@@ -1,0 +1,16 @@
+# Generated data — the raw capture is the asset; it lives on disk, not in git.
+raw/
+
+# Normalized / enriched output and the consolidated applicable set.
+out/
+
+# Prior-session captures and working outputs (directories and their zip archives).
+pull_*/
+grid_*/
+scratchpad/
+*.zip
+
+# Python
+__pycache__/
+.venv/
+*.pyc

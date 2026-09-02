@@ -1,0 +1,221 @@
+============================================================================
+EXPERIENCE EXTRACTION - 851 records
+Deterministic, no model call, every label carries its evidence.
+UNVALIDATED. Read the samples before trusting any number here.
+============================================================================
+
+### DISTRIBUTION
+
+    622   73.1%  REQUIRED     #####################
+     55    6.5%  PREFERRED    #
+     10    1.2%  WAIVED       
+      6    0.7%  NONE_NEEDED  
+    158   18.6%  NOT_STATED   #####
+
+  18 postings (2.1%) state BOTH an open and a closed condition.
+  Surfaced, not resolved. Measured at 44.3% on another corpus.
+
+### OPEN INVENTORY BY EMPLOYER FUNCTION
+The question the whole build exists to answer.
+
+  source_function                                REQUIRED  PREFERRED     WAIVED  NONE_NEED  NOT_STATE   total   open%
+  Clinical Care                                       316         29          4          1        104     454      1%
+  Nursing                                             175          5          0          0         21     201      0%
+  Revenue Cycle                                        51          2          2          1          8      64      5%
+  Clinical Support                                     20          5          0          0          3      28      0%
+  Facilities                                           12          4          0          0          5      21      0%
+  Operations                                            7          0          0          4          5      16     25%
+  Administration                                        8          2          1          0          4      15      7%
+  Information Technology                               10          3          2          0          0      15     13%
+  Supply Chain                                          6          3          0          0          3      12      0%
+  Community Service                                     2          1          0          0          3       6      0%
+  Project/Product Management                            5          1          0          0          0       6      0%
+  Finance                                               3          0          0          0          0       3      0%
+  Marketing/Public Relations/Community Affairs          2          0          1          0          0       3     33%
+  Quality/Process Improvements                          2          0          0          0          1       3      0%
+  Health Plans Services                                 1          0          0          0          1       2      0%
+  Provider Services                                     1          0          0          0          0       1      0%
+  Human Resources                                       1          0          0          0          0       1      0%
+
+### REQUIRED - how big is the bar
+
+    130  <= 6 mo
+    315  7-12 mo
+     95  13-24 mo
+     78  > 24 mo
+
+  A 6-month bar is a different product problem from a 5-year one.
+
+### POSTING FLOW - how often open roles appear
+Distribution is STOCK: how many exist now. This is FLOW: how many
+appear per period. Flow decides whether someone who checks back next
+week finds anything new, and it sets refresh cadence.
+
+  month       REQUIRED  PREFERRED     WAIVED  NONE_NEED  NOT_STATE   total   open   open%
+  2026-04            2          1          1          0          0       4      1     25%
+  2026-05           13          0          0          0          2      15      0      0%
+  2026-06           47          1          0          0         16      64      0      0%
+  2026-07          137         13          2          0         37     189      2      1%
+  2026-08          423         40          7          6        103     579     13      2%
+
+  Open roles: 1 in 2026-04, 13 in 2026-08 across 5 months on the board.
+  CAUTION: the most recent month is almost always partial, and the
+  oldest months are survivors - roles posted then and still open,
+  not roles posted then. This is a snapshot, not a time series.
+  A true flow rate needs repeat pulls and first_seen, not posted_at.
+
+### AGE BY CONDITION - do open roles move faster?
+
+  REQUIRED     n= 622  median   17d  oldest  138d  newest   0d
+  PREFERRED    n=  55  median   14d  oldest  139d  newest   0d
+  WAIVED       n=  10  median   14d  oldest  125d  newest   3d
+  NONE_NEEDED  n=   6  median   10d  oldest   25d  newest   4d
+  NOT_STATED   n= 158  median   19d  oldest   95d  newest   0d
+
+  A short median on open roles means they fill fast, which is good for
+  this audience and bad for a stale index. A long one means they sit.
+
+============================================================================
+### SAMPLES - READ THESE. This is the validation step.
+============================================================================
+
+
+--- REQUIRED  (622) ---
+
+  [Operations / Food Preparation/Service] Associate Food Service Attendant
+    REQUIRED     (bare-duration-no-modality)
+      "6 months - Related experience and/or training."
+
+  [Clinical Care / Patient Care (Non-Acute)] Senior Medical Assistant - Sleep Clinic
+    REQUIRED     (required-marker)
+      "Graduate of certified medical assistant program Washington Medical Assistant Certification upon hire National Provider BLS - American Heart Association upon hire 1 year of related "
+
+  [Clinical Care / Patient Care (Non-Acute)] Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular
+    REQUIRED     (bare-duration-no-modality)
+      "Coursework/Training - Graduate of an accredited school that includes hands on training in a clinical setting for medical assistants or, Coursework/Training - Graduate of a register"
+    REQUIRED     (bare-duration-no-modality)
+      "Medical assisting experience in a clinic setting (0-6 months)."
+    REQUIRED     (bare-duration-no-modality)
+      "6 months - Prior experience providing a high level of customer service in a fast paced environment."
+
+  [Clinical Care / Patient Care (Non-Acute)] Medical Assistant - Float Pool
+    REQUIRED     (bare-duration-no-modality)
+      "Coursework/Training Graduate of an accredited school that includes hands on training in a clinical setting for medical assistants Or Coursework/Training Graduate of a registered me"
+    REQUIRED     (bare-duration-no-modality)
+      "National Provider BLS - American Heart Association 6 months Healthcare experience 6 months Medical Assistant experience Why Join Providence?"
+
+  [Clinical Care / Patient Care (Non-Acute)] Medical Assistant - Cardiology Institute
+    REQUIRED     (bare-duration-no-modality)
+      "Graduate of an accredited school that includes hands on training in a clinical setting for medical assistants Or Graduate of a registered medical assistant apprenticeship program O"
+    REQUIRED     (bare-duration-no-modality)
+      "National Provider BLS - American Heart Association 6 months Healthcare experience 6 months Medical Assistant experience Medical Assistant, Salary Range:"
+    PREFERRED    (preferred-marker)
+      "Within 60 days of hire Washington Medical Assistant Registration Within 30 days of hire National Provider BLS - American Heart Association 6 months Healthcare experience 6 months M"
+
+  [Clinical Care / Diagnostic Imaging] Nuclear Medicine Technologist - Per Diem
+    REQUIRED     (bare-duration-no-modality)
+      "National Provider BLS - American Heart Association 6 months experience in nuclear medicine."
+
+
+--- PREFERRED  (55) ---
+
+  [Facilities / Facilities Management] Senior Manager Facilities
+    PREFERRED    (preferred-marker)
+      "5 years of progressively responsible healthcare facilities and project management experience 3 years of administrative experience in hospital administration or specialty field Pref"
+
+  [Facilities / Facilities Management] Facilities Engineer
+    PREFERRED    (preferred-marker)
+      "2 years progressively responsible experience in all aspects of building construction maintenance and repair, preferably in a hospital setting where the incumbent has gained skills "
+
+  [Clinical Care / Patient Care (Non-Acute)] Medical Assistant - Pain Services
+    PREFERRED    (preferred-marker)
+      "National Medical Assistant Certification upon hire 1 year of medical assisting experience in a clinic setting preferred Why Join Providence Swedish?"
+
+  [Clinical Care / Rehabilitation] Speech Language Pathologist - Otolaryngology
+    PREFERRED    (preferred-marker)
+      "Previous speech pathologist experience preferred."
+
+  [Clinical Care / Neurology] Manager Polysomnography and Respiratory Therapy - Sleep Lab
+    PREFERRED    (preferred-marker)
+      "National Registered Polysomnographic Technologist - Board of Registered Polysomnographic Technologists upon hire -OR- National Certified Polysomnographic Technician - Board of Regi"
+
+  [Supply Chain / Value Proposition] Manager - Supply Chain
+    PREFERRED    (preferred-marker)
+      "Bachelor’s Degree in Healthcare, Business, or Logistics/Supply Chain Management or equivalent education/experience or an equivalent combination of education and relevant experience"
+
+
+--- WAIVED  (10) ---
+
+  [Clinical Care / Pharmacy] Clinical Pharmacist
+    WAIVED       (waiver-phrase)
+      "Acute care hospital pharmacy experience, 1 year or equivalent experience Completion of ASHP-accredited PGY1 residency Why Join Providence?"
+
+  [Administration / Administrative Support] Department Scheduler - Linguistic Services
+    WAIVED       (waiver-phrase)
+      "2 years of experience as a scheduler/dispatcher or equivalent experience Demonstrated experience working with diverse cultural and socio-economic backgrounds showing sensitivity to"
+
+  [Clinical Care / Surgical/Perioperative Services] Operating Room Assistant
+    WAIVED       (waiver-phrase)
+      "National Provider BLS - American Heart Association 1 year of experience performing duties of a Perioperative Care Associate I or equivalent experience in a healthcare environment."
+
+  [Clinical Care / Pharmacy] Clinical Pharmacist
+    WAIVED       (waiver-phrase)
+      "Acute care hospital pharmacy experience, 1 year or equivalent experience."
+
+  [Revenue Cycle / Patient Financial Services] Patient Financial Counselor
+    WAIVED       (waiver-phrase)
+      "Associate's Degree or additional experience may be substituted for no degree 3 years or experience in patient financial services or medical billing in a hospital business office or"
+
+  [Clinical Care / Pharmacy] Clinical Pharmacist
+    WAIVED       (waiver-phrase)
+      "Acute care hospital pharmacy experience, 1 year or equivalent experience."
+
+
+--- NONE_NEEDED  (6) ---
+
+  [Operations / Food Preparation/Service] Food Service Attendant
+    NONE_NEEDED  (open-phrase)
+      "Perform basic, entry-level kitchen duties, including, but not limited to, cleaning, sanitizing, transport, simple food preparation and tray line activities."
+
+  [Operations / Environmental Services] Supervisor - Environmental Services
+    NONE_NEEDED  (open-phrase)
+      "1 or more years of college 3 years of proven experience in a supervisory role with 15+ employees Must have excellent customer service mannerisms and experience Progressively respon"
+
+  [Revenue Cycle / Billing/Collections] Billing and Collections Representative
+    NONE_NEEDED  (open-phrase)
+      "Medical terminology and medical coding training in an accredited school --or-- equivalent education/experience Equivalent on-the-job training in a follow-up role required 2 years o"
+
+  [Operations / Food Preparation/Service] Cook
+    NONE_NEEDED  (open-phrase)
+      "Some cooking classes with formal on-the-job training."
+
+  [Clinical Care / Pharmacy] Pharmacist Resident - Pharmacotherapy Dept
+    NONE_NEEDED  (open-phrase)
+      "The program will provide the opportunity to advance the resident's pharmacy practice beyond entry-level professional competence and develop the skills, knowledge, and attitude nece"
+
+  [Operations / Environmental Services] Environmental Services Technician
+    NONE_NEEDED  (open-phrase)
+      "Grade school education with on-the-job training Preferred Qualifications:"
+
+
+--- NOT_STATED  (158) ---
+
+  [Facilities / Facilities Management] Painter
+    no experience sentence found in this posting
+
+  [Clinical Care / Cardio Services] Senior Cardiovascular Technologist
+    no experience sentence found in this posting
+
+  [Clinical Care / Rehabilitation] Physical Therapist - Acute Care Rehab, PRN
+    no experience sentence found in this posting
+
+  [Clinical Care / Rehabilitation] Physical Therapist - Pain Services
+    no experience sentence found in this posting
+
+  [Clinical Care / Pharmacy] Inpatient Associate Pharmacy Technician, Pharmacy Technician and Senior Pharmacy Technician
+    no experience sentence found in this posting
+
+  [Nursing / Nursing-Patient Facing] Certified Nursing Assistant - Psych Adult
+    no experience sentence found in this posting
+
+Nothing above is validated. A label is a hypothesis with a receipt.

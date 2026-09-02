@@ -1,0 +1,229 @@
+==============================================================================
+REQUIREMENT EXTRACTION - 851 records
+Reads ONLY qualifications sections. Benefits, About and award text
+are out of scope by construction, not by blacklist.
+==============================================================================
+
+### SECTION DETECTION - the load-bearing number
+
+  841/851 (98.8%) had a required-qualifications section found and parsed.
+  The rest can only be NOT_STATED. If this number is low, everything
+  below is under-counted and section detection is the thing to fix.
+
+### DISTRIBUTION
+
+    599   70.4%  REQUIRED     #####################
+    156   18.3%  PREFERRED    #####
+      3    0.4%  WAIVED       
+     81    9.5%  NONE_NEEDED  ##
+     12    1.4%  NOT_STATED   
+
+  1 carry a trade ticket (journeyman / master / red seal) - a
+  completed apprenticeship, so a multi-year runway even where no
+  year count appears.
+
+### CREDENTIALS - the axis that was never extracted
+
+    143 require a credential TO APPLY
+    689 require one AFTER HIRE - not a barrier. 'Upon hire',
+        'within 30 days'. This is the winnable inventory.
+
+### OPEN INVENTORY BY FUNCTION
+
+  function                                       REQUIRED  PREFERRED     WAIVED  NONE_NEED  NOT_STATE   total   open%
+  Clinical Care                                       282        114          0         55          3     454     12%
+  Nursing                                             169         17          0         15          0     201      7%
+  Revenue Cycle                                        56          7          1          0          0      64      2%
+  Clinical Support                                     21          0          0          4          3      28     14%
+  Facilities                                           14          5          2          0          0      21     10%
+  Operations                                            6          6          0          1          3      16      6%
+  Administration                                        8          1          0          4          2      15     27%
+  Information Technology                               13          1          0          1          0      15      7%
+  Supply Chain                                          7          4          0          0          1      12      0%
+  Community Service                                     4          1          0          1          0       6     17%
+  Project/Product Management                            6          0          0          0          0       6      0%
+  Finance                                               3          0          0          0          0       3      0%
+  Marketing/Public Relations/Community Affairs          3          0          0          0          0       3      0%
+  Quality/Process Improvements                          3          0          0          0          0       3      0%
+  Health Plans Services                                 2          0          0          0          0       2      0%
+  Provider Services                                     1          0          0          0          0       1      0%
+  Human Resources                                       1          0          0          0          0       1      0%
+
+==============================================================================
+SAMPLES - read these
+==============================================================================
+
+
+--- REQUIRED  (599) ---
+
+  [Facilities] Senior Manager Facilities
+  section_found=True  months=36.0  ticket=False
+    TO_APPLY   experience                 5 years of progressively responsible healthcare facilities and project management experience
+    TO_APPLY   experience                 3 years of administrative experience in hospital administration or specialty field
+    PREFERRED  education                  Bachelor's Degree
+
+  [Clinical Care] Senior Medical Assistant - Sleep Clinic
+  section_found=True  months=12.0  ticket=False
+    TO_APPLY   credential/education       Graduate of certified medical assistant program
+    AFTER_HIRE credential                 Washington Medical Assistant Certification upon hire
+    AFTER_HIRE credential                 National Provider BLS - American Heart Association upon hire
+    TO_APPLY   experience                 1 year of related experience in the medical field
+    TO_APPLY   experience                 General experience regarding medical office paperwork required
+
+  [Clinical Care] Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular
+  section_found=True  months=6.0  ticket=False
+    TO_APPLY   education                  Coursework/Training - Graduate of an accredited school that includes hands on training in a clinical sett
+    TO_APPLY   education                  Coursework/Training - Graduate of a registered medical assistant apprenticeship program or,
+    TO_APPLY   education                  Coursework/Training - Has completed two years of medical training in the United States Armed Forces or,
+    TO_APPLY   education/experience       Coursework/Training - Minimum one year of work experience as a medical assistant that includes the follow
+    AFTER_HIRE credential                 Washington Medical Assistant Certification upon hire
+
+  [Clinical Care] Medical Assistant - Float Pool
+  section_found=True  months=6.0  ticket=False
+    TO_APPLY   education                  Coursework/Training Graduate of an accredited school that includes hands on training in a clinical settin
+    TO_APPLY   education                  Coursework/Training Graduate of a registered medical assistant apprenticeship program Or
+    TO_APPLY   education                  Coursework/Training Has completed two years of medical training in the United States Armed Forces Or
+    TO_APPLY   education/experience       Coursework/Training Minimum one year of work experience as a medical assistant that includes the followin
+    AFTER_HIRE credential                 Upon hire: Washington Medical Assistant Certification
+
+  [Clinical Care] Medical Assistant - Cardiology Institute
+  section_found=True  months=6.0  ticket=False
+    TO_APPLY   education                  Graduate of an accredited school that includes hands on training in a clinical setting for medical assist
+    TO_APPLY   education                  Graduate of a registered medical assistant apprenticeship program Or
+    TO_APPLY   experience                 Minimum one year of work experience as a medical assistant that includes the following clinical skills: o
+    AFTER_HIRE credential                 Upon hire: Washington Medical Assistant Certification
+    AFTER_HIRE credential                 Within 30 days of hire: National Provider BLS - American Heart Association
+
+  [Facilities] Painter
+  section_found=True  months=48.0  ticket=True
+    TO_APPLY   experience                 4 years Journeyman level in a similar environment
+
+
+--- PREFERRED  (156) ---
+
+  [Operations] Associate Food Service Attendant
+  section_found=True  months=None  ticket=False
+    AFTER_HIRE credential                 National Food Handler Card - State County City Authority upon hire
+    PREFERRED  experience                 6 months - Related experience and/or training
+
+  [Clinical Care] Clinical Pharmacist
+  section_found=True  months=None  ticket=False
+    TO_APPLY   education                  PharmD - Doctorate of Pharmacy or,
+    TO_APPLY   education                  Bachelor's Degree - Bachelor of Pharmacy
+    AFTER_HIRE credential                 Washington Pharmacist License upon hire
+    TO_APPLY   credential                 When eligible and where applicable, obtain a Board of Pharmacy Preceptor license
+    AFTER_HIRE credential/education       Upon hire: Basic Life Support (BLS) (Facility Managed) - where applicable
+
+  [Clinical Care] RN (Full/Part Time) - Transitional Care Unit
+  section_found=True  months=None  ticket=False
+    AFTER_HIRE credential                 Upon hire: Washington Registered Nurse License
+    AFTER_HIRE credential                 Within 30 days of hire: National Provider BLS - American Heart Association
+    PREFERRED  education                  Bachelor's Degree Nursing
+    PREFERRED  credential                 Food Handler's Permit
+    PREFERRED  experience                 1 year Med-Surg experience (Acute vs Sub-Acute)
+
+  [Clinical Care] Senior Cardiovascular Technologist
+  section_found=True  months=None  ticket=False
+    TO_APPLY   training/credential/education Coursework/Training and two years of community college/vocational training in a certified Cardiovascular 
+    AFTER_HIRE credential                 Upon hire: Washington Cardiovascular Invasive Specialist Certification
+    AFTER_HIRE credential                 Upon hire: National Certification from Cardiovascular Credentialing International Or
+    AFTER_HIRE credential                 Upon hire: National Certification from American Registry of Radiologic Technologists
+    AFTER_HIRE credential                 Upon hire: National Provider BLS - American Heart Association
+
+  [Clinical Care] Physical Therapist - Acute Care Rehab, PRN
+  section_found=True  months=None  ticket=False
+    TO_APPLY   credential                 Education to meet certification, license or registration requirement
+    AFTER_HIRE credential                 Washington Physical Therapist License upon hire
+    AFTER_HIRE credential                 National Provider BLS - American Heart Association upon hire
+    PREFERRED  experience                 Physical Therapy experience in an acute care rehabilitation or hospital setting
+
+  [Clinical Care] Physical Therapist - Pain Services
+  section_found=True  months=None  ticket=False
+    TO_APPLY   education                  A graduate of an accredited program of physical therapy
+    TO_APPLY   credential                 Washington Physical Therapist License --or
+    TO_APPLY   credential                 Washington state physical therapy license, or temporary permit
+    AFTER_HIRE credential                 Upon hire: National Provider BLS - American Heart Association
+    PREFERRED  credential/experience      Women’s health continuing education or certification experience
+
+
+--- WAIVED  (3) ---
+
+  [Facilities] Journeyman Engineer
+  section_found=True  months=None  ticket=False
+    TO_APPLY   education                  Coursework/Training: Must have successfully completed extensive specialized training courses --or
+    TO_APPLY   experience                 Demonstrated ability and experience may be accepted in lieu of education
+    PREFERRED  education                  Associate's Degree in Electronics, Mechanical Systems, Building Control Technology, HVAC, or similar fiel
+
+  [Revenue Cycle] Patient Financial Counselor
+  section_found=True  months=36.0  ticket=False
+    TO_APPLY   education/experience       Associate's Degree or additional experience may be substituted for no degree
+    TO_APPLY   education/experience       3 years or experience in patient financial services or medical billing in a hospital business office or f
+
+  [Facilities] Lead Senior Journeyman Engineer
+  section_found=True  months=None  ticket=False
+    TO_APPLY   education/experience       Coursework/Training: Must have successfully completed extensive specialized training courses or demonstra
+    PREFERRED  education                  Associate's Degree in Electronics, Mechanical Systems, Building Control Technology, HVAC, or similar fiel
+
+
+--- NONE_NEEDED  (81) ---
+
+  [Nursing] Certified Nursing Assistant - Psych Adult
+  section_found=True  months=None  ticket=False
+    AFTER_HIRE credential                 Upon hire: Washington Nursing Assistant Certification License
+    AFTER_HIRE credential                 Upon hire: National Provider BLS - American Heart Association
+
+  [Community Service] Associate Chaplain
+  section_found=True  months=None  ticket=False
+    TO_APPLY   education                  Graduate studies 32-48 credit hours in Theology, Divinity, Spirituality, Pastoral Ministry, or the equiva
+    TO_APPLY   education                  Bachelor's Degree
+    TO_APPLY   credential                 National Chaplain Certification within 3 years of hire
+    PREFERRED  education                  Master's Degree in Theology, Divinity, Spirituality, Pastoral Ministry, or relevant religious studies sim
+
+  [Nursing] Certified Nursing Assistant - Emergency Psych
+  section_found=True  months=None  ticket=False
+    AFTER_HIRE credential                 Upon hire: Washington Nursing Assistant Certification License
+    AFTER_HIRE credential                 Upon hire: National Provider BLS - American Heart Association
+
+  [Nursing] CNA - Float Personnel
+  section_found=True  months=None  ticket=False
+    AFTER_HIRE credential                 Washington Nursing Assistant Certification License upon hire
+    AFTER_HIRE credential                 National Provider BLS - American Heart Association upon hire
+
+  [Clinical Care] EEG Technician - Epilepsy Center
+  section_found=True  months=None  ticket=False
+    TO_APPLY   education                  Coursework/Training: Minimum education to qualify for eligibility to register with the board of Registere
+    AFTER_HIRE credential                 Upon hire: National Provider BLS - American Heart Association
+
+  [Clinical Care] Ultrasound Technologist - Nights
+  section_found=True  months=None  ticket=False
+    TO_APPLY   education                  Graduate of an accredited school of medical sonography
+    AFTER_HIRE credential                 Within 1 year of hire: National Certification from American Registry for Diagnostic Medical Sonography or
+    AFTER_HIRE credential                 Upon hire: National Provider BLS - American Heart Association
+
+
+--- NOT_STATED  (12) ---
+
+  [Administration] Associate Administrative Coordinator
+  section_found=False  months=None  ticket=False
+    PREFERRED  experience                 2 years of experience working with Kronos or other comparable electronic timekeeping/attendance system
+    PREFERRED  experience                 1 year of Staffing/scheduling experience
+
+  [Clinical Care] Radiology Assistant - Medical Imaging
+  section_found=False  months=None  ticket=False
+    PREFERRED  experience                 3 months related experience and/or training
+    PREFERRED  experience                 Experience as a Transporter
+
+  [Clinical Care] Medical Assistant - Dermatology - Bellevue
+  section_found=False  months=None  ticket=False
+
+  [Operations] Environmental Services Technician - Environmental Services
+  section_found=False  months=None  ticket=False
+
+  [Operations] Environmental Services Technician - Environmental Services
+  section_found=True  months=None  ticket=False
+
+  [Administration] Early Childhood Teacher
+  section_found=False  months=None  ticket=False
+    PREFERRED  education                  Coursework/Training: Completion of CDA or at least 12 ECE related credits as determined by program manage
+    PREFERRED  education                  Associate's Degree in AA in ECE or Child Development or an AA in another field with at least 12 ECE relat
+    PREFERRED  education                  Bachelor's Degree in BA in ECE or Child Development or BA in another field with at least 12 ECE related c

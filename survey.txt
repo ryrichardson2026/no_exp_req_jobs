@@ -1,0 +1,410 @@
+==============================================================================
+CORPUS SURVEY - providence  (Providence / Providence Swedish / Swedish Health Services)
+851 detail records read from disk. No API calls.
+==============================================================================
+
+
+### 1. FIELD FILL - what is actually populated
+
+    851  100.0%  Id                                 ##############################
+    851  100.0%  Title                              ##############################
+    851  100.0%  Category                           ##############################
+    851  100.0%  RequisitionType                    ##############################
+    851  100.0%  RequisitionId                      ##############################
+    851  100.0%  ExternalPostedStartDate            ##############################
+    851  100.0%  JobFamilyId                        ##############################
+    851  100.0%  GeographyId                        ##############################
+    851  100.0%  GeographyNodeId                    ##############################
+    851  100.0%  ExternalDescriptionStr             ##############################
+    851  100.0%  CorporateDescriptionStr            ##############################
+    851  100.0%  ShortDescriptionStr                ##############################
+    851  100.0%  ContentLocale                      ##############################
+    851  100.0%  PrimaryLocation                    ##############################
+    851  100.0%  PrimaryLocationCountry             ##############################
+    851  100.0%  JobFunctionCode                    ##############################
+    851  100.0%  HotJobFlag                         ##############################
+    851  100.0%  TrendingFlag                       ##############################
+    851  100.0%  BeFirstToApplyFlag                 ##############################
+    851  100.0%  WorkplaceTypeCode                  ##############################
+    851  100.0%  WorkplaceType                      ##############################
+    851  100.0%  BusinessUnitId                     ##############################
+    851  100.0%  LegalEmployerId                    ##############################
+    851  100.0%  OrganizationId                     ##############################
+    851  100.0%  JobFunction                        ##############################
+    851  100.0%  requisitionFlexFields              ##############################
+    851  100.0%  primaryLocationCoordinates         ##############################
+    849   99.8%  workLocation                       #############################
+    829   97.4%  JobSchedule                        #############################
+    786   92.4%  ApplyWhenNotPostedFlag             ###########################
+    703   82.6%  OrganizationDescriptionStr         ########################
+    624   73.3%  JobShift                           #####################
+     52    6.1%  secondaryLocations                 #
+     35    4.1%  ExternalPostedEndDate              #
+      1    0.1%  otherWorkLocations                 
+
+
+### 2. EMPLOYER-SUPPLIED TAXONOMY - the inclusion axis
+These are Providence's own labels, not derived. If a category cleanly
+separates frontline from clinical, inclusion is a lookup not a parse.
+
+  Category  (Category)
+  fill: 851/851  (100%)   distinct values: 58
+      201  Nursing-Patient Facing
+      147  Patient Care (Non-Acute)
+       76  Diagnostic Imaging
+       64  Rehabilitation
+       55  Patient Access
+       27  Pharmacy
+       20  Surgical/Perioperative Services
+       19  Respiratory Care
+       18  Behavioral Health
+       17  Care Management
+       16  Cardio Services
+       15  Facilities Management
+       14  Clinical Laboratory
+       13  Neurology
+       10  Food Preparation/Service
+       10  Clinical Education
+        9  Development/Engineering
+        8  Administrative Support
+        7  Materials Management
+        6  Social Services
+        6  Radiation Therapy
+        6  Facilities Security/Safety
+        6  Patient Services
+        6  Technical Services
+        6  Academics
+        6  Environmental Services
+        5  Pastoral Care
+        5  Clinical Nutrition Services
+        4  Claims
+        4  Clinical Administration
+        3  Value Proposition
+        3  Fundraising
+        3  Research
+        3  Product Management & Support
+        3  Project Management
+        3  Clinical Quality
+        2  Clinical Data/Analytics
+        2  Analytics/Business Intelligence
+        2  Finance Operations
+        2  Health Information Management
+        2  Clinical Specialty
+        1  Inventory Control
+        1  Provider Network
+        1  Applications
+        1  Information Security
+    ... 13 more
+
+  JobFunction  (JobFunction)
+  fill: 851/851  (100%)   distinct values: 17
+      454  Clinical Care
+      201  Nursing
+       64  Revenue Cycle
+       28  Clinical Support
+       21  Facilities
+       16  Operations
+       15  Administration
+       15  Information Technology
+       12  Supply Chain
+        6  Community Service
+        6  Project/Product Management
+        3  Finance
+        3  Marketing/Public Relations/Community Affairs
+        3  Quality/Process Improvements
+        2  Health Plans Services
+        1  Provider Services
+        1  Human Resources
+
+  JobFunctionCode  (JobFunctionCode)
+  fill: 851/851  (100%)   distinct values: 17
+      454  PROV_CC
+      201  PROV_N
+       64  PROV_RC
+       28  PROV_CLIS
+       21  PROV_F
+       16  PROV_O
+       15  PROV_A
+       15  PROV_IT
+       12  PROV_SC
+        6  PROV_CS
+        6  PROV_PM
+        3  PROV_FIN
+        3  PROV_MPR
+        3  PROV_PI
+        2  PROV_HPS
+        1  PROV_PS
+        1  PROV_HR
+
+  Organization  (Organization)
+  fill: 0/851  (0%)   distinct values: 0
+
+  BusinessUnit  (BusinessUnit)
+  fill: 0/851  (0%)   distinct values: 0
+
+  Department  (Department)
+  fill: 0/851  (0%)   distinct values: 0
+
+
+### 3. TERMS AND ELIGIBILITY AXES
+
+
+  StudyLevel  (StudyLevel)
+  fill: 0/851  (0%)   distinct values: 0
+
+  JobShift  (JobShift)
+  fill: 624/851  (73%)   distinct values: 4
+      444  Day
+       88  Variable
+       66  Night
+       26  Evening
+
+  WorkerType  (WorkerType)
+  fill: 0/851  (0%)   distinct values: 0
+
+  JobType  (JobType)
+  fill: 0/851  (0%)   distinct values: 0
+
+  JobSchedule  (JobSchedule)
+  fill: 829/851  (97%)   distinct values: 2
+      542  Full time
+      287  Part time
+
+  ContractType  (ContractType)
+  fill: 0/851  (0%)   distinct values: 0
+
+  WorkplaceType  (WorkplaceType)
+  fill: 851/851  (100%)   distinct values: 3
+      811  On-site
+       30  Hybrid
+       10  Remote
+
+  JobLevel  (JobLevel)
+  fill: 0/851  (0%)   distinct values: 0
+
+  JobGrade  (JobGrade)
+  fill: 0/851  (0%)   distinct values: 0
+
+  WorkDays  (WorkDays)
+  fill: 0/851  (0%)   distinct values: 0
+
+  WorkHours  (WorkHours)
+  fill: 0/851  (0%)   distinct values: 0
+
+
+### 4. LOCATION AND TIME
+
+
+  PrimaryLocation  (PrimaryLocation)
+  fill: 851/851  (100%)   distinct values: 32
+      225  Seattle, WA, United States
+      165  Spokane, WA, United States
+       92  Everett, WA, United States
+       50  Olympia, WA, United States
+       47  Richland, WA, United States
+       44  Walla Walla, WA, United States
+       43  Edmonds, WA, United States
+       29  Issaquah, WA, United States
+       24  Renton, WA, United States
+       17  Redmond, WA, United States
+       17  Chewelah, WA, United States
+       17  Colville, WA, United States
+       15  Centralia, WA, United States
+       12  Spokane Valley, WA, United States
+       11  Lacey, WA, United States
+       10  Bellevue, WA, United States
+        7  Kennewick, WA, United States
+        5  Bothell, WA, United States
+        4  Tukwila, WA, United States
+        2  Kettle Falls, WA, United States
+        2  Portland, OR, United States
+        2  Liberty Lake, WA, United States
+        2  Aberdeen, WA, United States
+        1  Mukilteo, WA, United States
+        1  Anchorage, AK, United States
+        1  Lake Stevens, WA, United States
+        1  Kent, WA, United States
+        1  Sammamish, WA, United States
+        1  Mill Creek, WA, United States
+        1  Marysville, WA, United States
+        1  Lynnwood, WA, United States
+        1  Yakima, WA, United States
+
+  ExternalPostedStartDate (year-month)  (ExternalPostedStartDate)
+  fill: 851/851  (100%)   distinct values: 850
+        2  2026-08-12T07:00:00+00:00
+        1  2026-08-25T22:42:23+00:00
+        1  2026-04-14T16:26:44+00:00
+        1  2026-07-16T23:00:19+00:00
+        1  2026-05-01T21:40:22+00:00
+        1  2026-05-06T17:47:08+00:00
+        1  2026-04-15T22:53:58+00:00
+        1  2026-07-07T23:54:55+00:00
+        1  2026-04-28T20:22:09+00:00
+        1  2026-04-28T21:03:53+00:00
+        1  2026-07-16T23:50:44+00:00
+        1  2026-05-06T17:45:47+00:00
+        1  2026-05-08T15:59:14+00:00
+        1  2026-05-11T23:25:53+00:00
+        1  2026-07-17T17:45:15+00:00
+        1  2026-05-12T20:57:31+00:00
+        1  2026-05-14T16:29:31+00:00
+        1  2026-05-26T18:15:11+00:00
+        1  2026-07-30T21:07:42+00:00
+        1  2026-06-05T23:40:29+00:00
+        1  2026-05-28T17:20:46+00:00
+        1  2026-05-26T21:19:36+00:00
+        1  2026-05-26T21:14:19+00:00
+        1  2026-07-10T23:07:29+00:00
+    ... 826 more
+
+
+### 5. requisitionFlexFields - salary and FTE if published
+
+  present on 851/851 records
+      851  Minimum Salary
+      851  Maximum Salary
+      847  FTE
+
+
+### 6. ExternalQualificationsStr - is it a real segmented block?
+
+  present and non-empty: 0/851 (0%)
+  description chars  median 1759  max 8633
+
+  --- three full qualifications blocks, verbatim ---
+
+
+==============================================================================
+### 7. EXPERIENCE VOCABULARY - employers' own words
+Every sentence mentioning the experience bar, grouped by frequency.
+NOT classified. Read this to write the inclusion rules.
+==============================================================================
+
+  851/851 records (100%) contain at least one experience sentence
+  1470 distinct sentences
+
+  --- REPEATED (appears in 2+ postings; boilerplate, and the rules will hinge on these) ---
+
+   118x  Required Qualifications: Graduation from an accredited nursing program.
+    61x  Providence Regional Medical Center Everett received the HealthGrades Distinguished Hospital Award for Clinical Excellence four years in a row.
+    26x  6 months Medical Assistant experience.
+    25x  Preferred Qualifications: Upon hire: National Medical Assistant Certification Why Join Providence?
+    23x  Required Qualifications: Coursework/Training Graduate of an accredited school that includes hands on training in a clinical setting for medical assistants Or Coursework/Training Graduate of a registered medical assistant
+    16x  Upon hire: Washington Registered Nurse License Upon hire: National Provider BLS - American Heart Association 1 year Nursing experience.
+    16x  Required Qualifications: H.
+    15x  Required Qualifications: Graduate of an accredited registered nursing school.
+    13x  Providence Regional Medical Center Everett received the Health Grades Distinguished Hospital Award for Clinical Excellence four years in a row.
+    12x  6 months of Medical Assistant experience.
+    12x  Preferred Qualifications: Upon hire: National Certification in area of specialty is preferred, unless otherwise indicated Why Join Providence?
+    11x  91/hr or higher depending on experience.
+    11x  Associate's Degree Nursing Or Bachelor's Degree Nursing Upon hire: Washington Registered Nurse License Upon hire: National Provider BLS - American Heart Association 18 months professional nursing experience Why Join Prov
+    11x  Upon hire: Washington Registered Nurse License Upon hire: National Provider BLS - American Heart Association 1 year of Nursing experience.
+    11x  1 year Nursing experience.
+    11x  Required Qualifications: Coursework/Training: Graduate of an accredited school that includes hands on training in a clinical setting for medical assistants or, Coursework/Training: Graduate of a registered medical assist
+    10x  Upon hire: Washington Medical Assistant Certification Within 30 days of hire: National Provider BLS - American Heart Association 6 months Healthcare experience.
+     9x  Preferred Qualifications: Upon hire: National Certification in area of specialty Why Join Providence?
+     9x  v=4u7BJ6YLetg Required Qualifications: Master's Degree in Psychology, Counseling, Sociology or another Social Science equivalent, Marriage and Family Counseling Upon hire: Washington Mental Health Counselor License, or U
+     9x  Preferred Qualifications: 1 year hospital or emergency department experience.
+     8x  $20,000 Sign-On Bonus for eligible rehires and external candidates that meet required qualifications and conditions for payment.
+     7x  For those who are interested in career growth, we offer additional training and opportunities for informal leadership experiences to help you prepare for advancement.
+     7x  Preferred Qualifications: National Medical Assistant Certification upon hire.
+     7x  Required Qualifications: Coursework/Training: Graduate of an accredited school that includes hands on training in a clinical setting for medical assistants, Or Coursework/Training: Graduate of a registered medical assist
+     7x  Hiring Bonus: $15,000 Sign-On Bonus for eligible rehires and external hires that meet required qualifications and conditions for payment.
+     6x  6 months - Healthcare experience.
+     6x  6 months - Medical Assistant experience.
+     6x  19/hr or higher depending on experience.
+     6x  6 months previous experience in a healthcare setting working with an Electronic Health record (EHR).
+     6x  Vincent: Easy commute – we’re across the street from a major bus line & 5 minute from the freeway Down-to-earth leadership with high engagement and an open door Onsite childcare (baby through preschool) at a 20% discount
+     6x  Required Qualifications: Education to meet certification, license or registration requirement Washington Physical Therapist License upon hire National Provider BLS - American Heart Association upon hire Preferred Qualifi
+     6x  Required Qualifications: Upon hire: Washington Nursing Assistant Certification License Upon hire: National Provider BLS - American Heart Association Why Join Providence?
+     6x  Required Qualifications: Coursework/Training: Graduate of an accredited school that includes hands on training in a clinical setting for medical assistants, or Coursework/Training: Graduate of a registered medical assist
+     6x  She/He may be qualified by training and experience to operate and maintain complex ventilatory support systems, monitoring and resuscitation devices, respiratory care procedures and patient assessments, diagnostic proced
+     6x  Required Qualifications: Education to meet certification, license, or registration requirement Washington Respiratory Care Practitioner License upon hire National Provider BLS - American Heart Association upon hire Why J
+     6x  Join our experienced and compassionate team to provide holistic care to patients in our community.
+     6x  Preferred Qualifications: National Certification in area of specialty upon hire.
+     6x  ORC's objective is to ensure our core strategy, One Ministry Committed to Excellence, is delivered along with the enhanced overall patient care experience (know me, care for me, ease my way) by providing a robust foundat
+     6x  Required Qualifications: 1 year of medical office or related healthcare experience OR 6 months of experience as a Providence employee in an Associate PSS position.
+     5x  That’s why we offer a first-in-class benefits package that starts on your first day of employment including health, dental, vision, on-the-job training & certification programs, tuition reimbursement, college education, 
+     5x  Medical Assistant Registered: Required Qualifications: Washington Medical Assistant Registration within 60 days of hire.
+     5x  6 months of healthcare experience.
+     5x  6 months Healthcare experience 6 months Medical Assistant experience Medical Assistant Salary Range, NE Washington: Min: $18.
+     5x  Preferred Qualifications: Hospital experience.
+     5x  Upon hire: Washington Registered Nurse License Upon hire: National Provider BLS - American Heart Association 1 year Acute care experience with the patient population similar to department of hire or completion of the spe
+     5x  Required Qualifications: 1 year medical office or related healthcare experience OR 6 months experience as a Providence employee in an Associate PCC position.
+     5x  Required Qualifications: Within 60 days of hire: Washington Medical Assistant Registration Within 30 days of hire: National Provider BLS - American Heart Association 6 months Healthcare experience 6 months Medical Assist
+     5x  v=4u7BJ6YLetg Required qualifications: Master's Degree in Psychology, counseling, sociology or another social science equivalent, marriage and family counseling.
+     4x  Required Qualifications: National Food Handler Card - State County City Authority upon hire.
+     4x  6 months - Previous experience in a healthcare setting working with an Electronic Health record (EHR).
+     4x  Required Qualifications: Coursework/Training: Graduate of an accredited school that includes hands on training in a clinical setting for medical assistants or Coursework/Training: Graduate of a registered medical assista
+     4x  6 months Healthcare experience.
+     4x  Preferred Qualifications: Upon hire: National Medical Assistant Certification.
+     4x  6 months of previous experience in a healthcare setting working with an Electronic Health record (EHR).
+     4x  Required qualifications: Graduation from an accredited nursing program.
+     4x  Upon hire: Washington Registered Nurse License Upon hire: National Provider BLS - American Heart Association National Provider ACLS - American Heart Association within 90 days of hire: 1 year of Acute care experience wit
+     4x  Required Qualifications: Education sufficient for licensure.
+     4x  Additional experience in substance use treatment setting.
+     4x  Customer service experience.
+     4x  Upon hire: Washington Radiologic Technologist Upon hire: National Provider BLS - American Heart Association Upon hire: National Registered Technologist - Radiography - American Registry of Radiologic Technologists Within
+     4x  $10,000 Hiring Bonus for eligible external hires that meet the required qualifications and conditions for payment Sets up and operates various types of respiratory care equipment to be used in the diagnosis and treatment
+     4x  Preferred Qualifications: H.
+     4x  $15,000 Sign-On Bonus for eligible rehires and external candidates that meet required qualifications and conditions for payment.
+     4x  00 Sign-On Bonus for eligible rehires and external hires that meet required qualifications and conditions for payment.
+     4x  Upon hire: Washington Registered Nurse License Upon hire: National Provider BLS - American Heart Association Upon hire: National Provider ACLS - American Heart Association Within 90 days of hire: National Institutes of H
+     4x  Diploma or GED 1 year of Customer service or healthcare registration.
+     4x  Required Qualifications: Upon hire: National Provider BLS - American Heart Association.
+     4x  Required Qualifications: Customer service-related experience.
+     4x  Preferred qualifications: 1 year hospital or emergency department experience.
+     4x  Required Qualifications: 1 year of Medical office or related healthcare experience OR 6 months experience as a Providence employee in an Associate PCC position.
+
+  (246 repeated sentences total)
+
+
+  --- ONE-OFF SAMPLE (40 of the singletons; the long tail the rules must not break on) ---
+
+  - Preferred Qualifications: 6 months - Related experience and/or training.
+  - Required qualifications: Upon hire: National Food Handler Card - State County City Authority.
+  - Diploma or GED Washington Pharmacy Technician License upon hire Minimum of 2 years (> 4160 clock hours) of pharmacy practice in an integrated health system and PTCB certification 3 years (> 6240 hours) of hospital pharma
+  - Required Qualifications: Associate's Degree Or equivalent education/experience In lieu of Associate's degree: Additional 2 years cancer registry experience Upon hire: Oncology Data Specialist - National Cancer Registrars
+  - Required Qualifications: Coursework/Training: Successfully completed an accredited program in EEG.
+  - 1 year experience or equivalent.
+  - 1 year of diagnostic experience with MBS procedures.
+  - Previous Experience.
+  - 6 months must have high-volume line cooking experience.
+  - Preferred Qualifications: Bachelor’s Degree in Nursing Medical surgical or rehabilitation medicine.
+  - Upon hire: Washington Registered Nurse License Upon hire: National Provider BLS - American Heart Association A\ACLSAHA_US - Provider ACLS - American Heart Association within 90 days of hire 1 year Nursing experience with
+  - 1 year claims processing experience, in a TPA, MSO, HMO, PHO or large group practice setting.
+  - Oncology experience, hospital work experience base.
+  - Extensive experience in the maintenance of building envelopes, finishes and equipment.
+  - Required Qualifications: Coursework/Training: Completed an approved Certified Nursing Assistant course or, Coursework/Training: May be presently enrolled in an approved course and perform skills successfully checked off 
+  - or, Coursework/Training: Minimum one year of work experience as a medical assistant that includes the following clinical skills: obtaining vital signs, administering injections, and medication administration.
+  - 4 working hours weekly Required Qualifications: Bachelor's Degree: BS in Nutrition, Pharmacology, or related field from an accredited educational institution.
+  - Hospital experience.
+  - Preferred Qualifications: Recent applicable clinical experience.
+  - Radiation Therapist – Aberdeen, WA Schedule: Full time $20,000 Hiring Bonus for eligible external hires that meet required qualifications and conditions for payment.
+  - Preferred qualifications: Master's Degree in Nursing, Health Administration, or related field.
+  - Within 2 years of hire: National Certified Pharmacy Technician certification (Facility Managed) 4 years Pharmacy Technician experience.
+  - Upon hire: Washington Registered Nurse License Upon hire: National Provider BLS - American Heart Association National Provider NRP - American Academy of Pediatrics upon hire: 1 year of Nursing experience.
+  - Interview and hire experienced staff RNs, travelers, and candidates for the residency/fellowship program for L&D Required qualifications: Bachelor's Degree in BSN from an accredited school of nursing, or ADN and a commit
+  - $10,000 Hiring Bonus for eligible external hires that meet the required qualifications and conditions for payment Performs a variety of technical and patient care procedures that require independent judgment utilizing a 
+  - Required qualifications: Successful completion of a formal radiologic technology training program, which meets the requirements for registry by the American Registry of Radiologic Technologists (ARRT).
+  - Diploma or GED or documentation of higher education Must have completed a Medical Assistant with Phlebotomy or Phlebotomy course Washington Medical Assistant Phlebotomist Certification upon hire Computer experience Labor
+  - Staff in this role bring together an informed mix of experience of technology, product, and business acumen.
+  - 2 years Demonstrated ability to successfully execute medium to complex projects;
+  - 2 years of EMT and/or two years Emergency Department experience.
+  - Upon hire: National Certified Nuclear Medicine Technologist - Nuclear Medicine Technology Certification Board Or Upon hire: National Registered Technologist - Nuclear Medicine Technology Upon hire: Washington Radiologic 
+  - 42 Lead Laboratory Assistant Required Qualifications: H.
+  - Experience with team-building and interpersonal conflict management.
+  - Healthcare experience.
+  - Minimum experience is obtained as part of the accredited physical therapy program as an intern.
+  - Preferred qualifications: Bachelor's Degree in Community Health, Health Promotion, Health Education, Public Health, or a closely related field.
+  - Required Qualifications: Experience working with community resources.
+  - Preferred Qualifications: Experience in enteral/parenteral nutrition.
+  - Required Qualifications: Graduate of certified Medical Assistant program Upon hire: Washington Medical Assistant Certification Upon hire: National Provider BLS - American Heart Association Preferred Qualifications: Upon 
+  - 6 months Experience in a healthcare setting working with an Electronic Health record (EHR).
+
+  (1224 singleton sentences total)
+
+==============================================================================
+Nothing above is classified, scored, or filtered. Structure and vocabulary only.
+==============================================================================

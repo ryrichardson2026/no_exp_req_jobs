@@ -1,0 +1,373 @@
+====================================================================================
+TASK 1 - National Specialty / BLS double-count
+====================================================================================
+
+10 clauses that produced a National Specialty hit (orig naming):
+  also_BLS=True  np_trigger_only=True  [Senior Medical Assistant - Sleep Clinic]
+     "National Provider BLS - American Heart Association upon hire"
+  also_BLS=True  np_trigger_only=True  [Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular]
+     "National Provider BLS - American Heart Association within 30 days of hire"
+  also_BLS=True  np_trigger_only=True  [Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular]
+     "Within 30 days of hire: National Provider BLS - American Heart Association"
+  also_BLS=True  np_trigger_only=True  [Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular]
+     "National Provider BLS - American Heart Association within 30 days of hire"
+  also_BLS=True  np_trigger_only=True  [Medical Assistant - Float Pool]
+     "Within 30 days of hire: National Provider BLS - American Heart Association"
+  also_BLS=True  np_trigger_only=True  [Medical Assistant - Cardiology Institute]
+     "Within 30 days of hire: National Provider BLS - American Heart Association"
+  also_BLS=True  np_trigger_only=True  [Medical Assistant - Cardiology Institute]
+     "Within 30 days of hire National Provider BLS - American Heart Association"
+  also_BLS=True  np_trigger_only=True  [Nuclear Medicine Technologist - Per Diem]
+     "Upon hire: National Provider BLS - American Heart Association"
+  also_BLS=True  np_trigger_only=True  [Medical Assistant - OBGYN]
+     "Within 30 days of hire: National Provider BLS - American Heart Association"
+  also_BLS=True  np_trigger_only=True  [Pediatric Medical Assistant - Spokane - Multiple Clinic Openings]
+     "National Provider BLS - American Heart Association within 30 days of hire"
+
+BLS after-hire jobs: 559
+National Specialty (ORIG, incl 'national provider'): 559 jobs
+National Specialty (CORRECTED, 'national provider' dropped): 93 jobs
+  corrected upon-hire instances for National Specialty: 93
+jobs where the National-Specialty hit was ONLY the 'national provider BLS' clause: 551
+
+
+====================================================================================
+TASK 2 - read Other certification / Other license
+====================================================================================
+
+--- Other certification / AFTER  (114 instances) ---
+  [Senior Cardiovascular Technologist]  "Upon hire: Washington Cardiovascular Invasive Specialist Certification"
+  [RN - Progress Care]  "National Institutes of Health Stroke Scale Certificate - NIH Stroke Scale Training Course within 90 days of hire"
+  [Acute RN - Neurology]  "National Institutes of Health Stroke Scale Certificate - NIH Stroke Scale Training Course within 90 days of hire"
+  [Care Manager MSW]  "Upon hire: Certified Case Manager (CCM)"
+  [Surgical Technician - Vascular Cluster]  "Washington Surgical Technologist Registration upon hire"
+  [Business Systems Analyst - Revenue Cycle]  "Upon hire: Certification in Epic Resolute Professional Billing Administration I & II, but can be obtained while in position"
+  [Business Systems Analyst - Revenue Cycle]  "Upon hire: Certification or proficiency obtained in Epic Resolute Professional Billing Claims and Epic Resolute Professional Billi"
+  [Care Manager RN]  "Upon hire: CCM certification"
+  [EEG Technician - Multiple Positions]  "upon hire: Electroencephalographic Technologists certification (R"
+  [Manager Nursing - Nursing Management]  "upon hire: Certification"
+  [Senior Manager Finance]  "Upon hire: Certified Public Accountant (CPA), Or"
+  [Senior Manager Finance]  "Upon hire: Healthcare Financial Management Association (HFMA) Certification, Or"
+  [RN - Short Stay Unit]  "National Institutes of Health Stroke Scale Certificate - NIH Stroke Scale Training Course within 90 days of hire"
+  [MRI Technologist]  "Upon hire: National Certified MRI Technologist - American Registry of Magnetic Resonance Imaging Technologists"
+  [RN - Swedish Cancer Institute Issaquah]  "Upon hire: Oncology Certified Nurse (OCN)"
+
+--- Other certification / APPLY  (58 instances) ---
+  [Senior Medical Assistant - Sleep Clinic]  "Graduate of certified medical assistant program"
+  [Senior Cardiovascular Technologist]  "Coursework/Training and two years of community college/vocational training in a certified Cardiovascular Technologist training pro"
+  [Associate Chaplain]  "National Chaplain Certification within 3 years of hire"
+  [Medical Assistant - Pain Services]  "Graduate of certified medical assistant program"
+  [Senior Medical Assistant - Breast Surgery Clinic]  "Coursework/Training: Graduate of certified medical assistant program"
+  [Medical Laboratory Scientist]  "Certification as Medical Laboratory Scientist (MLS) by the American Society for Clinical Pathology (ASCP) or equivalent"
+  [Manager IS Applications]  "ERP experience must include leading Information Services teams in two or more of the following applications and business processes"
+  [Interventional Radiology (IR) and Senior Interventional Radiology (IR) Technologist]  "Two years community college/vocational training in a certified radiological technologist training program"
+  [Interventional Radiology (IR) and Senior Interventional Radiology (IR) Technologist]  "Coursework/Training and Two years community college/vocational training in a certified radiological technologist training program"
+  [CT Technologist - Xray/CT Nights]  "Military certificate of completion- Radiology"
+  [Electrophysiology Technician]  "1 year If qualifying as Cardiovascular Invasive Specialist - recent Invasive Cardiology Laboratory experience or graduate of certi"
+  [Electrophysiology Technician]  "If qualifying as Cardiovascular Invasive Specialist must be a graduate of a two-year invasive cardiology program or IBHRE endorsed"
+  [Electrophysiology Technician]  "1 year experience - If qualifying as Cardiovascular Invasive Specialist - recent Invasive Cardiology Laboratory experience or grad"
+  [Cardiovascular Technologist]  "Washington Cardiovascular Invasive Specialist Certification"
+  [Cardiovascular Technologist]  "National Registered Cardiovascular Invasive Specialist - Cardiovascular Credentialing International"
+
+--- Other license / AFTER  (24 instances) ---
+  [Physical Therapy Assistant - Pediatrics and Adult]  "Upon hire: Washington Physical Therapy Assistant License"
+  [Senior LPN LVN (Full/Part Time) - Long Term Care - Transitional Care - Float Pool]  "Upon hire: Washington Licensed Practical Nurse"
+  [Physical Therapy Assistant]  "Upon hire: Washington Physical Therapy Assistant License"
+  [Clinic RN - URGENT CARE WA UC FACTORIA]  "Upon hire: National Registered Nurse Compact License"
+  [Chemical Dependency Counselor]  "Upon hire: Washington Substance Use Disorder Professional License"
+  [Supervisor - Facilities]  "Upon hire: National Boiler Operator Grade I License - State County City Trade License Authority or"
+  [Supervisor - Facilities]  "Upon hire: National Boiler Operator Grade II License - State County City Trade License Authority or"
+  [Supervisor - Facilities]  "Upon hire: National Boiler Operator Grade III License - State County City Trade License Authority"
+  [Chemical Dependency Counselor]  "Upon hire: Washington Substance Use Disorder Professional License"
+  [Audiologist - AUDIOLOGY]  "Washington Audiologist License upon hire"
+  [Physical Therapy Assistant]  "Upon hire: Washington Physical Therapy Assistant License"
+  [LPN LVN - Emergency Services]  "Upon hire: Washington Licensed Practical Nurse"
+  [Massage Therapist - Physical Therapy]  "Washington Licensed Massage Therapist upon hire"
+  [Physical Therapy Assistant]  "Upon hire: Washington Physical Therapy Assistant License"
+  [Massage Therapist - Physical Therapy 0.5 FTE]  "Washington Licensed Massage Therapist upon hire"
+
+--- Other license / APPLY  (46 instances) ---
+  [Clinical Pharmacist]  "When eligible and where applicable, obtain a Board of Pharmacy Preceptor license"
+  [Physical Therapist - Acute Care Rehab, PRN]  "Education to meet certification, license or registration requirement"
+  [RN Resident - Multiple Specialties - PSPH - November 2026]  "Graduation from an accredited nursing program and is newly licensed with 12 months of experience or less"
+  [Occupational Therapist - Acute Care Rehab]  "Education to meet certification, license or registration requirement"
+  [Respiratory Care Practitioner - Core, Variable Shift]  "Education to meet certification, license, or registration requirement"
+  [Occupational Therapist - Acute Care Rehab]  "Education to meet certification, license or registration requirement"
+  [Respiratory Care Practitioner - Core, Night Shift]  "Education to meet certification, license, or registration requirement"
+  [Respiratory Care Practitioner - 2 South]  "Education to meet certification, license, or registration requirement"
+  [Occupational Therapist]  "Education to meet certification, license or registration requirement"
+  [RN Resident - SHMC Multi Specialty]  "Graduation from an accredited nursing program and is newly licensed with 12 months of experience or less"
+  [Resident RN - Inpatient Rehab]  "Graduation from an accredited nursing program and is newly licensed with 12 months of experience or less"
+  [Per Diem Clinical Pharmacist - Refill Team]  "(1) Board of Pharmacy Preceptor License - when eligible and where applicable"
+  [Occupational Therapist]  "Education to meet certification, license or registration requirement"
+  [Facilities Engineer]  "Education sufficient for license/registration"
+  [Facilities Engineer]  "National Boiler Operator Grade II License - State County City Trade License Authority within 3 years of hire -OR"
+
+
+====================================================================================
+TASK 3 - acceptable-jobs rule
+====================================================================================
+
+### acceptable jobs WITH Phlebotomy: 52
+  by experience_condition: PREFERRED=29, NONE_NEEDED=13, NOT_STATED=10
+  by source_function:
+       20  Clinical Care
+       10  Operations
+        5  Administration
+        5  Facilities
+        5  Supply Chain
+        3  Clinical Support
+        2  Revenue Cycle
+        1  Information Technology
+        1  Community Service
+
+### acceptable jobs WITHOUT Phlebotomy: 49
+  by experience_condition: PREFERRED=27, NONE_NEEDED=12, NOT_STATED=10
+  by source_function:
+       18  Clinical Care
+       10  Operations
+        5  Facilities
+        5  Supply Chain
+        4  Administration
+        3  Clinical Support
+        2  Revenue Cycle
+        1  Information Technology
+        1  Community Service
+
+
+====================================================================================
+TASK 4 - after-hire cue validation (AFTER_HIRE / credential)
+====================================================================================
+
+per-cue counts and 8 clauses:
+
+  CUE 'upon hire'  fired 1371x
+     [Associate Food Service Attendant] "National Food Handler Card - State County City Authority upon hire"
+     [Senior Medical Assistant - Sleep Clinic] "Washington Medical Assistant Certification upon hire"
+     [Senior Medical Assistant - Sleep Clinic] "National Provider BLS - American Heart Association upon hire"
+     [Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular] "Washington Medical Assistant Certification upon hire"
+     [Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular] "National Medical Assistant Certification upon hire"
+     [Medical Assistant - Float Pool] "Upon hire: Washington Medical Assistant Certification"
+     [Medical Assistant - Cardiology Institute] "Upon hire: Washington Medical Assistant Certification"
+     [Nuclear Medicine Technologist - Per Diem] "Upon hire: National Certified Nuclear Medicine Technologist - Nuclear Medicine Technology Certification Board or"
+
+  CUE 'on hire'  fired 1371x
+     [Associate Food Service Attendant] "National Food Handler Card - State County City Authority upon hire"
+     [Senior Medical Assistant - Sleep Clinic] "Washington Medical Assistant Certification upon hire"
+     [Senior Medical Assistant - Sleep Clinic] "National Provider BLS - American Heart Association upon hire"
+     [Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular] "Washington Medical Assistant Certification upon hire"
+     [Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular] "National Medical Assistant Certification upon hire"
+     [Medical Assistant - Float Pool] "Upon hire: Washington Medical Assistant Certification"
+     [Medical Assistant - Cardiology Institute] "Upon hire: Washington Medical Assistant Certification"
+     [Nuclear Medicine Technologist - Per Diem] "Upon hire: National Certified Nuclear Medicine Technologist - Nuclear Medicine Technology Certification Board or"
+
+  CUE 'within 30 days'  fired 142x
+     [Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular] "National Provider BLS - American Heart Association within 30 days of hire"
+     [Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular] "Within 30 days of hire: National Provider BLS - American Heart Association"
+     [Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular] "National Provider BLS - American Heart Association within 30 days of hire"
+     [Medical Assistant - Float Pool] "Within 30 days of hire: National Provider BLS - American Heart Association"
+     [Medical Assistant - Cardiology Institute] "Within 30 days of hire: National Provider BLS - American Heart Association"
+     [Medical Assistant - Cardiology Institute] "Within 30 days of hire National Provider BLS - American Heart Association"
+     [Medical Assistant - OBGYN] "Within 30 days of hire: National Provider BLS - American Heart Association"
+     [Pediatric Medical Assistant - Spokane - Multiple Clinic Openings] "National Provider BLS - American Heart Association within 30 days of hire"
+
+  CUE 'within 90 days'  fired 80x
+     [RN - ICU] "National Provider ACLS - American Heart Association within 90 days of hire:"
+     [RN - Progress Care] "National Institutes of Health Stroke Scale Certificate - NIH Stroke Scale Training Course within 90 days of hire"
+     [RN - Progress Care] "National Provider ACLS - American Heart Association within 90 days of hire"
+     [Acute RN - Neurology] "National Institutes of Health Stroke Scale Certificate - NIH Stroke Scale Training Course within 90 days of hire"
+     [Acute RN - Neurology] "National Provider ACLS - American Heart Association within 90 days of hire"
+     [RN - Cardiac Medical] "National Provider ACLS - American Heart Association within 90 days of hire"
+     [RN - Short Stay Unit] "National Institutes of Health Stroke Scale Certificate - NIH Stroke Scale Training Course within 90 days of hire"
+     [RN - ICU] "Within 90 days of hire: National Provider ACLS - American Heart Association"
+
+  CUE 'within 60 days'  fired 21x
+     [Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular] "Within 60 days of hire: Washington Medical Assistant Registration"
+     [Medical Assistant - Cardiology Institute] "Within 60 days of hire Washington Medical Assistant Registration"
+     [Pediatric Medical Assistant - Spokane - Multiple Clinic Openings] "Washington Medical Assistant Registration within 60 days of hire"
+     [Medical Assistant - Registered or Certified - Float Pool] "Within 60 days of hire: Washington Medical Assistant Registration"
+     [Medical Assistant Registered - Cardiology - Structural Heart] "Washington Medical Assistant Registration within 60 days of hire"
+     [Medical Assistant Registered WA - Primary Care] "Within 60 days of hire: Washington Medical Assistant Registration"
+     [Medical Assistant – Primary Care - Multiple Clinics] "Washington Medical Assistant Registration within 60 days of hire"
+     [Medical Assistant Registered WA and Certified Medical Assistant - ENT] "Within 60 days of hire: Washington Medical Assistant Registration"
+
+  CUE 'within 1 year'  fired 19x
+     [Ultrasound Technologist - Nights] "Within 1 year of hire: National Certification from American Registry for Diagnostic Medical Sonography or"
+     [CT Technologist] "Within 1 year of hire National Computed Tomography Technologist - Nuclear Medicine Technology Certification Board"
+     [Ultrasound Technologist - Breast Care Center] "Within 1 year of hire: National Certification from American Registry for Diagnostic Medical Sonography"
+     [Ultrasound Technologist - Breast Care Center] "Within 1 year of hire: National Certification from American Registry for Diagnostic Medical Sonography"
+     [CT Technologist - Diagnostic Imaging] "Within 1 year of hire National Computed Tomography Technologist - Nuclear Medicine Technology Certification Board"
+     [Ultrasound Technologist - OB/GYN] "Within 1 year of hire National Certification from American Registry for Diagnostic Medical Sonography"
+     [CT Technologist - per diem] "Within 1 year of hire: National Computed Tomography Technologist - Nuclear Medicine Technology Certification Board"
+     [Executive Protection Specialist - Onsite] "Within 1 year of hire: Successful completion of TASER© training and certification within 9 months of employment with ann"
+
+  CUE 'within 6 months'  fired 8x
+     [RN - Cardiac Cath Lab] "Within 6 months (180 days) of hire: National Provider ACLS - American Heart Association"
+     [Emergency Technician] "Washington Medical Assistant Phlebotomist Certification within 6 months (180 days) of hire or,"
+     [Emergency Technician] "Washington Medical Assistant Certification within 6 months (180 days) of hire"
+     [Fellow RN - ICU] "National Provider ACLS - American Heart Association within 6 months (180 days) of hire"
+     [Dietitian - Home Infusion] "Within 6 months (180 days) of hire: Washington Dietitian Certification"
+     [Security Officer] "Within 6 months (180 days) of hire: Successful completion of TASER Training - annual re-certification (Facility Managed)"
+     [RN Fellow - ICU - SED November 2026 Cohort] "National Provider ACLS - American Heart Association within 6 months (180 days) of hire"
+     [Clinical Student Intern - Phlebotomy] "Washington Medical Assistant Phlebotomist Certification within 6 months (180 days) of hire"
+
+  CUE 'required within'  fired 4x
+     [Respiratory Care Practitioner – Respiratory Therapy] "National Provider ACLS - American Heart Association is required within 90 days of hire"
+     [Respiratory Care Practitioner – Respiratory Therapy] "National Provider PALS - American Heart Association is required within 90 days of hire"
+     [Respiratory Care Practitioner – Respiratory Therapy] "National Provider ACLS - American Heart Association is required within 90 days of hire"
+     [Respiratory Care Practitioner – Respiratory Therapy] "National Provider PALS - American Heart Association is required within 90 days of hire"
+
+  CUE 'prior to start'  fired 2x
+     [MRI Technologist] "Upon hire: WA Radiologic Technologist Certification (MRI modality) or eligible to obtain prior to start date"
+     [MRI Technologist] "Upon hire: WA Radiologic Technologist Certification (MRI modality) or eligible to obtain prior to start date"
+
+jobs with an after-hire credential: 689
+jobs surviving if only tight cues count (upon/at/on hire, within N days): 683
+
+
+====================================================================================
+TASK 5 - validate REQUIRED (599)
+====================================================================================
+
+20 REQUIRED sampled across functions:
+
+  [Clinical Care] Senior Medical Assistant - Sleep Clinic
+    min_months=12.0  trade_ticket=False
+      exp: "1 year of related experience in the medical field"
+      exp: "General experience regarding medical office paperwork required"
+
+  [Nursing] RN - Float Personnel- Rapid Response Team
+    min_months=12.0  trade_ticket=False
+      exp: "1 year Nursing experience"
+
+  [Revenue Cycle] Admissions and Referral Intake Specialist
+    min_months=24.0  trade_ticket=False
+      exp: "2 years of experience in long term care, clinical case management and admissions"
+      exp: "2 years of experience in a customer service, business development or sales environment"
+
+  [Clinical Support] Clinical Registrar - Tumor Registry - Remote
+    min_months=24.0  trade_ticket=False
+      exp: "Associate's Degree Or equivalent education/experience"
+      exp: "In lieu of Associate's degree: Additional 2 years cancer registry experience"
+      exp: "2 years Cancer registry experience"
+
+  [Facilities] Senior Manager Facilities
+    min_months=36.0  trade_ticket=False
+      exp: "5 years of progressively responsible healthcare facilities and project management experien"
+      exp: "3 years of administrative experience in hospital administration or specialty field"
+
+  [Information Technology] Business Systems Analyst - Revenue Cycle
+    min_months=60.0  trade_ticket=False
+      exp: "5 years progressively more responsible work experience in a health care business office"
+
+  [Administration] Department Scheduler - Linguistic Services
+    min_months=24.0  trade_ticket=False
+      exp: "2 years of experience as a scheduler/dispatcher or equivalent experience"
+      exp: "Demonstrated experience working with diverse cultural and socio-economic backgrounds showi"
+
+  [Supply Chain] Senior Inventory Control Coordinator
+    min_months=60.0  trade_ticket=False
+      exp: "Equivalent educ/experience"
+      exp: "5 years of supply chain management or finance experience"
+
+  [Operations] Cook
+    min_months=None  trade_ticket=False
+      exp: "Progressive experience in institutional cooking"
+
+  [Project/Product Management] Senior Product Manager -  Remote
+    min_months=60.0  trade_ticket=False
+      exp: "Bachelor’s Degree in Data Science, Analytics, Finance, Engineering, Mathematics, Computer "
+      exp: "5 years progressively increasing responsibility in management level experience (project, p"
+
+  [Community Service] Specialty Chaplain - Palliative Care
+    min_months=60.0  trade_ticket=False
+      exp: "5 years Clinical and/or pastoral experience in healthcare setting"
+
+  [Finance] Senior Manager Finance
+    min_months=72.0  trade_ticket=False
+      exp: "Bachelor's Degree in Accounting or Finance related field., Or equivalent education /experi"
+      exp: "8 years of closely related experience"
+      exp: "6 years experience in a leadership role or capacity"
+
+  [Marketing/Public Relations/Community Affairs] Program Manager - Foundation Liaison
+    min_months=60.0  trade_ticket=False
+      exp: "Equivalent education/experience"
+      exp: "5 years in Program Management, similar Project Management or Leadership experience"
+
+  [Quality/Process Improvements] Manager Quality RN
+    min_months=36.0  trade_ticket=False
+      exp: "5 years Experience in hospital acute care"
+      exp: "3 years Recent leadership experience"
+      exp: "Experience with Joint Commission standards, state and federal regulations, and compliance"
+
+  [Health Plans Services] Senior Provider Network Contract Specialist - USFHP
+    min_months=None  trade_ticket=False
+      exp: "Extensive experience and understanding of capitated medicine, contracted networks and heal"
+
+  [Provider Services] Continuing Medical Education Coordinator
+    min_months=12.0  trade_ticket=False
+      exp: "An equivalent amount of experience and education"
+      exp: "1 year of related experience and/or training"
+      exp: "Office procedure experience"
+
+  [Human Resources] Retirement Analyst - Hybrid
+    min_months=24.0  trade_ticket=False
+      exp: "2 years related experience"
+      exp: "Professional experience working with employee retirement benefit plans"
+
+  [Clinical Care] Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular
+    min_months=6.0  trade_ticket=False
+      exp: "Coursework/Training - Minimum one year of work experience as a medical assistant that incl"
+      exp: "Medical assisting experience in a clinic setting (0-6 months)"
+      exp: "6 months healthcare experience"
+      exp: "6 months Medical Assistant experience"
+      exp: "Coursework/Training - Minimum one year of work experience as a medical assistant that incl"
+      exp: "6 months - Healthcare experience"
+      exp: "6 months - Medical Assistant experience"
+
+  [Nursing] RN - ICU
+    min_months=12.0  trade_ticket=False
+      exp: "1 year of Acute care experience with the patient population similar to department of hire "
+
+  [Revenue Cycle] Patient Services Specialist - Scheduling
+    min_months=12.0  trade_ticket=False
+      exp: "1 year customer service experience"
+
+min_months distribution across REQUIRED (599):
+  none (modality word, no bar)   63
+  <=6 mo                         139
+  7-12 mo                        224
+  13-24 mo                       92
+  >24 mo                         81
+
+
+====================================================================================
+CARRY-FORWARD for Notion
+====================================================================================
+section detection: 841/851
+10 no-marker titles: Associate Administrative Coordinator | Radiology Assistant - Medical Imaging | Medical Assistant - Dermatology - Bellevue | Environmental Services Technician - Environmental Services | Early Childhood Teacher | HUC - Emergency Services | Central Supply Distribution Technician | Supervisor Clinic Operations - Heart and Vascular Issaquah | Patient Service Representative - Patient Access | Healthcare Educator - EMS Instructor
+distribution: REQUIRED=599, PREFERRED=156, WAIVED=3, NONE_NEEDED=81, NOT_STATED=12
+NOT_STATED split: no-section=10, no-typed-requirements=2
+HealthGrades=0  years-in-a-row=0  swallow=0
+445702 [Facilities Engineer] -> PREFERRED min_months=None trade_ticket=False
+429070 [Painter] -> REQUIRED min_months=48.0 trade_ticket=True
+
+by-function table:
+  function                            REQUIRED  PREFERRE    WAIVED  NONE_NEE  NOT_STAT   total
+  Clinical Care                            282       114         0        55         3     454
+  Nursing                                  169        17         0        15         0     201
+  Revenue Cycle                             56         7         1         0         0      64
+  Clinical Support                          21         0         0         4         3      28
+  Facilities                                14         5         2         0         0      21
+  Operations                                 6         6         0         1         3      16
+  Administration                             8         1         0         4         2      15
+  Information Technology                    13         1         0         1         0      15
+  Supply Chain                               7         4         0         0         1      12
+  Community Service                          4         1         0         1         0       6
+  Project/Product Management                 6         0         0         0         0       6
+  Finance                                    3         0         0         0         0       3
+  Marketing/Public Relations/Community Affairs         3         0         0         0         0       3
+  Quality/Process Improvements               3         0         0         0         0       3
+  Health Plans Services                      2         0         0         0         0       2
+  Provider Services                          1         0         0         0         0       1
+  Human Resources                            1         0         0         0         0       1

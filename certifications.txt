@@ -1,0 +1,3652 @@
+==================================================================================
+CERTIFICATION CATALOG - Providence WA board (851 records)
+after-hire = completable on a timeframe after hire (manageable).
+to-apply   = must be held to apply (a hard barrier, not timeframe-completable).
+==================================================================================
+
+jobs with >=1 after-hire credential: 689
+jobs with >=1 to-apply credential : 143
+
+
+### AFTER-HIRE CERTIFICATIONS  (the manageable inventory)
+certification                              #jobs   typical timeframes
+  BLS                                        559   upon hire:447  within 30 days:142  within 90 days:2
+  National Specialty Certification           559   upon hire:584  within 30 days:141  within 90 days:48  within 1 year:5
+  WA Registered Nurse License                235   upon hire:243
+  WA Medical Assistant Cert/Reg              119   upon hire:199  within 60 days:21  within 6 months:3  within 90 days:2
+  Other certification                         92   upon hire:82  within 90 days:22  within 1 year:7  within 6 months:2
+  ACLS                                        83   upon hire:44  within 90 days:39  within 6 months:3
+  PALS                                        32   upon hire:20  within 90 days:14
+  Radiologic Technologist (ARRT)              30   upon hire:33
+  WA Nursing Assistant Cert (CNA/NAC)         25   upon hire:25  within 90 days:1
+  Occupational Therapist License              22   upon hire:23
+  Other license                               20   upon hire:24
+  WA Respiratory Care License                 19   upon hire:20
+  WA Counselor License                        17   upon hire:36
+  Sonographer Cert                            16   upon hire:13  within 1 year:5
+  Food Handler Card                           14   upon hire:14
+  Pharmacy Technician License/Cert            14   upon hire:16
+  WA Physical Therapist License               13   upon hire:13
+  Pharmacist License                          12   upon hire:13
+  Phlebotomy Certification                    12   upon hire:10  within 6 months:2  within 90 days:2
+  WA Social Worker License                    12   upon hire:25
+  Nuclear Medicine Tech Cert                  11   within 1 year:7  upon hire:4
+  Speech-Language Pathologist License         10   upon hire:10
+  Polysomnographic Tech Cert                   7   upon hire:7
+  Perfusionist Cert                            1   upon hire:1
+  Driver License / CDL                         1   upon hire:1
+  CPR / First Aid                              1   upon hire:1
+
+
+### TIMEFRAME DISTRIBUTION  (after-hire credential instances)
+  upon hire                   1370
+  within 30 days               142
+  within 90 days                80
+  within 60 days                21
+  within 1 year                 19
+  within 6 months                8
+  within 2 years                 1
+
+
+### TO-APPLY CERTIFICATIONS  (barrier - must hold at application)
+certification                              #jobs
+  Other certification                         49
+  Other license                               43
+  Driver License / CDL                        16
+  Nuclear Medicine Tech Cert                   7
+  Radiologic Technologist (ARRT)               6
+  Pharmacy Technician License/Cert             5
+  National Specialty Certification             4
+  Sonographer Cert                             4
+  Occupational Therapist License               3
+  Pharmacist License                           2
+  WA Medical Assistant Cert/Reg                2
+  Phlebotomy Certification                     2
+  WA Physical Therapist License                1
+  Speech-Language Pathologist License          1
+  WA Registered Nurse License                  1
+  BLS                                          1
+  Polysomnographic Tech Cert                   1
+  WA Nursing Assistant Cert (CNA/NAC)          1
+  WA Social Worker License                     1
+
+
+==================================================================================
+PER-JOB LISTING - every job carrying a credential
+condition | function | title  ->  cert (modality, timeframe)
+==================================================================================
+
+[NONE_NEEDED] Administration | Clinical Student Intern - Magnolia Primary Care
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[NONE_NEEDED] Administration | Surgical Technologist Student Resident
+    - Other certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Administration | Surgical Technologist Student Resident
+    - Other certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | EEG Technician - Epilepsy Center
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Ultrasound Technologist - Nights
+    - Sonographer Cert  (after-hire; within 1 year)
+    - National Specialty Certification  (after-hire; within 1 year)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Respiratory Care Practitioner - Core, Variable Shift
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Clinical Care | Respiratory Care Practitioner - Core, Night Shift
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Clinical Care | Respiratory Care Practitioner - 2 South
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Clinical Care | Radiology Technologist
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Speech Language Pathologist
+    - Speech-Language Pathologist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Radiation Therapist - Lacey
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Senior Radiology Technologist
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Respiratory Care Practitioner - Respiratory Therapy
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[NONE_NEEDED] Clinical Care | Respiratory Care Practitioner - Respiratory Therapy
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[NONE_NEEDED] Clinical Care | RN Care Manager - PACE
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Physical Therapy Assistant
+    - Other license  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Polysomnographer - Sleep Lab
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Polysomnographic Tech Cert  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Clinical Care | Occupational Therapist – Outpatient Neurological and Hands Rehab
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Occupational Therapist
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Clinical Care | Chemical Dependency Counselor
+    - Other license  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Polysomnographer
+    - Polysomnographic Tech Cert  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | CT Technologist - per diem
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Nuclear Medicine Tech Cert  (after-hire; within 1 year)
+
+[NONE_NEEDED] Clinical Care | Radiation Therapist
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Nuclear Medicine Technologist - Nuclear Medicine
+    - Nuclear Medicine Tech Cert  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Radiation Therapist - Radiation Oncology
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Occupational Therapist - Inpatient
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Respiratory Care Practitioner - PICU
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Clinical Care | Respiratory Care Practitioner - Childrens Hospital Float
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Clinical Care | Respiratory Care Practitioner - 2nd Floor Float
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Clinical Care | Respiratory Care Practitioner
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+    - PALS  (after-hire; within 90 days)
+
+[NONE_NEEDED] Clinical Care | Radiation Therapist - Aberdeen
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Physical Therapist
+    - WA Physical Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Emergency Technician
+    - WA Medical Assistant Cert/Reg  (after-hire; within 6 months)
+    - Phlebotomy Certification  (after-hire; within 6 months)
+
+[NONE_NEEDED] Clinical Care | Occupational Therapist - Inpatient
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Recreational Therapist - PACE (West Seattle)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - Other certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Medical Laboratory Scientist - Clinical Laboratory
+    - WA Medical Assistant Cert/Reg  (after-hire; within 90 days)
+    - Phlebotomy Certification  (after-hire; within 90 days)
+
+[NONE_NEEDED] Clinical Care | Endoscopic Technician - Outpatient Surgery
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Senior Mammography Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Physical Therapist
+    - WA Physical Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Clinical Care | Physical Therapist
+    - WA Physical Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Clinical Care | Occupational Therapist - Inpatient
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Recreational Therapist (Part Time) - PACE
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - Other certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Clinical Care | Ophthalmic Technician - Ophthalmology
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Pharmacist Intern
+    - Pharmacist License  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Ophthalmic Technician
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Pharmacist Intern - Credena Health Pharmacy
+    - Pharmacist License  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Senior Radiology Technologist
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Polysomnographer
+    - Polysomnographic Tech Cert  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Occupational Therapist - Inpatient
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Senior Mammography Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Physical Therapist - Outpatient Pelvic Floor Rehab
+    - WA Physical Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Occupational Therapist - Inpatient
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Surgical Technician - General Surgery
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Surgical Technician - Various FTE/Shifts
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Occupational Therapist
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Care | Occupational Therapist - Acute Care
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Occupational Therapist License  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Clinical Support | Patient Sitter - Emergency Services - Various FTE/Shifts
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Support | Radiology Technologist Student
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Support | Patient Sitter - Emergency Services - 0.9 FTE / DAY
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Clinical Support | Radiology Technologist Student
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Community Service | Associate Chaplain
+    - Other certification  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Nursing | Certified Nursing Assistant - Psych Adult
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Nursing | Certified Nursing Assistant - Emergency Psych
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Nursing | CNA - Float Personnel
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Nursing | CNA - Emergency Services
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Nursing | CNA - Emergency Services
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Nursing | CNA - Cardiac Medical
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Nursing | CNA - Renal Medical
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Nursing | CNA - Renal Medical
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Nursing | CNA - Olympia, WA - DAYS
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Nursing | CNA - Olympia, WA - NIGHTS
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Nursing | CNA - Progressive Care Unit - NIGHTS
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Nursing | CNA Medical 6A-PL
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; within 90 days)
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Nursing | Nurse Technician
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Nursing | CNA - Emergency Services
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[NONE_NEEDED] Nursing | CNA - Neurology
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[NONE_NEEDED] Operations | Cook
+    - Food Handler Card  (after-hire; upon hire)
+
+[NOT_STATED] Clinical Support | HUC - Emergency Services
+    - Other certification  (after-hire; upon hire)
+
+[NOT_STATED] Clinical Support | Healthcare Educator - EMS Instructor
+    - BLS  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[PREFERRED] Administration | Clinical Student Intern - Phlebotomy
+    - WA Medical Assistant Cert/Reg  (after-hire; within 6 months)
+    - Phlebotomy Certification  (after-hire; within 6 months)
+
+[PREFERRED] Clinical Care | Clinical Pharmacist
+    - Pharmacist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | RN (Full/Part Time) - Transitional Care Unit
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[PREFERRED] Clinical Care | Senior Cardiovascular Technologist
+    - Other certification  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Physical Therapist - Acute Care Rehab, PRN
+    - WA Physical Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Physical Therapist - Pain Services
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - WA Physical Therapist License  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Inpatient Associate Pharmacy Technician, Pharmacy Technician and Senior Pharmacy Technician
+    - Pharmacy Technician License/Cert  (after-hire; upon hire)
+    - Pharmacy Technician License/Cert  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Speech Language Pathologist- per diem
+    - Speech-Language Pathologist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Respiratory Care Practitioner - Sleep Lab
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Pharmacy Technician
+    - Pharmacy Technician License/Cert  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Medical Assistant - Pain Services
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Radiology Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Speech Language Pathologist - Otolaryngology
+    - Speech-Language Pathologist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Occupational Therapist - Acute Care Rehab
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Occupational Therapist - Acute Care Rehab
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Speech Language Pathologist
+    - Speech-Language Pathologist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | MRI Technologist
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | CT Technologist - Xray/CT Nights
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Nuclear Medicine Tech Cert  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Occupational Therapist
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Respiratory Care Practitioner
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - PALS  (after-hire; within 90 days)
+
+[PREFERRED] Clinical Care | CT Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Nuclear Medicine Tech Cert  (after-hire; within 1 year)
+
+[PREFERRED] Clinical Care | Lead Respiratory Care Practitioner
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+    - PALS  (after-hire; within 90 days)
+
+[PREFERRED] Clinical Care | Radiology Technologist
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Clinic RN - URGENT CARE WA UC FACTORIA
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - Other license  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | CT Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Nuclear Medicine Tech Cert  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | CT Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Nuclear Medicine Tech Cert  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | CT Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Certified Occupational Therapy Assistant - PACE
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - Occupational Therapist License  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Pharmacy Technician - Sterile Compounding
+    - Pharmacy Technician License/Cert  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Surgical Technician - Labor and Delivery
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Pharmacy Technician
+    - Pharmacy Technician License/Cert  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Surgical Technician - Operating Room
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Supervisor Anesthesia
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - Phlebotomy Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Pharmacy Technician - Oncology/Infusion
+    - Pharmacy Technician License/Cert  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Ultrasound Technologist
+    - Sonographer Cert  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Care Manager RN - Accountable Care
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Radiology Technologist - Orthopedic
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Surgical Technician Resident
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[PREFERRED] Clinical Care | Speech Language Pathologist
+    - Speech-Language Pathologist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Physical Therapy Assistant
+    - Other license  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Certified Occupational Therapy Assistant
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Clinical Pharmacist
+    - Pharmacist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Clinical Pharmacist - per diem
+    - Pharmacist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Surgical Technician - Operating Room
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | CT Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Nuclear Medicine Tech Cert  (after-hire; within 1 year)
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+
+[PREFERRED] Clinical Care | Pharmacy Technician
+    - Pharmacy Technician License/Cert  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Surgical Technician - Orthopedic Surgery
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Radiology Technologist
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Rehabilitation Aide
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Endoscopic Technician
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Clinical Pharmacist
+    - Pharmacist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Pharmacist Intern
+    - Pharmacist License  (TO-APPLY; required at application)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Physical Therapist - NICU
+    - WA Physical Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Nutrition Attendant
+    - Food Handler Card  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | MRI Technologist - Per Diem
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | MRI Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Physical Therapist - Outpatient Rehab
+    - WA Physical Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Occupational Therapist - Outpatient Rehab
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Speech Language Pathologist - Outpatient Rehab
+    - Speech-Language Pathologist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Senior Laboratory Assistant
+    - WA Medical Assistant Cert/Reg  (TO-APPLY; required at application)
+    - Phlebotomy Certification  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Medical Laboratory Technician - Clinical Laboratory
+    - WA Medical Assistant Cert/Reg  (after-hire; within 90 days)
+    - Phlebotomy Certification  (after-hire; within 90 days)
+
+[PREFERRED] Clinical Care | CT Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Nuclear Medicine Tech Cert  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | MRI Technologist
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Associate Medical Assistant Registered WA
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[PREFERRED] Clinical Care | Nuclear Medicine Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Nuclear Medicine Tech Cert  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Speech Language Pathologist - Acute Care Rehab
+    - Speech-Language Pathologist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | EKG Technician
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Dosimetrist - Radiation Oncology
+    - Other certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Pharmacy Technician
+    - Pharmacy Technician License/Cert  (after-hire; upon hire)
+    - Pharmacy Technician License/Cert  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Radiology Technologist (Per Diem) - Radiology Diagnostic
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Occupational Therapist - NICU
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Pharmacy Technician
+    - Pharmacy Technician License/Cert  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Pharmacy Technician - Infusion
+    - Pharmacy Technician License/Cert  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Ultrasound Technologist - MFM SHMC STE
+    - Sonographer Cert  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Emergency Department Technician (Swedish Mill Creek)
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - Phlebotomy Certification  (after-hire; upon hire)
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Pharmacist - Pharmacotherapy Clinic, Ambulatory Oncology
+    - Pharmacist License  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Pharmacist - Anticoagulation Therapy Clinic
+    - Pharmacist License  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Associate Mental Health Counselor Masters
+    - WA Counselor License  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Respiratory Care Practitioner
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+    - PALS  (after-hire; within 90 days)
+
+[PREFERRED] Clinical Care | Nuclear Medicine Technologist
+    - Nuclear Medicine Tech Cert  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Speech Language Pathologist
+    - Speech-Language Pathologist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Occupational Therapist - Southgate Physical Therapy
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Pediatric Occupational Therapist - Southgate Physical Therapy
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Massage Therapist - Physical Therapy 0.5 FTE
+    - Other license  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | MRI Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | CT Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Nuclear Medicine Tech Cert  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Rehabilitation Aide - Outpatient Rehab
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Physical Therapist - Phys Med Rehab
+    - WA Physical Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Radiology Technologist
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Mammography Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Respiratory Care Practitioner
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[PREFERRED] Clinical Care | Respiratory Care Practitioner
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[PREFERRED] Clinical Care | Pharmacy Technician - Specialty Pharmacy
+    - Pharmacy Technician License/Cert  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Pharmacist Resident - Pharmacotherapy Dept
+    - Pharmacist License  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+    - Pharmacist License  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Radiology Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | MRI Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | PRN Audiologist
+    - Other license  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Masters-Level Therapist - Associate
+    - WA Counselor License  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Masters-Level Therapist - Associate
+    - WA Counselor License  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Masters-Level Therapist - Associate
+    - WA Counselor License  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Masters-Level Therapist - Associate
+    - WA Counselor License  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Masters-Level Therapist - Associate
+    - WA Counselor License  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Physical Therapist - Inpatient Rehab
+    - WA Physical Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Senior Diagnostic Imaging Assistant - Diagnostic Imaging
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Dietary Assistant
+    - Food Handler Card  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Speech Language Pathologist - Outpatient Pediatrics
+    - Speech-Language Pathologist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Echocardiograph Technologist
+    - Sonographer Cert  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Physical Therapist - Acute Care Rehab
+    - WA Physical Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | MRI Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Medical Assistant - First Hill Family Medicine
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Clinical Care | Physical Therapy Assistant - PACE
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - Other license  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Occupational Therapist - Outpatient/Acute/Pediatrics
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Audiologist - ENT Practice
+    - Other license  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Physical Therapist - Phys Med Rehab
+    - WA Physical Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Clinical Care | Physical Therapist - Inpatient Rehab Float
+    - WA Physical Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[PREFERRED] Facilities | Associate Security Officer
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[PREFERRED] Facilities | Security Officer
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[PREFERRED] Facilities | Associate Security Officer
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[PREFERRED] Information Technology | Associate IS Support Technician - Service Management, OnSite
+    - Other certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | Associate Certified Nursing Assistant - IP Rehab
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | Assistant Nurse Manager - Cancer Treatment Center
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | Acute Care RN - Neuro CVA
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | CNA - Medical Oncology
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | Senior LPN LVN (Full/Part Time) - Long Term Care - Transitional Care - Float Pool
+    - Other license  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[PREFERRED] Nursing | Infusion RN - Canyon Park
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | CNA - Centralia, WA - Various FTE/Shifts
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - WA Nursing Assistant Cert (CNA/NAC)  (TO-APPLY; required at application)
+
+[PREFERRED] Nursing | Assistant Nurse Manager - NICU
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | Assistant Nurse Manager - Psych Emergency Services
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | CNA - Float Pool
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | Certified Nursing Assistant – Float Pool
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | Assistant Nurse Manager - Obstetrics
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | Acute Care RN - Spinal Injury SCI
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | Acute Care RN - Float Pool
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | RN - Outpatient Oncology Infusion
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | Certified Nursing Assistant – Pediatrics
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Nursing | Acute Care RN - Neuro CVA
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[PREFERRED] Operations | Associate Food Service Attendant
+    - Food Handler Card  (after-hire; upon hire)
+
+[PREFERRED] Operations | Food Service Attendant
+    - Food Handler Card  (after-hire; upon hire)
+
+[PREFERRED] Operations | Food Service Attendant
+    - Food Handler Card  (after-hire; upon hire)
+
+[PREFERRED] Operations | Food Service Attendant
+    - Food Handler Card  (after-hire; upon hire)
+
+[PREFERRED] Operations | Food Service Attendant
+    - Food Handler Card  (after-hire; upon hire)
+
+[PREFERRED] Revenue Cycle | Patient Services Specialist
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Revenue Cycle | Patient Admissions Coordinator - Patient Access
+    - Other certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Revenue Cycle | Patient Services Specialist - Patient Access
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Revenue Cycle | Patient Services Specialist - Patient Access
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Revenue Cycle | Patient Admissions Coordinator - Patient Access
+    - Other certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[PREFERRED] Revenue Cycle | Scheduler - PACE
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Senior Medical Assistant - Sleep Clinic
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Float Pool
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Cardiology Institute
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+
+[REQUIRED] Clinical Care | Nuclear Medicine Technologist - Per Diem
+    - Nuclear Medicine Tech Cert  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (TO-APPLY; required at application)
+    - Nuclear Medicine Tech Cert  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Medical Assistant - OBGYN
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Pediatric Medical Assistant - Spokane - Multiple Clinic Openings
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+
+[REQUIRED] Clinical Care | Associate Medical Assistant (AMA), Medical Assistant (MA-C) - Administration
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | RN (Full/Part Time) - Long Term Care
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant Certified (MA-C) - Dermatology - Issaquah
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Senior Perfusionist
+    - Perfusionist Cert  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Phlebotomist- Float
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - Phlebotomy Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Phlebotomist - Urgent Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - Phlebotomy Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN - Float Pool
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - Registered or Certified - Float Pool
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+
+[REQUIRED] Clinical Care | ML Integrated Behavioral Health Clinician - Primary Care
+    - WA Counselor License  (after-hire; upon hire)
+    - WA Social Worker License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Occupational Therapist - per diem
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN - KETTLE FALLS
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Polysomnographic Technologist - Sleep Lab
+    - Polysomnographic Tech Cert  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Polysomnographic Technologist - Sleep Lab
+    - Polysomnographic Tech Cert  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant Certified (MA-C) - Patient Access
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Care Manager MSW
+    - WA Social Worker License  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN (Part-Time) - Centralized
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN (Full Time) - Centralized
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Radiology Technologist - per diem
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant Certified (MA-C) - Pediatric Specialty Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | RN (Full/Part Time) - Long Term Care - Float Pool
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Senior Pharmacy Technician
+    - Pharmacy Technician License/Cert  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Surgical Technician - Vascular Cluster
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Care Manager RN
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - Supplemental/Per diem
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - OB/GYN
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | EEG Technician - Multiple Positions
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN - VASCULAR SURGERY
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | CT Technologist - Yelm
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Care Manager MSW & Care Manager LCSW - Per Diem
+    - WA Social Worker License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Radiology Technologist
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Senior Ultrasound Technologist - 1.0 Days
+    - Sonographer Cert  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant Certified (MA-C) - Pediatric Specialty
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant Woodinville - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Senior Medical Assistant - Breast Surgery Clinic
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Medical Laboratory Scientist
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Manager Polysomnography and Respiratory Therapy - Sleep Lab
+    - Polysomnographic Tech Cert  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - Walla Walla - Multiple Clinics
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Speech Language Pathologist
+    - Speech-Language Pathologist License  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Clinic RN - Rheumatology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Interventional Radiology (IR) and Senior Interventional Radiology (IR) Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Laboratory Assistant
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - Phlebotomy Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Respiratory Care Practitioner – Respiratory Therapy
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+    - PALS  (after-hire; within 90 days)
+
+[REQUIRED] Clinical Care | Physical Therapy Assistant - Pediatrics and Adult
+    - Other license  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Senior Pharmacy Technician
+    - Pharmacy Technician License/Cert  (after-hire; upon hire)
+    - Pharmacy Technician License/Cert  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Senior Ultrasound Technologist
+    - Sonographer Cert  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - Pulmonology
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Care Manager - Social Worker
+    - WA Social Worker License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant Certified (MA-C) - Infectious Disease
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant Certified (MA-C) - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Infectious Disease
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Clinic RN - SOUTH RICHLAND PRIMARY CARE
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Certified Medical Assistant (MA-C) - Centralized
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Associate Medical Assistant - Centralized
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Respiratory Care Practitioner NICU
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+    - PALS  (after-hire; within 90 days)
+
+[REQUIRED] Clinical Care | Non-Certified Surgical Technician - Operating Room
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Electrophysiology Technician
+    - Other certification  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Clinic RN - Cardiology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Manager Behavioral Health - Behavioral Health
+    - WA Counselor License  (after-hire; upon hire)
+    - WA Social Worker License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant Registered - Cardiology - Structural Heart
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Clinic RN - Pediatrics Mill Creek
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Certified Medical Assistant - Dermatology
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Clinic RN - Gynecologic Oncology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Exercise Physiologist - Cardiac Rehab
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Ambulatory Surgery Center RN - Orthopedic Surgery
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - Float Pool Per Diem
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Clinic RN - NEUROLOGY
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Driver/Patient Transportation Coordinator
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | EEG Technician
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Electrophysiology Technician
+    - Other certification  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Cardiovascular Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (TO-APPLY; required at application)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | MRI Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Medical Assistant - Express Care WA Richland Downtown
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Senior Ultrasound Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Sonographer Cert  (TO-APPLY; required at application)
+    - National Specialty Certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Ultrasound Technologist - Breast Care Center
+    - Sonographer Cert  (after-hire; within 1 year)
+    - National Specialty Certification  (after-hire; within 1 year)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Ultrasound Technologist - Breast Care Center
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Sonographer Cert  (after-hire; within 1 year)
+    - National Specialty Certification  (after-hire; within 1 year)
+
+[REQUIRED] Clinical Care | Operating Room Assistant
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Per Diem Clinical Pharmacist - Refill Team
+    - Pharmacist License  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Medical Assistant - Express Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Pharmacy Program Specialist
+    - Pharmacy Technician License/Cert  (after-hire; upon hire)
+    - Pharmacy Technician License/Cert  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Medical Assistant - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Clinic RN - Gastroenterology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - Nursing Support Services
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | CT Technologist - Diagnostic Imaging
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Nuclear Medicine Tech Cert  (after-hire; within 1 year)
+
+[REQUIRED] Clinical Care | Ultrasound Technologist - OB/GYN
+    - Sonographer Cert  (after-hire; within 1 year)
+    - National Specialty Certification  (after-hire; within 1 year)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Echocardiograph Technologist
+    - Sonographer Cert  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - Sonographer Cert  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Medical Assistant
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Lead Clinic RN – Gynecologic Oncology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN - APW 945 GOETHALS
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | RN (Per Diem) - Hospice
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Radiology Technologist - Per Diem
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Radiology Technologist
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Medical Assistant Registered WA - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Associate Certified Medical Assistant and Certified Medical Assistant - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Mammography Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN - General Surgery
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Senior Radiology Technologist - PEDS
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Associate Medical Assistant and Medical Assistant - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Senior Certified Medical Assistant and Certified Medical Assistant - Heart and Vascular
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Mammography Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Cardiovascular Technologist
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Social Worker LCSW - Behavioral Health
+    - WA Social Worker License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant Certified (MA-C) - Residency
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Certified Medical Assistant - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Ultrasound Technologist
+    - Sonographer Cert  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Mammography Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Associate Medical Assistant (AMA), Medical Assistant (MA-C) - Provadv
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Senior Radiology Technologist
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant/ MA-C - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant/ MA-C - Urology
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Senior Manager Clinical Pharmacy - Pharmacy - Hybrid
+    - Pharmacist License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant – Primary Care - Multiple Clinics
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+
+[REQUIRED] Clinical Care | Chemical Dependency Counselor
+    - Other license  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Sterile Processing Technician 1FTE Dayshift
+    - Other certification  (after-hire; within 1 year)
+
+[REQUIRED] Clinical Care | Audiologist - AUDIOLOGY
+    - Other license  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Clinic RN - Urology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant Registered WA and Certified Medical Assistant - ENT
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Polysomnographer
+    - Polysomnographic Tech Cert  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Supervisor Clinic RN - Heart and Vascular
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Supervisor Respiratory Care
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+    - PALS  (after-hire; within 90 days)
+
+[REQUIRED] Clinical Care | Senior Cardiac Device Technician - Heart and Vascular - Per Diem
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Senior Cardiac Device Technician - Heart and Vascular - Full time
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Senior Cardiac Device Technician - Heart and Vascular - Part Time
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant Certified/Procedural Scheduler - Heart and Vascular
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Mammography Technologist (Per Diem) - Radiology Diagnostic
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Mammography Technologist (Per Diem) - Radiology Diagnostic
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN - APW 945 GOETHALS
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - Gastroenterology
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Care Manager RN - Inpatient Float
+    - WA Registered Nurse License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Senior Pharmacy Technician
+    - Pharmacy Technician License/Cert  (after-hire; upon hire)
+    - Pharmacy Technician License/Cert  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Clinic RN - Heart and Vascular
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - PEDIATRIC
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Associate Medical Assistant - VASCULAR SURGERY
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Exercise Physiologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Clinical Care | Ultrasound Technologist
+    - Sonographer Cert  (after-hire; within 1 year)
+    - National Specialty Certification  (after-hire; within 1 year)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - EXPRESS CARE WA LAKE STEVENS
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant Registered WA
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant Certified - Behavioral Health
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Midwifery
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Nursing Support Services
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Clinic RN - Per Diem -  SMG Centralized Triage
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Senior Ultrasound Technologist - 0.75, Night
+    - Sonographer Cert  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Surgical Technician - CVOR
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - OBGYN
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Senior Operating Room Assistant - Surgery Services
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Associate Medical Assistant - PEDIATRIC
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - EXPRESS CARE WA
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Driver/Patient Transportation Coordinator - PACE
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Respiratory Care Practitioner - Respiratory Therapy
+    - WA Respiratory Care License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN - Midwifery PART-TIME
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Social Worker - Emergency Department
+    - WA Social Worker License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Ambulatory Surgery Center RN - TRI CITY REGIONAL SURG CTR
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Mammography Technologist (Full Time) - Radiology Diagnostic
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Care Manager RN ED - Night
+    - WA Registered Nurse License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant Registered / MA-R
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant / MA-C - Scheduling
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant Certified - Urology
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Clinic RN - PER DIEM Heart and Vascular Swedish Edmonds
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | CT Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Nuclear Medicine Tech Cert  (after-hire; within 1 year)
+
+[REQUIRED] Clinical Care | Echocardiograph Technologist
+    - Sonographer Cert  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - Sonographer Cert  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Telemetry Technician
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - Urgent Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Phlebotomist
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - Phlebotomy Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Care Manager - Social Worker
+    - WA Social Worker License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Supervisor Clinic RN – Urology FIRST HILL
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Medical Assistant Registered WA - Multiple Sclerosis
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - PEDIATRIC
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Massage Therapist - Physical Therapy
+    - Other license  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant – Physiatry
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+
+[REQUIRED] Clinical Care | Medical Assistant Certified (MA-C) - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | RN Manager - Long Term Care
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Care Manager - Social Worker
+    - WA Social Worker License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant -  URGENT CARE WA UC FACTORIA
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Medical Assistant Certified - BIRTH FAMILY
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Clinic RN - OBGYN WA RENTON Part-Time
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Nutrition Attendant
+    - Food Handler Card  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Care Manager MSW or LCSW
+    - WA Social Worker License  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Ambulatory Surgery Center RN - Surgical
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Care Manager RN - HEMATOLOGY ONCOLOGY
+    - WA Registered Nurse License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN - Cardiology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Polysomnographer - Sleep Laboratory
+    - Polysomnographic Tech Cert  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Care Manager RN - Case Management
+    - WA Registered Nurse License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Supervisor Clinic RN - OB/GYN Issaquah
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Associate Medical Assistant and Medical Assistant - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | RN - Care Manager
+    - WA Registered Nurse License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Senior Medical Assistant - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Laboratory Assistant
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - Phlebotomy Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Radiology Technologist - Radiology Diagnostic
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Certified Occupational Therapy Assistant - Physical Therapy
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Occupational Therapist License  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Clinic RN
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Supervisor PACE Operations
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Physical Therapy Assistant
+    - Other license  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Supervisor - Laboratory
+    - WA Medical Assistant Cert/Reg  (TO-APPLY; required at application)
+    - Phlebotomy Certification  (TO-APPLY; required at application)
+    - National Specialty Certification  (TO-APPLY; required at application)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Medical Assistant
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant – Gyn/Onc
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+
+[REQUIRED] Clinical Care | Cardiovascular Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (TO-APPLY; required at application)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Senior Ultrasound Technologist - Maternal Fetal Medicine
+    - Sonographer Cert  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Cardiovascular Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (TO-APPLY; required at application)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Social Worker MSW - PACE
+    - WA Social Worker License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - Urgent Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | CT Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Nuclear Medicine Tech Cert  (after-hire; within 1 year)
+
+[REQUIRED] Clinical Care | Medical Assistant - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Physical Therapist
+    - WA Physical Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Senior Clinical Pharmacist - Anticoagulation
+    - Pharmacist License  (after-hire; upon hire)
+    - Other license  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Medical Assistant (MA-C) - CENTER FOR HEALTHY AGING
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Care Manager RN - Managed Care Support
+    - WA Registered Nurse License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant Certified (MA-C) - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Dermatology MOHS
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - Other certification  (after-hire; within 1 year)
+
+[REQUIRED] Clinical Care | CT Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Nuclear Medicine Tech Cert  (after-hire; within 1 year)
+
+[REQUIRED] Clinical Care | Medical Assistant Certified (Ma-C) - Vascular Surgery
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Care Manager RN - Managed Care Support
+    - WA Registered Nurse License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN - KETTLE FALLS
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Manager Care Management - Social Work
+    - WA Social Worker License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Care Manager RN
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Dietitian - Home Infusion
+    - Other certification  (after-hire; within 6 months)
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Masters-Level Therapist - Licensed
+    - WA Counselor License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Masters-Level Therapist - Licensed
+    - WA Counselor License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Masters-Level Therapist - Licensed
+    - WA Counselor License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Masters-Level Therapist - Licensed
+    - WA Counselor License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Masters-Level Therapist - Licensed
+    - WA Counselor License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Masters-Level Therapist - Licensed
+    - WA Counselor License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Masters-Level Therapist - Licensed
+    - WA Counselor License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Masters-Level Therapist - Licensed
+    - WA Counselor License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Masters-Level Therapist - Licensed
+    - WA Counselor License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Cardiovascular Technologist and Senior Cardiovascular Technologist
+    - Other certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Radiology Technologist - Radiology Diagnostic
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Emergency Technician - Emergency Services - Various Shifts
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - Phlebotomy Certification  (after-hire; upon hire)
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Senior Ultrasound Technologist - Maternal Fetal Medicine
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Sonographer Cert  (TO-APPLY; required at application)
+    - National Specialty Certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Cardiovascular Technologist - Interventional Radiology
+    - Radiologic Technologist (ARRT)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Radiologic Technologist (ARRT)  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Sterile Processing Technician
+    - Other certification  (after-hire; within 1 year)
+
+[REQUIRED] Clinical Care | Medical Assistant – Medical Specialties - Multiple Clinic Openings
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+
+[REQUIRED] Clinical Care | Speech Language Pathologist
+    - Speech-Language Pathologist License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Occupational Therapist - Occupational Therapy
+    - Occupational Therapist License  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Ultrasound Technologist - Mammography
+    - Sonographer Cert  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN (Part Time) - Mill Creek Walk-in Clinic
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN - Centralized RN Triage Team
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Clinic RN - Mill Creek Internal Medicine
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - Marysville Family Medicine
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Lynnwood Family Medicine
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Associate Medical Assistant - OB/GYN
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant Part-Time - Women's Services
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Endocrinology
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Plastic Surgery
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant Per Diem - Centralized Staffing Pool
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - North Everett Internal Medicine
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Mill Creek Internal Medicine
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant Part-Time - Women's Services
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant Part-Time - Centralized Staffing Pool
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Edmonds Urology
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | CT Technologist
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Nuclear Medicine Tech Cert  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Care | Medical Assistant - Centralized Staffing Pool
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Care Manager - Social Worker
+    - WA Social Worker License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - Cardiology
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Clinic RN - PACE
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Primary Care
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant Registered / MA-R - HEALTHY AGING
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant - Sports Medicine
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant Registered WA - Pediatrics
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Medical Assistant/ MA-C - Cardiology
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Care | Dietary Assistant
+    - Food Handler Card  (after-hire; upon hire)
+
+[REQUIRED] Clinical Care | Medical Assistant - OB/GYN
+    - WA Medical Assistant Cert/Reg  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Support | Nurse Educator
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Support | Research Scientist RN
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - Other certification  (after-hire; within 2 years)
+
+[REQUIRED] Clinical Support | Professional Development Specialist RN - Telemetry
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Support | Diabetes Educator - Diabetes Learning Center
+    - Other certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Support | Senior Medical Interpreter - Vietnamese
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Clinical Support | Nurse Educator - Clinical Nursing Ed
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Support | RN Patient Placement Coordinator
+    - WA Registered Nurse License  (after-hire; upon hire)
+
+[REQUIRED] Clinical Support | Clinical Informatics Specialist
+    - Other certification  (after-hire; within 1 year)
+
+[REQUIRED] Clinical Support | Clinical Research Coordinator- Heart Research
+    - WA Medical Assistant Cert/Reg  (after-hire; within 60 days)
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Support | ICU/PCU Nurse Educator - Clinical Education
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Support | Lactation Educator RN
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Support | Nurse Educator
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Clinical Support | Childbirth Educator
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Clinical Support | Nurse Educator - Infusion Nursing
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Registered Nurse License  (after-hire; upon hire)
+
+[REQUIRED] Community Service | Specialty Chaplain - Palliative Care
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Community Service | Chaplain - Everett, WA
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Community Service | Community Health Worker - Accountable Care
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[REQUIRED] Community Service | Chaplain
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Facilities | Supervisor - Facilities
+    - Other license  (after-hire; upon hire)
+
+[REQUIRED] Facilities | Facilities Engineer
+    - Other license  (TO-APPLY; required at application)
+
+[REQUIRED] Facilities | Executive Protection Specialist - Onsite
+    - Other certification  (after-hire; within 1 year)
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[REQUIRED] Facilities | Security Officer
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[REQUIRED] Facilities | Lead HVAC Technician
+    - Other license  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Facilities | Security Officer
+    - BLS  (after-hire; within 90 days)
+    - Other certification  (after-hire; within 6 months)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Facilities | Facilities Engineer - Plant Maintenance
+    - Other license  (after-hire; upon hire)
+
+[REQUIRED] Finance | Senior Manager Finance
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Finance | Senior Financial Analyst - Regional Finance Operations -  Hybrid
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Information Technology | Business Systems Analyst - Revenue Cycle
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Information Technology | Manager IS Applications
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Information Technology | Manager Analytics Business Intelligence - Remote
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Float Personnel- Rapid Response Team
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - ICU
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Home Infusion Patient Teach/Liaison Nurse
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[REQUIRED] Nursing | RN - Electro Convulsive Therapy
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Outpatient Hematology Oncology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Progress Care
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | Acute RN - Neurology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Cardiac Catheterization
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Float Pool
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - WA Registered Nurse License  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Manager Emergency Services RN
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Medical Surgical
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Manager Nursing - IMCU
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN Resident - Multiple Specialties - PSPH - November 2026
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[REQUIRED] Nursing | CNA - Long Term Care
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+
+[REQUIRED] Nursing | RN - Float - Rapid Response
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Infusion RN - Infusion
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[REQUIRED] Nursing | Manager Nursing - Nursing Management
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Behavioral Rapid Response
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Operation Room
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Cardiac Medical
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Surgical Services .8FTE Day
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Short Stay Unit
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - ICU
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+    - PALS  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Labor and Delivery/Triage/Postpartum .9FTE Night
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Swedish Cancer Institute Issaquah
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Pediatric Palliative Care RN
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Manager Nursing - Labor and Delivery
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - NICU - Night
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN Resident - SHMC Multi Specialty
+    - WA Registered Nurse License  (TO-APPLY; required at application)
+    - BLS  (TO-APPLY; required at application)
+    - National Specialty Certification  (TO-APPLY; required at application)
+    - Other license  (TO-APPLY; required at application)
+
+[REQUIRED] Nursing | RN - Hematology Oncology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN Fellow - NICU - SFH November 2026 Cohort
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Emergency Services
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+    - PALS  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN Fellow - L&D and FMC - PRMCE November 2026 Cohort
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN Fellow - Medical ICU - PRMCE November 2026 Cohort
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Advanced Specialty Staff RN - Cardiology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Medical Oncology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Manager Nursing - Nephrology Surgical/ Dialysis
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Charge RN - General Medical 7A
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | Infusion RN - Infusion
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[REQUIRED] Nursing | RN - Cardiac Telemetry
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | Acute Care Charge RN - Medical Surgical
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - OR *Weekends*
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Medical 6A PL
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Float Pool - Various FTE/Shifts
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Medical Surgical ICU
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | Resident RN - Inpatient Rehab
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[REQUIRED] Nursing | RN - Family Childbirth Center (LDRP)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Oncology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Progressive Care Unit
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Home Infusion Patient Teach/Liaison Nurse
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[REQUIRED] Nursing | RN - Recovery
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+    - PALS  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | House Supervisor RN - Nursing Administration
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Medical Oncology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Psychiatry
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Pediatric ICU
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Progressive Care - NIGHTS
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Medical Telemetry - DAYS
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Cardiac Cath Lab
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 6 months)
+    - National Specialty Certification  (after-hire; within 6 months)
+
+[REQUIRED] Nursing | RN - NICU PEDS Transport
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - ICU Telemetry (Break Relief)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Oncology - Various Shifts
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - WA Registered Nurse License  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Emergency Department
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Cardiac Catheterization
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Cardiac Progressive Care
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Labor and Delivery
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Cardiac Neuro Telemetry
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | LPN LVN - Emergency Services
+    - Other license  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN House Supervisor
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Emergency Services
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Rehab Unit
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Clinical Decision - Various FTE/Shifts
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Emergency Department
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | Charge RN - Emergency Services
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Recovery
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Emergency Department
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Orthopedic Surgery (Weekends)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Pediatrics Float
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - PALS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - NICU
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Emergency Services
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | Manager Nursing - Emergency Services
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Medical ICU
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN First Assistant
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Multi Campus Float Pool Staff RN - NICU/ Pediatric
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | CNA - Assisted Living
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - CPR / First Aid  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Acute Care RN-Float Pool
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Acute Care RN-Float Pool
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Emergency Department
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN Fellow - Orthopedics
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Neuro - Various FTE/Shifts
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Charge RN - PICU
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - PICU
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Postpartum
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Medical Renal - 0.9 FTE Nights
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Manager Nursing - Labor and Delivery
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Intensive Care
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Labor and Delivery
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Certified Nursing Assistant - Surgery Oncology
+    - WA Nursing Assistant Cert (CNA/NAC)  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | House Supervisor RN
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Intensive Care Unit
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Cardiac ICU
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Cardiac Medical
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Subacute Care
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Cardiac Catheterization
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Fellow RN - ICU
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 6 months)
+    - National Specialty Certification  (after-hire; within 6 months)
+
+[REQUIRED] Nursing | RN - Electrophysiology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Surgical Services
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Pediatric Oncology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - PALS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Pediatric Oncology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Interventional Radiology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Emergency Services - Night
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Cardiac Cath
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Pediatric Oncology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - PALS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Surgical Acute
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - ICU / ED Float Pool PL
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Behavioral Psychology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Emergency Department (Swedish Mill Creek)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Surgery Oncology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Vascular Access
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Diagnostic Imaging
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Vascular Access
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Pulmonology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - ICU Telemetry
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN – Interventional Radiology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Wound Ostomy
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Progressive Care
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Cardiac Catheterization
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | Infusion RN - Infusion
+    - BLS  (after-hire; within 30 days)
+    - National Specialty Certification  (after-hire; within 30 days)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[REQUIRED] Nursing | RN - Cardiovascular Intensive Care Unit
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Acute Care
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - NICU (Level IV)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - IV Therapy
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Emergency Services
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Intensive Care Unit
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Vascular Access
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - General Surgery - Variable Shifts
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - SURGICAL 3RD FLR EAST
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Vascular Access
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Cardiovascular Diagnostics
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | House Supervisor RN
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Acute Care RN - Emergency Services
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Medical Acute
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Family Maternity
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Charge RN - NICU PICU Transport
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - WA Registered Nurse License  (after-hire; upon hire)
+
+[REQUIRED] Nursing | LPN LVN - Urgent Care
+    - Other license  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[REQUIRED] Nursing | RN - Operating Room - Various FTE/Shifts
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Recovery Pre/Post - Various FTE/Shifts
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN Fellow - Emergency Department
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Family Childbirth Center (LDRP)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN Fellow - Neurology
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN Fellow - Cardiac Medical
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Cardiac Transplant
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Emergency Department (Swedish Mill Creek)
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Emergency Department
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | Acute Care RN
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Emergency Services
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; upon hire)
+    - PALS  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Recovery Room
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Cardiac ICU
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 90 days)
+    - National Specialty Certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN - Medical
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Surgery
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - WA Registered Nurse License  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN Resident - Clinical Decision Unit
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[REQUIRED] Nursing | RN - Labor and Delivery
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Medical Acute
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN - Psychiatry
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN Resident Progressive Surgical Unit
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[REQUIRED] Nursing | Nurse Manager - Family Maternity Center
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | RN Fellow - ICU - SED November 2026 Cohort
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - ACLS  (after-hire; within 6 months)
+    - National Specialty Certification  (after-hire; within 6 months)
+    - Other certification  (after-hire; within 90 days)
+
+[REQUIRED] Nursing | RN Resident - PRMCE
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other license  (TO-APPLY; required at application)
+
+[REQUIRED] Nursing | RN - Operating Room
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Nursing | Acute Care RN - Float
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - BLS  (after-hire; upon hire)
+    - National Specialty Certification  (after-hire; upon hire)
+
+[REQUIRED] Operations | Cook
+    - Food Handler Card  (after-hire; upon hire)
+
+[REQUIRED] Operations | Senior Cook
+    - Food Handler Card  (after-hire; upon hire)
+
+[REQUIRED] Operations | Food Service Attendant
+    - Food Handler Card  (after-hire; upon hire)
+
+[REQUIRED] Operations | Cook - Dietary
+    - Food Handler Card  (after-hire; upon hire)
+
+[REQUIRED] Quality/Process Improvements | Manager Quality RN
+    - WA Registered Nurse License  (after-hire; upon hire)
+
+[REQUIRED] Quality/Process Improvements | Senior Manager Quality - Remote
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Quality/Process Improvements | RN Senior Manager - Quality Assurance
+    - WA Registered Nurse License  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Revenue Cycle | Patient Admissions Coordinator
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Revenue Cycle | Coder
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Revenue Cycle | Patient Admissions Coordinator - Patient Access
+    - National Specialty Certification  (after-hire; upon hire)
+    - Other certification  (TO-APPLY; required at application)
+
+[REQUIRED] Revenue Cycle | Patient Scheduler
+    - BLS  (after-hire; upon hire)
+
+[REQUIRED] Revenue Cycle | Health Information Management Representative
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Supply Chain | Manager - Supply Chain
+    - Other certification  (after-hire; upon hire)
+
+[REQUIRED] Supply Chain | Truck Driver - Mobile Mammography Clinic
+    - Driver License / CDL  (after-hire; upon hire)
+    - Other certification  (after-hire; upon hire)
+    - Driver License / CDL  (TO-APPLY; required at application)
+
+[REQUIRED] Supply Chain | Central Supply Distribution Technician
+    - Other certification  (after-hire; upon hire)

@@ -1,0 +1,672 @@
+{
+  "_comment": "Config is data. No adapter may branch on tenant identity. Add an employer by adding an entry here.",
+  "_sources": {
+    "call_shape": "https://github.com/Masterjx9/OpenPostings/discussions/16 and https://jobo.world/ats/oraclecloud",
+    "oracle_docs": "https://docs.oracle.com/en/cloud/saas/human-resources/farws/api-recruiting-ce-job-requisitions.html",
+    "nlx_counts": "usnlx.com/jobs/?location=WA employer facet, read manually 25 Aug 2026, Notion research record Finding 21. CAUTION: measured 31 Aug 2026 to be a BOARD total, not a state total, at least for Providence. Do not read nlx_wa_jobs as a WA figure.",
+    "workday_call_shape": "POST /wday/cxs/{tenant}/{site}/jobs with body {appliedFacets, limit, offset, searchText}. Verified on MultiCare 1 Sep 2026 by DevTools capture. Requires a prior GET on the careers page to establish PLAY_SESSION / CALYPSO_SESSION / CALYPSO_CSRF_TOKEN cookies, and the CSRF token echoed back as the x-calypso-csrf-token header. Cloudflare fronts the host - curl-cffi with a Chrome fingerprint is required. Oracle needs none of this.",
+    "radancy_call_shape": "Career-site front end reached at jobs.aus.com. VERIFIED 2 Sep 2026 by direct fetch: GET /search-jobs with query params, &p=N for page 2+, 15 records per page, fully SERVER-RENDERED - job href, title, city, state, Req ID and every facet count are in the returned HTML. No XHR, no session, no CSRF, no token. Job URL is /job/{city-slug}/{title-slug}/{orgId}/{internalId}. NOT VERIFIED: the detail-page parse. See allied_security.extraction._qualifications_field."
+  },
+  "oracle_orc": {
+    "providence": {
+      "label": "Providence / Providence Swedish / Swedish Health Services",
+      "host": "evac.fa.us2.oraclecloud.com",
+      "site_number": "CX_1",
+      "language": "en",
+      "careers_url": "https://providence-washington.jobs/",
+      "terms_reference": null,
+      "employer_domain": "providence.org",
+      "nlx_wa_jobs": 2177,
+      "source_class": "direct-employer",
+      "verified": "2026-08-31 - host and site confirmed from three live apply URLs: req 452841, 455081, 455287. 455287 is a Swedish Health Services posting on the same host and site, so Providence St. Joseph, Providence and Swedish share one board. Run result: 2,034 board total across 7 states, 848 WA by PrimaryLocation, 851 detail records captured, zero failures.",
+      "location_filter": {
+        "_note": "field pins the match to one named field. Omit field to fall back to matching the whole record blob, which is correct on a NEW tenant before --inspect has been run.",
+        "_confirmed": "2026-08-31 --survey over 851 detail records: all PrimaryLocation values are 'City, WA, United States'. Every WA record carries the ', WA' token, so this filter catches the full WA set with no under-count.",
+        "field": "PrimaryLocation",
+        "match_any": [
+          ", WA",
+          "Washington",
+          "WA,"
+        ]
+      },
+      "extraction": {
+        "_note": "Forked opener vocabulary (was shared REQUIRED_HEADINGS/PREFERRED_HEADINGS colon rules). Providence uses colon headings only; bare/prefix rules were measured inert here (0 occurrences across 851 descriptions) so they are omitted.",
+        "openers": [
+          {
+            "text": "required qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "basic qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "essential qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required skills",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "qualifications required",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required education",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required experience",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required licenses",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required certifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "what you will need",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "what you'll need",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred qualification",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired qualification",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred skills",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred experience",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred education",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "nice to have",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "additional qualification",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred licenses",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred certifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          }
+        ]
+      }
+    },
+    "kroger": {
+      "label": "The Kroger Family of Companies (Fred Meyer, QFC in WA)",
+      "host": "eluq.fa.us2.oraclecloud.com",
+      "site_number": "CX_2001",
+      "language": "en",
+      "careers_url": "https://eluq.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_2001/jobs",
+      "terms_reference": null,
+      "employer_domain": "kroger.com",
+      "nlx_wa_jobs": 519,
+      "source_class": "direct-employer",
+      "verified": "2026-08-31 - host and site confirmed from live job URLs on CX_2001. SSO redirect captured earlier carried agentid=OraFusionApp_11AG on eluq.login.us2.oraclecloud.com.",
+      "finder_extra": {
+        "locationId": "300000190314953"
+      },
+      "finder_extra_note": "Washington facet ID on this tenant, captured from the careers site 31 Aug 2026. Facet IDs are per-tenant - never reuse across employers. Server-side filter added to escape the offset-10000 pagination ceiling: the board is 12,140, the endpoint stops paginating past offset 10000, so WA postings among the oldest ~2,140 are unreachable client-side. With locationId in the finder the server returns only the WA subset, which fits under the ceiling.",
+      "location_filter": {
+        "_confirmed": "2026-08-31 --inspect over live listing records: PrimaryLocation format is verified identical to Providence, 'City, ST, United States'. Yield is ~4.5% of the board (9/200 sample) because Kroger's board is national, not regional - the WA subset is real but thin, consistent with nlx_wa_jobs 519 on a 12,134-record board. Dropped 'Washington' (matches the CITY named Washington in PA, IN, MO and others - a false positive at national scale) and 'WA,' (redundant given the confirmed format). ', WA' alone catches the full WA set.",
+        "field": "PrimaryLocation",
+        "match_any": [
+          ", WA"
+        ]
+      },
+      "extraction": {
+        "_note": "Forked opener vocabulary. Generic colon headings + Kroger phrasing: colon-less bare Minimum/Desired, the Minimum Position Qualifications and Desired Previous Job Experience whole-line forms, and the /education colon variants.",
+        "openers": [
+          {
+            "text": "required qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "basic qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "essential qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required skills",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "qualifications required",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required education",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required experience",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required licenses",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required certifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "what you will need",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "what you'll need",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred qualification",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired qualification",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred skills",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred experience",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred education",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "nice to have",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "additional qualification",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred licenses",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred certifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum position qualifications/education",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum position qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "what we need from you",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired previous job experience/education",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired previous job experience",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired previous experience",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "minimum position qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "desired",
+            "role": "PREFERRED",
+            "match": "bare"
+          },
+          {
+            "text": "desired previous job experience",
+            "role": "PREFERRED",
+            "match": "bare"
+          },
+          {
+            "text": "desired previous experience",
+            "role": "PREFERRED",
+            "match": "bare"
+          }
+        ]
+      }
+    }
+  },
+  "workday": {
+    "multicare": {
+      "label": "MultiCare Health System",
+      "host": "multicare.wd1.myworkdayjobs.com",
+      "tenant": "multicare",
+      "site": "multicare",
+      "language": "en-US",
+      "url_style": "myworkdayjobs",
+      "careers_url": "https://multicare.wd1.myworkdayjobs.com/en-US/multicare",
+      "terms_reference": null,
+      "employer_domain": "multicare.org",
+      "nlx_wa_jobs": 1342,
+      "source_class": "direct-employer",
+      "verified": "2026-09-01 - tenant, site and hostname pattern confirmed from a live requisition URL: multicare.wd1.myworkdayjobs.com/en-US/multicare/details/Security-Officer_JR78035. POST verified on this tenant via DevTools capture; session cookies plus x-calypso-csrf-token are required, and Cloudflare sits in front. Standard myworkdayjobs hostname, NOT the myworkdaysite variant.",
+      "applied_facets": {},
+      "curated_categories": [
+        {
+          "name": "Food and Nutrition Services",
+          "searchText": "Food",
+          "appliedFacets": {
+            "jobFamilyGroup": [
+              "c7853882436f101a8636782665320000"
+            ]
+          }
+        },
+        {
+          "name": "Facilities and Engineering",
+          "searchText": "Engineer",
+          "appliedFacets": {
+            "jobFamilyGroup": [
+              "c7853882436f101a86366fba324f0000"
+            ]
+          }
+        },
+        {
+          "name": "Customer Service",
+          "searchText": "customer service",
+          "appliedFacets": {
+            "jobFamilyGroup": [
+              "c7853882436f101a8636782665320000"
+            ]
+          }
+        },
+        {
+          "name": "Housekeeping",
+          "searchText": "Housekeeper",
+          "appliedFacets": {}
+        },
+        {
+          "name": "Security",
+          "searchText": "Security",
+          "appliedFacets": {}
+        }
+      ],
+      "curated_categories_note": "MultiCare's own five non-clinical category links, captured from their careers page 1 Sep 2026 as exact searchText+facet pairs. Recovered via --categories because the jobPostingInfo detail carries NO taxonomy field (only timeType). These are free-text searches, so 'Food Service Director' returns alongside 'Food Service Worker' and a 'Dietary Aide' may not return at all - written into source_category with source_category_method 'employer-curated-query' so this weaker evidence is never conflated with a field read. It recovers the category axis; it does not replace the extractor.",
+      "non_clinical_facets_available": {
+        "jobFamilyGroup": [
+          "c7853882436f101a8636782665320000",
+          "c7853882436f101a86366fba324f0000"
+        ]
+      },
+      "_facet_note": "MultiCare's own non-clinical classification, captured from their careers page 1 Sep 2026. NOT applied. The Security and Housekeeping links on that page carry NO jobFamilyGroup, so facet scoping would silently drop two frontline categories. The board is WA-only at ~1,342, well under the 10,000 ceiling, so there is no reason to scope. Facets are a labelled cross-check after capture, not a filter before it - which also keeps the NLx state-vs-board test clean.",
+      "location_filter": {
+        "_note": "MultiCare is Washington-only, so no location filter is applied. If --inspect ever shows out-of-state postings: the listing on this tenant has NO locationsText field - location is in bulletFields[0] - and the format is 'Lacey, Washington' with the full state name, so a ', WA' token would never match. A Workday location filter here must read the bulletFields element, and the token is 'Washington', not ', WA'. bulletFields is a list, so this needs the blob fallback (omit 'field') or bulletFields-aware handling, not a plain named string field.",
+        "match_any": []
+      },
+      "extraction": {
+        "_note": "Forked opener vocabulary. Generic colon headings + MultiCare colon-less Requirements / Department Specific Requirements prefix rule (heading leads the line, first item follows).",
+        "openers": [
+          {
+            "text": "required qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "basic qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "essential qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required skills",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "qualifications required",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required education",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required experience",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required licenses",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required certifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "what you will need",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "what you'll need",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred qualification",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired qualification",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred skills",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred experience",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred education",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "nice to have",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "additional qualification",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred licenses",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred certifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "prefix"
+          },
+          {
+            "text": "department specific requirements",
+            "role": "REQUIRED",
+            "match": "prefix"
+          }
+        ]
+      }
+    },
+    "target": {
+      "label": "Target",
+      "host": "target.wd5.myworkdayjobs.com",
+      "tenant": "target",
+      "site": "targetcareers",
+      "language": "en-US",
+      "url_style": "myworkdayjobs",
+      "careers_url": "https://target.wd5.myworkdayjobs.com/en-US/targetcareers",
+      "terms_reference": null,
+      "employer_domain": "target.com",
+      "nlx_wa_jobs": 224,
+      "source_class": "direct-employer",
+      "applied_facets": {},
+      "discovery": {
+        "url": "https://corporate.target.com/api/jobsearch",
+        "method": "POST",
+        "encoding": "form",
+        "page_param": "currentPage",
+        "form": {
+          "state": "Washington",
+          "hierarchy": "",
+          "jobcategories": "",
+          "culture": "en-us"
+        },
+        "_hierarchy_note": "Set to '' (all areas, 228 records) rather than 'Stores' (221). The 7 extra include distribution centre roles, which are Warehouse - one of the eight categories and genuinely frontline. Frontline scope is enforced by the exclusion gates, not by a source-side filter: filtering at the source means never being able to see what was excluded. Set to 'Stores' to reverse.",
+        "_verified": "2026-09-01 - honest pagination (15 pages x15, page16 empty, 221 distinct R0000 ids at hierarchy=Stores); cookieless (200 with empty cookie jar); NOT a Workday wrapper (Azure Cognitive Search index 'targetabv-search', carries structured pay/skills/jobarea/lat-long the Workday CXS listing lacks). requisitionid maps 1:1 to Workday jobReqId (10/10 detail fetches resolved, 0 404s). The full form is sent with empty defaults for unused fields - that shape is a source quirk owned by adapters/target.py, not config."
+      },
+      "verified": "2026-09-01 - PROBED: session GET 200, no CSRF token needed, POST 200 returning records. Board total reported as 2,000 (a suspiciously round number; Target's own careers site shows ~11,800 - under investigation via full --index, see _board_total_note). tenant, site and host originally taken from a live apply URL captured during ATS mapping: target.wd5.myworkdayjobs.com/targetcareers/job/8801-NE-Hazel-Dell-Ave-VancouverWA-98665-8145/Target-Security-Specialist_R0000450645, now confirmed live.",
+      "_board_total_note": "2026-09-01 - the POST 'total' field is UNRELIABLE on this tenant: it reports 2000 (a round cap), and at some offsets returns 0, while the endpoint keeps serving full pages of 20 well past offset 2000 (verified to offset 9980). The TRUE magnitudes come from the facets block, which proved reliable: Country=United States 12,233; Job Area 'Stores' 11,809 (matches the ~11,800 Target's own careers site shows); Washington 225. So targetcareers is NOT a partial site - it carries the full national inventory, WA included. mode_index currently trusts extract_total() and STOPS at offset+len>=2000, so a plain --index captures only the first 2000 of ~12,233. To capture the full reachable board it must page until an empty page or the offset ceiling, ignoring the bogus total.",
+      "_ceiling_note": "REVISED 2026-09-01. Board is ~12,233 (facet), above the 10,000 offset ceiling, so the oldest ~2,200 records are unreachable client-side - same ceiling as Kroger. BUT the Kroger fix does NOT transfer: on this tenant appliedFacets BREAKS offset pagination. With a location facet applied, offset is IGNORED (offset 0/1000/5000 return byte-identical records) and limit>20 returns 0, so a faceted query yields only the first 20 of the WA set - useless for full capture. Also unlike Oracle there is no finder_extra. Net: the only working capture path is the UNFILTERED board paged to the ceiling with client-side location_filter; WA records older than offset ~10,000 (an estimated ~40 of 225) are not retrievable by this endpoint. A different ingress (sitemap, per-store search, or the facet's own first-page-per-city loop) would be needed to close that tail.",
+      "location_filter": {
+        "_confirmed": "2026-09-01 over live listing records: Target's location is a full store STREET ADDRESS in the named string field 'locationsText' (listing) / 'location' (detail). This is the THIRD distinct location shape across four tenants: 'City, ST, United States' (Providence, Kroger), 'Lacey, Washington' in bulletFields[0] (MultiCare), and this 'Street, City,ST ZIP' store address (Target). It is a plain string field, not a list, so the _adapter_gap concern (bulletFields non-string) does not apply and in_scope reads it directly.",
+        "_two_formats": "CRITICAL - the state is encoded TWO ways on this tenant, so both tokens are required. Most records omit the space after the city comma ('...Oklahoma City,OK 73134' -> ',WA '), but a real subset uses a space ('1215 N Landing Way, Renton, WA 98057' -> ', WA '). Confirmed by the WA facet result set, which returned Renton/Marysville/Puyallup as ', WA '. Across the captured first-2000 board slice the split was 1706 no-space vs 151 spaced. A single ',WA ' token silently undercounts by missing every spaced WA record, so match_any carries both.",
+        "_multi_location_gap": "89 of the first 2000 records are multi-store postings whose locationsText is literally 'N Locations' (e.g. '9 Locations') and carry NO state string at all. Any address-token filter drops these silently; some may be WA. Resolving them needs the detail record's location list, not the listing - a known residual gap, not fixed by the token.",
+        "field": "locationsText",
+        "match_any": [
+          ",WA ",
+          ", WA "
+        ]
+      },
+      "extraction": {
+        "_note": "Forked opener vocabulary, Target only. WHAT WE ARE LOOKING FOR is a standalone line (line-anchored, alnum-healed for the 'ever y thing'/'m ay' artifacts); 'there are a few skills you should have from the get-go:' is mid-line and colon-terminated, so colon-anywhere.",
+        "openers": [
+          {
+            "text": "what we are looking for",
+            "role": "REQUIRED",
+            "match": "line"
+          },
+          {
+            "text": "there are a few skills you should have from the get-go",
+            "role": "REQUIRED",
+            "match": "colon"
+          }
+        ]
+      }
+    }
+  },
+  "radancy_tb": {
+    "_platform_note": "PLATFORM ATTRIBUTION IS UNSETTLED - the key name is a label, not a finding. What was verified by direct fetch 2 Sep 2026: requests to securitycareers-aus.icims.com return the career site at jobs.aus.com (meta-career-site-full-domain), the search layer reports meta-search-client-type: SearchAsService, page assets load from tbcdn.talentbrew.com with a meta-tb-page-type tag, search analytics post to jobs-search-analytics.prod.use1.radancy.net, AND the document base host is c-4112-20260528-jobs-aus-com.i.icims.com served by machine careersites-group55. So: TalentBrew markup and Radancy analytics, on iCIMS infrastructure. A search for an acquisition or partnership explaining that found nothing. The vendor relationship is UNKNOWN and no claim is made here. The key is named radancy_tb because the markup self-identifies that way, which is the most defensible label available. It is not evidence about who owns what. WHY IT IS ITS OWN ADAPTER: the fetch shape above was verified on this board and is the only thing this adapter is built against. Any other tenant - including another host ending in icims.com - gets --probe run against it before being added here, and goes to its own platform key if the shape differs. Config is data; the platform key names the code path, so one key must never cover two fetch shapes.",
+    "allied_security": {
+      "label": "Allied Universal - Security (jobs.aus.com)",
+      "careers_base": "https://jobs.aus.com",
+      "sitemap_url": "https://jobs.aus.com/sitemap",
+      "locate_hint": "washington",
+      "index_url": "https://jobs.aus.com/search-jobs?acm=71899&alrpm=ALL&ascf=%5B%7B%22key%22%3A%22ALL%22%2C%22value%22%3A%22%22%7D%5D",
+      "careers_url": "https://jobs.aus.com/search-jobs",
+      "terms_reference": null,
+      "employer_domain": "aus.com",
+      "org_id": "22950",
+      "ats_platform": "icims",
+      "ats_host": "securitycareers-aus.icims.com",
+      "nlx_wa_jobs": 172,
+      "source_class": "direct-employer",
+      "sector": "security",
+      "verified": "2026-09-02 - careers_base, org_id 22950 and the search-jobs call shape confirmed by direct fetch. acm=71899 is the Security Officer category facet, nationwide with NO location applied: 8,327 results across 556 pages at 15/page. Listing is server-rendered - job href, title, city, state and Req ID (format 2026-1671802) all present in HTML. Two identifiers per job: the internal id in the URL path (matches meta-search-analytics-jobIds) and the displayed Req ID. SCOPE OF THIS VERIFICATION: index pages only. NO job detail page has been fetched. --probe and --inspect must run before --index.",
+      "_facet_read": "2026-09-02, read off the same page, category=Security Officer. Washington 146, and the division facet reconciles exactly: Bellevue 54 + Seattle 69 + Spokane 9 + Auburn 7 + Yakima 7 = 146. City facet adds Renton 6, Bothell 6, Redmond 7, Everett 7, Tukwila 3, Tacoma 1 and a tail. Position Type is a STRUCTURED facet on this platform: Part Time 4,830 / Full Time 3,424 / Temporary 73 nationwide - 58% part-time. Shift was free text on all four prior tenants. NOTE 146 is the Security Officer category only; nlx_wa_jobs 172 spans all Allied categories and both Allied boards, so the two figures are not directly comparable and neither settles the NLx state-vs-board question.",
+      "expected_in_scope": 146,
+      "_expected_note": "Employer's own facet count, manual read. Diagnostic for --probe and --report only. Never a stop condition - QA rule 4. The stated page count (556) and meta-search-analytics-total-jobs are likewise diagnostics; --index pages until a genuinely empty page.",
+      "location_filter": {
+        "_note": "Applied to the LISTING ANCHOR TEXT, not a named JSON field - this platform returns HTML, so there is no field to pin. Token is anchored to the Req ID that follows the state so it cannot match a city named Washington (the Kroger false positive, guarded). UNVERIFIED against a full capture: a token derived from one sample was wrong on two of four prior tenants. --probe prints the page-1 in-scope count; if it is not close to 1 in 57 (146 of 8,327), re-derive before --index.",
+        "_formats_seen": "Fifth distinct location shape across five tenants: 'City, ST, United States' (Providence, Kroger), 'Lacey, Washington' in bulletFields[0] (MultiCare), street address 'Street, City,ST ZIP' both spaced and unspaced (Target), and here 'Seattle, WA Req ID: 2026-1671802' in anchor text.",
+        "field": null,
+        "match_any": [
+          ", WA Req ID:"
+        ]
+      },
+      "_scoping_open": "The configured index_url is NATIONWIDE - 556 pages to reach 146 WA records, ~10 minutes at 1s pacing. Works, but wasteful. --locate reads the Washington state URL off the site's own sitemap (/location/{slug}-jobs/22950/{geoPath}/3) rather than hardcoding a GeoNames id, because a hardcoded id is exactly the unverified inference that produced the nshs.wd1 404. UNKNOWN whether those location pages accept &p=N - the trailing path segment is the facet LEVEL (3=state, 4=city), not a page number. Run --probe against the located URL before swapping it in here. If it does not paginate, keep the nationwide crawl.",
+      "extraction": {
+        "_note": "Forked opener vocabulary, Allied only. DERIVED from this tenant's own 146-record WA capture (2026-09-02), nothing inherited. Allied's descriptions come in TWO templates: Template A (~44 of 146) carries a QUALIFICATIONS (MUST HAVE): / PREFERRED QUALIFICATIONS (NICE TO HAVE): heading pair - the openers below, colon-anchored on that load-bearing colon so they cannot fire on prose. Template B (~102) is a 'What You'll Do:' narrative with NO qualifications heading; it is NOT addressed here and returns NOT_STATED by construction, the same shape as Kroger's headingless clerks at larger scale. A headingless list is never defaulted to a modality - unknown is not open. EXCLUDED on purpose: RESPONSIBILITIES: (a DUTIES heading, not a qualifications opener - useful as an END boundary if the shared engine ever needs one, not as an opener).",
+        "_qualifications_field": "RESOLVED 2026-09-02 by --inspect across 146/146 detail pages fetched by this pipeline: the JobPosting JSON-LD carries NO 'qualifications' key - absent, not empty - so the search-engine-extraction lead was wrong. Requirements live in the description body and openers had to be derived (the ExternalQualificationsStr-empty branch, not the threads-into-qualifications_html branch). SALARY: baseSalary exists but its currency is empty on this tenant, so it is NOT a stated wage; map_record forces salary_is_stated False (the $207K-289K guard).",
+        "openers": [
+          {
+            "text": "qualifications (must have)",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "qualifications/requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred qualifications (nice to have)",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          }
+        ],
+        "_openers_lead": "RESOLVED 2026-09-02, lead REJECTED by measurement. The CEO spot-check proposed forking in 'requirements' and 'minimum requirements'. Measured over 146 descriptions: bare 'requirements' appears in 145/146 (99%) and 'minimum' in 109/146 (75%), almost entirely as PROSE - 'licensing requirements', 'minimum wage', 'meet the requirements' - not as colon-terminated headings. Adding either would fire on nearly every record and destroy the section boundary. They were NOT added. The only real qualifications headings on this board are the QUALIFICATIONS (MUST HAVE)/(NICE TO HAVE) pair now in openers. Derive from a capture, do not copy - confirmed the hard way."
+      },
+      "_credential_gate_open": "CEO DECISION PENDING, flagged before the density number is read. Finding 25's qualifying credential list has no entry for a Washington security guard licence, and gate 3 disqualifies any job naming a credential that is not on the list. This tenant could therefore return near-zero applicable for a CONFIG GAP, not a finding about Allied Universal. Obtainability is a Career Bridge lookup (program length is a structured, state-audited field per Finding 17), not a judgment call. The Seattle grid separately measured 14 postings naming a guard card.",
+      "_sector_baseline": "First security-sector tenant. No baseline exists, so there is no smoke alarm for this capture (Finding 31): healthcare ~4-13% and retail ~65-89% cannot say whether a security number is right. Whatever comes back is n=1 and provisional. Two per sector is the threshold - Securitas (47 WA) is the natural second."
+    }
+  }
+}

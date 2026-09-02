@@ -1,0 +1,311 @@
+==============================================================================
+TRIGGER AUDIT - what each phrase actually caught
+Read the sentences, not the rule name. The rule name always sounds
+reasonable; the sentences are the evidence.
+==============================================================================
+
+
+==============================================================================
+REQUIRED   956 sentences, 17 distinct triggers
+==============================================================================
+
+  TRIGGER: "12mo"   fired 414x
+     • Coursework/Training - Graduate of an accredited school that includes hands on training in a clinical setting for medical assistants or, Coursework/Tra
+       ^ Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular
+     • Coursework/Training - Graduate of an accredited school that includes hands on training in a clinical setting for medical assistants or, Coursework/Tra
+       ^ Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular
+     • Coursework/Training Graduate of an accredited school that includes hands on training in a clinical setting for medical assistants Or Coursework/Traini
+       ^ Medical Assistant - Float Pool
+     • Graduate of an accredited school that includes hands on training in a clinical setting for medical assistants Or Graduate of a registered medical assi
+       ^ Medical Assistant - Cardiology Institute
+     • Minimum one year of work experience as a medical assistant that includes the following clinical skills:
+       ^ Medical Assistant - OBGYN
+     • Graduate of an accredited school that includes hands on training in a clinical setting for medical assistants Or Graduate of a registered medical assi
+       ^ Pediatric Medical Assistant - Spokane - Multiple Clinic Openings
+     ... 408 more
+
+  TRIGGER: "6mo"   fired 207x
+     • 6 months - Related experience and/or training.
+       ^ Associate Food Service Attendant
+     • 6 months - Prior experience providing a high level of customer service in a fast paced environment.
+       ^ Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular
+     • 6 months - Previous experience in a healthcare setting working with an Electronic Health record (EHR).
+       ^ Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular
+     • 6 months - Healthcare experience.
+       ^ Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular
+     • 6 months - Medical Assistant experience.
+       ^ Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular
+     • National Provider BLS - American Heart Association 6 months Healthcare experience 6 months Medical Assistant experience Why Join Providence?
+       ^ Medical Assistant - Float Pool
+     ... 201 more
+
+  TRIGGER: "24mo"   fired 99x
+     • 2 years of experience in long term care, clinical case management and admissions.
+       ^ Admissions and Referral Intake Specialist
+     • 2 years of experience in a customer service, business development or sales environment.
+       ^ Admissions and Referral Intake Specialist
+     • 2 years related experience.
+       ^ ML Integrated Behavioral Health Clinician - Primary Care
+     • 2 years of Hospital experience.
+       ^ ML Integrated Behavioral Health Clinician - Primary Care
+     • 2 years of experience working with Kronos or other comparable electronic timekeeping/attendance system.
+       ^ Associate Administrative Coordinator
+     • ASTEP Program or equivalent education/experience National Registered Polysomnographic Technologist - Board of Registered Polysomnographic Technologist
+       ^ Polysomnographic Technologist - Sleep Lab
+     ... 93 more
+
+  TRIGGER: "48mo"   fired 81x
+     • Providence Regional Medical Center Everett received the HealthGrades Distinguished Hospital Award for Clinical Excellence four years in a row.
+       ^ RN - Float Personnel- Rapid Response Team
+     • Providence Regional Medical Center Everett received the HealthGrades Distinguished Hospital Award for Clinical Excellence four years in a row.
+       ^ Cook
+     • Providence Regional Medical Center Everett received the Health Grades Distinguished Hospital Award for Clinical Excellence four years in a row.
+       ^ Occupational Therapist - per diem
+     • Providence Regional Medical Center Everett received the HealthGrades Distinguished Hospital Award for Clinical Excellence four years in a row.
+       ^ Speech Language Pathologist- per diem
+     • Providence Regional Medical Center Everett received the Health Grades Distinguished Hospital Award for Clinical Excellence four years in a row.
+       ^ Clinic RN (Part-Time) - Centralized
+     • Providence Regional Medical Center Everett received the Health Grades Distinguished Hospital Award for Clinical Excellence four years in a row.
+       ^ Clinic RN (Full Time) - Centralized
+     ... 75 more
+
+  TRIGGER: "36mo"   fired 49x
+     • National Certified Clinical Perfusionist - American Board of Cardiovascular Perfusion upon hire 3 years Current open-heart clinical experience.
+       ^ Senior Perfusionist
+     • Washington Clinical Independent Social Worker Associate License 3 years of Social services experience with a health care related organization;
+       ^ Care Manager MSW
+     • Washington Registered Nurse License upon hire National Provider BLS - American Heart Association upon hire 3 years Recent experience in related clinic
+       ^ Manager Nursing - IMCU
+     • 3 years of Clinical experience.
+       ^ Care Manager RN
+     • National Provider BLS - American Heart Association 3 years of previous experience to include the equivalent of three years previous special procedures
+       ^ Interventional Radiology (IR) and Senior Interventional Radiology (IR) Technologist
+     • Washington Registered Nurse License 3 years Nursing experience.
+       ^ Pediatric Palliative Care RN
+     ... 43 more
+
+  TRIGGER: "18mo"   fired 30x
+     • 18 months professional nursing experience Why Join Providence?
+       ^ Clinic RN - Float Pool
+     • National Provider BLS - American Heart Association 18 months professional nursing experience Why Join Providence?
+       ^ Clinic RN - KETTLE FALLS
+     • 18 months professional nursing experience.
+       ^ Clinic RN (Part-Time) - Centralized
+     • 18 months professional nursing experience.
+       ^ Clinic RN (Full Time) - Centralized
+     • National Provider BLS - American Heart Association 18 months professional nursing experience Why Join Providence?
+       ^ Clinic RN - VASCULAR SURGERY
+     • National Provider BLS - American Heart Association 18 months professional nursing experience Clinic RN Salary Range:
+       ^ Clinic RN - Rheumatology
+     ... 24 more
+
+  TRIGGER: "60mo"   fired 22x
+     • Bachelor's Degree in Inventory Management, Supply Chain, Business, Finance or Logistics --or-- Equivalent educ/experience 5 years of supply chain mana
+       ^ Senior Inventory Control Coordinator
+     • Washington Pharmacy Technician License 5 years of experience as a pharmacy technician Why Join Providence?
+       ^ Senior Pharmacy Technician
+     • · Bachelor’s degree or foreign equivalent in Computer Science, Business Management, Information Services, Engineering, or Science · 5 years of Informa
+       ^ Manager IS Applications
+     • Master's Degree in Data Science, Analytics, Finance, Engineering, Mathematics, Computer Science, Business Administration, Health Administration, Publi
+       ^ Senior Product Manager -  Remote
+     • Diploma or GED 5 years of experience in maintenance and repair of mechanical systems.
+       ^ Facilities Engineer
+     • 5 years Clinical and/or pastoral experience in healthcare setting.
+       ^ Specialty Chaplain - Palliative Care
+     ... 16 more
+
+  TRIGGER: "required"   fired 15x
+     • Graduate of certified medical assistant program Washington Medical Assistant Certification upon hire National Provider BLS - American Heart Associatio
+       ^ Senior Medical Assistant - Sleep Clinic
+     • TNCC Instructor status, or ability to achieve A RN with 20 years of experience will not be required to obtain a BSN.
+       ^ Manager Emergency Services RN
+     • Must have successfully completed at least one formal specialized, related training course 2 years of experience in equipment inspection, testing, trou
+       ^ Facilities Engineer
+     • This equivalency is in addition to what is required in the experience section.
+       ^ Business Systems Analyst - Revenue Cycle
+     • Graduated from an accredited school of Respiratory Therapy Washington Respiratory Care Practitioner License is required upon hire National Provider BL
+       ^ Respiratory Care Practitioner – Respiratory Therapy
+     • Pharmacy technician program (may be required in some states for pharmacy technicians) 1 year of customer service experience 1 year or more of work exp
+       ^ Senior Pharmacy Technician
+     ... 9 more
+
+  TRIGGER: "minimum of"   fired 12x
+     • experience should include a minimum of 2 years in acute care/ care coordination.
+       ^ Care Manager MSW
+     • Minimum of one year of work experience as a Medical Assistant, including the following clinical skills:
+       ^ Medical Assistant - OB/GYN
+     • 4 years of Managed Care operations, including a minimum of 3 years claims processing experience, in a TPA, MSO, HMO, PHO or large group practice setti
+       ^ Senior Claims Specialist - USFHP
+     • Hired as a new graduate - up to 2 years experience as a Radiation Therapist AND 3 years of employment at the Cancer Institute, as a Radiation Therapis
+       ^ Radiation Therapist - Radiation Oncology
+     • minimum of two (2) years of experience 1 year Master’s Degree:
+       ^ Exercise Physiologist - Cardiac Rehab
+     • minimum of one (1) year experience handling own participant caseload in cardiovascular risk reduction and cardiopulmonary rehabilitation or related fi
+       ^ Exercise Physiologist - Cardiac Rehab
+     ... 6 more
+
+  TRIGGER: "must have"   fired 5x
+     • Must have extensive experience in configuring and managing Azure networking components, including VNets, subnets, private endpoints, ExpressRoute.
+       ^ Senior Cloud Engineer IS - Hybrid
+     • 6 months must have high-volume line cooking experience.
+       ^ Senior Cook
+     • 2 years If qualifying as a Radiologic Technologist must have cath lab/IR experience.
+       ^ Electrophysiology Technician
+     • 2 years experience - If qualifying as a Radiologic Technologist must have cath lab/IR experience.
+       ^ Electrophysiology Technician
+     • Must have successfully completed extensive specialized training courses or demonstrated ability and experience may be accepted in lieu of education.
+       ^ Lead Senior Journeyman Engineer
+
+  TRIGGER: "at least"   fired 5x
+     • (1) Board of Pharmacy Preceptor License - when eligible and where applicable 3 years Pharmacy practice experience with at least 2 years of related exp
+       ^ Per Diem Clinical Pharmacist - Refill Team
+     • National Provider BLS - American Heart Association At least 3 years acute care professional experience within the last 7 years.
+       ^ Manager Nursing - Emergency Services
+     • including at least one year experience working with the elderly.
+       ^ Supervisor PACE Operations
+     • 3 years Pharmacy practice experience with at least 2 years of related experience in lieu of Postgraduate Year One (PGY-1) Pharmacy Residency.
+       ^ Senior Clinical Pharmacist - Anticoagulation
+     • 6 years of closely related experience, with at least 3 years of experience supporting a leadership role.
+       ^ Senior Executive Assistant - On Site
+
+  TRIGGER: "72mo"   fired 4x
+     • 6 years experience in a leadership role or capacity.
+       ^ Senior Manager Finance
+     • 6 years in a position equal to executive or administrative secretary to include advanced computer skills and working knowledge of a variety of softwar
+       ^ Manager Administrative Services - Hybrid
+     • 6 years People Management experience in a Leadership role.
+       ^ Senior Manager Sourcing - Hybrid
+     • Washington Clinical Independent Social Worker License 6 years of experience in Case Management.
+       ^ Manager Care Management - Social Work
+
+  TRIGGER: "3mo"   fired 4x
+     • 3 months of related experience (recurring appointments).
+       ^ Patient Care Coordinator
+     • 3 months related experience and/or training.
+       ^ Radiology Assistant - Medical Imaging
+     • CPR and First Aid Certification 3 months experience of long-term care or related geriatric and/or rehabilitative care.
+       ^ CNA - Assisted Living
+     • Be selected for enrollment in the Providence School of Phlebotomy training program Complete the Providence School of Phlebotomy training program withi
+       ^ Clinical Student Intern - Phlebotomy
+
+  TRIGGER: "0mo"   fired 3x
+     • Medical assisting experience in a clinic setting (0-6 months).
+       ^ Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular
+     • Medical assisting experience in a clinic setting (0-6 months).
+       ^ Medical Assistant - Registered or Certified - Float Pool
+     • National Provider BLS - American Heart Association Medical assisting experience in a clinic setting (0-6 months).
+       ^ Associate Medical Assistant - OB/GYN
+
+  TRIGGER: "96mo"   fired 3x
+     • Bachelor's Degree in Accounting or Finance related field., Or equivalent education /experience 8 years of closely related experience.
+       ^ Senior Manager Finance
+     • · 8 years of experience working with application design and/or implementation of large scale Enterprise Resource Planning systems (like Oracle Applica
+       ^ Manager IS Applications
+     • 8 years' experience in Contract Management or a blend of healthcare and corporate contracting responsibilities.
+       ^ Senior Manager Sourcing - Hybrid
+
+  TRIGGER: "120mo"   fired 2x
+     • · Bachelor’s degree or foreign equivalent in Computer Science, Management Information Systems, Information Security, or Business Management · 10 years
+       ^ Principal Information Security Analyst
+     • · 10 years of hands-on experience with security risk management practices.
+       ^ Principal Information Security Analyst
+
+  TRIGGER: "requires"   fired 1x
+     • This role requires a minimum of several years of hands-on Azure Hub-and-Spoke networking experience, including the design and operational support of c
+       ^ Senior Cloud Engineer IS - Hybrid
+
+
+==============================================================================
+PREFERRED   169 sentences, 2 distinct triggers
+==============================================================================
+
+  TRIGGER: "preferred"   fired 167x
+     • 5 years of progressively responsible healthcare facilities and project management experience 3 years of administrative experience in hospital administ
+       ^ Senior Manager Facilities
+     • National Provider BLS - American Heart Association 6 months healthcare experience 6 months Medical Assistant experience Preferred qualifications:
+       ^ Associate Medical Assistant, Medical Assistant Registered (MA-R), Medical Assistant Certified (MA-C) - Heart & Vascular
+     • Within 60 days of hire Washington Medical Assistant Registration Within 30 days of hire National Provider BLS - American Heart Association 6 months He
+       ^ Medical Assistant - Cardiology Institute
+     • Medical assisting experience in a clinic setting (0-6 months) Preferred Qualifications:
+       ^ Pediatric Medical Assistant - Spokane - Multiple Clinic Openings
+     • National Provider BLS - American Heart Association Medical assisting experience in a clinic setting (0-6 months) Preferred Qualifications:
+       ^ Associate Medical Assistant (AMA), Medical Assistant (MA-C) - Administration
+     • National Provider BLS - American Heart Association 6 months healthcare experience 6 months Medical Assistant experience Preferred Qualifications:
+       ^ Associate Medical Assistant (AMA), Medical Assistant (MA-C) - Administration
+     ... 161 more
+
+  TRIGGER: "desired"   fired 2x
+     • Experienced with configuring Desired State Configuration (DSC) using AWX.
+       ^ Senior Cloud Engineer IS - Hybrid
+     • Master's Degree in Computer Science, Business Management, Information Services, Engineering, Commerce Or equivalent educ/experience 2 years Experience
+       ^ Senior Software Developer - Hybrid
+
+
+==============================================================================
+WAIVED   29 sentences, 3 distinct triggers
+==============================================================================
+
+  TRIGGER: "equivalent combination of education and experience"   fired 16x
+     • Bachelor’s Degree in Computer Engineering, Computer Science, Mathematics, Engineering or an equivalent combination of education and experience 5 years
+       ^ Senior Cloud Engineer IS - Hybrid
+     • Bachelor’s Degree in Data Science, Analytics, Finance, Engineering, Mathematics, Computer Science, Business Administration, Health Administration, Pub
+       ^ Senior Product Manager -  Remote
+     • 2 years of college or business school training or an equivalent combination of education and experience Bachelor’s Degree in Business Administration, 
+       ^ Manager Administrative Services - Hybrid
+     • PharmD in Pharmacy or an equivalent combination of education and experience.
+       ^ Senior Manager Clinical Pharmacy - Pharmacy - Hybrid
+     • Bachelor's Degree in Business, Finance, Journalism or Public Administration or an equivalent combination of education and experience 3 years Prospect 
+       ^ Senior Prospect and Systems Management Analyst -Hybrid
+     • Bachelor's Degree in Accounting / Finance or an equivalent combination of education and experience.
+       ^ Senior Financial Analyst - Regional Finance Operations -  Hybrid
+     ... 10 more
+
+  TRIGGER: "or equivalent experience"   fired 12x
+     • Acute care hospital pharmacy experience, 1 year or equivalent experience Completion of ASHP-accredited PGY1 residency Why Join Providence?
+       ^ Clinical Pharmacist
+     • Bachelor's Degree In related field or Equivalent experience in Health Care Business Administration.
+       ^ Senior Claims Specialist - USFHP
+     • Diploma or GED, or equivalent experience in Health Care Business Administration.
+       ^ Claims Specialist - USFHP
+     • 2 years of experience as a scheduler/dispatcher or equivalent experience Demonstrated experience working with diverse cultural and socio-economic back
+       ^ Department Scheduler - Linguistic Services
+     • National Provider BLS - American Heart Association 1 year of experience performing duties of a Perioperative Care Associate I or equivalent experience
+       ^ Operating Room Assistant
+     • Postgraduate Year One (PGY-1) Pharmacy Residency or equivalent experience.
+       ^ Per Diem Clinical Pharmacist - Refill Team
+     ... 6 more
+
+  TRIGGER: "experience may be substituted"   fired 1x
+     • Associate's Degree or additional experience may be substituted for no degree 3 years or experience in patient financial services or medical billing in
+       ^ Patient Financial Counselor
+
+
+==============================================================================
+NONE_NEEDED   8 sentences, 4 distinct triggers
+==============================================================================
+
+  TRIGGER: "entry-level"   fired 3x
+     • This role is ideal for recent Medical Assistant graduates, entry-level Medical Assistants, and individuals beginning their healthcare careers.
+       ^ Associate Medical Assistant - Centralized
+     • Perform basic, entry-level kitchen duties, including, but not limited to, cleaning, sanitizing, transport, simple food preparation and tray line activ
+       ^ Food Service Attendant
+     • The program will provide the opportunity to advance the resident's pharmacy practice beyond entry-level professional competence and develop the skills
+       ^ Pharmacist Resident - Pharmacotherapy Dept
+
+  TRIGGER: "on-the-job training"   fired 3x
+     • Medical terminology and medical coding training in an accredited school --or-- equivalent education/experience Equivalent on-the-job training in a fol
+       ^ Billing and Collections Representative
+     • Some cooking classes with formal on-the-job training.
+       ^ Cook
+     • Grade school education with on-the-job training Preferred Qualifications:
+       ^ Environmental Services Technician
+
+  TRIGGER: "willingness to learn"   fired 1x
+     • Agility, flexibility, and a willingness to learn are important.
+       ^ Workforce Development Program Manager
+
+  TRIGGER: "on the job training"   fired 1x
+     • 1 or more years of college 3 years of proven experience in a supervisory role with 15+ employees Must have excellent customer service mannerisms and e
+       ^ Supervisor - Environmental Services
+
+==============================================================================
