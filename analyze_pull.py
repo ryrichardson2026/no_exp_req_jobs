@@ -48,7 +48,7 @@ WEAK = [
     "training", "we train", "learn on the job", "all experience levels",
 ]
 
-# HEURISTIC title -> category map, eight categories per the master doc.
+# HEURISTIC title -> category map, nine categories per the master doc §4.
 CATEGORY_PATTERNS = {
     "Administrative": r"\b(admin|administrative|clerk|clerical|receptionist|data entry|office assistant|front desk|scheduler)\b",
     "Customer Service": r"\b(customer service|call center|call centre|csr|customer support|contact center|dispatcher)\b",
@@ -58,6 +58,9 @@ CATEGORY_PATTERNS = {
     "Construction": r"\b(construction|laborer|labourer|carpenter|roofer|framer|concrete|apprentice|helper|demolition)\b",
     "Security": r"\b(security|guard|patrol|loss prevention|surveillance|unarmed|armed officer)\b",
     "Facilities": r"\b(janitor|custodian|cleaner|housekeep|facilities|maintenance|groundskeep|porter)\b",
+    # Ninth category. Patterns DERIVED from the captured corpus (Compass food-service
+    # board + Providence dietary/nutrition titles), not guessed.
+    "Food Services": r"\b(cook|baker|barista|bartender|chef|dishwasher|busser|server|waiter|waitress|catering|culinary|kitchen|cafeteria|concession|dietary|dining|nutrition|food service|foodservice|food worker|food prep|food transporter|banquet|deli)\b",
 }
 
 SHIFT_HINT = r"\b(1st shift|2nd shift|3rd shift|first shift|second shift|third shift|overnight|graveyard|swing shift|night shift|weekend)\b"

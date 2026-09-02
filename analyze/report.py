@@ -75,9 +75,16 @@ PROTECT_RX = re.compile(r"\b(assistant|trainee|apprentice)\b", re.IGNORECASE)
 # ---- gate 3: credential obtainability ---------------------------------------
 # Obtainable within ~90 days, no prerequisite -> passes.
 CREDENTIAL_QUICK_RX = re.compile(
-    r"(food handler|food safety|servsafe|guard card|security guard (license|card)|"
+    # "food worker" is WA's legal name for the food handler card - a SYNONYM of the
+    # existing food-handler entry, not a new credential. Corpus has "food worker
+    # permit"/"food worker card"; the food-handler spellings all contain "food
+    # handler" already, so only the worker synonym is added.
+    r"(food handler|food worker|food safety|servsafe|guard card|security guard (license|card)|"
     r"\bbls\b|\bcpr\b|basic life support|first aid|\baed\b|forklift|"
-    r"osha[- ]?10|\btabc\b|tips certification|driver'?s? licen[sc]e)", re.IGNORECASE)
+    r"osha[- ]?10|\btabc\b|tips certification|driver'?s? licen[sc]e|"
+    # WA MAST (Mandatory Alcohol Server Training) Class 12/13 permit - CEO approved
+    # 2 Sep 2026: obtainable in days, no prerequisite, so it meets both conditions.
+    r"\bmast\b|alcohol server)", re.IGNORECASE)
 # Anything that names a credential but is not on the quick list is treated as a
 # prerequisite/long-lead barrier (RN/LPN/CNA licences, ARRT, CDL, pharmacist,
 # therapist, CPA, ACLS/PALS held to apply, degree-based certs, ...).

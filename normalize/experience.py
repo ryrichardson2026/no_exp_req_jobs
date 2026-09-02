@@ -76,6 +76,12 @@ END_HEADINGS = (
     "posted are the minimum", "we offer", "total rewards", "salary range",
     "pay range", "benefits", "learn more at", "for any concerns",
     "pay and benefit expectations",
+    # Perks/benefits lists are the same fence-off class as "benefits"/"we offer",
+    # just a heading not yet listed. Compass uses "Perks:"; leaving it out let a
+    # transit-pass perk ("Perks: ORCA card") be read as a required credential, and
+    # "paid training" in a perks list read as a waiver. Fence the whole list, not
+    # the one token - same reasoning as the punctuation fold.
+    "perks",
 )
 
 END_RX = re.compile(
