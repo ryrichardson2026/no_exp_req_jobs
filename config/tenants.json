@@ -5,7 +5,9 @@
     "oracle_docs": "https://docs.oracle.com/en/cloud/saas/human-resources/farws/api-recruiting-ce-job-requisitions.html",
     "nlx_counts": "usnlx.com/jobs/?location=WA employer facet, read manually 25 Aug 2026, Notion research record Finding 21. CAUTION: measured 31 Aug 2026 to be a BOARD total, not a state total, at least for Providence. Do not read nlx_wa_jobs as a WA figure.",
     "workday_call_shape": "POST /wday/cxs/{tenant}/{site}/jobs with body {appliedFacets, limit, offset, searchText}. Verified on MultiCare 1 Sep 2026 by DevTools capture. Requires a prior GET on the careers page to establish PLAY_SESSION / CALYPSO_SESSION / CALYPSO_CSRF_TOKEN cookies, and the CSRF token echoed back as the x-calypso-csrf-token header. Cloudflare fronts the host - curl-cffi with a Chrome fingerprint is required. Oracle needs none of this.",
-    "radancy_call_shape": "Career-site front end reached at jobs.aus.com. VERIFIED 2 Sep 2026 by direct fetch: GET /search-jobs with query params, &p=N for page 2+, 15 records per page, fully SERVER-RENDERED - job href, title, city, state, Req ID and every facet count are in the returned HTML. No XHR, no session, no CSRF, no token. Job URL is /job/{city-slug}/{title-slug}/{orgId}/{internalId}. NOT VERIFIED: the detail-page parse. See allied_security.extraction._qualifications_field."
+    "radancy_call_shape": "Career-site front end reached at jobs.aus.com. VERIFIED 2 Sep 2026 by direct fetch: GET /search-jobs with query params, &p=N for page 2+, 15 records per page, fully SERVER-RENDERED - job href, title, city, state, Req ID and every facet count are in the returned HTML. No XHR, no session, no CSRF, no token. Job URL is /job/{city-slug}/{title-slug}/{orgId}/{internalId}. NOT VERIFIED: the detail-page parse. See allied_security.extraction._qualifications_field.",
+    "jibe_call_shape": "Jibe career-site JSON API. VERIFIED LIVE 2 Sep 2026 by direct fetch: GET https://{careers_host}/api/jobs?{params} with domain={client}.jibeapply.com. Cookieless, no session, no CSRF, plain GET, returns application/json. Response is {\"jobs\":[{\"data\":{...}}]} - one unwrap. Records are FULL: description, qualifications and responsibilities all arrive on the listing call, so there is NO detail fetch on this platform. Server-side state filter works (state=Washington). NOT YET MEASURED: page size and whether any total/count key exists - --probe reports both.",
+    "compass_call_shape": "Compass Group careers-site API. Captured from the site's own XHR 2 Sep 2026. POST https://careers.compass-usa.com/api/get-jobs with the filters in the QUERY STRING, not the body: radius=15, filter[state][0]=WA, filter[state][1]=Washington, page_number=N, enable_kilometers=false. The observed request carried a small JSON body (content-length 78) whose contents were not captured, and a 'ct=' session cookie holding a JWT - whether either is REQUIRED is unverified and --probe answers it. Response carries jobs[] with FULL descriptions (no detail fetch), a facets[] catalog (Employment Type, State, City, Brand, Category) with counts, and totalJob."
   },
   "oracle_orc": {
     "providence": {
@@ -667,6 +669,154 @@
       },
       "_credential_gate_open": "CEO DECISION PENDING, flagged before the density number is read. Finding 25's qualifying credential list has no entry for a Washington security guard licence, and gate 3 disqualifies any job naming a credential that is not on the list. This tenant could therefore return near-zero applicable for a CONFIG GAP, not a finding about Allied Universal. Obtainability is a Career Bridge lookup (program length is a structured, state-audited field per Finding 17), not a judgment call. The Seattle grid separately measured 14 postings naming a guard card.",
       "_sector_baseline": "First security-sector tenant. No baseline exists, so there is no smoke alarm for this capture (Finding 31): healthcare ~4-13% and retail ~65-89% cannot say whether a security number is right. Whatever comes back is n=1 and provisional. Two per sector is the threshold - Securitas (47 WA) is the natural second."
+    }
+  },
+  "jibe_api": {
+    "_platform_note": "NAMED FOR THE READ SURFACE, NOT THE ATS. Every Dollar General record carries \"ats_code\": \"icims\" - the ATS is a FIELD IN THE DATA, not the thing being fetched. What is fetched is /api/jobs on a Jibe career site (domain=dollargeneral.jibeapply.com, client_code: dollargeneral in the payload). Two employers are now confirmed on iCIMS with unrelated read surfaces: Allied Universal (TalentBrew markup, server-rendered HTML, &p=N - see radancy_tb) and Dollar General (Jibe, JSON API, ?page=N - here). An 'icims' platform key covering both would require branching on tenant identity, which breaks config-is-data. They share no fetch path. See Finding 42: the ATS is not the read surface and is not the adapter boundary. GENERALISATION UNPROVEN: the URL shape is vendor-generic so a second Jibe employer SHOULD be one config entry, but Oracle looked uniform until Kroger's flex-field prompts shared zero overlap with Providence's. One tenant. --probe first.",
+    "dollar_general": {
+      "label": "Dollar General (careers.dollargeneral.com, Jibe)",
+      "careers_host": "https://careers.dollargeneral.com",
+      "api_url": "https://careers.dollargeneral.com/api/jobs",
+      "page_param": "page",
+      "first_page": 1,
+      "query": {
+        "location": "Washington",
+        "state": "Washington",
+        "woe": "8",
+        "regionCode": "US",
+        "stretchUnit": "MILES",
+        "stretch": "10",
+        "sortBy": "relevance",
+        "descending": "false",
+        "internal": "false",
+        "domain": "dollargeneral.jibeapply.com"
+      },
+      "_query_note": "Captured from the site's own XHR 2 Sep 2026 and verified live at page=2. sortBy=relevance is the site default, kept so the capture matches what a candidate sees; if pagination proves unstable under it, a deterministic sort is the fix and it is a config edit. woe/stretch/regionCode are the site's geo params, sent as captured. deviceId=undefined was dropped: a client-side artifact, not a filter.",
+      "terms_reference": null,
+      "employer_domain": "dollargeneral.com",
+      "ats_platform": "icims",
+      "ats_host": "retail-dollargeneral.icims.com",
+      "icims_tenant_id": "6192",
+      "client_code": "dollargeneral",
+      "nlx_wa_jobs": 203,
+      "expected_in_scope": 203,
+      "_expected_note": "NLx facet figure, NOT employer-stated - weaker than Allied's 146, which came off the employer's own facet. Diagnostic only, never a stop condition (QA rule 4). Any total/count key in the response is likewise a diagnostic: a vendor total reported 2,000 against a real 12,233 on Target.",
+      "source_class": "direct-employer",
+      "sector": "retail",
+      "verified": "2026-09-02 - endpoint captured from the site's own Fetch/XHR and confirmed by direct fetch at page=2: status 200, application/json, cookieless. Records carry req_id, title, description, qualifications, responsibilities, city, state, postal_code, lat/lng, street_address, employment_type, posted_date, apply_url, canonical_url, categories, tags1-4, ats_code, hiring_organization, meta_data.icims.date_updated. NOT YET RUN - no capture on disk. --probe and --inspect before --index.",
+      "location_filter": {
+        "_note": "FIELD READ, not a string token - the first tenant where this is possible. 'state' returns the clean full name 'Washington'. Every prior tenant needed an address token and two of five were measured wrong.",
+        "_trap_avoided": "Dollar General operates stores in a town called WASHINGTON in at least six states - NJ, GA, PA, IL, MO - plus Port Washington WI, all confirmed from live job pages. A title or blob token would have been far worse here than the Kroger city-of-Washington false positive. Matching the 'state' field cannot hit a city.",
+        "_formats_seen": "location_name is 'STORENUM-ST-CITY' (e.g. '30198-WA-IONE') and title carries ', WA S30198'. Both are cross-checks; neither is the filter.",
+        "field": "state",
+        "match_any": [
+          "Washington"
+        ]
+      },
+      "extraction": {
+        "_note": "Requirements arrive in the 'qualifications' field, populated and segmented - confirmed on live records, not inferred from a field name. Opener observed is 'WORK EXPERIENCE and/or EDUCATION:', a colon heading already in the shared vocabulary. This tenant may need little or no forked vocabulary, which would be a first. CONFIRM VIA --inspect: it prints FILLED/EMPTY and a length per field and dumps qualifications directly. ExternalQualificationsStr existed on two Oracle tenants and was EMPTY on one; Allied's JSON-LD had no qualifications key at all.",
+        "_expected_regime": "Every sampled record states experience as PREFERRED - 'High school diploma or equivalent preferred', 'six months of supervisory experience ... preferred', 'One year of experience in a retail environment and six months supervisory experience preferred'. That is the Kroger regime (58.9% applicable) and predicts high density. A LOW number means the extractor is wrong, not the employer - Finding 31.",
+        "_derivation": "2026-09-02: section detection measured 0/203 with empty openers, so the 'this tenant needs no forked vocabulary' hypothesis is REJECTED - openers are forked per tenant and none is inherited from a shared list. Derived from DG's OWN qualifications text: 'KNOWLEDGE and SKILLS:' and 'WORK EXPERIENCE and/or EDUCATION:' each appear 203/203. Both are colon headings, a match mode the shared engine already carries, so NO engine change. 'WORKING CONDITIONS:' (49) / 'WORKING CONDITIONS and PHYSICAL REQUIREMENTS:' (7) are physical-demands sections, not qualifications openers, and are excluded on purpose - the experience bar lives under WORK EXPERIENCE and/or EDUCATION. RESTORED 2026-09-02 after an inadvertent revert to [] wiped these and dropped DG 196 -> 0; verified back to 196.",
+        "openers": [
+          {
+            "text": "work experience and/or education",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "knowledge and skills",
+            "role": "REQUIRED",
+            "match": "colon"
+          }
+        ]
+      },
+      "_age_gate_open": "CEO DECISION 2 Sep 2026: EXTRACT AND LABEL, DO NOT BUILD AROUND IT. Titles read 'LEAD SALES ASSOCIATE-FT - 21 and older only - in IONE, WA S30198'. A minimum-age condition is a FOURTH eligibility axis alongside experience, education and credential, and no prior tenant had one. Decisive for 18-to-20-year-olds and currently invisible to every gate. Parseable off the title, so it costs a field not an extractor. Consistent with label-don't-filter (F17). --report counts how many titles carry it.",
+      "_management_title_open": "CEO DECISION 2 Sep 2026: LEAVE THE EXCLUSION PATTERN ALONE. Gate 1 anchors on whole words, so abbreviated 'ASST STORE MGR' does not match \\bmanagement\\b and those records pass to gate 2 - where CEO spot-check confirms most carry PREFERRED rather than required quals, making them applicable. Current behaviour is the wanted outcome, and removing real inventory on a word needs evidence first (F26). WATCH IN THE RESIDUAL: abbreviated 'ASST STORE MGR' passes while spelled-out 'STORE MANAGER CANDIDATE' - also on this board - is excluded by the same rule. Same role class, opposite outcomes, decided by abbreviation. Belongs in the gate-attribution report, not buried.",
+      "_do_not_use": "googlejobs.derivedInfo.jobCategories tags 'LEAD SALES ASSOCIATE' as MANAGEMENT. That is Google's classifier, wrong for this product, and wiring it into the exclusion gate would delete exactly the frontline inventory the product exists to surface. Category comes from TITLE per the settled decision - never from a third-party label.",
+      "_pay_note": "Pay is STATED but in description prose: 'New Hire Starting Pay Range: 17.63 - 17.88'. Not a structured field. Third pattern across tenants: Kroger published no rate, Providence published one as a structured flex field on every record, Dollar General publishes it as text. A parse, not a field read.",
+      "_sitemap": "https://careers.dollargeneral.com/sitemap.xml - index of 36 child sitemaps, one <loc> per job at /jobs/{id}?lang=en-us with a per-record lastmod, regenerated daily. NOT a discovery path: it carries NO location, so scoping to WA through it would mean fetching the whole board. Useful later for the inbound death-check (a job absent from the sitemap is gone) and as a completeness cross-check against the API count."
+    }
+  },
+  "compass_api": {
+    "_platform_note": "NAMED FOR THE READ SURFACE. Compass Group's ATS is SAP SuccessFactors (applyURL -> career8.successfactors.com) and its text-to-apply layer is Paradox (olivia.paradox.ai, 'Text JOB to 75000'). Neither is fetched. What is fetched is /api/get-jobs on careers.compass-usa.com. THIRD CONFIRMATION OF FINDING 42: Panda Restaurant Group ALSO runs SuccessFactors with Paradox on top, and its jobs live on Paradox-hosted pages behind a bespoke careers site - a completely different fetch shape, not built. Two employers, same ATS, same text-apply vendor, no shared code path. GENERALISATION: probably none. This looks bespoke to Compass rather than a vendor platform, so this key may only ever hold one tenant. Acceptable under the F35 threshold - a bespoke adapter is worth it when the employer's volume justifies it alone, and Compass is ~301 WA jobs across three otherwise-empty categories.",
+    "compass_group": {
+      "label": "Compass Group USA (careers.compass-usa.com)",
+      "careers_host": "https://careers.compass-usa.com",
+      "api_url": "https://careers.compass-usa.com/api/get-jobs",
+      "method": "POST",
+      "page_param": "page_number",
+      "first_page": 1,
+      "query": [
+        [
+          "radius",
+          "15"
+        ],
+        [
+          "filter[state][0]",
+          "WA"
+        ],
+        [
+          "filter[state][1]",
+          "Washington"
+        ],
+        [
+          "enable_kilometers",
+          "false"
+        ]
+      ],
+      "_query_note": "A LIST OF PAIRS, not a dict - filter[state][0] and filter[state][1] are repeated array-index keys and a dict would collapse them. Captured verbatim from the XHR and confirmed at page_number=2. The API accepts BOTH 'WA' and 'Washington' in one call, which is why no abbreviation token is needed at the query layer - a first. radius=15 is the site default and is what pulls the out-of-state strays noted in location_filter; it is kept as captured rather than pruned on a guess.",
+      "body_extra": {
+        "disable_switch_search_mode": false,
+        "site_available_languages": ["en", "en-us"]
+      },
+      "_body_note": "VERIFIED 2026-09-02 from the Payload tab, 78 bytes, matching the observed content-length. The body carries SITE CONFIGURATION (search-mode switch, available languages), not filters - which is why the filters live in the query string, not here. The 'ct=' JWT session cookie remains UNVERIFIED as a requirement and no session handling is implemented. If the 403 persists with this body set, THAT is the next gate: it needs the cookie captured from a live session, not guessed.",
+      "terms_reference": null,
+      "employer_domain": "compass-usa.com",
+      "ats_platform": "sap_successfactors",
+      "ats_host": "career8.successfactors.com",
+      "ats_company_code": "CGNA",
+      "text_apply_vendor": "paradox",
+      "nlx_wa_jobs": 299,
+      "expected_in_scope": 301,
+      "_expected_note": "301 is the API's own totalJob, read live 2 Sep 2026; NLx said 299. Both diagnostics, never a stop condition (QA rule 4). NOTE totalJob 301 is the UNFILTERED radius result and includes the out-of-state strays below, so the true WA figure is lower - the State facet showed WA 296 + Washington 5 + Northwest Region 3.",
+      "source_class": "direct-employer",
+      "sector": "food_service",
+      "verified": "2026-09-02 - endpoint and page_number captured from the site's own Fetch/XHR at page 1 and page 2, status 200, application/json, 146KB response. Records carry requisitionID, uniqueID, title, description (full), companyName, brandName, accountName, locations[] (streetAddress, city, state, stateAbbr, zip, lat/lng), employmentType[], applyURL, originalURL, customFields[], jobCardExtraFields[]. NOT YET RUN - no capture on disk. --probe, --facets and --inspect before --index.",
+      "location_filter": {
+        "_note": "READS locations[].stateAbbr - NOT the top-level 'state' field, and NOT the State facet. Both are dirty.",
+        "_why": "The response's own State facet reads: WA 296, Washington 5, and 'NORTHWEST REGION' 3 - three different values for the same state, one of which is not a state at all. It also carries Arizona 1, Nevada 1, Oregon 2, Utah 1 pulled in by radius=15. A top-level state read would MISS the Northwest Region rows and KEEP the out-of-state ones. Every sampled record carries a clean stateAbbr on the location object.",
+        "_multi_location": "locations is an ARRAY. in_scope returns true if ANY location matches, which is correct for a multi-site posting. --report counts how many records carry more than one, because that shape affects dedupe and card rendering and no prior tenant had it except Target's 'N Locations' records.",
+        "field": "stateAbbr",
+        "match_any": [
+          "WA"
+        ]
+      },
+      "extraction": {
+        "_note": "Forked opener vocabulary, Compass only. DERIVED 2026-09-02 from this tenant's own 301-record capture; 0/301 sectionized with empty openers, confirming vocabulary is needed. Seventh employer, seventh vocabulary, zero inheritance (Finding 48).",
+        "_shape_observed": "TWO shapes, both now MEASURED and both SECTIONIZE. (1) HOURLY inline label 'Requirement : ...' (note the space before the colon) inside a bullet list - 238/301. It was feared to be an un-sectionizable Allied-Template-B shape, but html_to_text splits the <li> to its own line and colon mode matches 'requirement\\s*:' line-leading, so each labelled bullet IS a one-line required section. No engine change was needed. (2) SALARIED 'Qualifications' heading - 49/301, appearing both colon-terminated ('Qualifications:') and bare ('Qualifications' on its own line), so both a colon and a bare opener are carried. 43/301 carry NEITHER shape and return NOT_STATED by construction (a residual, not a vocabulary gap - not solved by loosening anything).",
+        "openers": [
+          {
+            "text": "requirement",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          }
+        ]
+      },
+      "_brand_mapping_open": "NINETEEN BRANDS on one board - the Fred Meyer/QFC situation at nine times the scale. Measured from the Brand facet 2 Sep 2026: Eurest 72, Bon Appetit 64, Morrison Healthcare 33, Chartwells HE 32, Morrison Living 18, Restaurant Associates 16, Levy Sector 14, Chartwells K12 12, Fresh & Ready Foods 8, Flik Hospitality 7, Canteen 6, CCL Hospitality 3, ESFM 3, Unidine 3, Wolfgang Puck Catering 3, Compass Corporate 2, Crothall Healthcare 2, Intelas 2, Foodworks 1. company_name MUST map from brandName, not companyName - companyName reads 'Compass Group Prod 5' / 'Compass Group Prod 1', which are internal instance labels and mean nothing to a job seeker. A seeker knows Levy at Lumen Field and Bon Appetit at Expedia. Same reasoning that made Fred Meyer and QFC render separately.",
+      "_category_coverage": "THIS IS WHY THIS EMPLOYER WAS CHOSEN. The Category facet fills THREE of the four empty categories from one adapter, by the employer's own taxonomy: FOOD SERVICES - Foodservice Workers and Supervisors 96, Cook 71, Culinary 27, Dishwasher/Back of House 18, Hospitality/Wait Staff 10, Catering and Catering Supervisors 8, Cashier/Front of House 6, Chef 10. FACILITIES - Housekeeper/Janitor 3, Technicians 5, Clinical Engineering 2. ADMINISTRATIVE - Administrative Assistant 7. Plus WAREHOUSE 2 and Route Driver 8. HOURLY 249 vs SALARY 51 is a frontline flag sitting in the data. NOTE these are the EMPLOYER's category labels; per the settled decision, category on the record still comes from TITLE. This facet is a cross-check, not the source.",
+      "_credential_open": "WA MAST CLASS 12 PERMIT is named on live postings on this board (alcohol service, Levy at Lumen Field) alongside the WA Food Handlers Permit. Food Handler is already on the Finding 25 qualifying list. MAST IS NOT. It is a WA alcohol-server permit - genuinely quick and prerequisite-free, so it very likely qualifies - but gate 3 disqualifies any credential not on the list, so every alcohol-serving role will be excluded until it is added. Unlike the Allied guard-card question this one has a known answer; it still needs a CEO decision and a Career Bridge obtainability check rather than being assumed. WATCH THE CREDENTIAL-GATE LINE in the attribution report.",
+      "_age_gate": "'Must be 21 years of age or older' appears on alcohol-service roles here, same as Dollar General. Label-only per CEO decision 2 Sep 2026, dropped from active tracking. Gates nothing.",
+      "_pay_note": "Pay is STATED and prominent but in description prose: 'Fixed Pay Rate: $26.05 per hour', 'Pay Range: $21.13 per hour to $26.08', 'Salary: $81,000 - 86,500/year'. Fourth pattern across tenants and the most varied - hourly fixed, hourly range, and annual salary all appear. A parse, not a field read, and the hourly-ceiling guard matters here because salaried and hourly are mixed on one board."
     }
   }
 }
