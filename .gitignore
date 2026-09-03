@@ -4,6 +4,9 @@ raw/
 # Normalized / enriched output and the consolidated applicable set.
 out/
 
+# Review exports (generated spreadsheets/CSVs for manual review).
+outputs/
+
 # Prior-session captures and working outputs (directories and their zip archives).
 pull_*/
 grid_*/
