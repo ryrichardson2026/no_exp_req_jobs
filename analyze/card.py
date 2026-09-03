@@ -24,6 +24,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 APPLICABLE = os.path.join(ROOT, "out", "applicable.jsonl")
 TODAY = datetime.date(2026, 9, 1)          # currentDate; card.py takes no clock
+POSTED_DISPLAY_MAX_DAYS = 60               # past this, hide the posted DATE only
+                                           # (display rule, Finding 23) - never the job
 
 # --- layout tokens (px) ------------------------------------------------------
 W, PAD = 360, 22
@@ -94,6 +96,13 @@ def rel_date(posted):
         return None
     n = (TODAY - d).days
     if n < 0:
+        return None
+    # DISPLAY-ONLY age suppression (Finding 23): past POSTED_DISPLAY_MAX_DAYS the
+    # POSTED DATE is hidden so a stale-looking date does not mislead, but the JOB
+    # still renders (the caller drops posted from the subline; loc etc. stay).
+    # This NEVER filters, removes or down-ranks - age does not touch the applicable
+    # set or ordering. Newness/ranking is is_new (first_seen), untouched here.
+    if n > POSTED_DISPLAY_MAX_DAYS:
         return None
     if n == 0:
         return "Posted today"
