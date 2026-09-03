@@ -28,6 +28,12 @@ import os
 import re
 from collections import Counter, defaultdict
 
+# The title -> category table now lives in one place and is imported by both the
+# analysis layer (here, compare_pulls, experience_classifier via `ap.`) and
+# enrich.py. Re-exported into this namespace so `ap.categorize` /
+# `ap.CATEGORY_PATTERNS` keep resolving for the existing consumers.
+from normalize.category import CATEGORY_PATTERNS, categorize  # noqa: E402,F401
+
 # ---------------------------------------------------------------------------
 # PROVISIONAL tier phrases. These are a starting scaffold, NOT the BBJ brief
 # rules — those aren't in this environment and are not guessed at here.
@@ -47,29 +53,6 @@ MEDIUM = [
 WEAK = [
     "training", "we train", "learn on the job", "all experience levels",
 ]
-
-# HEURISTIC title -> category map, nine categories per the master doc §4.
-CATEGORY_PATTERNS = {
-    # Vocab extended 2026-09-02 from the audit of applicable-but-UNCLASSIFIED
-    # titles (grocery-store dept format, Target inbound, healthcare-support admin,
-    # the housekeep* regex fix). Category is additive and ungated - it labels, it
-    # does not gate - so these move no verdict.
-    "Administrative": r"\b(admin|administrative|clerk|clerical|receptionist|data entry|office assistant|front desk|scheduler|scheduling coord\w*|bookkeeper|human resources|\bhr\b|payroll|patient financial|revenue cycle|patient service[s]? (representative|coordinator)|registrar|registration|health information|\bhim\b|medical records)\b",
-    "Customer Service": r"\b(customer service|call center|call centre|csr|customer support|contact center|dispatcher)\b",
-    "Sales": r"\b(sales|account executive|canvasser|telesales|inside sales|outside sales|business development)\b",
-    "Retail": r"\b(retail|cashier|store associate|sales associate|stocker|merchandiser|barista|shift lead|store manager|store mgr|asst store mgr|assistant store manager|dept leader|department leader|person in charge|\bpic\b|th person|rd person|nd person|team lead\w*|general merchandise|grocery|produce|meat|seafood|floral|apparel|garden ctr|dairy|starbucks|bakery|courtesy|bagger|checkout)\b",
-    "Warehouse": r"\b(warehouse|forklift|picker|packer|material handler|order selector|loader|shipping|receiving|fulfillment|inbound|outbound|logistics|inventory|materials|supply chain|stocking|replenish)\b",
-    "Construction": r"\b(construction|laborer|labourer|carpenter|roofer|framer|concrete|apprentice|helper|demolition)\b",
-    "Security": r"\b(security|guard|patrol|loss prevention|surveillance|unarmed|armed officer)\b",
-    "Facilities": r"\b(janitor|custodian|cleaner|housekeep\w*|facilities|maintenance|groundskeep|porter|environmental service|\bevs\b|engineer|journeyman)\b",
-    # Ninth category. Patterns DERIVED from the captured corpus (Compass food-service
-    # board + Providence dietary/nutrition titles), not guessed.
-    # Grocery FOOD departments dual-tag Food Services AND Retail (a meat wrapper
-    # works with food and is in-store) - additive, so both lanes. Pure retail
-    # (cashier, courtesy, bagger) stays Retail-only; 'grocery'/center-store aisle
-    # stocking stays Retail (not food-handling).
-    "Food Services": r"\b(cook|baker|barista|bartender|chef|dishwasher|busser|server|waiter|waitress|catering|culinary|kitchen|cafeteria|concession|dietary|dining|nutrition|food service|foodservice|food worker|food prep|food transporter|banquet|deli|meat|seafood|produce|bakery|dairy|starbucks|order builder|general utility|food unit|\bfoh\b|\bfsw\b|food and beverage|meat cutter|meat wrapper)\b",
-}
 
 SHIFT_HINT = r"\b(1st shift|2nd shift|3rd shift|first shift|second shift|third shift|overnight|graveyard|swing shift|night shift|weekend)\b"
 
@@ -128,12 +111,6 @@ def tier(text):
     if any(p in t for p in WEAK):
         return "WEAK"
     return "NONE"
-
-
-def categorize(title):
-    t = norm(title)
-    hits = [c for c, pat in CATEGORY_PATTERNS.items() if re.search(pat, t)]
-    return hits or ["UNCLASSIFIED"]
 
 
 def apply_hosts(job):

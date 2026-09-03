@@ -16,7 +16,8 @@ call), and writes back ONLY the derived fields:
     experience_condition   the verdict
     evidence_clauses        the clauses behind it
     credentials             every named credential, its modality, its timeframe
-    category                left as-is (empty []) - shape exists before the table
+    category                the title -> category table (normalize/category.py),
+                            additive; unmatched stores [] (never "UNCLASSIFIED")
 
 Every other field is preserved value-for-value: the record is mutated in place,
 existing keys keep their position and value, `credentials` (a new contract field)
@@ -37,6 +38,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 from normalize import experience as X   # noqa: E402  the shared extractor
+from normalize.category import categorize  # noqa: E402  the shared title->category table
 
 OUT_GLOB = os.path.join(ROOT, "out", "*", "*", "normalized.jsonl")
 
@@ -59,8 +61,14 @@ def enrich_records(recs, openers):
         r["experience_condition"] = xo["experience_condition"]
         r["evidence_clauses"] = xo["evidence_clauses"]
         r["credentials"] = xo["credentials"]
-        if "category" not in r:
-            r["category"] = []          # shape must exist before the table lands
+        # Land the title -> category table. ADDITIVE: every matching category is
+        # kept (a grocery meat cutter carries both Food Services and Retail).
+        # LABELS ONLY - category moves no verdict; applicability is untouched.
+        # An unmatched title stores [] (the categoryless state), NOT the analysis
+        # layer's "UNCLASSIFIED" sentinel - that value looks like a category and
+        # would eventually be treated as one. Empty means no category, which is true.
+        cats = categorize(r.get("title"))
+        r["category"] = [] if cats == ["UNCLASSIFIED"] else cats
         if xo["section_found"]:
             counts["section_found"] += 1
         for f in DERIVED:
