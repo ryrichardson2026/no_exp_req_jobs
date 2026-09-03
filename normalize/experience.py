@@ -331,18 +331,31 @@ DURATION = re.compile(
 
 RECURRENCE = re.compile(r"\bevery\s+\d+\s*(?:years?|months?)", re.IGNORECASE)
 
-WAIVER_RX = (
-    r"\bin lieu of experience\b",
-    r"\bexperience (?:may|can|will) be (?:substituted|accepted)\b",
+# EXPLICIT no-experience statements. These do not WAIVE a stated requirement -
+# they declare there is none. By model.py's vocabulary that is NONE_NEEDED
+# ("explicitly hires without experience"), NOT WAIVED ("states experience, then
+# removes it as a barrier"). Kept a separate lever from the substitution waivers
+# below and fired first (see derive_condition), so the strongest evidence class
+# is not buried in the weakest-looking bucket. Measured: 44 of 49 former WAIVED
+# records were actually this - "No experience is necessary" on food-service
+# boards (Allied 36, Eurest 5, Morrison 3).
+EXPLICIT_NONE_RX = (
     r"\bno experience (?:is )?(?:required|necessary|needed)\b",
     r"\bexperience (?:is )?not required\b",
-    # "No prior experience required" - the exact and only waiver phrasing on Allied
+    # "No prior experience required" - the exact and only phrasing on Allied
     # (36 of 146). The bare "no experience ..." pattern above misses the interposed
     # "prior", so a genuine no-experience posting read as REQUIRED. Scoped to
     # "prior" because that is the sole form measured on this board; "previous" and
-    # other synonyms are deliberately NOT added - nobody uses them, and a WAIVER
-    # phrase that over-matches clears real bars (cf. the "of hire" precedent).
+    # other synonyms are deliberately NOT added - nobody uses them, and a phrase
+    # that over-matches clears real bars (cf. the "of hire" precedent).
     r"\bno prior experience (?:is )?(?:required|necessary|needed)\b",
+)
+
+# Genuine substitution waivers: a stated requirement that another qualification
+# may stand in for. This is WAIVED, distinct from EXPLICIT_NONE_RX above.
+WAIVER_RX = (
+    r"\bin lieu of experience\b",
+    r"\bexperience (?:may|can|will) be (?:substituted|accepted)\b",
 )
 
 
@@ -390,11 +403,24 @@ def classify_line(line, section_modality):
 def derive_condition(reqs, found_required):
     """Absence counts only where a section was actually read. A populated required
     section with nothing blocking application - including one whose every item is
-    AFTER_HIRE - is NONE_NEEDED, not NOT_STATED. After-hire items ARE content."""
+    AFTER_HIRE - is NONE_NEEDED, not NOT_STATED. After-hire items ARE content.
+
+    LEVER ORDER. An EXPLICIT no-experience statement wins first - it is the
+    strongest evidence of NONE_NEEDED and must outrank a stray requirement line
+    elsewhere in the posting (same reason the substitution waiver outranks it).
+    A substitution waiver is next (WAIVED). Only then does a to-apply experience
+    line make the record REQUIRED. NONE_NEEDED is reached two ways: this explicit
+    statement (strong), or the absence-inference at the tail (weaker) - both are
+    the same condition, distinguished only by evidence."""
     to_apply = [r for r in reqs if r["modality"] == TO_APPLY]
     apply_exp = [r for r in to_apply if EXPERIENCE in r["types"]]
     pref_exp = [r for r in reqs
                 if r["modality"] == PREFERRED_M and EXPERIENCE in r["types"]]
+
+    explicit_none = [r for r in reqs
+                     if any(re.search(p, r["clause"].lower()) for p in EXPLICIT_NONE_RX)]
+    if explicit_none:
+        return NONE_NEEDED, explicit_none
 
     waiver = [r for r in reqs
               if any(re.search(p, r["clause"].lower()) for p in WAIVER_RX)]
