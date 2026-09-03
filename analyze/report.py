@@ -97,8 +97,10 @@ LICENSED_OCCUPATION_RX = re.compile(
 # NOT the basis here. CNA is quick to certify but is a nursing career-path entry, so
 # it is excluded on positioning, not on how long the cert takes. CEO decision
 # 2 Sep 2026. Do not later misread this as a finding about CNA cert duration.
+# Internships are the same §3 career-path class (CEO 2 Sep 2026): "intern"/
+# "internship" as whole words - \bintern\b does NOT match "internal", verified.
 CAREER_PATH_OCCUPATION_RX = re.compile(
-    r"\b(cna|certified nursing assistant)\b", re.IGNORECASE)
+    r"\b(cna|certified nursing assistant|intern|internship)\b", re.IGNORECASE)
 
 # ---- gate 3: credential obtainability ---------------------------------------
 # Obtainable within ~90 days, no prerequisite -> passes.
