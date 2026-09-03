@@ -70,6 +70,11 @@ def new_record():
         "source_id": None,          # which adapter produced this
         "source_job_id": None,      # the source's own stable id (req number)
         "dedupe_hash": None,
+        # Stable account-layer id (additive). Deterministic from source + the
+        # source's requisition id, so a re-fetch keeps the SAME id and saved-jobs
+        # / applied-disposition survive. Populated for records that reach the
+        # applicable set; see internal_id().
+        "internal_id": None,
 
         # employer
         "company_name": None,
@@ -175,6 +180,25 @@ def dedupe_hash(company_name, title, location_raw):
     fallback are separate layers and are not implemented here."""
     key = "|".join((_norm(company_name), _norm(title), _norm(location_raw)))
     return hashlib.sha256(key.encode("utf-8")).hexdigest()
+
+
+def internal_id(source_id, source_job_id):
+    """Stable account-layer id, deterministic from source + the source's own
+    requisition id.
+
+    Keyed on (source_id, source_job_id) ONLY - never on dedupe_hash, title or
+    location, which change when an employer edits a posting. So the same job
+    re-fetched next week yields the identical id, and saved-jobs / applied-
+    disposition (the settled account-layer features) do not break. A sequential
+    counter would reissue ids every pull and is exactly what this avoids.
+
+    Format: 'nxj_' + first 12 hex of sha256(source|reqid). Returns None if the
+    source id is missing (a record with no stable source id cannot get a stable
+    internal id)."""
+    if not source_id or not source_job_id:
+        return None
+    key = f"{source_id}\x1f{source_job_id}"
+    return "nxj_" + hashlib.sha256(key.encode("utf-8")).hexdigest()[:12]
 
 
 def parse_money(value):

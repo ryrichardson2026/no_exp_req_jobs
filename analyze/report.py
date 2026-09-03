@@ -133,6 +133,9 @@ def load_records():
                 r["experience_condition"] = xo["experience_condition"]
                 r["evidence_clauses"] = xo["evidence_clauses"]
                 r["credentials"] = xo["credentials"]
+                # stable account-layer id, deterministic from source + req id
+                r["internal_id"] = model.internal_id(r.get("source_id"),
+                                                     r.get("source_job_id"))
                 r["_tenant"] = tenant
                 r["_cred_to_apply"] = xo["credentials_to_apply"]
                 r["_to_apply"] = [rq["clause"] for rq in xo["requirements"]
