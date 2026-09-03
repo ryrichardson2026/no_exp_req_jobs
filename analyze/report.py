@@ -90,6 +90,16 @@ LICENSED_OCCUPATION_RX = re.compile(
     r"medical laboratory scientist|medical technologist|dietitian)\b",
     re.IGNORECASE)
 
+# Career-path occupations. Excluded under the POSITIONING rule (master doc §3:
+# people here want a job NOW, not a career path) - the SAME class as internships
+# and long-runway apprenticeships §3 already excludes. This is NOT the Finding 25
+# obtainability test (~90 days / no prerequisite): that test was NOT applied and is
+# NOT the basis here. CNA is quick to certify but is a nursing career-path entry, so
+# it is excluded on positioning, not on how long the cert takes. CEO decision
+# 2 Sep 2026. Do not later misread this as a finding about CNA cert duration.
+CAREER_PATH_OCCUPATION_RX = re.compile(
+    r"\b(cna|certified nursing assistant)\b", re.IGNORECASE)
+
 # ---- gate 3: credential obtainability ---------------------------------------
 # Obtainable within ~90 days, no prerequisite -> passes.
 CREDENTIAL_QUICK_RX = re.compile(
@@ -189,6 +199,10 @@ def gate_exclusion(r):
     # implicit in the title.
     if LICENSED_OCCUPATION_RX.search(title):
         return False, "occupation-licensed"
+    # Career-path occupation (CNA, ...): excluded on POSITIONING (§3 job-now, not
+    # career-path), not on obtainability. Same class as internships/apprenticeships.
+    if CAREER_PATH_OCCUPATION_RX.search(title):
+        return False, "occupation-career-path"
     # associate degree -> review (handled by caller as a separate bucket)
     if DEGREE_REVIEW_RX.search(edu):
         return False, "review-associate"
@@ -339,8 +353,8 @@ def main():
     p("\n\n### WHERE RECORDS FELL (first failing gate)\n")
     reasons = Counter(verdicts[id(r)] for r in recs)
     for k in ("applicable", "degree", "occupation-management", "occupation-licensed",
-              "review-associate", "experience-required", "credential", "prerequisite",
-              "not-stated"):
+              "occupation-career-path", "review-associate", "experience-required",
+              "credential", "prerequisite", "not-stated"):
         p(f"  {reasons.get(k, 0):>6}  {k}")
 
     # ---- fill matrix ----
