@@ -72,6 +72,24 @@ MANAGEMENT_RX = re.compile(
 # Protected occupations: kept unless the title is also management.
 PROTECT_RX = re.compile(r"\b(assistant|trainee|apprentice)\b", re.IGNORECASE)
 
+# Licensed clinical occupations. For these the TITLE is the credential - an "RN"
+# posting need not restate "RN license required", so the credential gate never sees
+# it and the role reaches applicable. Excluded by TITLE at gate 1, like management.
+# Scoped to clearly-LICENSED roles ONLY. Deliberately NOT here (they stay applicable
+# pending the CEO obtainability decision): entry-level aides (patient sitter, case
+# aide, therapy AIDE), and the certificate tier - CNA, medical assistant, and
+# *technician* roles (pharmacy/surgical/EEG/dietetic technician). 'technologist' (an
+# ARRT/licensure role) IS excluded; 'technician' is NOT. CEO-approved 2026-09-02.
+LICENSED_OCCUPATION_RX = re.compile(
+    r"\b(registered nurse|\brn\b|\blpn\b|\blvn\b|nurse practitioner|"
+    r"physician|physician assistant|pharmacist|"
+    r"physical therapist|occupational therapist|speech language pathologist|"
+    r"respiratory (?:care )?(?:practitioner|therapist)|radiation therapist|"
+    r"recreational therapist|massage therapist|therapy assistant|"
+    r"technologist|audiologist|dosimetrist|sonographer|polysomnographer|"
+    r"medical laboratory scientist|medical technologist|dietitian)\b",
+    re.IGNORECASE)
+
 # ---- gate 3: credential obtainability ---------------------------------------
 # Obtainable within ~90 days, no prerequisite -> passes.
 CREDENTIAL_QUICK_RX = re.compile(
@@ -166,6 +184,11 @@ def gate_exclusion(r):
     protected = bool(PROTECT_RX.search(head))
     if not protected and MANAGEMENT_RX.search(title):
         return False, "occupation-management"
+    # Licensed clinical occupation: the title IS the credential. Excluded here
+    # because the credential gate cannot see a license that the posting leaves
+    # implicit in the title.
+    if LICENSED_OCCUPATION_RX.search(title):
+        return False, "occupation-licensed"
     # associate degree -> review (handled by caller as a separate bucket)
     if DEGREE_REVIEW_RX.search(edu):
         return False, "review-associate"
@@ -315,8 +338,9 @@ def main():
     # ---- gate attribution ----
     p("\n\n### WHERE RECORDS FELL (first failing gate)\n")
     reasons = Counter(verdicts[id(r)] for r in recs)
-    for k in ("applicable", "degree", "occupation-management", "review-associate",
-              "experience-required", "credential", "prerequisite", "not-stated"):
+    for k in ("applicable", "degree", "occupation-management", "occupation-licensed",
+              "review-associate", "experience-required", "credential", "prerequisite",
+              "not-stated"):
         p(f"  {reasons.get(k, 0):>6}  {k}")
 
     # ---- fill matrix ----
