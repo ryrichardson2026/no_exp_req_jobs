@@ -77,12 +77,19 @@ PROTECT_RX = re.compile(r"\b(assistant|trainee|apprentice)\b", re.IGNORECASE)
 # it and the role reaches applicable. Excluded by TITLE at gate 1, like management.
 # Scoped to clearly-LICENSED roles ONLY. Deliberately NOT here (they stay applicable
 # pending the CEO obtainability decision): entry-level aides (patient sitter, case
-# aide, therapy AIDE), and the certificate tier - CNA, medical assistant, and
-# *technician* roles (pharmacy/surgical/EEG/dietetic technician). 'technologist' (an
+# aide, therapy AIDE), and the certificate tier - CNA, medical assistant, and the
+# *technician* roles (surgical/EEG/dietetic technician). 'technologist' (an
 # ARRT/licensure role) IS excluded; 'technician' is NOT. CEO-approved 2026-09-02.
+# EXCEPTION 2026-09-06: 'pharmacy' IS excluded by title - both pharmacy technician
+# AND pharmacy assistant. WA registers/licenses both with the Board of Pharmacy, so
+# the title carries the credential, same rationale as the licensed clinical roles.
+# The bare token catches every pharmacy variant (assistant, certified tech, intern,
+# senior/lead tech); the surgical/EEG/dietetic technicians above are unaffected.
+# Movement audit: 73 titles reattribute to occupation-licensed, 8 leave applicable,
+# zero non-pharmacy titles move.
 LICENSED_OCCUPATION_RX = re.compile(
     r"\b(registered nurse|\brn\b|\blpn\b|\blvn\b|nurse practitioner|"
-    r"physician|physician assistant|pharmacist|"
+    r"physician|physician assistant|pharmacist|pharmacy|"
     r"physical therapist|occupational therapist|speech language pathologist|"
     r"respiratory (?:care )?(?:practitioner|therapist)|radiation therapist|"
     r"recreational therapist|massage therapist|therapy assistant|"
