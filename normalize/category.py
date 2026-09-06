@@ -4,8 +4,15 @@ normalize/category.py - the title -> category table, in ONE place.
 This is the single definition of CATEGORY_PATTERNS and categorize(). It was
 lifted verbatim out of analyze_pull.py so the analysis layer and enrich.py read
 the SAME mapping; two copies drifting apart is the failure mode this prevents.
-The patterns are NOT edited here - the vocabulary is settled work, extended
-2026-09-02 in a deliberate realignment pass, and this move is byte-identical.
+The patterns are edited here only in deliberate, movement-audited passes. The
+vocabulary was extended 2026-09-02 (realignment). Phase A close-out 2026-09-06:
+'clerk' removed from Administrative and 'helper' from Construction (shop-floor
+titles, not office/trades work); the shared Retail vocabulary gained the phrases
+'fuel center', 'service counter', 'home hardlines', 'front end', 'e-commerce' -
+real retail concepts that 'clerk' had been masking, added engine-side (not tenant
+config) because they are true at any grocery chain. Matched as PHRASES, never bare
+'service'/'counter'/'front'. Audit: 56 title/employer pairs move, all correct;
+retail phrases caused zero cross-employer movement.
 
 The table LABELS, it does not GATE. A record's category has no bearing on
 applicability. Assignment is ADDITIVE: categorize() returns every matching
@@ -24,12 +31,12 @@ CATEGORY_PATTERNS = {
     # titles (grocery-store dept format, Target inbound, healthcare-support admin,
     # the housekeep* regex fix). Category is additive and ungated - it labels, it
     # does not gate - so these move no verdict.
-    "Administrative": r"\b(admin|administrative|clerk|clerical|receptionist|data entry|office assistant|front desk|scheduler|scheduling coord\w*|bookkeeper|human resources|\bhr\b|payroll|patient financial|revenue cycle|patient service[s]? (representative|coordinator)|registrar|registration|health information|\bhim\b|medical records)\b",
+    "Administrative": r"\b(admin|administrative|clerical|receptionist|data entry|office assistant|front desk|scheduler|scheduling coord\w*|bookkeeper|human resources|\bhr\b|payroll|patient financial|revenue cycle|patient service[s]? (representative|coordinator)|registrar|registration|health information|\bhim\b|medical records)\b",
     "Customer Service": r"\b(customer service|call center|call centre|csr|customer support|contact center|dispatcher)\b",
     "Sales": r"\b(sales|account executive|canvasser|telesales|inside sales|outside sales|business development)\b",
-    "Retail": r"\b(retail|cashier|store associate|sales associate|stocker|merchandiser|barista|shift lead|store manager|store mgr|asst store mgr|assistant store manager|dept leader|department leader|person in charge|\bpic\b|th person|rd person|nd person|team lead\w*|general merchandise|grocery|produce|meat|seafood|floral|apparel|garden ctr|dairy|starbucks|bakery|courtesy|bagger|checkout)\b",
+    "Retail": r"\b(retail|cashier|store associate|sales associate|stocker|merchandiser|barista|shift lead|store manager|store mgr|asst store mgr|assistant store manager|dept leader|department leader|person in charge|\bpic\b|th person|rd person|nd person|team lead\w*|general merchandise|fuel center|service counter|home hardlines|front end|e-commerce|grocery|produce|meat|seafood|floral|apparel|garden ctr|dairy|starbucks|bakery|courtesy|bagger|checkout)\b",
     "Warehouse": r"\b(warehouse|forklift|picker|packer|material handler|order selector|loader|shipping|receiving|fulfillment|inbound|outbound|logistics|inventory|materials|supply chain|stocking|replenish)\b",
-    "Construction": r"\b(construction|laborer|labourer|carpenter|roofer|framer|concrete|apprentice|helper|demolition)\b",
+    "Construction": r"\b(construction|laborer|labourer|carpenter|roofer|framer|concrete|apprentice|demolition)\b",
     "Security": r"\b(security|guard|patrol|loss prevention|surveillance|unarmed|armed officer)\b",
     "Facilities": r"\b(janitor|custodian|cleaner|housekeep\w*|facilities|maintenance|groundskeep|porter|environmental service|\bevs\b|engineer|journeyman)\b",
     # Ninth category. Patterns DERIVED from the captured corpus (Compass food-service
