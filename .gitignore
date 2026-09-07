@@ -7,6 +7,11 @@ out/
 # Review exports (generated spreadsheets/CSVs for manual review).
 outputs/
 
+# Generated site data — rebuilt from out/applicable.jsonl by analyze/site_data.py on
+# every pull (6.6MB, volatile). Same policy as out/: generated data lives on disk, not
+# in git. Regenerate with `python analyze/site_data.py` (or a deploy build step).
+noprobjobs/data/jobs.js
+
 # Prior-session captures and working outputs (directories and their zip archives).
 pull_*/
 grid_*/

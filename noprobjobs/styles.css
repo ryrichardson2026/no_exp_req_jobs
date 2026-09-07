@@ -1,0 +1,94 @@
+/* ── TOKEN LAYER ─────────────────────────────────────────────
+   Verbatim from the .dc files. 32 tokens, hex values, no oklch. Every component
+   reads semantic aliases only, never a raw colour. Do not edit here without editing
+   the record — this is the one copy now that the frames are gone. */
+:root{
+  --paper:        #FBF8EF;   /* newsprint — page ground */
+  --paper-raised: #FFFFFF;   /* card fill */
+  --paper-sunk:   #F1EBDA;
+  --ink-900:      #0A3A75;   /* union navy */
+  --ink-500:      #4C6E9C;   /* navy, muted */
+  --hair:         #C3D2E8;
+  --brand-600:    #D42B1F;   /* circular red — act */
+  --brand-050:    #FBE7E4;
+  --mark-500:     #F5C518;   /* marigold — this is us */
+  --tint-600:     #0A3A75;
+  --tint-050:     #E7EEF8;
+
+  --surface: var(--paper);
+  --surface-raised: var(--paper-raised);
+  --surface-sunk: var(--paper-sunk);
+  --ink: var(--ink-900);
+  --ink-muted: var(--ink-500);
+  --line: var(--hair);
+  --accent: var(--brand-600);
+  --accent-soft: var(--brand-050);
+  --accent-ink: #FFFFFF;
+  --mark: var(--mark-500);
+  --mark-ink: var(--ink-900);
+  --fact: var(--tint-050);
+  --fact-ink: var(--tint-600);
+  --ok: #1B7A56;             /* clocked green — the experience claim only */
+  --ok-ink: #FFFFFF;
+  --ok-soft: #E3F1EA;
+  --ok-ink-text: #14603F;
+  --focus: var(--ink-900);
+
+  --font-display: "Archivo", "Public Sans", system-ui, sans-serif;
+
+  --gap-block: 8px;
+  --gap-section: 16px;
+}
+
+/* ── BASE ──────────────────────────────────────────────────── */
+html,body{height:100%}
+body{margin:0;background:var(--surface);font-family:"Public Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+[data-desc-html]{font-size:16.5px;line-height:1.62;color:var(--ink);max-width:68ch}
+[data-desc-html] p{margin:0 0 15px}
+[data-desc-html] b,[data-desc-html] strong{font-weight:700}
+[data-desc-html] ul,[data-desc-html] ol{margin:0 0 18px;padding-left:22px}
+[data-desc-html] li{margin:0 0 9px;line-height:1.55}
+[data-desc-html] a{overflow-wrap:anywhere}
+[data-desc-html] h3,[data-desc-html] h4{margin:22px 0 8px;font-size:16.5px;font-weight:800}
+.dsp{font-family:var(--font-display);font-stretch:112%}
+
+/* ── KEYFRAMES ─────────────────────────────────────────────── */
+@keyframes slideinright{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes sheetup{from{transform:translateY(18px)}to{transform:translateY(0)}}
+@keyframes sheetdown{from{transform:translateY(-14px);opacity:.35}to{transform:translateY(0);opacity:1}}
+@keyframes scrimin{from{opacity:0}to{opacity:1}}
+@keyframes slidein{from{transform:translateX(24px);opacity:.4}to{transform:translateX(0);opacity:1}}
+@keyframes livedot{0%{transform:scale(1);opacity:1}55%{transform:scale(1.5);opacity:.45}100%{transform:scale(1);opacity:1}}
+@keyframes sk{0%{opacity:.55}50%{opacity:1}100%{opacity:.55}}
+
+/* §4 (step 0): the result-list fade. ONE keyframe, ONE class — the whole effect
+   lives here. Delete these two rules to remove it; edit the timing to tune it.
+   The component replays it by remounting the list container (key change) only on a
+   user-triggered filter/sort/page change — never on job open. */
+@keyframes listfade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.list-fade{animation:listfade 180ms cubic-bezier(.22,.61,.36,1)}
+
+/* One global rule covers every animation above, including listfade. Do not duplicate. */
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+
+/* ── PSEUDO-CLASS UTILITIES ────────────────────────────────────
+   The DC runtime compiled style-hover / style-focus / style-focus-within into
+   generated classes. With it gone, these hand-authored utilities carry the exact
+   same declarations; components add them via className. */
+.hv-bd-accent:hover{border-color:var(--accent)}
+.hv-bd-accent-tx:hover{border-color:var(--accent);color:var(--accent)}
+.hv-bg-fact:hover{background:var(--fact)}
+.hv-tx-accent:hover{color:var(--accent)}
+.hv-bg-sunk:hover{background:var(--surface-sunk)}
+.hv-bg-sunk-tx-ink:hover{background:var(--surface-sunk);color:var(--ink)}
+.hv-bright:hover{filter:brightness(1.08)}
+.hv-tx-ink:hover{color:var(--ink)}
+.hv-underline-none:hover{text-decoration:none}
+.hv-bg-white10:hover{background:rgba(255,255,255,0.1)}
+.fc-bd-accent:focus{border-color:var(--accent)}
+.fc-bd-ink:focus{border-color:var(--ink)}
+.fw-bd-accent:focus-within{border-color:var(--accent)}
