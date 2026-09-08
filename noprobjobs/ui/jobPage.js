@@ -3,6 +3,14 @@
    (isMobilePage). `page` is a shaped record; `page.description` is a ready React
    element from data/describe.js. No record logic here. */
 import { h, s, raw } from "./h.js";
+import { Pressable } from "./pressable.js";
+
+/* Primary-CTA bevel (C1): 3px bevel derived from --accent's own fill, no radius; on
+   press the bevel inverts and the label shifts 1px. A press state is not a loading
+   state — Apply opens the external ATS in a new tab after the press has ended. */
+const CTA_BEVEL = (pd) => "border:0;background:var(--accent);color:var(--accent-ink);text-decoration:none;transition:box-shadow 40ms ease-out,transform 40ms ease-out;box-shadow:"
+  + (pd ? "inset -3px -3px 0 0 var(--accent-lite),inset 3px 3px 0 0 var(--accent-dark);transform:translate(1px,1px)"
+        : "inset 3px 3px 0 0 var(--accent-lite),inset -3px -3px 0 0 var(--accent-dark)");
 
 const BACK_ICON = '<svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7.5 1.5 2 7.5l5.5 6"></path></svg>';
 const CLOSE_ICON = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.6 1.6l11.8 11.8"></path><path d="M13.4 1.6L1.6 13.4"></path></svg>';
@@ -22,8 +30,8 @@ function modIcon(m){
 }
 
 export function JobPage({ page, categories = [], back, isMobilePage = false, isPanel = false, isPermanent = false }){
-  const applyBtn = (key) => h("a", { key, href: page.applyUrl, target: "_blank", rel: "noopener noreferrer", className: "hv-bright",
-    style: s("margin-top:14px;justify-self:center;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 22px;border-radius:3px;background:var(--accent);color:var(--accent-ink);font-size:15.5px;font-weight:700;text-decoration:none") }, "Apply on employer site");
+  const applyBtn = (key) => h(Pressable, { key, tag: "a", href: page.applyUrl, target: "_blank", rel: "noopener noreferrer", className: "hv-bright",
+    styleFor: (pd) => s("margin-top:14px;justify-self:center;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 24px;font-size:15.5px;font-weight:700;" + CTA_BEVEL(pd)) }, "Apply on employer site");
 
   return h("div", { style: s("height:100%;display:flex;flex-direction:column;min-height:0;background:var(--surface-raised)") },
     // Top bar — rendered ONLY when it carries a control: the mobile back button or
@@ -41,7 +49,7 @@ export function JobPage({ page, categories = [], back, isMobilePage = false, isP
     // scroll body
     h("div", { style: s("flex:1;min-height:0;overflow-y:auto") },
       h("div", { style: s("padding:16px 20px 20px;display:grid;gap:5px;border-bottom:1px solid var(--line)") },
-        h("h1", { style: s("margin:0;font-family:var(--font-display);font-stretch:112%;font-size:27px;line-height:1.14;font-weight:800;letter-spacing:-0.008em;color:var(--ink);text-wrap:pretty") }, page.title),
+        h("h1", { style: s("margin:0;font-family:var(--font-display);font-size:27px;line-height:1.14;font-weight:800;letter-spacing:-0.008em;color:var(--ink);text-wrap:pretty") }, page.title),
         h("div", { style: s("display:flex;align-items:center;gap:9px;margin-top:1px") },
           page.showLogo && h("span", { key: "lg", style: s("display:flex;flex:none") }, page.pageLogoImg),
           page.showMonogram && h("span", { key: "mo", "aria-hidden": "true",
@@ -88,8 +96,8 @@ export function JobPage({ page, categories = [], back, isMobilePage = false, isP
       ),
 
       page.live && h("div", { key: "apply-btm", style: s("padding:8px 20px 28px;display:grid;gap:8px;justify-items:center") },
-        h("a", { href: page.applyUrl, target: "_blank", rel: "noopener noreferrer", className: "hv-bright",
-          style: s("min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 22px;border-radius:3px;background:var(--accent);color:var(--accent-ink);font-size:15.5px;font-weight:700;text-decoration:none") }, "Apply on employer site"),
+        h(Pressable, { tag: "a", href: page.applyUrl, target: "_blank", rel: "noopener noreferrer", className: "hv-bright",
+          styleFor: (pd) => s("min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 24px;font-size:15.5px;font-weight:700;" + CTA_BEVEL(pd)) }, "Apply on employer site"),
         h("div", { style: s("font-size:13px;line-height:1.45;color:var(--ink-muted);text-align:center") }, "Job posting managed by employer")
       )
     )

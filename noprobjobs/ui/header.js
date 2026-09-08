@@ -13,9 +13,9 @@ export function Header({ productName = "NoProbJobs.com", onAlerts, wide = false 
         // now, takes an image later with no layout shift. Desktop only (gated on `wide`):
         // the mobile header is already tight. Does not stretch the wordmark. (B4/#3)
         wide && h("span", { key: "logo", "aria-hidden": "true",
-          style: s("flex:none;width:40px;height:40px;display:grid;place-items:center;border-radius:3px;background:var(--fact);color:var(--fact-ink);font-family:var(--font-display);font-stretch:112%;font-size:22px;font-weight:800;line-height:1") }, "N"),
+          style: s("flex:none;width:40px;height:40px;display:grid;place-items:center;border-radius:3px;background:var(--fact);color:var(--fact-ink);font-family:var(--font-display);font-size:22px;font-weight:800;line-height:1") }, "N"),
         h("div", { style: s("display:flex;flex-direction:column;gap:2px;min-width:0") },
-          h("div", { style: s("font-family:var(--font-display);font-stretch:112%;font-weight:800;font-size:17px;letter-spacing:-0.005em;white-space:nowrap;color:var(--mark)") }, productName),
+          h("div", { style: s("font-family:var(--font-display);font-weight:800;font-size:17px;letter-spacing:-0.005em;white-space:nowrap;color:var(--mark)") }, productName),
           h("div", { style: s("font-size:13px;line-height:1.35;color:var(--surface);white-space:nowrap") }, "No experience? No problem.")
         )
       ),

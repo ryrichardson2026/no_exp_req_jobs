@@ -3,9 +3,12 @@
    reads semantic aliases only, never a raw colour. Do not edit here without editing
    the record — this is the one copy now that the frames are gone. */
 :root{
-  --paper:        #FBF8EF;   /* newsprint — page ground */
+  --paper:        #FFFFFF;   /* page ground (was newsprint #FBF8EF — C2: warm cream
+                                is the frontend-design skill's #1 AI-design tell) */
   --paper-raised: #FFFFFF;   /* card fill */
-  --paper-sunk:   #F1EBDA;
+  --paper-sunk:   #F2F4F7;   /* COOL grey (was warm #F1EBDA — C2). Cards now separate on
+                                the white ground via the C1 offset shadow + navy border,
+                                and this sunk grey carries the panel/section separation. */
   --ink-900:      #0A3A75;   /* union navy */
   --ink-500:      #4C6E9C;   /* navy, muted */
   --hair:         #C3D2E8;
@@ -24,6 +27,10 @@
   --accent: var(--brand-600);
   --accent-soft: var(--brand-050);
   --accent-ink: #FFFFFF;
+  /* C1 bevel shades, derived from --accent's own fill (never generic grey): a lighter
+     and a darker red for the raised/inverted bevel on the primary CTA. */
+  --accent-lite: #E5675C;
+  --accent-dark: #9E1D14;
   --mark: var(--mark-500);
   --mark-ink: var(--ink-900);
   --fact: var(--tint-050);
@@ -34,7 +41,7 @@
   --ok-ink-text: #14603F;
   --focus: var(--ink-900);
 
-  --font-display: "Archivo", "Public Sans", system-ui, sans-serif;
+  --font-display: "Chivo", "Public Sans", system-ui, sans-serif;
 
   --gap-block: 8px;
   --gap-section: 16px;
@@ -54,7 +61,7 @@ button{font:inherit;color:inherit}
 [data-desc-html] li{margin:0 0 9px;line-height:1.55}
 [data-desc-html] a{overflow-wrap:anywhere}
 [data-desc-html] h3,[data-desc-html] h4{margin:22px 0 8px;font-size:16.5px;font-weight:800}
-.dsp{font-family:var(--font-display);font-stretch:112%}
+.dsp{font-family:var(--font-display)}
 
 /* ── KEYFRAMES ─────────────────────────────────────────────── */
 @keyframes slideinright{from{transform:translateX(100%)}to{transform:translateX(0)}}
@@ -92,3 +99,9 @@ button{font:inherit;color:inherit}
 .fc-bd-accent:focus{border-color:var(--accent)}
 .fc-bd-ink:focus{border-color:var(--ink)}
 .fw-bd-accent:focus-within{border-color:var(--accent)}
+
+/* C1 depth — press behaviour is JS-driven (see ui/pressable.js): iOS Safari does not
+   apply :active without a bound touch handler, so CSS :active alone is dead on a phone.
+   This class only carries the properties that make a press feel right; the pressed
+   STYLE (offset/shadow/bevel) is applied inline by Pressable. */
+.pressable{-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none}
