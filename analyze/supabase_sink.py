@@ -36,19 +36,23 @@ Python stdlib only.
 import json
 import os
 import sys
+import time
 import urllib.request
 import urllib.error
 from datetime import datetime, timezone
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path.insert(0, ROOT)
+from normalize import model            # noqa: E402  stdlib-only; slugify()
 APPLICABLE_PATH = os.path.join(ROOT, "out", "applicable.jsonl")
 
 SUPABASE_URL = (os.environ.get("SUPABASE_URL")
                 or "https://eyatyzatcmjnmazmaghd.supabase.co").rstrip("/")
 SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 
-BATCH = 500
+BATCH = 150          # smaller POSTs survive flaky links better than one big body
+TRIES = 5            # retry transient network/5xx with backoff; upsert is idempotent
 
 # The pull-managed columns the upsert sends. Deliberately EXCLUDES the operator columns
 # (first_seen, killed, kill_reason, killed_at, killed_by); the upsert_jobs RPC never
@@ -83,13 +87,22 @@ def _req(method, path, body=None, prefer=None):
     req.add_header("Content-Type", "application/json")
     if prefer:
         req.add_header("Prefer", prefer)
-    try:
-        with urllib.request.urlopen(req) as resp:
-            raw = resp.read().decode("utf-8")
-            return json.loads(raw) if raw else None
-    except urllib.error.HTTPError as e:
-        detail = e.read().decode("utf-8", "replace")
-        raise SystemExit(f"{method} {path} -> HTTP {e.code}: {detail}")
+    # Retry transient failures (connection reset / timeout / 5xx) with backoff. Every
+    # write is an idempotent upsert or a pulls insert, so re-sending a batch is safe.
+    for attempt in range(TRIES):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                raw = resp.read().decode("utf-8")
+                return json.loads(raw) if raw else None
+        except urllib.error.HTTPError as e:
+            detail = e.read().decode("utf-8", "replace")
+            if 500 <= e.code < 600 and attempt < TRIES - 1:
+                time.sleep(1.5 * (attempt + 1)); continue
+            raise SystemExit(f"{method} {path} -> HTTP {e.code}: {detail}")
+        except (urllib.error.URLError, TimeoutError) as e:
+            if attempt < TRIES - 1:
+                time.sleep(1.5 * (attempt + 1)); continue
+            raise SystemExit(f"{method} {path} -> network error after {TRIES} tries: {e}")
 
 
 def _row(rec, pull_ts, seed):
@@ -101,6 +114,7 @@ def _row(rec, pull_ts, seed):
     # UNCLASSIFIED is an internal sentinel, not a display category — store [] instead,
     # matching the site's contract (never emit the sentinel across the boundary).
     row["category"] = [c for c in (rec.get("category") or []) if c != "UNCLASSIFIED"]
+    row["slug"] = model.slugify(rec.get("title"))    # write-once: RPC sets it on INSERT only
     if seed:
         row["first_seen"] = rec.get("first_seen")    # option A: preserve real history
     return row

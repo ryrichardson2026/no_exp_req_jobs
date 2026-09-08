@@ -21,6 +21,7 @@ filled, which makes it the more trustworthy of the two.
 
 import hashlib
 import re
+import unicodedata
 
 SCHEMA_VERSION = "1.0.0"
 
@@ -232,6 +233,21 @@ def order_salary(rec):
     if lo is not None and hi is not None and lo > hi:
         rec["salary_min"], rec["salary_max"] = hi, lo
     return rec
+
+
+def slugify(title, maxlen=60):
+    """URL slug for a job's flat address /jobs/{slug}-{job_number}. Decoration only —
+    the route matches the job_number, so the slug need not be unique. WRITE-ONCE: generated
+    at first insert and never changed (a changing slug would change the canonical URL),
+    so the sink sends it but the upsert only sets it on INSERT. ASCII-fold, lowercase,
+    non-alphanumerics to '-', collapse/trim, cap at a word boundary. Empty -> 'job'."""
+    s = unicodedata.normalize("NFKD", str(title or "")).encode("ascii", "ignore").decode("ascii")
+    s = re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
+    if len(s) > maxlen:
+        cut = s[:maxlen]
+        sp = cut.rfind("-")
+        s = (cut[:sp] if sp > 0 else cut).strip("-")
+    return s or "job"
 
 
 def compute_is_new(rec, now_days_fn=None):
