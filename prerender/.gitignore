@@ -1,0 +1,4 @@
+# Build tooling deps and baked output are not source — they regenerate from the pull.
+node_modules/
+out/
+package-lock.json

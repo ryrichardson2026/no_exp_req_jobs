@@ -1,0 +1,14 @@
+{
+  "name": "noprobjobs-prerender",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Build-time prerender: load each route in headless system Chrome, inject JobPosting JSON-LD on job pages, serialize the rendered DOM to static HTML. A rebuild accompanies every pull.",
+  "scripts": {
+    "build": "node build.mjs",
+    "proof": "node prerender.mjs"
+  },
+  "dependencies": {
+    "puppeteer-core": "^23.0.0"
+  }
+}

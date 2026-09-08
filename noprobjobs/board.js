@@ -42,6 +42,8 @@ const CLOSE = '<svg width="13" height="13" viewBox="0 0 15 15" fill="none" strok
 const CLOSE15 = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.6 1.6l11.8 11.8"></path><path d="M13.4 1.6L1.6 13.4"></path></svg>';
 // Shown in the detail pane while jobs_detail (description_html) is fetched on open.
 const DESC_LOADING = h("p", { style: s("color:var(--ink-muted)") }, "Loading…");
+// Leading chevron for the standalone page's destination back-link.
+const BACK_CHEV = '<svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="2" style="flex:none" aria-hidden="true"><path d="M7.5 1.5 2 7.5l5.5 6"></path></svg>';
 
 class BoardApp extends React.Component {
   constructor(props){
@@ -51,6 +53,13 @@ class BoardApp extends React.Component {
       showsPay: false, shifts: [], types: [], sheet: null, sort: "newest", pg: 1,
       alertsOpen: false, alertsDone: false, alertEmail: "",
       wide: window.matchMedia(BP).matches };
+    // A job URL loaded COLD renders a standalone reading document (what the prerender
+    // bakes and what a crawler / shared link gets), not the board with a panel. Decided
+    // once, from the entry URL, so the very first render is already standalone (no flash
+    // of the board shell). In-app browsing never sets this — clicking a card there opens
+    // the master-detail panel client-side, so that behaviour is untouched.
+    this._standalone = false;
+    try { this._standalone = RT.parsePath(window.location.pathname).kind === "job"; } catch (e) {}
   }
 
   // ── state changes: every filter/sort resets to page one ──────────────
@@ -419,7 +428,11 @@ class BoardApp extends React.Component {
     if (openRec && det) openRec = Object.assign({}, openRec, det);   // merge description_html
     const detailReady = !!det;
     const onPage = !!st.openId && !!openRec;
-    const expired = openRec ? openRec.freshness_state === "STALE" : false;
+    // Expired = the employer actually removed it (churn: the latest pull for its source
+    // didn't see it), NOT merely posted long ago. freshness_state STALE is an age LABEL
+    // ("Posted 2 months ago") and a sort signal; a 30-day-old posting still present in the
+    // pull is live and still accepting, so it keeps its Apply button and its JobPosting.
+    const expired = openRec ? !!openRec.expired : false;
     let page = { modifiers: [], live: !expired, expired };
     if (openRec) {
       const mods = [];
@@ -675,8 +688,33 @@ class BoardApp extends React.Component {
     );
   }
 
+  // ── standalone job page (cold job-URL load / prerendered document) ───────
+  // A normal scrolling document, not the 100vh app shell: title, employer, pay,
+  // experience, full description, Apply — and nothing else (the payload the 6.6MB board
+  // never was). The back affordance is an <a href> naming its destination, so a cold
+  // arrival with no history still has somewhere real to go.
+  renderStandalone(d){
+    const rec = d.openRec;
+    const back = rec ? RT.backTo(rec.state, R.recordCats(rec)) : { href: "/jobs/", label: "All jobs" };
+    return h("div", { style: s("min-height:100vh;display:flex;flex-direction:column;background:var(--surface)") },
+      h(Header, { productName: PRODUCT, onAlerts: this.openAlerts, wide: this.state.wide }),
+      h("main", { style: s("flex:1;padding:14px 20px 56px") },
+        h("div", { style: s("max-width:760px;margin:0 auto;display:grid;gap:12px") },
+          h("a", { href: back.href, className: "hv-tx-accent",
+            style: s("display:inline-flex;align-items:center;gap:7px;min-height:44px;font-size:15px;font-weight:600;color:var(--accent);text-decoration:none") },
+            raw(BACK_CHEV), h("span", null, back.label)),
+          rec
+            ? h(JobPage, { page: d.page, isStandalone: true })
+            : h("p", { style: s("color:var(--ink-muted)") }, "Loading…")
+        )
+      ),
+      this.renderAlerts()
+    );
+  }
+
   render(){
     const d = this.derive();
+    if (this._standalone) return this.renderStandalone(d);
     return h("div", { style: s("height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative;background:var(--surface)") },
       h(Header, { productName: PRODUCT, onAlerts: this.openAlerts, wide: this.state.wide }),
       this.state.wide ? this.renderWide(d) : this.renderMobile(d),

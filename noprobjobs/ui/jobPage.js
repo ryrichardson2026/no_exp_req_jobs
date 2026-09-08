@@ -1,7 +1,10 @@
-/* Job detail. One component, two placements: a permanent panel on wide screens
-   (isPermanent) and a full page reached by tapping a card on narrow ones
-   (isMobilePage). `page` is a shaped record; `page.description` is a ready React
-   element from data/describe.js. No record logic here. */
+/* Job detail. One component, now three placements: a permanent panel on wide screens
+   (isPermanent), a full page reached by tapping a card on narrow ones (isMobilePage),
+   and a STANDALONE reading document (isStandalone) rendered when a job URL is loaded
+   cold — a crawler or a shared link — which is what the D2 prerender bakes. `page` is a
+   shaped record; `page.description` is a ready React element from data/describe.js. No
+   record logic here. The four content blocks are built once and shared by all three
+   placements, so the standalone document and the panel show byte-identical content. */
 import { h, s, raw } from "./h.js";
 import { Pressable } from "./pressable.js";
 
@@ -29,9 +32,72 @@ function modIcon(m){
   return null;
 }
 
-export function JobPage({ page, categories = [], back, isMobilePage = false, isPanel = false, isPermanent = false }){
+export function JobPage({ page, categories = [], back, isMobilePage = false, isPanel = false, isPermanent = false, isStandalone = false }){
   const applyBtn = (key) => h(Pressable, { key, tag: "a", href: page.applyUrl, target: "_blank", rel: "noopener noreferrer", className: "hv-bright",
     styleFor: (pd) => s("margin-top:14px;justify-self:center;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 24px;font-size:15.5px;font-weight:700;" + CTA_BEVEL(pd)) }, "Apply on employer site");
+
+  // ── content blocks, built once and shared by all three placements ────────
+  const titleBlock = h("div", { key: "title", style: s("padding:16px 20px 20px;display:grid;gap:5px;border-bottom:1px solid var(--line)") },
+    h("h1", { style: s("margin:0;font-family:var(--font-display);font-size:27px;line-height:1.14;font-weight:800;letter-spacing:-0.008em;color:var(--ink);text-wrap:pretty") }, page.title),
+    h("div", { style: s("display:flex;align-items:center;gap:9px;margin-top:1px") },
+      page.showLogo && h("span", { key: "lg", style: s("display:flex;flex:none") }, page.pageLogoImg),
+      page.showMonogram && h("span", { key: "mo", "aria-hidden": "true",
+        style: s("width:24px;height:24px;display:grid;place-items:center;border-radius:3px;background:var(--fact);color:var(--fact-ink);font-size:13px;font-weight:800;flex:none") }, page.monogram),
+      h("span", { style: s("font-size:16px;font-weight:600;color:var(--ink)") }, page.company)
+    ),
+    h("div", { style: s("font-size:15px;color:var(--ink-muted)") }, page.locationLine),
+    page.pay && h("div", { key: "pay", style: s("font-size:17px;font-weight:700;color:var(--ink);margin-top:3px") }, page.pay),
+
+    page.expired && h("div", { key: "exp", style: s("margin-top:12px;padding:14px;background:var(--surface-sunk);display:grid;gap:4px") },
+      h("div", { style: s("font-size:15px;font-weight:700;color:var(--ink)") }, "This job is no longer accepting applications."),
+      h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "The employer removed the posting. Browse other retail jobs below.")
+    ),
+    page.expired && h("div", { key: "exc", style: s("margin-top:12px;display:flex;flex-wrap:wrap;gap:8px") },
+      categories.map((cat) => h("button", { key: cat, type: "button", className: "hv-bd-accent-tx",
+        style: s("min-height:44px;padding:0 14px;border-radius:3px;background:var(--surface-raised);border:1px solid var(--line);font-size:15px;font-weight:500;color:var(--ink);cursor:pointer") }, cat))
+    ),
+
+    page.live && applyBtn("apply-top")
+  );
+
+  const modsBlock = page.hasModifiers && h("div", { key: "mods", style: s("margin:14px 20px;padding:12px 14px;background:var(--surface-raised);border:2px solid var(--line);border-radius:3px;display:grid;gap:8px") },
+    page.expStrong && h("div", { key: "es", style: s("display:flex;align-items:flex-start;gap:9px;color:var(--ok-ink-text)") },
+      raw(OK_ICON), h("span", { style: s("font-size:16px;font-weight:700") }, page.expLabel)),
+    page.verbatimNeedsLabel && h("div", { key: "vn", style: s("display:flex;align-items:flex-start;gap:9px") },
+      raw(STAR_ICON),
+      h("div", { style: s("display:grid;gap:2px") },
+        h("div", { style: s("font-size:16px;font-weight:700;color:var(--accent)") }, page.expLabel),
+        h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "“" + page.expVerbatim + "”")
+      )
+    ),
+    page.verbatimBare && h("div", { key: "vb", style: s("display:flex;align-items:flex-start;gap:9px") },
+      raw(INFO_ICON),
+      h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "“" + page.expVerbatim + "”")
+    ),
+    (page.modifiers || []).map((m, i) => h("div", { key: "m" + i, style: s("display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600;color:var(--ink)") },
+      modIcon(m), h("span", null, m.value))),
+    page.posted && h("div", { key: "po", style: s("display:flex;align-items:center;gap:9px;font-size:15px;color:var(--ink-muted)") },
+      raw(CLOCK_ICON), h("span", null, page.posted))
+  );
+
+  const descBlock = h("div", { key: "desc", style: s("padding:20px 20px 8px") },
+    h("div", { "data-desc-html": "true" }, page.description)
+  );
+
+  const applyBtm = page.live && h("div", { key: "apply-btm", style: s("padding:8px 20px 28px;display:grid;gap:8px;justify-items:center") },
+    h(Pressable, { tag: "a", href: page.applyUrl, target: "_blank", rel: "noopener noreferrer", className: "hv-bright",
+      styleFor: (pd) => s("min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 24px;font-size:15.5px;font-weight:700;" + CTA_BEVEL(pd)) }, "Apply on employer site"),
+    h("div", { style: s("font-size:13px;line-height:1.45;color:var(--ink-muted);text-align:center") }, "Job posting managed by employer")
+  );
+
+  // Standalone reading document (prerendered): normal page flow, no panel/mobile chrome,
+  // no inner scroller — the document itself scrolls, which is the sustained-reading
+  // surface. The 68ch measure lives on [data-desc-html] in styles.css, so the description
+  // is capped there. The destination back-link is rendered by the board above this.
+  if (isStandalone) {
+    return h("article", { style: s("background:var(--surface-raised);width:100%;border:1px solid var(--line);border-radius:3px") },
+      titleBlock, modsBlock, descBlock, applyBtm);
+  }
 
   return h("div", { style: s("height:100%;display:flex;flex-direction:column;min-height:0;background:var(--surface-raised)") },
     // Top bar — rendered ONLY when it carries a control: the mobile back button or
@@ -48,58 +114,7 @@ export function JobPage({ page, categories = [], back, isMobilePage = false, isP
     ),
     // scroll body
     h("div", { style: s("flex:1;min-height:0;overflow-y:auto") },
-      h("div", { style: s("padding:16px 20px 20px;display:grid;gap:5px;border-bottom:1px solid var(--line)") },
-        h("h1", { style: s("margin:0;font-family:var(--font-display);font-size:27px;line-height:1.14;font-weight:800;letter-spacing:-0.008em;color:var(--ink);text-wrap:pretty") }, page.title),
-        h("div", { style: s("display:flex;align-items:center;gap:9px;margin-top:1px") },
-          page.showLogo && h("span", { key: "lg", style: s("display:flex;flex:none") }, page.pageLogoImg),
-          page.showMonogram && h("span", { key: "mo", "aria-hidden": "true",
-            style: s("width:24px;height:24px;display:grid;place-items:center;border-radius:3px;background:var(--fact);color:var(--fact-ink);font-size:13px;font-weight:800;flex:none") }, page.monogram),
-          h("span", { style: s("font-size:16px;font-weight:600;color:var(--ink)") }, page.company)
-        ),
-        h("div", { style: s("font-size:15px;color:var(--ink-muted)") }, page.locationLine),
-        page.pay && h("div", { key: "pay", style: s("font-size:17px;font-weight:700;color:var(--ink);margin-top:3px") }, page.pay),
-
-        page.expired && h("div", { key: "exp", style: s("margin-top:12px;padding:14px;background:var(--surface-sunk);display:grid;gap:4px") },
-          h("div", { style: s("font-size:15px;font-weight:700;color:var(--ink)") }, "This job is no longer accepting applications."),
-          h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "The employer removed the posting. Browse other retail jobs below.")
-        ),
-        page.expired && h("div", { key: "exc", style: s("margin-top:12px;display:flex;flex-wrap:wrap;gap:8px") },
-          categories.map((cat) => h("button", { key: cat, type: "button", className: "hv-bd-accent-tx",
-            style: s("min-height:44px;padding:0 14px;border-radius:3px;background:var(--surface-raised);border:1px solid var(--line);font-size:15px;font-weight:500;color:var(--ink);cursor:pointer") }, cat))
-        ),
-
-        page.live && applyBtn("apply-top")
-      ),
-
-      page.hasModifiers && h("div", { key: "mods", style: s("margin:14px 20px;padding:12px 14px;background:var(--surface-raised);border:2px solid var(--line);border-radius:3px;display:grid;gap:8px") },
-        page.expStrong && h("div", { key: "es", style: s("display:flex;align-items:flex-start;gap:9px;color:var(--ok-ink-text)") },
-          raw(OK_ICON), h("span", { style: s("font-size:16px;font-weight:700") }, page.expLabel)),
-        page.verbatimNeedsLabel && h("div", { key: "vn", style: s("display:flex;align-items:flex-start;gap:9px") },
-          raw(STAR_ICON),
-          h("div", { style: s("display:grid;gap:2px") },
-            h("div", { style: s("font-size:16px;font-weight:700;color:var(--accent)") }, page.expLabel),
-            h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "“" + page.expVerbatim + "”")
-          )
-        ),
-        page.verbatimBare && h("div", { key: "vb", style: s("display:flex;align-items:flex-start;gap:9px") },
-          raw(INFO_ICON),
-          h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "“" + page.expVerbatim + "”")
-        ),
-        (page.modifiers || []).map((m, i) => h("div", { key: "m" + i, style: s("display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600;color:var(--ink)") },
-          modIcon(m), h("span", null, m.value))),
-        page.posted && h("div", { key: "po", style: s("display:flex;align-items:center;gap:9px;font-size:15px;color:var(--ink-muted)") },
-          raw(CLOCK_ICON), h("span", null, page.posted))
-      ),
-
-      h("div", { style: s("padding:20px 20px 8px") },
-        h("div", { "data-desc-html": "true" }, page.description)
-      ),
-
-      page.live && h("div", { key: "apply-btm", style: s("padding:8px 20px 28px;display:grid;gap:8px;justify-items:center") },
-        h(Pressable, { tag: "a", href: page.applyUrl, target: "_blank", rel: "noopener noreferrer", className: "hv-bright",
-          styleFor: (pd) => s("min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 24px;font-size:15.5px;font-weight:700;" + CTA_BEVEL(pd)) }, "Apply on employer site"),
-        h("div", { style: s("font-size:13px;line-height:1.45;color:var(--ink-muted);text-align:center") }, "Job posting managed by employer")
-      )
+      titleBlock, modsBlock, descBlock, applyBtm
     )
   );
 }

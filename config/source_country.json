@@ -1,0 +1,10 @@
+{
+  "_comment": "Adapter-declared country for JobPosting.jobLocation.addressCountry. Keyed by source_id (the adapter). NOT inferred from the record's state/city — a set-derived country is a hardcode in disguise, the same rule as the URL market. Every current adapter is a US employer feed; a non-US source is added here explicitly when it onboards. Build-time only (the prerender reads it); never part of the record contract.",
+  "_default": null,
+  "oracle_orc": "US",
+  "workday": "US",
+  "target": "US",
+  "compass_api": "US",
+  "radancy_tb": "US",
+  "jibe_api": "US"
+}

@@ -49,6 +49,29 @@ export const CATEGORY_SLUGS = new Set(CATEGORIES.map(catToSlug));
 
 export function stateSlug(abbr){ return STATE_SLUG[abbr] || null; }
 
+/* Full state name for prose ("Washington", "New York", "District of Columbia"), derived
+   from the slug so there is one source of truth for the state list. */
+export function stateName(abbr){
+  const slug = STATE_SLUG[abbr];
+  if (!slug) return null;
+  const small = { of: 1, the: 1 };
+  return slug.split("-").map((w, i) => (i > 0 && small[w]) ? w : w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
+
+/* The back affordance on a STANDALONE job page. It must be an <a href> to a real browse
+   URL, never history.back(): a cold arrival (crawler, shared link) — exactly who the
+   prerender serves — has no history, so back() would eject them to the referrer. The
+   label names the DESTINATION ("All retail jobs in Washington"), not the action, so a
+   cold visitor knows what they'd get. One clear category -> the category browse; multiple
+   or none -> the state browse; no state -> the all-jobs index. */
+export function backTo(stateAbbr, categories){
+  const st = stateName(stateAbbr);
+  const cats = categories || [];
+  if (st && cats.length === 1) return { href: browsePath(stateAbbr, cats[0]), label: "All " + cats[0].toLowerCase() + " jobs in " + st };
+  if (st) return { href: browsePath(stateAbbr, null), label: "All jobs in " + st };
+  return { href: "/jobs/", label: "All jobs" };
+}
+
 export function jobPath(rec){
   return "/jobs/" + (rec.slug || "job") + "-" + rec.job_number;
 }
