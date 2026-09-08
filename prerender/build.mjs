@@ -122,7 +122,11 @@ function attachCache(page, cache){
 
 async function main(){
   const t0 = Date.now();
-  await rm(OUT, { recursive: true, force: true });
+  const LIMIT = process.env.LIMIT ? +process.env.LIMIT : 0;                 // LIMIT=N: bake first N jobs
+  const ONLY = process.env.ONLY ? process.env.ONLY.split(",").map((s) => s.trim()) : null;  // ONLY=n,m: bake just these job_numbers
+  const SMOKE = 8;                                                          // jobs in the smoke pass
+  const fullRun = !LIMIT && !ONLY;
+  if (fullRun) await rm(OUT, { recursive: true, force: true });             // partial runs preserve existing out/
   const recs = await fetchAll("/jobs_detail?select=*&limit=2000");
   const list = await fetchAll("/jobs_list?select=*&limit=2000");
   const meta = await fetchAll("/site_meta?select=pulled_at");
@@ -135,7 +139,7 @@ async function main(){
   for (const r of recs) {
     const ld = r.expired ? null : jobPostingScript(jobPostingLd(r, COUNTRY));   // parity: none on expired
     if (r.expired) expiredCount++; if (ld) ldCount++;
-    routes.push({ type: "job", path: jobPath(r) + "/", url: null, ld });
+    routes.push({ type: "job", path: jobPath(r) + "/", url: null, ld, num: r.job_number });
   }
   // browse: states present, and categories present within each state
   const byState = {};
@@ -147,9 +151,6 @@ async function main(){
   }
   for (const p of browsePaths) routes.push({ type: "browse", path: p, url: null, ld: null });
   routes.push({ type: "landing", path: "/", url: null, ld: null });
-
-  const LIMIT = process.env.LIMIT ? +process.env.LIMIT : 0;   // LIMIT=N: bake N jobs, skip smoke split
-  const SMOKE = 8;                                            // jobs baked in the smoke pass
 
   const server = serve();
   await new Promise((r) => server.listen(PORT, r));
@@ -196,7 +197,10 @@ async function main(){
   try {
     const jobRoutes = routes.filter((r) => r.type === "job");
     const nonJob = routes.filter((r) => r.type !== "job");
-    if (LIMIT) {
+    if (ONLY) {
+      const set = new Set(ONLY.map(String));
+      await runRoutes(jobRoutes.filter((r) => set.has(String(r.num))));   // targeted rebake; no smoke/breaker gymnastics
+    } else if (LIMIT) {
       await runRoutes([...jobRoutes.slice(0, LIMIT), ...nonJob]);
     } else {
       // Smoke FIRST: 8 job pages + every browse/landing route. A broken render/inject path
@@ -209,6 +213,16 @@ async function main(){
     await browser.close();
     server.close();
   }
+
+  // Lifecycle manifest — derived from the DB every run (independent of which pages were
+  // baked), so a targeted rebake still leaves it complete. Drives the deploy's HTTP status
+  // (expired -> 410) and the sitemap (live only). retired = a baked file that no longer has
+  // a live/expired entry AND whose expiry aged out; the retire job (not this build) deletes it.
+  const live = recs.filter((r) => !r.expired).map((r) => jobPath(r) + "/");
+  const expired = recs.filter((r) => r.expired).map((r) => jobPath(r) + "/");
+  const manifest = { generated: (meta[0] && meta[0].pulled_at) || null, live, expired, browse: [...browsePaths] };
+  await mkdir(OUT, { recursive: true });
+  await writeFile(join(OUT, "_lifecycle.json"), JSON.stringify(manifest), "utf8");
 
   const secs = (Date.now() - t0) / 1000;
   const jobs = results.filter((r) => r.type === "job");
@@ -225,6 +239,8 @@ async function main(){
     job_pages_ok: jobs.filter((r) => !r.error).length,
     job_pages_with_jsonld: jobs.filter((r) => r.ld).length,
     expired_no_jsonld: expiredCount,
+    manifest_live: live.length,
+    manifest_expired: expired.length,
     browse_pages_ok: results.filter((r) => r.type === "browse" && !r.error).length,
     landing_ok: results.filter((r) => r.type === "landing" && !r.error).length,
     failures: failures.length,
