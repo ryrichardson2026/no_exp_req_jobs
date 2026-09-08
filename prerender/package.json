@@ -6,6 +6,7 @@
   "description": "Build-time prerender: load each route in headless system Chrome, inject JobPosting JSON-LD on job pages, serialize the rendered DOM to static HTML. A rebuild accompanies every pull.",
   "scripts": {
     "build": "node build.mjs",
+    "retire": "node retire.mjs",
     "proof": "node prerender.mjs"
   },
   "dependencies": {

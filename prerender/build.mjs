@@ -190,7 +190,10 @@ async function main(){
   const ONLY = process.env.ONLY ? process.env.ONLY.split(",").map((s) => s.trim()) : null;  // ONLY=n,m: bake just these job_numbers
   const SMOKE = 8;                                                          // jobs in the smoke pass
   const fullRun = !LIMIT && !ONLY;
-  if (fullRun) await rm(OUT, { recursive: true, force: true });             // partial runs preserve existing out/
+  // The bake is INCREMENTAL — no rm(OUT). A job that crosses 30 days stops being baked
+  // (skipped below), and its stale expired page stays on disk until retire.mjs deletes it;
+  // that is the retire step's real work. Paths are stable (slug + job_number are write-once),
+  // so live/expired pages just overwrite and nothing orphans.
   const recs = await fetchAll("/jobs_detail?select=*&limit=2000");
   const list = await fetchAll("/jobs_list?select=*&limit=2000");
   const meta = await fetchAll("/site_meta?select=pulled_at");
@@ -199,9 +202,10 @@ async function main(){
 
   // enumerate routes
   const routes = [];
-  let ldCount = 0, expiredCount = 0;
+  let ldCount = 0, expiredCount = 0, retiredCount = 0;
   for (const r of recs) {
-    const ld = r.expired ? null : jobPostingScript(jobPostingLd(r, COUNTRY));   // parity: none on expired
+    if (r.retired) { retiredCount++; continue; }                              // retired -> not baked; retire.mjs removes any stale file
+    const ld = r.expired ? null : jobPostingScript(jobPostingLd(r, COUNTRY)); // parity: no JSON-LD once expired
     if (r.expired) expiredCount++; if (ld) ldCount++;
     routes.push({ type: "job", path: jobPath(r) + "/", url: null, ld, num: r.job_number });
   }
@@ -283,13 +287,14 @@ async function main(){
   // (expired -> 410) and the sitemap (live only). retired = a baked file that no longer has
   // a live/expired entry AND whose expiry aged out; the retire job (not this build) deletes it.
   const live = recs.filter((r) => !r.expired).map((r) => jobPath(r) + "/");
-  const expired = recs.filter((r) => r.expired).map((r) => jobPath(r) + "/");
-  const manifest = { generated: (meta[0] && meta[0].pulled_at) || null, live, expired, browse: [...browsePaths] };
+  const expired = recs.filter((r) => r.expired && !r.retired).map((r) => jobPath(r) + "/");   // 410 window (<30d)
+  const retired = recs.filter((r) => r.retired).map((r) => jobPath(r) + "/");                 // retire.mjs deletes these
+  const manifest = { generated: (meta[0] && meta[0].pulled_at) || null, live, expired, retired, browse: [...browsePaths] };
   await mkdir(OUT, { recursive: true });
   await writeFile(join(OUT, "_lifecycle.json"), JSON.stringify(manifest), "utf8");
 
   const expiredBack = {};
-  for (const r of recs) if (r.expired) expiredBack[jobPath(r) + "/"] = backTo(r.state, r.category).href;
+  for (const r of recs) if (r.expired && !r.retired) expiredBack[jobPath(r) + "/"] = backTo(r.state, r.category).href;
   const deploy = await assembleDeploy(live, expiredBack, [...browsePaths]);
 
   const secs = (Date.now() - t0) / 1000;
@@ -309,6 +314,7 @@ async function main(){
     expired_no_jsonld: expiredCount,
     manifest_live: live.length,
     manifest_expired: expired.length,
+    manifest_retired: retired.length,
     sitemap_urls: deploy.sitemap_urls,
     browse_pages_ok: results.filter((r) => r.type === "browse" && !r.error).length,
     landing_ok: results.filter((r) => r.type === "landing" && !r.error).length,
