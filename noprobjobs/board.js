@@ -11,6 +11,7 @@ import { description } from "./data/describe.js";
 import * as R from "./data/record.js";
 import * as L from "./data/resolve.js";
 import * as SB from "./data/supabase.js";
+import * as RT from "./data/routes.js";
 
 const React = window.React;
 const BP = "(min-width:900px)";
@@ -45,7 +46,7 @@ const DESC_LOADING = h("p", { style: s("color:var(--ink-muted)") }, "Loading…"
 class BoardApp extends React.Component {
   constructor(props){
     super(props);
-    this.state = { openId: null, recs: null, logoOk: {}, details: {},
+    this.state = { openId: null, recs: null, logoOk: {}, details: {}, stateCtx: null,
       cities: [], zips: {}, cityGeo: {}, cats: [], catDraft: [], loc: "", locDraft: "", radius: 15,
       showsPay: false, shifts: [], types: [], sheet: null, sort: "newest", pg: 1,
       alertsOpen: false, alertsDone: false, alertEmail: "",
@@ -120,10 +121,23 @@ class BoardApp extends React.Component {
 
   // ── URL state (filters, sort, page, open job) ────────────────────────
   readUrl(){
-    let p;
-    try { p = new URL(window.location.href).searchParams; } catch (e) { return {}; }
+    let u; try { u = new URL(window.location.href); } catch (e) { return {}; }
+    const p = u.searchParams;
+    const out = {};
+    // canonical path: /jobs/{slug}-{id} (job) or /{state}/{category}/ (browse)
+    const route = RT.parsePath(u.pathname);
+    if (route.kind === "job") out._jobRef = (route.jobNumber !== undefined) ? { jobNumber: route.jobNumber } : { internalId: route.internalId };
+    else if (route.kind === "browse") { out.stateCtx = route.state; if (route.category) out.cats = [route.category]; }
+    // legacy ?job=nxj_… (pre-D1 / a shared preview link); resolved + canonicalised on load
+    const legacyJob = p.get("job");
+    if (legacyJob && !out._jobRef) out._jobRef = { internalId: legacyJob };
+    // query refinements (and legacy ?category=, which is multi-select anyway)
     const listOf = (key, allowed) => String(p.get(key) || "").split(",").map((v) => v.trim()).filter((v) => allowed.indexOf(v) >= 0);
-    const out = { cats: listOf("category", R.CATEGORIES), shifts: listOf("shift", R.SHIFT_FACETS), types: listOf("type", R.TYPE_FACETS), showsPay: p.get("pay") === "1" };
+    const qcats = listOf("category", R.CATEGORIES);
+    if (qcats.length && !out.cats) out.cats = qcats;
+    out.shifts = listOf("shift", R.SHIFT_FACETS);
+    out.types = listOf("type", R.TYPE_FACETS);
+    out.showsPay = p.get("pay") === "1";
     const loc = p.get("location");
     if (loc) { out.loc = loc; out.locDraft = loc; }
     const r = parseInt(p.get("radius"), 10);
@@ -138,21 +152,31 @@ class BoardApp extends React.Component {
   writeUrl(over){
     const o = over || {};
     const pick = (k) => (o[k] !== undefined ? o[k] : this.state[k]);
-    const loc = pick("loc"), radius = pick("radius"), job = o.openId !== undefined ? o.openId : this.state.openId;
+    const job = o.openId !== undefined ? o.openId : this.state.openId;
     const page = o.page !== undefined ? o.page : this.state.pg;
     try {
-      const u = new URL(window.location.href);
-      const set = (k, v) => { if (v) u.searchParams.set(k, v); else u.searchParams.delete(k); };
-      set("category", (pick("cats") || []).join(","));
-      set("location", loc);
-      set("radius", loc && /^\d{5}$/.test(loc) ? String(radius) : "");
-      set("pay", pick("showsPay") ? "1" : "");
-      set("shift", (pick("shifts") || []).join(","));
-      set("type", (pick("types") || []).join(","));
-      set("sort", pick("sort") === "newest" ? "" : pick("sort"));
-      set("page", page > 1 ? String(page) : "");
-      set("job", job);
-      window.history.replaceState(null, "", u.pathname + (u.search ? u.search : "") + u.hash);
+      let path;
+      const q = new URLSearchParams();
+      if (job) {
+        // Flat, clean canonical job URL — nothing derived, no query refinements.
+        const rec = (this.state.recs || []).find((r) => r.internal_id === job);
+        path = rec ? RT.jobPath(rec) : "/jobs/";
+      } else {
+        // Browse: state (per the path context) + a SINGLE category in the path;
+        // everything else is a query refinement and stays off the canonical route.
+        const cats = pick("cats") || [];
+        path = RT.browsePath(pick("stateCtx"), cats.length === 1 ? cats[0] : null);
+        if (cats.length > 1) q.set("category", cats.join(","));
+        const loc = pick("loc"); if (loc) q.set("location", loc);
+        const radius = pick("radius"); if (loc && /^\d{5}$/.test(loc)) q.set("radius", String(radius));
+        if (pick("showsPay")) q.set("pay", "1");
+        const shifts = pick("shifts") || []; if (shifts.length) q.set("shift", shifts.join(","));
+        const types = pick("types") || []; if (types.length) q.set("type", types.join(","));
+        const sort = pick("sort"); if (sort && sort !== "newest") q.set("sort", sort);
+        if (page > 1) q.set("page", String(page));
+      }
+      const qs = q.toString();
+      window.history.replaceState(null, "", path + (qs ? "?" + qs : "") + window.location.hash);
     } catch (e) { /* sandboxed */ }
   }
 
@@ -190,13 +214,22 @@ class BoardApp extends React.Component {
     this._mql = window.matchMedia(BP);
     this._onMql = () => this.setState({ wide: this._mql.matches });
     this._mql.addEventListener("change", this._onMql);
-    this.setState(this.readUrl());
-    let wantJob = null;
-    try { wantJob = new URL(window.location.href).searchParams.get("job"); } catch (e) {}
+    const urlState = this.readUrl();
+    this.setState(urlState);
+    const jobRef = urlState._jobRef || null;
     SB.pulledAt().then((d) => R.setToday(d)).catch(() => {});
     SB.listJobs().then((recs) => {
-      const ok = wantJob && recs.some((r) => r.internal_id === wantJob);
-      this.setState({ recs, openId: ok ? wantJob : null });
+      // resolve the URL ref -> a record -> openId (internal_id, the app's key). Prefer
+      // job_number; fall back to a legacy internal_id ref for the transition.
+      let openId = null;
+      if (jobRef) {
+        const rec = jobRef.internalId
+          ? recs.find((r) => r.internal_id === jobRef.internalId)
+          : recs.find((r) => r.job_number === jobRef.jobNumber);
+        openId = rec ? rec.internal_id : null;
+      }
+      // canonicalise once records are in: legacy id / ?job= / ?category= -> the path form
+      this.setState({ recs, openId }, () => this.writeUrl({}));
       this.preflightLogos(recs);
     }).catch((e) => { console.error("jobs_list failed to load", e); this.setState({ recs: [] }); });
     import("./data/cities.js").then((m) => this.setState({ cities: m.CITIES })).catch((e) => console.error("cities.js failed to load", e));

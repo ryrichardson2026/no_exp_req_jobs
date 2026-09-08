@@ -10,6 +10,7 @@ import { catIconSvg } from "./ui/catIcons.js";
 import * as R from "./data/record.js";
 import * as L from "./data/resolve.js";
 import * as SB from "./data/supabase.js";
+import * as RT from "./data/routes.js";
 
 const React = window.React;
 const BP = "(min-width:768px)";
@@ -184,20 +185,24 @@ class LandingApp extends React.Component {
     const o = over || {};
     const loc = o.loc !== undefined ? o.loc : this.state.locDraft;
     const cats = o.category ? [o.category] : this.state.cats;
-    const p = [];
-    if (cats.length) p.push("category=" + cats.map(encodeURIComponent).join(","));
+    // Landing has no per-record state context, so it uses the launch-market parameter
+    // (RT.MARKET) for the browse path — one explicit value, not an inventory scan.
+    const single = cats.length === 1 ? cats[0] : null;
+    const path = RT.browsePath(RT.MARKET, single);        // /washington/ or /washington/{cat}/
+    const q = [];
+    if (cats.length > 1) q.push("category=" + cats.map(encodeURIComponent).join(","));
     if (loc) {
-      p.push("location=" + encodeURIComponent(loc));
-      if (/^\d{5}$/.test(String(loc).trim())) p.push("radius=" + this.state.radius);
+      q.push("location=" + encodeURIComponent(loc));
+      if (/^\d{5}$/.test(String(loc).trim())) q.push("radius=" + this.state.radius);
     }
-    return "board.html" + (p.length ? "?" + p.join("&") : "");
+    return path + (q.length ? "?" + q.join("&") : "");
   }
   submit = () => { window.location.href = this.boardHref(); };
 
   shape(r){
     const domain = r.employer_domain || "";
     const showLogo = R.ownsDomain(r.company_name, domain) && !!this.state.logoOk[domain];
-    const go = () => { window.location.href = "board.html?job=" + encodeURIComponent(r.internal_id); };
+    const go = () => { window.location.href = RT.jobPath(r); };   // /jobs/{slug}-{id}
     return Object.assign({}, r, {
       id: r.internal_id,
       company: r.company_name.split(" /")[0],
