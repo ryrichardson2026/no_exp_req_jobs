@@ -224,7 +224,9 @@ async function main(){
   await new Promise((r) => server.listen(PORT, r));
   const base = "http://localhost:" + PORT;
   routes.forEach((r) => { r.url = base + r.path; });
-  const browser = await puppeteer.launch({ executablePath: CHROME, headless: "new", args: ["--no-sandbox"] });
+  // protocolTimeout raised from the 180s default: under a 6-wide pool a page.evaluate can
+  // queue long enough to trip it on a few pages (flaky, load-dependent). 240s clears it.
+  const browser = await puppeteer.launch({ executablePath: CHROME, headless: "new", args: ["--no-sandbox"], protocolTimeout: 240000 });
 
   // Circuit breaker: a failing build should die fast and loud, not grind through hundreds
   // of identical errors. Abort the moment 5 failures land in a row, or once >=10% of

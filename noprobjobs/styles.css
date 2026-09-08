@@ -71,6 +71,7 @@ button{font:inherit;color:inherit}
 @keyframes slidein{from{transform:translateX(24px);opacity:.4}to{transform:translateX(0);opacity:1}}
 @keyframes livedot{0%{transform:scale(1);opacity:1}55%{transform:scale(1.5);opacity:.45}100%{transform:scale(1);opacity:1}}
 @keyframes sk{0%{opacity:.55}50%{opacity:1}100%{opacity:.55}}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* §4 (step 0): the result-list fade. ONE keyframe, ONE class — the whole effect
    lives here. Delete these two rules to remove it; edit the timing to tune it.

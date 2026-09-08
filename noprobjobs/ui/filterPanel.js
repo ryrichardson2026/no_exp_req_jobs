@@ -37,6 +37,17 @@ function pill(opt, i){
       opt.label));
 }
 
+/* "Apply all" — a select-all checkbox (not a commit button): checks every option in the
+   menu, or clears them if all are already on. Sits at the top of each multi-select menu. */
+function applyAllRow(on, onClick){
+  return h("button", { key: "all", type: "button", role: "checkbox", "aria-checked": on, onClick, className: "hv-bg-sunk",
+      style: s("width:100%;min-height:44px;display:flex;align-items:center;gap:11px;padding:0 8px;background:transparent;border:0;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;text-align:left") },
+    h("span", { "aria-hidden": "true",
+        style: s("flex:none;width:20px;height:20px;display:grid;place-items:center;border-radius:3px;color:var(--accent-ink);border:1px solid " + (on ? "var(--ink)" : "var(--line)") + ";background:" + (on ? "var(--ink)" : "var(--surface)")) },
+      on ? raw(CHECK14) : null),
+    h("span", null, "Apply all"));
+}
+
 export function FilterPanel(p){
   const kids = [];
 
@@ -55,7 +66,8 @@ export function FilterPanel(p){
   if (p.divided) kids.push(sep("d1"));
   if (p.isCat) kids.push(h("div", { key: "cat", style: s("display:grid;gap:6px") },
     h("div", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, "Type of work"),
-    h("div", { style: s("display:grid;gap:2px") }, (p.catOptions || []).map((c, i) => catRow(c, i)))
+    h("div", { style: s("display:grid;gap:2px") },
+      (p.catAll ? [applyAllRow(p.catAllOn, p.catAll)] : []).concat((p.catOptions || []).map((c, i) => catRow(c, i))))
   ));
 
   if (p.divided) kids.push(sep("d2"));
@@ -77,6 +89,7 @@ export function FilterPanel(p){
       h("div", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, "Shift"),
       h("div", { style: s("font-size:13px;line-height:1.45;color:var(--ink-muted);text-wrap:pretty") }, "Few employers state a shift. Turning one on narrows to the jobs that do.")
     ),
+    p.shiftAll && applyAllRow(p.shiftAllOn, p.shiftAll),
     h("div", { style: s("display:flex;flex-wrap:wrap;gap:8px") }, (p.shiftOptions || []).map((so, i) => pill(so, i)))
   ));
 
@@ -86,6 +99,7 @@ export function FilterPanel(p){
       h("div", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, "Employment type"),
       h("div", { style: s("font-size:13px;line-height:1.45;color:var(--ink-muted);text-wrap:pretty") }, "Some employers don’t state a type. Turning one on narrows to the jobs that do.")
     ),
+    p.typeAll && applyAllRow(p.typeAllOn, p.typeAll),
     h("div", { style: s("display:flex;flex-wrap:wrap;gap:8px") }, (p.typeOptions || []).map((t, i) => pill(t, i)))
   ));
 

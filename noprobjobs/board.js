@@ -7,6 +7,7 @@ import { Header } from "./ui/header.js";
 import { JobCard } from "./ui/jobCard.js";
 import { JobPage } from "./ui/jobPage.js";
 import { FilterPanel } from "./ui/filterPanel.js";
+import { catIconSvg } from "./ui/catIcons.js";
 import { description } from "./data/describe.js";
 import * as R from "./data/record.js";
 import * as L from "./data/resolve.js";
@@ -51,7 +52,7 @@ class BoardApp extends React.Component {
     this.state = { openId: null, recs: null, logoOk: {}, details: {}, stateCtx: null,
       cities: [], zips: {}, cityGeo: {}, cats: [], catDraft: [], loc: "", locDraft: "", radius: 15,
       showsPay: false, shifts: [], types: [], sheet: null, sort: "newest", pg: 1,
-      alertsOpen: false, alertsDone: false, alertEmail: "",
+      alertsOpen: false, alertEmail: "", alertLoc: "", alertCats: [], alertCatOpen: false, alertPhase: "form", alertError: "",
       wide: window.matchMedia(BP).matches };
     // A job URL loaded COLD renders a standalone reading document (what the prerender
     // bakes and what a crawler / shared link gets), not the board with a panel. Decided
@@ -89,6 +90,11 @@ class BoardApp extends React.Component {
   };
   toggleShift = (s2) => () => this.toggleIn("shifts", s2);
   toggleType = (t) => () => this.toggleIn("types", t);
+  // "Apply all" select-all checkboxes for the multi-select menus. Category rides the draft
+  // (committed by the menu's Apply); shift/type apply live like their individual options.
+  selectAllCatDraft = () => this.setState((st) => ({ catDraft: (st.catDraft || []).length === R.CATEGORIES.length ? [] : R.CATEGORIES.slice() }));
+  selectAllShifts = () => { const n = this.state.shifts.length === R.SHIFT_FACETS.length ? [] : R.SHIFT_FACETS.slice(); this.setState({ shifts: n, openId: null, pg: 1 }); this.writeUrl({ shifts: n, openId: null, page: 1 }); };
+  selectAllTypes = () => { const n = this.state.types.length === R.TYPE_FACETS.length ? [] : R.TYPE_FACETS.slice(); this.setState({ types: n, openId: null, pg: 1 }); this.writeUrl({ types: n, openId: null, page: 1 }); };
   togglePay = () => { const v = !this.state.showsPay; this.setState({ showsPay: v, openId: null, pg: 1 }); this.writeUrl({ showsPay: v, openId: null, page: 1 }); };
   clearAll = () => {
     this.setState({ cats: [], catDraft: [], loc: "", locDraft: "", showsPay: false, shifts: [], types: [], openId: null, sheet: null, pg: 1 });
@@ -303,16 +309,27 @@ class BoardApp extends React.Component {
   ALERT_KEY = "npj.alerts.dismissed";
   readFlag(){ if (this._flag !== undefined) return this._flag; try { this._flag = window.localStorage.getItem(this.ALERT_KEY) === "1"; } catch (e) { this._flag = false; } return this._flag; }
   writeFlag(){ this._flag = true; try { window.localStorage.setItem(this.ALERT_KEY, "1"); } catch (e) {} }
-  openAlerts = () => this.setState({ alertsOpen: true, alertsDone: false });
-  closeAlerts = () => { this.writeFlag(); this.setState({ alertsOpen: false }); };
+  // Pre-fill from the current filters (cats + location) — shared by the header button and
+  // the auto-prompt in open(), so both open with the same job-type/location context.
+  _alertOpenState(){ return { alertsOpen: true, alertPhase: "form", alertError: "", alertCatOpen: false,
+    alertCats: (this.state.cats || []).slice(), alertLoc: this.state.loc || "" }; }
+  openAlerts = () => this.setState(this._alertOpenState());
+  closeAlerts = () => { this.writeFlag(); clearTimeout(this._alertT); this.setState({ alertsOpen: false }); };
   onAlertEmail = (e) => this.setState({ alertEmail: e.target.value });
-  submitAlerts = (e) => {
-    if (e && e.preventDefault) e.preventDefault();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(this.state.alertEmail)) return;
-    this.writeFlag();                              // location + category ride along, unshown
-    this.setState({ alertsDone: true });
+  onAlertLoc = (e) => this.setState({ alertLoc: e.target.value });
+  toggleAlertCatOpen = () => this.setState((st) => ({ alertCatOpen: !st.alertCatOpen }));
+  toggleAlertCat = (c) => () => this.setState((st) => ({ alertCats: st.alertCats.indexOf(c) >= 0 ? st.alertCats.filter((v) => v !== c) : st.alertCats.concat([c]) }));
+  alertApplyAll = () => this.setState((st) => ({ alertCats: st.alertCats.length === R.CATEGORIES.length ? [] : R.CATEGORIES.slice() }));   // select-all checkbox, live
+  submitAlerts = () => {
+    const email = (this.state.alertEmail || "").trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { this.setState({ alertPhase: "form", alertError: "Enter a valid email address." }); return; }
+    this.setState({ alertPhase: "creating", alertError: "" });
+    const wait = new Promise((r) => { this._alertT = setTimeout(r, 2500); });   // deliberate 2.5s "Creating alert" loader
+    Promise.all([SB.captureAlert({ email, categories: this.state.alertCats, location: this.state.alertLoc, source: "board" }), wait])
+      .then(() => { this.writeFlag(); this.setState({ alertPhase: "done" }); })
+      .catch(() => this.setState({ alertPhase: "form", alertError: "Couldn’t save that — please try again." }));
   };
-  onAlertKey = (e) => { if (e.key === "Enter") this.submitAlerts(e); };
+  onAlertKey = (e) => { if (e.key === "Enter") { e.preventDefault(); this.submitAlerts(); } };
 
   open(r){
     return (e) => {
@@ -320,7 +337,9 @@ class BoardApp extends React.Component {
       this._scrollNode = node; this._scroll = node ? node.scrollTop : 0;
       this._opens = (this._opens || 0) + 1;
       const prompt = this._opens >= 3 && !this.readFlag() && !this.state.alertsOpen;
-      this.setState({ openId: r.internal_id, alertsOpen: prompt || this.state.alertsOpen });
+      const st = { openId: r.internal_id };
+      if (prompt) Object.assign(st, this._alertOpenState());   // auto-prompt opens the alert pre-filled
+      this.setState(st);
       this.syncUrl(r.internal_id);
     };
   }
@@ -481,6 +500,9 @@ class BoardApp extends React.Component {
     return {
       loading, list, total, totalPages, pg, pageRecs, res, radius, isZipDraft,
       catOptions, catDraftOptions, shiftOptions, typeOptions, cityOptions, locLabel, listOf,
+      catAllOn: catDraft.length === R.CATEGORIES.length,
+      shiftAllOn: shifts.length === R.SHIFT_FACETS.length,
+      typeAllOn: types.length === R.TYPE_FACETS.length,
       cats, shifts, types,
       catLabel: cats.length ? listOf(cats) : null,
       // Mobile chip: first selection plus a count, never concatenated names that get
@@ -547,6 +569,9 @@ class BoardApp extends React.Component {
       unmatched: d.unmatched, unmatchedLine: d.unmatchedLine, noCityMatch: d.noCityMatch, noCityMatchLine: d.noCityMatchLine,
       locDraft: this.state.locDraft, onLocDraft: this.onLocDraft, onLocKey: this.onLocKey, applyDraft: this.applyLoc(),
       clearLoc: this.clearLoc, hasLoc: d.hasLoc, showsPay: this.state.showsPay, payOff: !this.state.showsPay, togglePay: this.togglePay,
+      catAll: this.selectAllCatDraft, catAllOn: d.catAllOn,
+      shiftAll: this.selectAllShifts, shiftAllOn: d.shiftAllOn,
+      typeAll: this.selectAllTypes, typeAllOn: d.typeAllOn,
     }, flags);
   }
 
@@ -674,21 +699,45 @@ class BoardApp extends React.Component {
 
   renderAlerts(){
     if (!this.state.alertsOpen) return null;
-    const form = !this.state.alertsDone;
+    const phase = this.state.alertPhase;
+    const cats = this.state.alertCats, allOn = cats.length === R.CATEGORIES.length;
+    const jobLabel = !cats.length ? "Any type of work" : allOn ? "All types of work"
+      : cats.length > 2 ? cats.slice(0, 2).join(", ") + " +" + (cats.length - 2) : cats.join(", ");
+    const inputStyle = "box-sizing:border-box;width:100%;min-height:48px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:var(--surface);font-family:inherit;font-size:16px;color:var(--ink);outline:none";
+    const rowStyle = "width:100%;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;border:0;background:transparent;font-size:15px;color:var(--ink);text-align:left;cursor:pointer";
+    const box = (on) => h("span", { "aria-hidden": "true", style: s("flex:none;width:20px;height:20px;display:grid;place-items:center;border-radius:3px;color:var(--accent-ink);border:1px solid " + (on ? "var(--ink)" : "var(--line)") + ";background:" + (on ? "var(--ink)" : "var(--surface)")) }, on ? raw(CHECK14) : null);
+    const field = (label, node) => h("label", { style: s("display:grid;gap:6px") },
+      h("span", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, label), node);
+
+    const body = phase === "creating"
+      ? h("div", { key: "cr", style: s("display:grid;justify-items:center;gap:14px;padding:24px 0 28px") },
+          h("span", { "aria-hidden": "true", style: s("width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite") }),
+          h("div", { role: "status", style: s("font-size:15px;font-weight:600;color:var(--ink)") }, "Creating alert…"))
+      : phase === "done"
+      ? h("div", { key: "dn", style: s("display:grid;gap:6px;padding-right:40px") },
+          h("div", { className: "dsp", style: s("font-size:21px;line-height:1.16;font-weight:800;color:var(--ink)") }, "You’re on the list"),
+          h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "We’ll email new jobs as they’re posted. Unsubscribe anytime."))
+      : h("div", { key: "fm", style: s("display:grid;gap:12px") },
+          h("div", { style: s("display:grid;gap:5px;padding-right:40px") },
+            h("div", { className: "dsp", style: s("font-size:21px;line-height:1.16;font-weight:800;color:var(--ink);text-wrap:pretty") }, "Get new jobs by email"),
+            h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "New listings sent as they’re posted.")),
+          field("Email", h("input", { type: "email", value: this.state.alertEmail, onChange: this.onAlertEmail, onKeyDown: this.onAlertKey, placeholder: "you@email.com", "aria-label": "Email address", className: "fc-bd-ink", style: s(inputStyle) })),
+          field("Location", h("input", { type: "text", value: this.state.alertLoc, onChange: this.onAlertLoc, onKeyDown: this.onAlertKey, placeholder: "City or ZIP — optional", "aria-label": "Location", className: "fc-bd-ink", style: s(inputStyle) })),
+          field("Job type", h("div", { style: s("position:relative") },
+            h("button", { type: "button", onClick: this.toggleAlertCatOpen, "aria-expanded": this.state.alertCatOpen, "aria-haspopup": "true", className: "hv-bg-sunk", style: s("width:100%;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:var(--surface);font-size:16px;font-weight:600;color:var(--ink);cursor:pointer;text-align:left") },
+              h("span", { style: s("overflow:hidden;text-overflow:ellipsis;white-space:nowrap") }, jobLabel), raw(CHEV)),
+            this.state.alertCatOpen && h("div", { style: s("position:absolute;top:52px;left:0;right:0;z-index:3;background:var(--surface-raised);border:1px solid var(--ink);border-radius:3px;box-shadow:0 10px 24px rgba(10,58,117,0.18);max-height:240px;overflow-y:auto;padding:4px 0") },
+              h("button", { key: "all", type: "button", role: "checkbox", "aria-checked": allOn, onClick: this.alertApplyAll, className: "hv-bg-sunk", style: s(rowStyle + ";font-weight:700;border-bottom:1px solid var(--line)") }, box(allOn), h("span", null, "Apply all")),
+              R.CATEGORIES.map((c, i) => { const on = cats.indexOf(c) >= 0; return h("button", { key: i, type: "button", role: "checkbox", "aria-checked": on, onClick: this.toggleAlertCat(c), className: "hv-bg-sunk", style: s(rowStyle + (on ? ";font-weight:700" : "")) }, box(on), raw(catIconSvg(c, 18)), h("span", null, c)); }))
+          )),
+          this.state.alertError && h("div", { key: "er", role: "alert", style: s("font-size:14px;font-weight:600;color:var(--accent)") }, this.state.alertError),
+          h("button", { key: "go", type: "button", onClick: this.submitAlerts, style: s("min-height:48px;border-radius:3px;background:var(--accent);border:0;font-size:15px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;color:var(--accent-ink);cursor:pointer") }, "Create alert"));
+
     return h("div", { style: s("position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:20px;background:rgba(10,58,117,0.42);animation:scrimin 160ms ease-out") },
       h("div", { onClick: this.closeAlerts, style: s("position:absolute;inset:0") }),
-      h("div", { role: "dialog", "aria-modal": "true", "aria-label": "Get new jobs by email", style: s("position:relative;width:min(380px,100%);padding:20px;background:var(--surface-raised);border:2px solid var(--ink);border-radius:3px;box-shadow:0 18px 44px rgba(10,58,117,0.24);display:grid;gap:12px") },
-        h("button", { type: "button", onClick: this.closeAlerts, "aria-label": "Close", className: "hv-tx-ink", style: s("position:absolute;top:6px;right:6px;width:44px;height:44px;display:grid;place-items:center;background:transparent;border:0;cursor:pointer;color:var(--ink-muted)") }, raw(CLOSE)),
-        form ? [
-          h("div", { key: "f1", style: s("display:grid;gap:6px;padding-right:40px") },
-            h("div", { className: "dsp", style: s("font-size:21px;line-height:1.16;font-weight:800;color:var(--ink);text-wrap:pretty") }, "Get new jobs by email"),
-            h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "New listings sent as they’re posted. Unsubscribe anytime.")),
-          h("div", { key: "f2", style: s("display:flex;gap:8px;align-items:stretch") },
-            h("input", { type: "email", value: this.state.alertEmail, onChange: this.onAlertEmail, onKeyDown: this.onAlertKey, placeholder: "you@email.com", "aria-label": "Email address", className: "fc-bd-ink", style: s("flex:1;min-width:0;box-sizing:border-box;min-height:44px;padding:0 11px;border:1px solid var(--line);border-radius:3px;background:var(--surface);font-family:inherit;font-size:16px;color:var(--ink);outline:none") }),
-            h("button", { type: "button", onClick: this.submitAlerts, style: s("flex:none;min-height:44px;padding:0 15px;border:1px solid var(--accent);border-radius:3px;background:var(--accent);font-size:13.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--accent-ink);cursor:pointer") }, "Sign up"))
-        ] : h("div", { style: s("display:grid;gap:6px;padding-right:40px") },
-            h("div", { className: "dsp", style: s("font-size:21px;line-height:1.16;font-weight:800;color:var(--ink)") }, "You’re on the list"),
-            h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "We’ll email new jobs as they’re posted."))
+      h("div", { role: "dialog", "aria-modal": "true", "aria-label": "Get new jobs by email", style: s("position:relative;width:min(390px,100%);padding:20px;background:var(--surface-raised);border:2px solid var(--ink);border-radius:3px;box-shadow:0 18px 44px rgba(10,58,117,0.24);display:grid;gap:12px") },
+        h("button", { type: "button", onClick: this.closeAlerts, "aria-label": "Close", className: "hv-tx-ink", style: s("position:absolute;top:6px;right:6px;width:44px;height:44px;display:grid;place-items:center;background:transparent;border:0;cursor:pointer;color:var(--ink-muted);z-index:1") }, raw(CLOSE)),
+        body
       )
     );
   }

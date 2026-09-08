@@ -29,3 +29,18 @@ export function jobDetail(internalId){
 export function pulledAt(){
   return get("/site_meta?select=pulled_at").then((rows) => (rows[0] ? rows[0].pulled_at : null));
 }
+
+/* Capture an email-alert signup — the launch signal — through the guarded capture_alert
+   RPC (server-side: validates the email, whitelists categories, dedupes on email). Throws
+   on a bad email or network error so the modal can show a retry rather than silently drop
+   the one number that matters. */
+export function captureAlert({ email, categories, location, source }){
+  return fetch(REST + "/rpc/capture_alert", {
+    method: "POST",
+    headers: Object.assign({ "content-type": "application/json" }, HEADERS),
+    body: JSON.stringify({ p_email: email, p_categories: categories || [], p_location: location || null, p_source: source || null }),
+  }).then((res) => {
+    if (!res.ok) return res.text().then((t) => { throw new Error(t || ("capture_alert " + res.status)); });
+    return true;
+  });
+}

@@ -32,7 +32,8 @@ class LandingApp extends React.Component {
       recs: null, cities: [], zips: {},
       cats: [], locDraft: "", radius: 15, catOpen: false,
       fbOpen: false, fbName: "", fbEmail: "", fbText: "",
-      alertOpen: false, alertEmail: "", toast: "", logoOk: {},
+      alertOpen: false, alertEmail: "", alertLoc: "", alertCats: [], alertCatOpen: false,
+      alertPhase: "form", alertError: "", toast: "", logoOk: {},
       wide: window.matchMedia(BP).matches,
     };
   }
@@ -122,15 +123,27 @@ class LandingApp extends React.Component {
     }).sort((a, b) => b.n - a.n);   // C4: all nine show (no "+4 more"); ordered by volume
   }
 
-  openAlerts = () => this.setState({ alertOpen: true, catOpen: false, fbOpen: false });
-  closeAlerts = () => { this.markAlertsDone(); this.setState({ alertOpen: false }); };
+  // Open with the current filters pre-filled — someone browsing Retail in Seattle who
+  // opens alerts shouldn't re-enter it. Resets to the form phase each open.
+  openAlerts = () => this.setState({ alertOpen: true, catOpen: false, fbOpen: false, alertPhase: "form",
+    alertError: "", alertCatOpen: false, alertCats: this.state.cats.slice(), alertLoc: this.state.locDraft });
+  closeAlerts = () => { this.markAlertsDone(); clearTimeout(this._alertT); this.setState({ alertOpen: false }); };
   onAlertEmail = (e) => this.setState({ alertEmail: e.target.value });
+  onAlertLoc = (e) => this.setState({ alertLoc: e.target.value });
   onAlertKey = (e) => { if (e.key === "Enter") { e.preventDefault(); this.sendAlerts(); } };
+  toggleAlertCatOpen = () => this.setState((st) => ({ alertCatOpen: !st.alertCatOpen }));
+  toggleAlertCat = (c) => () => this.setState((st) => ({ alertCats: st.alertCats.indexOf(c) >= 0 ? st.alertCats.filter((v) => v !== c) : st.alertCats.concat([c]) }));
+  // "Apply all" is a select-all checkbox, not a commit button: checks every option, or
+  // clears them if all are already on. The menu stays live.
+  alertApplyAll = () => this.setState((st) => ({ alertCats: st.alertCats.length === R.CATEGORIES.length ? [] : R.CATEGORIES.slice() }));
   sendAlerts = () => {
-    this.markAlertsDone();
-    this.setState({ alertOpen: false, alertEmail: "", toast: "Thanks — we’ll email you new jobs." });
-    clearTimeout(this._t);
-    this._t = setTimeout(() => this.setState({ toast: "" }), 2600);
+    const email = (this.state.alertEmail || "").trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { this.setState({ alertPhase: "form", alertError: "Enter a valid email address." }); return; }
+    this.setState({ alertPhase: "creating", alertError: "" });
+    const wait = new Promise((r) => { this._alertT = setTimeout(r, 2500); });   // deliberate 2.5s "Creating alert" loader
+    Promise.all([SB.captureAlert({ email, categories: this.state.alertCats, location: this.state.alertLoc, source: "landing" }), wait])
+      .then(() => { this.markAlertsDone(); this.setState({ alertPhase: "done" }); })
+      .catch(() => this.setState({ alertPhase: "form", alertError: "Couldn’t save that — please try again." }));
   };
 
   openFeedback = () => this.setState({ fbOpen: true, catOpen: false });
@@ -168,6 +181,7 @@ class LandingApp extends React.Component {
   // completed search with a location seeds it there). The landing keeps the explicit
   // "Get job alerts" button.
   toggleCat = (c) => () => this.setState((st) => ({ cats: st.cats.indexOf(c) >= 0 ? st.cats.filter((v) => v !== c) : st.cats.concat([c]) }));
+  selectAllCats = () => this.setState((st) => ({ cats: st.cats.length === R.CATEGORIES.length ? [] : R.CATEGORIES.slice() }));   // "Apply all" select-all, live
   onLocDraft = (e) => this.setState({ locDraft: e.target.value });
   onSubmitKey = (e) => { if (e.key === "Enter") { e.preventDefault(); this.submit(); } };
   setRadius = (r) => () => this.setState({ radius: r });
@@ -250,7 +264,10 @@ class LandingApp extends React.Component {
     }));
   }
   renderCatWide(){
+    const allOn = this.state.cats.length === R.CATEGORIES.length;
     return h("div", { role: "group", "aria-label": "Type of work", style: s("display:flex;flex-wrap:wrap;justify-content:center;gap:8px") },
+      h("button", { key: "all", type: "button", onClick: this.selectAllCats, "aria-pressed": allOn, className: allOn ? undefined : "hv-bg-fact",
+          style: s("min-height:46px;display:inline-flex;align-items:center;padding:0 15px;border:1px solid var(--ink);border-radius:3px;background:" + (allOn ? "var(--ink)" : "var(--surface-raised)") + ";font-size:15px;font-weight:700;color:" + (allOn ? "var(--surface)" : "var(--ink)") + ";cursor:pointer;white-space:nowrap") }, "Apply all"),
       this.catOptions().map((c, i) => c.isOn
         ? h("button", { key: i, type: "button", onClick: c.pick, "aria-pressed": true, style: s("min-height:46px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);font-size:15px;font-weight:700;color:var(--surface);cursor:pointer;white-space:nowrap") }, raw(catIconSvg(c.label, 20, "currentColor")), h("span", null, c.label))
         : h("button", { key: i, type: "button", onClick: c.pick, "aria-pressed": false, className: "hv-bg-fact", style: s("min-height:46px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border:1px solid var(--ink);border-radius:3px;background:var(--surface-raised);font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;white-space:nowrap") }, raw(catIconSvg(c.label, 20)), h("span", null, c.label)))
@@ -258,6 +275,7 @@ class LandingApp extends React.Component {
   }
   renderCatMobile(){
     const picked = this.state.cats;
+    const allOn = picked.length === R.CATEGORIES.length;
     const listOf = (arr) => (arr.length > 2 ? arr.slice(0, 2).join(", ") + " +" + (arr.length - 2) : arr.join(", "));
     const catLabel = picked.length ? listOf(picked) : null;
     return h("div", { style: s("position:relative") },
@@ -269,6 +287,9 @@ class LandingApp extends React.Component {
       this.state.catOpen && h("div", { key: "pop", "data-filter-pop": "true", role: "dialog", "aria-label": "Type of work", style: s("position:absolute;top:54px;left:0;z-index:6;width:330px;max-width:100%;box-sizing:border-box;background:var(--surface-raised);border:2px solid var(--ink);border-radius:3px;box-shadow:0 10px 24px rgba(10,58,117,0.18);animation:sheetdown 160ms cubic-bezier(.22,.61,.36,1)") },
         h("div", { style: s("padding:8px 0") },
           h("div", { style: s("padding:6px 14px 8px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink)") }, "Type of work"),
+          h("button", { key: "all", type: "button", role: "checkbox", "aria-checked": allOn, onClick: this.selectAllCats, className: "hv-bg-sunk", style: s("width:100%;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 14px;border:0;background:transparent;font-size:15px;font-weight:700;color:var(--ink);text-align:left;cursor:pointer") },
+            allOn ? h("span", { style: s("flex:none;width:18px;height:18px;border-radius:3px;background:var(--ink);display:grid;place-items:center") }, raw(ROW_CHECK)) : h("span", { style: s("flex:none;width:18px;height:18px;border-radius:3px;border:1px solid var(--ink);background:var(--surface-raised)") }),
+            h("span", null, "Apply all")),
           this.catOptions().map((c, i) => h("button", { key: i, type: "button", onClick: c.pick, "aria-pressed": c.isOn, className: "hv-bg-sunk", style: s("width:100%;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 14px;border:0;background:transparent;font-size:15px;color:var(--ink);text-align:left;cursor:pointer") },
             c.isOn
               ? h("span", { style: s("flex:none;width:18px;height:18px;border-radius:3px;background:var(--ink);display:grid;place-items:center") }, raw(ROW_CHECK))
@@ -436,17 +457,43 @@ class LandingApp extends React.Component {
 
   renderAlerts(){
     if (!this.state.alertOpen) return null;
+    const phase = this.state.alertPhase;
+    const cats = this.state.alertCats, allOn = cats.length === R.CATEGORIES.length;
+    const jobLabel = !cats.length ? "Any type of work" : allOn ? "All types of work"
+      : cats.length > 2 ? cats.slice(0, 2).join(", ") + " +" + (cats.length - 2) : cats.join(", ");
+    const inputStyle = "box-sizing:border-box;width:100%;min-height:48px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:16px;color:var(--ink)";
+    const rowStyle = "width:100%;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;border:0;background:transparent;font-size:15px;color:var(--ink);text-align:left;cursor:pointer";
+    const box = (on) => h("span", { "aria-hidden": "true", style: s("flex:none;width:20px;height:20px;display:grid;place-items:center;border-radius:3px;color:var(--accent-ink);border:1px solid " + (on ? "var(--ink)" : "var(--line)") + ";background:" + (on ? "var(--ink)" : "var(--surface-raised)")) }, on ? raw(ROW_CHECK) : null);
+    const field = (label, node) => h("label", { style: s("display:grid;gap:6px") },
+      h("span", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, label), node);
+
+    const body = phase === "creating"
+      ? h("div", { key: "cr", style: s("display:grid;justify-items:center;gap:14px;padding:24px 0 28px") },
+          h("span", { "aria-hidden": "true", style: s("width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite") }),
+          h("div", { role: "status", style: s("font-size:15px;font-weight:600;color:var(--ink)") }, "Creating alert…"))
+      : phase === "done"
+      ? h("div", { key: "dn", style: s("font-size:16.5px;line-height:1.62;color:var(--ink-muted);text-wrap:pretty") }, "We’ll email new jobs as they’re posted. Unsubscribe anytime.")
+      : h("div", { key: "fm", style: s("display:grid;gap:12px") },
+          h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "New listings sent as they’re posted."),
+          field("Email", h("input", { type: "email", value: this.state.alertEmail, onChange: this.onAlertEmail, onKeyDown: this.onAlertKey, placeholder: "you@example.com", className: "fc-bd-accent", style: s(inputStyle) })),
+          field("Location", h("input", { type: "text", value: this.state.alertLoc, onChange: this.onAlertLoc, onKeyDown: this.onAlertKey, placeholder: "City or ZIP — optional", className: "fc-bd-accent", style: s(inputStyle) })),
+          field("Job type", h("div", { style: s("position:relative") },
+            h("button", { type: "button", onClick: this.toggleAlertCatOpen, "aria-expanded": this.state.alertCatOpen, "aria-haspopup": "true", className: "hv-bg-fact", style: s("width:100%;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:16px;font-weight:600;color:var(--ink);cursor:pointer;text-align:left") },
+              h("span", { style: s("overflow:hidden;text-overflow:ellipsis;white-space:nowrap") }, jobLabel), raw(CHEV)),
+            this.state.alertCatOpen && h("div", { style: s("position:absolute;top:52px;left:0;right:0;z-index:3;background:var(--surface-raised);border:1px solid var(--ink);border-radius:3px;box-shadow:0 10px 24px rgba(10,58,117,0.18);max-height:250px;overflow-y:auto;padding:4px 0") },
+              h("button", { key: "all", type: "button", role: "checkbox", "aria-checked": allOn, onClick: this.alertApplyAll, className: "hv-bg-sunk", style: s(rowStyle + ";font-weight:700;border-bottom:1px solid var(--line)") }, box(allOn), h("span", null, "Apply all")),
+              R.CATEGORIES.map((c, i) => { const on = cats.indexOf(c) >= 0; return h("button", { key: i, type: "button", role: "checkbox", "aria-checked": on, onClick: this.toggleAlertCat(c), className: "hv-bg-sunk", style: s(rowStyle + (on ? ";font-weight:700" : "")) }, box(on), raw(catIconSvg(c, 18)), h("span", null, c)); }))
+          )),
+          this.state.alertError && h("div", { key: "er", role: "alert", style: s("font-size:14px;font-weight:600;color:var(--accent)") }, this.state.alertError),
+          h("button", { key: "go", type: "button", onClick: this.sendAlerts, style: s("min-height:48px;border-radius:3px;background:var(--accent);border:0;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--accent-ink);cursor:pointer") }, "Create alert"));
+
     return h("div", { style: s("position:absolute;inset:0;z-index:9") },
       h("div", { onClick: this.closeAlerts, style: s("position:absolute;inset:0;background:rgba(10,58,117,0.42);animation:scrimin 180ms ease-out") }),
       h("div", { role: "dialog", "aria-modal": "true", "aria-label": "Get new jobs by email", style: s("position:sticky;top:64px;z-index:1;width:390px;max-width:calc(100% - 32px);margin:0 auto;box-sizing:border-box;background:var(--surface);border:2px solid var(--ink);border-radius:3px;box-shadow:0 14px 30px rgba(10,58,117,0.22);display:grid;gap:12px;padding:16px;animation:sheetup 220ms cubic-bezier(.22,.61,.36,1)") },
         h("div", { style: s("display:flex;align-items:flex-start;justify-content:space-between;gap:8px") },
-          h("div", { style: s("font-size:16px;font-weight:800;color:var(--ink)") }, "Get new jobs by email"),
+          h("div", { style: s("font-size:16px;font-weight:800;color:var(--ink)") }, phase === "done" ? "You’re on the list" : "Get new jobs by email"),
           h("button", { type: "button", onClick: this.closeAlerts, "aria-label": "Close", className: "hv-bg-sunk-tx-ink", style: s("flex:none;width:44px;height:44px;margin:-10px -10px 0 0;display:grid;place-items:center;background:transparent;border:0;border-radius:8px;cursor:pointer;color:var(--ink-muted)") }, raw(CLOSE))),
-        h("div", { style: s("font-size:16.5px;line-height:1.62;color:var(--ink-muted);text-wrap:pretty") }, "New listings sent as they’re posted. Unsubscribe anytime."),
-        h("label", { style: s("display:grid;gap:6px") },
-          h("span", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, "Email"),
-          h("input", { type: "email", value: this.state.alertEmail, onChange: this.onAlertEmail, onKeyDown: this.onAlertKey, placeholder: "you@example.com", className: "fc-bd-accent", style: s("box-sizing:border-box;min-height:48px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:16px;color:var(--ink)") })),
-        h("button", { type: "button", onClick: this.sendAlerts, style: s("min-height:48px;border-radius:3px;background:var(--accent);border:0;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--accent-ink);cursor:pointer") }, "Send me jobs")
+        body
       )
     );
   }
