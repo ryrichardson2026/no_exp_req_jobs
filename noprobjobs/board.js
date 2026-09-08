@@ -10,6 +10,7 @@ import { FilterPanel } from "./ui/filterPanel.js";
 import { description } from "./data/describe.js";
 import * as R from "./data/record.js";
 import * as L from "./data/resolve.js";
+import * as SB from "./data/supabase.js";
 
 const React = window.React;
 const BP = "(min-width:900px)";
@@ -38,11 +39,13 @@ const FILTERS_ICON = '<svg width="15" height="15" viewBox="0 0 16 16" fill="none
 const FILTERS_ICON_MUTED = '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ink-muted)" stroke-width="1.8" aria-hidden="true"><path d="M2 4.2h12"></path><path d="M4.4 8h7.2"></path><path d="M6.6 11.8h2.8"></path></svg>';
 const CLOSE = '<svg width="13" height="13" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.6 1.6l11.8 11.8"></path><path d="M13.4 1.6L1.6 13.4"></path></svg>';
 const CLOSE15 = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.6 1.6l11.8 11.8"></path><path d="M13.4 1.6L1.6 13.4"></path></svg>';
+// Shown in the detail pane while jobs_detail (description_html) is fetched on open.
+const DESC_LOADING = h("p", { style: s("color:var(--ink-muted)") }, "Loading…");
 
 class BoardApp extends React.Component {
   constructor(props){
     super(props);
-    this.state = { openId: null, recs: null, logoOk: {},
+    this.state = { openId: null, recs: null, logoOk: {}, details: {},
       cities: [], zips: {}, cityGeo: {}, cats: [], catDraft: [], loc: "", locDraft: "", radius: 15,
       showsPay: false, shifts: [], types: [], sheet: null, sort: "newest", pg: 1,
       alertsOpen: false, alertsDone: false, alertEmail: "",
@@ -190,12 +193,12 @@ class BoardApp extends React.Component {
     this.setState(this.readUrl());
     let wantJob = null;
     try { wantJob = new URL(window.location.href).searchParams.get("job"); } catch (e) {}
-    import("./data/jobs.js").then((m) => {
-      R.setToday(m.PULLED_AT);
-      const ok = wantJob && m.RECORDS.some((r) => r.internal_id === wantJob);
-      this.setState({ recs: m.RECORDS, openId: ok ? wantJob : null });
-      this.preflightLogos(m.RECORDS);
-    }).catch((e) => { console.error("jobs.js failed to load", e); this.setState({ recs: [] }); });
+    SB.pulledAt().then((d) => R.setToday(d)).catch(() => {});
+    SB.listJobs().then((recs) => {
+      const ok = wantJob && recs.some((r) => r.internal_id === wantJob);
+      this.setState({ recs, openId: ok ? wantJob : null });
+      this.preflightLogos(recs);
+    }).catch((e) => { console.error("jobs_list failed to load", e); this.setState({ recs: [] }); });
     import("./data/cities.js").then((m) => this.setState({ cities: m.CITIES })).catch((e) => console.error("cities.js failed to load", e));
     import("./data/zips.js").then((m) => this.setState({ zips: m.ZIPS })).catch((e) => console.error("zips.js failed to load", e));
     import("./data/cities-geo.js").then((m) => this.setState({ cityGeo: m.CITY_GEO })).catch((e) => console.error("cities-geo.js failed to load", e));
@@ -210,6 +213,21 @@ class BoardApp extends React.Component {
       const restore = () => { const node = this._scrollNode || this._list; if (node) node.scrollTop = this._scroll || 0; };
       restore(); requestAnimationFrame(restore);
     }
+    // The detail pane shows the open job (or, on desktop, the first of the page). Its
+    // description_html isn't in jobs_list, so fetch jobs_detail for whichever job is
+    // effective now (derive() stashed its id). Cached + de-duped in ensureDetail.
+    this.ensureDetail(this._effectiveId);
+  }
+
+  ensureDetail(id){
+    if (!id || (this.state.details && this.state.details[id])) return;
+    this._detailPending = this._detailPending || {};
+    if (this._detailPending[id]) return;
+    this._detailPending[id] = true;
+    SB.jobDetail(id).then((d) => {
+      if (d) this.setState((st) => { const nx = Object.assign({}, st.details); nx[id] = d; return { details: nx }; });
+    }).catch((e) => console.error("jobs_detail failed", id, e))
+      .then(() => { delete this._detailPending[id]; });
   }
   componentWillUnmount(){
     window.removeEventListener("keydown", this.onKeyDown);
@@ -361,8 +379,12 @@ class BoardApp extends React.Component {
     if (res.kind !== "all") narrowing.push({ label: "Location", fix: "Try a wider radius, or a different city.", open: this.openSheet("loc") });
     if (cats.length) narrowing.push({ label: "Type of work", fix: "Add another type of work.", open: this.openSheet("cat") });
 
-    const openRec = all.find((r) => r.internal_id === st.openId) || pageRecs[0] || null;
+    let openRec = all.find((r) => r.internal_id === st.openId) || pageRecs[0] || null;
     const effectiveId = openRec ? openRec.internal_id : null;
+    this._effectiveId = effectiveId;                 // componentDidUpdate fetches its detail
+    const det = effectiveId ? (st.details || {})[effectiveId] : null;
+    if (openRec && det) openRec = Object.assign({}, openRec, det);   // merge description_html
+    const detailReady = !!det;
     const onPage = !!st.openId && !!openRec;
     const expired = openRec ? openRec.freshness_state === "STALE" : false;
     let page = { modifiers: [], live: !expired, expired };
@@ -372,7 +394,7 @@ class BoardApp extends React.Component {
       if (openRec.shift_raw) mods.push({ value: R.shiftLabel(openRec.shift_raw), isShift: true });
       if (openRec.fte) mods.push({ value: (+(openRec.fte * 100).toFixed(1)) + "% of full-time hours", isFte: true });
       page = Object.assign(this.shape(openRec), {
-        description: description(openRec), modifiers: mods, hasFacts: mods.length > 0,
+        description: detailReady ? description(openRec) : DESC_LOADING, modifiers: mods, hasFacts: mods.length > 0,
         expVerbatim: R.verbatim(openRec),
         verbatimNeedsLabel: openRec.experience_condition === "PREFERRED" && !!R.verbatim(openRec),
         verbatimBare: openRec.experience_condition === "WAIVED" && !!R.verbatim(openRec),

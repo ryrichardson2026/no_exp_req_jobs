@@ -9,6 +9,7 @@ import { Pressable } from "./ui/pressable.js";
 import { catIconSvg } from "./ui/catIcons.js";
 import * as R from "./data/record.js";
 import * as L from "./data/resolve.js";
+import * as SB from "./data/supabase.js";
 
 const React = window.React;
 const BP = "(min-width:768px)";
@@ -64,11 +65,11 @@ class LandingApp extends React.Component {
     this._mql = window.matchMedia(BP);
     this._onMql = () => this.setState({ wide: this._mql.matches });
     this._mql.addEventListener("change", this._onMql);
-    import("./data/jobs.js").then((m) => {
-      R.setToday(m.PULLED_AT);
-      this.setState({ recs: m.RECORDS });
-      this.preflightLogos(m.RECORDS);
-    }).catch((e) => { console.error("jobs.js failed to load", e); this.setState({ recs: [] }); });
+    SB.pulledAt().then((d) => R.setToday(d)).catch(() => {});
+    SB.listJobs().then((recs) => {
+      this.setState({ recs });
+      this.preflightLogos(recs);
+    }).catch((e) => { console.error("jobs_list failed to load", e); this.setState({ recs: [] }); });
     import("./data/cities.js").then((m) => this.setState({ cities: m.CITIES }))
       .catch((e) => console.error("cities.js failed to load", e));
     import("./data/zips.js").then((m) => this.setState({ zips: m.ZIPS }))
