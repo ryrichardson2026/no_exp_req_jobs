@@ -173,6 +173,7 @@ def load_records():
                 # stable account-layer id, deterministic from source + req id
                 r["internal_id"] = model.internal_id(r.get("source_id"),
                                                      r.get("source_job_id"))
+                model.order_salary(r)          # enforce salary_min <= salary_max
                 r["_tenant"] = tenant
                 r["_cred_to_apply"] = xo["credentials_to_apply"]
                 r["_to_apply"] = [rq["clause"] for rq in xo["requirements"]

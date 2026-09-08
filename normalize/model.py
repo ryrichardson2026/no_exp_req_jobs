@@ -223,6 +223,17 @@ def parse_money(value):
         return None, False       # 'See Posting', 'DOE', 'Competitive', etc.
 
 
+def order_salary(rec):
+    """Enforce the contract invariant salary_min <= salary_max. A range is a range:
+    if an adapter emitted it high-to-low (measured once on an oracle_orc Kroger range),
+    min is still the smaller of two already-published numbers - reordering is not
+    fabrication. Idempotent. validate() flags min>max; this is where it's corrected."""
+    lo, hi = rec.get("salary_min"), rec.get("salary_max")
+    if lo is not None and hi is not None and lo > hi:
+        rec["salary_min"], rec["salary_max"] = hi, lo
+    return rec
+
+
 def compute_is_new(rec, now_days_fn=None):
     """New to OUR inventory. Uses first_seen, never posted_at.
 
