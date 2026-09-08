@@ -225,6 +225,11 @@ class BoardApp extends React.Component {
     this._mql.addEventListener("change", this._onMql);
     const urlState = this.readUrl();
     this.setState(urlState);
+    // Alert-intent weighting (see landing.js): a completed search WITH a location is full
+    // intent, so arriving on the board with a location seeds the counter by one; job views
+    // (open()) add the rest. The prompt is only ever evaluated inside open(), so the modal
+    // still cannot fire before a job has been viewed — a chip tap never counts.
+    this._opens = urlState.loc ? 1 : 0;
     const jobRef = urlState._jobRef || null;
     SB.pulledAt().then((d) => R.setToday(d)).catch(() => {});
     SB.listJobs().then((recs) => {

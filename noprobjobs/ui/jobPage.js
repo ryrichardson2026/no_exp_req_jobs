@@ -50,7 +50,7 @@ export function JobPage({ page, categories = [], back, isMobilePage = false, isP
 
     page.expired && h("div", { key: "exp", style: s("margin-top:12px;padding:14px;background:var(--surface-sunk);display:grid;gap:4px") },
       h("div", { style: s("font-size:15px;font-weight:700;color:var(--ink)") }, "This job is no longer accepting applications."),
-      h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "The employer removed the posting. Browse other retail jobs below.")
+      h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "The employer removed the posting. Plenty of other companies are hiring with no experience required.")
     ),
     page.expired && h("div", { key: "exc", style: s("margin-top:12px;display:flex;flex-wrap:wrap;gap:8px") },
       categories.map((cat) => h("button", { key: cat, type: "button", className: "hv-bd-accent-tx",

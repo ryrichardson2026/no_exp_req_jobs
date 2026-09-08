@@ -17,3 +17,6 @@ scratchpad/
 __pycache__/
 .venv/
 *.pyc
+
+.vercel
+.env*

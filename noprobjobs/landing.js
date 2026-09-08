@@ -32,7 +32,7 @@ class LandingApp extends React.Component {
       recs: null, cities: [], zips: {},
       cats: [], locDraft: "", radius: 15, catOpen: false,
       fbOpen: false, fbName: "", fbEmail: "", fbText: "",
-      alertOpen: false, alertEmail: "", intent: 0, toast: "", logoOk: {},
+      alertOpen: false, alertEmail: "", toast: "", logoOk: {},
       wide: window.matchMedia(BP).matches,
     };
   }
@@ -97,7 +97,6 @@ class LandingApp extends React.Component {
     if (this.state.catOpen) { e.preventDefault(); this.setState({ catOpen: false }); }
   };
 
-  static ALERT_THRESHOLD = 3;
   alertsDone(){
     try { if (localStorage.getItem("npj.alerts") === "done") return true; } catch (e) {}
     return LandingApp._alertsDone === true;
@@ -106,12 +105,6 @@ class LandingApp extends React.Component {
     LandingApp._alertsDone = true;
     try { localStorage.setItem("npj.alerts", "done"); } catch (e) {}
   }
-  bumpIntent = () => this.setState((st) => {
-    const n = st.intent + 1;
-    const fire = n >= LandingApp.ALERT_THRESHOLD && !st.alertOpen && !this.alertsDone();
-    return fire ? { intent: n, alertOpen: true, catOpen: false } : { intent: n };
-  });
-
   _payTop(){
     const rates = (this.state.recs || [])
       .filter((r) => r.salary_is_stated && r.pay_period === "HOURLY")
@@ -168,16 +161,14 @@ class LandingApp extends React.Component {
   }
 
   openCat = () => this.setState((st) => ({ catOpen: !st.catOpen }));
-  toggleCat = (c) => () => {
-    this.setState((st) => ({ cats: st.cats.indexOf(c) >= 0 ? st.cats.filter((v) => v !== c) : st.cats.concat([c]) }));
-    this.bumpIntent();
-  };
-  onLocDraft = (e) => {
-    const v = e.target.value;
-    const first = !this.state.locDraft.trim() && !!v.trim();
-    this.setState({ locDraft: v });
-    if (first) this.bumpIntent();
-  };
+  // Category chips are browsing, not alert intent (weight: none) — selecting them no
+  // longer opens the alert modal. Signup volume is the launch signal, so it must measure
+  // a stated interest in being notified about jobs, not exploratory filtering. The alert
+  // modal now fires only where genuine intent lives: on the board, after job views (a
+  // completed search with a location seeds it there). The landing keeps the explicit
+  // "Get job alerts" button.
+  toggleCat = (c) => () => this.setState((st) => ({ cats: st.cats.indexOf(c) >= 0 ? st.cats.filter((v) => v !== c) : st.cats.concat([c]) }));
+  onLocDraft = (e) => this.setState({ locDraft: e.target.value });
   onSubmitKey = (e) => { if (e.key === "Enter") { e.preventDefault(); this.submit(); } };
   setRadius = (r) => () => this.setState({ radius: r });
 
