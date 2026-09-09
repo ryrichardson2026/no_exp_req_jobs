@@ -7,6 +7,7 @@
    placements, so the standalone document and the panel show byte-identical content. */
 import { h, s, raw } from "./h.js";
 import { Pressable } from "./pressable.js";
+import { track, sourcePage } from "./track.js";
 
 /* Primary-CTA bevel (C1): 3px bevel derived from --accent's own fill, no radius; on
    press the bevel inverts and the label shifts 1px. A press state is not a loading
@@ -33,7 +34,12 @@ function modIcon(m){
 }
 
 export function JobPage({ page, categories = [], back, isMobilePage = false, isPanel = false, isPermanent = false, isStandalone = false }){
-  const applyBtn = (key) => h(Pressable, { key, tag: "a", href: page.applyUrl, target: "_blank", rel: "noopener noreferrer", className: "hv-bright",
+  // Change #5: push apply_click before the Apply link navigates. The link opens the ATS in a
+  // new tab (target=_blank), so the current page never unloads — a synchronous push in the
+  // click handler always lands before navigation, no beacon needed. page.applyEvt carries
+  // { job_id, employer, category }, set by the board when it shapes the detail record.
+  const onApply = () => track(Object.assign({ event: "apply_click", source_page: sourcePage() }, page.applyEvt || {}));
+  const applyBtn = (key) => h(Pressable, { key, tag: "a", href: page.applyUrl, target: "_blank", rel: "noopener noreferrer", className: "hv-bright", onClick: onApply,
     styleFor: (pd) => s("margin-top:14px;justify-self:center;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 24px;font-size:15.5px;font-weight:700;" + CTA_BEVEL(pd)) }, "Apply on employer site");
 
   // ── content blocks, built once and shared by all three placements ────────
@@ -85,7 +91,7 @@ export function JobPage({ page, categories = [], back, isMobilePage = false, isP
   );
 
   const applyBtm = page.live && h("div", { key: "apply-btm", style: s("padding:8px 20px 28px;display:grid;gap:8px;justify-items:center") },
-    h(Pressable, { tag: "a", href: page.applyUrl, target: "_blank", rel: "noopener noreferrer", className: "hv-bright",
+    h(Pressable, { tag: "a", href: page.applyUrl, target: "_blank", rel: "noopener noreferrer", className: "hv-bright", onClick: onApply,
       styleFor: (pd) => s("min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 24px;font-size:15.5px;font-weight:700;" + CTA_BEVEL(pd)) }, "Apply on employer site"),
     h("div", { style: s("font-size:13px;line-height:1.45;color:var(--ink-muted);text-align:center") }, "Job posting managed by employer")
   );

@@ -7,6 +7,7 @@ import { Header } from "./ui/header.js";
 import { JobCard } from "./ui/jobCard.js";
 import { Pressable } from "./ui/pressable.js";
 import { catIconSvg } from "./ui/catIcons.js";
+import { track, sourcePage } from "./ui/track.js";
 import * as R from "./data/record.js";
 import * as L from "./data/resolve.js";
 import * as SB from "./data/supabase.js";
@@ -15,6 +16,17 @@ import * as RT from "./data/routes.js";
 const React = window.React;
 const BP = "(min-width:768px)";
 const PRODUCT = "NoProbJobs.com";
+
+// Change #2: the Washington lander is this same landing page served at /washington-jobs.
+// The ONLY content difference is the hero headline; everything else (job data, components,
+// CTAs) is identical. Detected from the path so the one bundle serves both routes, and the
+// prerender bakes the correct headline into each. Kept as a suffix match so a trailing
+// slash (/washington-jobs/) — how the route is baked — still resolves.
+const WA_LANDER_PATH = "/washington-jobs";
+function isWaLander(){
+  try { return (window.location.pathname || "").replace(/\/+$/, "") === WA_LANDER_PATH; }
+  catch (e) { return false; }
+}
 
 const STAR = (px) => '<svg viewBox="0 0 200 200" width="' + px + '" height="' + px + '" aria-hidden="true" style="display:block"><polygon points="100.0,3.0 126.8,35.3 168.6,31.4 164.7,73.2 197.0,100.0 164.7,126.8 168.6,168.6 126.8,164.7 100.0,197.0 73.2,164.7 31.4,168.6 35.3,126.8 3.0,100.0 35.3,73.2 31.4,31.4 73.2,35.3" fill="var(--mark)" stroke="var(--ink)" stroke-width="5" stroke-linejoin="miter"></polygon></svg>';
 const SEARCH_ICON = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="7.6" cy="7.6" r="5.4"></circle><path d="M11.6 11.6l4.2 4.2"></path></svg>';
@@ -35,7 +47,9 @@ class LandingApp extends React.Component {
       recs: props.initialRecs || null, cities: [], zips: {},
       cats: [], locDraft: "", radius: 15, catOpen: false,
       fbOpen: false, fbName: "", fbEmail: "", fbText: "",
-      alertOpen: false, alertEmail: "", alertLoc: "", alertCats: [], alertCatOpen: false,
+      // Change #1: email-only capture — location and type-of-work fields (and their state)
+      // removed. Only alertEmail is collected now.
+      alertOpen: false, alertEmail: "",
       alertPhase: "form", alertError: "", toast: "", logoOk: {},
       wide: window.matchMedia(BP).matches,
     };
@@ -132,24 +146,26 @@ class LandingApp extends React.Component {
 
   // Open with the current filters pre-filled — someone browsing Retail in Seattle who
   // opens alerts shouldn't re-enter it. Resets to the form phase each open.
-  openAlerts = () => this.setState({ alertOpen: true, catOpen: false, fbOpen: false, alertPhase: "form",
-    alertError: "", alertCatOpen: false, alertCats: this.state.cats.slice(), alertLoc: this.state.locDraft });
+  // Change #1: email-only. Opening no longer pre-fills location/categories (those fields
+  // are gone). Change #5: fire job_alert_open on open (covers the header CTA, which routes
+  // its click through here).
+  openAlerts = () => {
+    track({ event: "job_alert_open", source_page: sourcePage() });
+    this.setState({ alertOpen: true, catOpen: false, fbOpen: false, alertPhase: "form", alertError: "" });
+  };
   closeAlerts = () => { this.markAlertsDone(); clearTimeout(this._alertT); this.setState({ alertOpen: false }); };
   onAlertEmail = (e) => this.setState({ alertEmail: e.target.value });
-  onAlertLoc = (e) => this.setState({ alertLoc: e.target.value });
   onAlertKey = (e) => { if (e.key === "Enter") { e.preventDefault(); this.sendAlerts(); } };
-  toggleAlertCatOpen = () => this.setState((st) => ({ alertCatOpen: !st.alertCatOpen }));
-  toggleAlertCat = (c) => () => this.setState((st) => ({ alertCats: st.alertCats.indexOf(c) >= 0 ? st.alertCats.filter((v) => v !== c) : st.alertCats.concat([c]) }));
-  // "Apply all" is a select-all checkbox, not a commit button: checks every option, or
-  // clears them if all are already on. The menu stays live.
-  alertApplyAll = () => this.setState((st) => ({ alertCats: st.alertCats.length === R.CATEGORIES.length ? [] : R.CATEGORIES.slice() }));
   sendAlerts = () => {
     const email = (this.state.alertEmail || "").trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { this.setState({ alertPhase: "form", alertError: "Enter a valid email address." }); return; }
     this.setState({ alertPhase: "creating", alertError: "" });
     const wait = new Promise((r) => { this._alertT = setTimeout(r, 2500); });   // deliberate 2.5s "Creating alert" loader
-    Promise.all([SB.captureAlert({ email, categories: this.state.alertCats, location: this.state.alertLoc, source: "landing" }), wait])
-      .then(() => { this.markAlertsDone(); this.setState({ alertPhase: "done" }); })
+    // capture_alert is a fixed 4-arg RPC (no defaults), so the wire payload keeps the
+    // now-empty p_categories/p_location (supabase.js defaults them to []/null) — the FORM
+    // stopped collecting them, the columns and function signature are untouched (change #1).
+    Promise.all([SB.captureAlert({ email, source: "landing" }), wait])
+      .then(() => { track({ event: "email_capture_submit", source_page: sourcePage() }); this.markAlertsDone(); this.setState({ alertPhase: "done" }); })
       .catch(() => this.setState({ alertPhase: "form", alertError: "Couldn’t save that — please try again." }));
   };
 
@@ -261,9 +277,15 @@ class LandingApp extends React.Component {
   renderHero(){
     // One DOM for both widths; CSS (.hero*) handles the mobile/desktop differences so the
     // prerendered mobile markup doesn't jump to the desktop hero on mount. (see styles.css)
+    // Change #2: the WA lander headline is longer than the default and, on one line, ran into
+    // the pay-burst star at the top-right. Force a two-line break ("Washington companies" /
+    // "hiring now.") — an explicit <br> breaks even under the desktop white-space:nowrap, so
+    // each line stays short and clears the burst; .hero-h1-wa centres the two lines on desktop.
     return h("div", { className: "hero" },
       this.burst(),
-      h("h1", { className: "hero-h1" }, "Companies hiring now."),
+      isWaLander()
+        ? h("h1", { className: "hero-h1 hero-h1-wa" }, "Washington companies", h("br"), "hiring now.")
+        : h("h1", { className: "hero-h1" }, "Companies hiring now."),
       h("div", { className: "hero-badge" }, "No experience needed")
     );
   }
@@ -438,7 +460,7 @@ class LandingApp extends React.Component {
 
   renderFooter(){
     return h("footer", { style: s("flex:none;background:var(--ink)") },
-      h("div", { style: s("max-width:1120px;margin:0 auto;padding:12px 14px;display:grid;justify-items:center;gap:2px") },
+      h("div", { style: s("max-width:var(--rail,1120px);margin:0 auto;padding:12px 14px;display:grid;justify-items:center;gap:2px") },
         h("button", { type: "button", onClick: this.openFeedback, "aria-haspopup": "dialog", "aria-expanded": this.state.fbOpen, className: "hv-bg-white10", style: s("min-height:36px;display:inline-flex;align-items:center;padding:0 16px;border:0;border-radius:3px;background:transparent;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--mark);cursor:pointer") }, "Tell us what’s missing"),
         h("div", { style: s("display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px") },
           h("a", { href: "#terms", style: s("min-height:44px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Terms"),
@@ -473,12 +495,7 @@ class LandingApp extends React.Component {
   renderAlerts(){
     if (!this.state.alertOpen) return null;
     const phase = this.state.alertPhase;
-    const cats = this.state.alertCats, allOn = cats.length === R.CATEGORIES.length;
-    const jobLabel = !cats.length ? "Any type of work" : allOn ? "All types of work"
-      : cats.length > 2 ? cats.slice(0, 2).join(", ") + " +" + (cats.length - 2) : cats.join(", ");
     const inputStyle = "box-sizing:border-box;width:100%;min-height:48px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:16px;color:var(--ink)";
-    const rowStyle = "width:100%;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;border:0;background:transparent;font-size:15px;color:var(--ink);text-align:left;cursor:pointer";
-    const box = (on) => h("span", { "aria-hidden": "true", style: s("flex:none;width:20px;height:20px;display:grid;place-items:center;border-radius:3px;color:var(--accent-ink);border:1px solid " + (on ? "var(--ink)" : "var(--line)") + ";background:" + (on ? "var(--ink)" : "var(--surface-raised)")) }, on ? raw(ROW_CHECK) : null);
     const field = (label, node) => h("label", { style: s("display:grid;gap:6px") },
       h("span", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, label), node);
 
@@ -493,14 +510,6 @@ class LandingApp extends React.Component {
       : h("div", { key: "fm", style: s("display:grid;gap:12px") },
           h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "Get alerted when no-experience needed jobs get posted."),
           field("Email", h("input", { type: "email", value: this.state.alertEmail, onChange: this.onAlertEmail, onKeyDown: this.onAlertKey, placeholder: "you@example.com", className: "fc-bd-accent", style: s(inputStyle) })),
-          field("Location", h("input", { type: "text", value: this.state.alertLoc, onChange: this.onAlertLoc, onKeyDown: this.onAlertKey, placeholder: "City or ZIP — optional", className: "fc-bd-accent", style: s(inputStyle) })),
-          field("Job type", h("div", { style: s("position:relative") },
-            h("button", { type: "button", onClick: this.toggleAlertCatOpen, "aria-expanded": this.state.alertCatOpen, "aria-haspopup": "true", className: "hv-bg-fact", style: s("width:100%;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:16px;font-weight:600;color:var(--ink);cursor:pointer;text-align:left") },
-              h("span", { style: s("overflow:hidden;text-overflow:ellipsis;white-space:nowrap") }, jobLabel), raw(CHEV)),
-            this.state.alertCatOpen && h("div", { style: s("position:absolute;top:52px;left:0;right:0;z-index:3;background:var(--surface-raised);border:1px solid var(--ink);border-radius:3px;box-shadow:0 10px 24px rgba(10,58,117,0.18);max-height:250px;overflow-y:auto;padding:4px 0") },
-              h("button", { key: "all", type: "button", role: "checkbox", "aria-checked": allOn, onClick: this.alertApplyAll, className: "hv-bg-sunk", style: s(rowStyle + ";font-weight:700;border-bottom:1px solid var(--line)") }, box(allOn), h("span", null, "Apply all")),
-              R.CATEGORIES.map((c, i) => { const on = cats.indexOf(c) >= 0; return h("button", { key: i, type: "button", role: "checkbox", "aria-checked": on, onClick: this.toggleAlertCat(c), className: "hv-bg-sunk", style: s(rowStyle + (on ? ";font-weight:700" : "")) }, box(on), raw(catIconSvg(c, 18)), h("span", null, c)); }))
-          )),
           this.state.alertError && h("div", { key: "er", role: "alert", style: s("font-size:14px;font-weight:600;color:var(--accent)") }, this.state.alertError),
           h("button", { key: "go", type: "button", onClick: this.sendAlerts, style: s("min-height:48px;border-radius:3px;background:var(--accent);border:0;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--accent-ink);cursor:pointer") }, "Create alert"));
 
@@ -523,10 +532,10 @@ class LandingApp extends React.Component {
     const hasFreshness = ready && fresh >= LandingApp.FRESH_FLOOR;
     const freshnessLine = fresh + (fresh === 1 ? " new job added this week" : " new jobs added this week");
 
-    return h("div", { style: s("position:relative;display:flex;flex-direction:column;min-height:100%;background:var(--surface)") },
+    return h("div", { className: "landing-scope", style: s("position:relative;display:flex;flex-direction:column;min-height:100%;background:var(--surface)") },
       h(Header, { productName: PRODUCT, onAlerts: this.openAlerts }),
       h("section", { style: s("flex:none;position:relative;background:var(--surface);border-bottom:2px solid var(--ink)") },
-        h("div", { style: s("position:relative;container-type:inline-size;max-width:1120px;margin:0 auto;box-sizing:border-box;padding:0 14px 16px;display:grid;justify-items:stretch;gap:12px") },
+        h("div", { style: s("position:relative;container-type:inline-size;max-width:var(--rail,1120px);margin:0 auto;box-sizing:border-box;padding:0 14px 16px;display:grid;justify-items:stretch;gap:12px") },
           hasFreshness && h("div", { key: "fp", style: s("margin:0 -14px;min-height:30px;display:flex;align-items:center;justify-content:center;gap:8px;padding:4px 14px;background:var(--accent)") },
             h("span", { "aria-hidden": "true", style: s("width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none;animation:livedot 2.4s ease-in-out infinite") }),
             h("span", { style: s("font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent-ink);text-align:center") }, freshnessLine)),
@@ -534,7 +543,7 @@ class LandingApp extends React.Component {
           this.renderSearchCard(res, unmatched)
         )
       ),
-      h("main", { style: s("flex:1;max-width:1120px;width:100%;margin:0 auto;box-sizing:border-box;padding:var(--gap-section) 14px 24px;display:grid;gap:var(--gap-section);align-content:start") },
+      h("main", { style: s("flex:1;max-width:var(--rail,1120px);width:100%;margin:0 auto;box-sizing:border-box;padding:var(--gap-section) 14px 24px;display:grid;gap:var(--gap-section);align-content:start") },
         // C3 order: the jobs come first (the reader sees the product), then "what's
         // different" explains what they just saw, then browse, then the closing CTA.
         this.renderRecent(),

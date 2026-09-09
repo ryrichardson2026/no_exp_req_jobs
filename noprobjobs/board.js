@@ -7,7 +7,7 @@ import { Header } from "./ui/header.js";
 import { JobCard } from "./ui/jobCard.js";
 import { JobPage } from "./ui/jobPage.js";
 import { FilterPanel } from "./ui/filterPanel.js";
-import { catIconSvg } from "./ui/catIcons.js";
+import { track, sourcePage } from "./ui/track.js";
 import { description } from "./data/describe.js";
 import * as R from "./data/record.js";
 import * as L from "./data/resolve.js";
@@ -60,7 +60,8 @@ class BoardApp extends React.Component {
     this.state = { openId: null, recs: props.initialRecs || null, logoOk: {}, details: {}, stateCtx: null,
       cities: [], zips: {}, cityGeo: {}, cats: [], catDraft: [], loc: "", locDraft: "", radius: 15,
       showsPay: false, shifts: [], types: [], sheet: null, sort: "newest", pg: 1,
-      alertsOpen: false, alertEmail: "", alertLoc: "", alertCats: [], alertCatOpen: false, alertPhase: "form", alertError: "",
+      // Change #1: email-only capture — location/type-of-work fields and their state removed.
+      alertsOpen: false, alertEmail: "", alertPhase: "form", alertError: "",
       wide: window.matchMedia(BP).matches };
     // A job URL loaded COLD renders a standalone reading document (what the prerender
     // bakes and what a crawler / shared link gets), not the board with a panel. Decided
@@ -321,24 +322,25 @@ class BoardApp extends React.Component {
   ALERT_KEY = "npj.alerts.dismissed";
   readFlag(){ if (this._flag !== undefined) return this._flag; try { this._flag = window.localStorage.getItem(this.ALERT_KEY) === "1"; } catch (e) { this._flag = false; } return this._flag; }
   writeFlag(){ this._flag = true; try { window.localStorage.setItem(this.ALERT_KEY, "1"); } catch (e) {} }
-  // Pre-fill from the current filters (cats + location) — shared by the header button and
-  // the auto-prompt in open(), so both open with the same job-type/location context.
-  _alertOpenState(){ return { alertsOpen: true, alertPhase: "form", alertError: "", alertCatOpen: false,
-    alertCats: (this.state.cats || []).slice(), alertLoc: this.state.loc || "" }; }
-  openAlerts = () => this.setState(this._alertOpenState());
+  // Change #1: email-only — opening no longer pre-fills location/categories (fields gone).
+  // Change #5: fire job_alert_open on open (covers the header CTA and the empty-state CTA,
+  // both of which route their click through here).
+  openAlerts = () => {
+    track({ event: "job_alert_open", source_page: sourcePage() });
+    this.setState({ alertsOpen: true, alertPhase: "form", alertError: "" });
+  };
   closeAlerts = () => { this.writeFlag(); clearTimeout(this._alertT); this.setState({ alertsOpen: false }); };
   onAlertEmail = (e) => this.setState({ alertEmail: e.target.value });
-  onAlertLoc = (e) => this.setState({ alertLoc: e.target.value });
-  toggleAlertCatOpen = () => this.setState((st) => ({ alertCatOpen: !st.alertCatOpen }));
-  toggleAlertCat = (c) => () => this.setState((st) => ({ alertCats: st.alertCats.indexOf(c) >= 0 ? st.alertCats.filter((v) => v !== c) : st.alertCats.concat([c]) }));
-  alertApplyAll = () => this.setState((st) => ({ alertCats: st.alertCats.length === R.CATEGORIES.length ? [] : R.CATEGORIES.slice() }));   // select-all checkbox, live
   submitAlerts = () => {
     const email = (this.state.alertEmail || "").trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { this.setState({ alertPhase: "form", alertError: "Enter a valid email address." }); return; }
     this.setState({ alertPhase: "creating", alertError: "" });
     const wait = new Promise((r) => { this._alertT = setTimeout(r, 2500); });   // deliberate 2.5s "Creating alert" loader
-    Promise.all([SB.captureAlert({ email, categories: this.state.alertCats, location: this.state.alertLoc, source: "board" }), wait])
-      .then(() => { this.writeFlag(); this.setState({ alertPhase: "done" }); })
+    // capture_alert is a fixed 4-arg RPC (no defaults): the wire keeps the now-empty
+    // p_categories/p_location (defaulted in supabase.js) — the form stopped collecting them,
+    // the columns/signature are untouched (change #1).
+    Promise.all([SB.captureAlert({ email, source: "board" }), wait])
+      .then(() => { track({ event: "email_capture_submit", source_page: sourcePage() }); this.writeFlag(); this.setState({ alertPhase: "done" }); })
       .catch(() => this.setState({ alertPhase: "form", alertError: "Couldn’t save that — please try again." }));
   };
   onAlertKey = (e) => { if (e.key === "Enter") { e.preventDefault(); this.submitAlerts(); } };
@@ -351,7 +353,9 @@ class BoardApp extends React.Component {
       this._opens = (this._opens || 0) + 1;
       const prompt = this._opens >= 3 && !this.readFlag() && !this.state.alertsOpen;
       const st = { openId: r.internal_id };
-      if (prompt) Object.assign(st, this._alertOpenState());   // auto-prompt opens the alert pre-filled
+      // Auto-prompt after the 3rd open. It's an automatic open, not a user click, so it does
+      // NOT push job_alert_open (that event tracks intentional opens via the CTAs / openAlerts).
+      if (prompt) Object.assign(st, { alertsOpen: true, alertPhase: "form", alertError: "" });
       this.setState(st);
       this.syncUrl(r.internal_id);
     };
@@ -485,6 +489,10 @@ class BoardApp extends React.Component {
         verbatimBare: openRec.experience_condition === "WAIVED" && !!R.verbatim(openRec),
         hasModifiers: mods.length > 0 || !!R.postedLabel(openRec.posted_at) || !!R.EXP_LABEL[openRec.experience_condition],
         expired, live: !expired, applyUrl: openRec.apply_url || null,
+        // Change #5: payload for the apply_click dataLayer push, fired from the Apply link in
+        // jobPage.js. job_id prefers the public job_number, falls back to internal_id.
+        applyEvt: { job_id: openRec.job_number != null ? openRec.job_number : openRec.internal_id,
+          employer: (openRec.company_name || "").split(" /")[0], category: R.recordCats(openRec)[0] || null },
       });
     }
 
@@ -721,12 +729,7 @@ class BoardApp extends React.Component {
   renderAlerts(){
     if (!this.state.alertsOpen) return null;
     const phase = this.state.alertPhase;
-    const cats = this.state.alertCats, allOn = cats.length === R.CATEGORIES.length;
-    const jobLabel = !cats.length ? "Any type of work" : allOn ? "All types of work"
-      : cats.length > 2 ? cats.slice(0, 2).join(", ") + " +" + (cats.length - 2) : cats.join(", ");
     const inputStyle = "box-sizing:border-box;width:100%;min-height:48px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:var(--surface);font-family:inherit;font-size:16px;color:var(--ink);outline:none";
-    const rowStyle = "width:100%;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;border:0;background:transparent;font-size:15px;color:var(--ink);text-align:left;cursor:pointer";
-    const box = (on) => h("span", { "aria-hidden": "true", style: s("flex:none;width:20px;height:20px;display:grid;place-items:center;border-radius:3px;color:var(--accent-ink);border:1px solid " + (on ? "var(--ink)" : "var(--line)") + ";background:" + (on ? "var(--ink)" : "var(--surface)")) }, on ? raw(CHECK14) : null);
     const field = (label, node) => h("label", { style: s("display:grid;gap:6px") },
       h("span", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, label), node);
 
@@ -744,14 +747,6 @@ class BoardApp extends React.Component {
             h("div", { className: "dsp", style: s("font-size:21px;line-height:1.16;font-weight:800;color:var(--ink);text-wrap:pretty") }, "Get Job Alerts"),
             h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "Get alerted when no-experience needed jobs get posted.")),
           field("Email", h("input", { type: "email", value: this.state.alertEmail, onChange: this.onAlertEmail, onKeyDown: this.onAlertKey, placeholder: "you@email.com", "aria-label": "Email address", className: "fc-bd-ink", style: s(inputStyle) })),
-          field("Location", h("input", { type: "text", value: this.state.alertLoc, onChange: this.onAlertLoc, onKeyDown: this.onAlertKey, placeholder: "City or ZIP — optional", "aria-label": "Location", className: "fc-bd-ink", style: s(inputStyle) })),
-          field("Job type", h("div", { style: s("position:relative") },
-            h("button", { type: "button", onClick: this.toggleAlertCatOpen, "aria-expanded": this.state.alertCatOpen, "aria-haspopup": "true", className: "hv-bg-sunk", style: s("width:100%;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:var(--surface);font-size:16px;font-weight:600;color:var(--ink);cursor:pointer;text-align:left") },
-              h("span", { style: s("overflow:hidden;text-overflow:ellipsis;white-space:nowrap") }, jobLabel), raw(CHEV)),
-            this.state.alertCatOpen && h("div", { style: s("position:absolute;top:52px;left:0;right:0;z-index:3;background:var(--surface-raised);border:1px solid var(--ink);border-radius:3px;box-shadow:0 10px 24px rgba(10,58,117,0.18);max-height:240px;overflow-y:auto;padding:4px 0") },
-              h("button", { key: "all", type: "button", role: "checkbox", "aria-checked": allOn, onClick: this.alertApplyAll, className: "hv-bg-sunk", style: s(rowStyle + ";font-weight:700;border-bottom:1px solid var(--line)") }, box(allOn), h("span", null, "Apply all")),
-              R.CATEGORIES.map((c, i) => { const on = cats.indexOf(c) >= 0; return h("button", { key: i, type: "button", role: "checkbox", "aria-checked": on, onClick: this.toggleAlertCat(c), className: "hv-bg-sunk", style: s(rowStyle + (on ? ";font-weight:700" : "")) }, box(on), raw(catIconSvg(c, 18)), h("span", null, c)); }))
-          )),
           this.state.alertError && h("div", { key: "er", role: "alert", style: s("font-size:14px;font-weight:600;color:var(--accent)") }, this.state.alertError),
           h("button", { key: "go", type: "button", onClick: this.submitAlerts, style: s("min-height:48px;border-radius:3px;background:var(--accent);border:0;font-size:15px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;color:var(--accent-ink);cursor:pointer") }, "Create alert"));
 

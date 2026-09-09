@@ -50,6 +50,13 @@ export function jobDescription(r){
 export function landingTitle(){ return BRAND + " — Jobs Hiring Now, No Experience Needed"; }
 export function landingDescription(){ return stateName(MARKET) + " jobs hiring now, no experience required. " + DIFF; }
 
+/* The Washington lander (change #2): the landing page served at /washington-jobs, whose only
+   content difference is the "Washington companies hiring now." headline. Its own title/
+   description so it reads as a distinct indexable page; canonical points to itself (set by
+   the baker from the route path). */
+export function waLanderTitle(){ return "Washington Companies Hiring Now, No Experience Needed | " + BRAND; }
+export function waLanderDescription(){ return "Washington companies hiring now, no experience required. " + DIFF; }
+
 export function stateTitle(abbr){ return "Jobs in " + stateName(abbr) + " - No Experience Needed | " + BRAND; }
 export function stateDescription(abbr, count){ return count + " " + stateName(abbr) + " jobs hiring now, no experience required. " + DIFF; }
 export function stateH1(abbr){ return "Jobs in " + stateName(abbr); }

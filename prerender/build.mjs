@@ -33,6 +33,11 @@ const PORT = 8795;
 const CONC = 6;                                     // concurrent Chrome pages
 const SITE_URL = (process.env.SITE_URL || "https://noprobjobs.com").replace(/\/$/, "");   // canonical + OG + sitemap base
 const MOBILE = { width: 412, height: 915, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
+// Change #2: the Washington lander — a landing-page clone (served from index.html, so it runs
+// landing.js) that differs only in its headline. Baked as its own route; excluded from the
+// state-browse machinery entirely (no filtering, no state param). Trailing slash to match how
+// every other baked route is written and how trailingSlash serves it.
+const WA_LANDER = "/washington-jobs/";
 const MIME = { ".html":"text/html",".js":"text/javascript",".mjs":"text/javascript",".css":"text/css",
   ".json":"application/json",".svg":"image/svg+xml",".png":"image/png",".ico":"image/x-icon",".woff2":"font/woff2",".map":"application/json" };
 
@@ -50,8 +55,11 @@ function serve(){
         res.writeHead(200, { "content-type": MIME[extname(p)] || "application/octet-stream" });
         return res.end(await readFile(join(SITE, p)));
       }
+      // "/" and the Washington lander are the landing SPA (index.html → landing.js); every
+      // other virtual path is the board SPA (board.html → board.js).
+      const isLanding = p === "/" || p.replace(/\/+$/, "") === WA_LANDER.replace(/\/+$/, "");
       res.writeHead(200, { "content-type": "text/html" });
-      res.end(await readFile(join(SITE, p === "/" ? "index.html" : "board.html")));
+      res.end(await readFile(join(SITE, isLanding ? "index.html" : "board.html")));
     } catch (e) { res.writeHead(500); res.end(String(e)); }
   });
 }
@@ -110,7 +118,7 @@ async function assembleDeploy(live, expiredBack, browse){
   for (const d of ["data", "ui", "vendor"]) await cp(join(SITE, d), join(OUT, d), { recursive: true });
 
   const base = SITE_URL;
-  const locs = ["/", ...browse, ...live];                          // expired/retired excluded
+  const locs = ["/", WA_LANDER, ...browse, ...live];               // change #2: lander in sitemap; expired/retired excluded
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + locs.map((u) => "  <url><loc>" + base + u + "</loc></url>").join("\n") + "\n</urlset>\n";
   await writeFile(join(OUT, "sitemap.xml"), xml, "utf8");
@@ -252,6 +260,9 @@ async function main(){
     for (const c of byState[st]) if (CAT_SLUG[c]) { const cp = browsePath(st, c); browsePaths.add(cp); routes.push({ type: "browse", path: cp, url: null, state: st, category: c }); }
   }
   routes.push({ type: "landing", path: "/", url: null, meta: { title: PM.landingTitle(), description: PM.landingDescription() } });
+  // Change #2: Washington lander. Same landing type (same render wait + meta injection), its
+  // own path so bake() writes out/washington-jobs/index.html and sets canonical to itself.
+  routes.push({ type: "landing", path: WA_LANDER, url: null, meta: { title: PM.waLanderTitle(), description: PM.waLanderDescription() } });
 
   const server = serve();
   await new Promise((r) => server.listen(PORT, r));

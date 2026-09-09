@@ -45,6 +45,11 @@
 
   --gap-block: 8px;
   --gap-section: 16px;
+
+  /* Content rail (change #4). One knob for the centred column width; the shared header,
+     hero, main, and footer all read it. Default is the pre-existing 1120; the landing
+     pages narrow it on desktop only (see .landing-scope below). */
+  --rail: 1120px;
 }
 
 /* ── BASE ──────────────────────────────────────────────────── */
@@ -109,6 +114,8 @@ button{font:inherit;color:inherit}
   .see-jobs-txt{display:inline}
   .search-help{text-align:center}
   .search-ticks{justify-content:center}
+  /* WA lander headline (change #2): two centred lines so neither runs into the pay burst. */
+  .hero-h1-wa{text-align:center}
 }
 
 /* §4 (step 0): the result-list fade. ONE keyframe, ONE class — the whole effect
@@ -138,6 +145,23 @@ button{font:inherit;color:inherit}
 .fc-bd-accent:focus{border-color:var(--accent)}
 .fc-bd-ink:focus{border-color:var(--ink)}
 .fw-bd-accent:focus-within{border-color:var(--accent)}
+
+/* Change #3: hover/active for the marigold job-alert CTA. Base colours are set inline
+   (bg --mark, label --mark-ink); these carry only the interaction states, using the
+   brightness/translate language already used for CTAs elsewhere — no new colour value.
+   Focus is the global :focus-visible navy ring, which reads well on marigold. */
+.alert-cta:hover{filter:brightness(1.06)}
+.alert-cta:active{filter:brightness(0.92);transform:translateY(1px)}
+
+/* Change #4: desktop-only framing for the landing pages (/ and /washington-jobs). The
+   full-bleed layout ran the content out to a 1120 rail with no visible margin; on desktop
+   we tighten the rail so the column is clearly centred with margin on both sides, and pull
+   in the vertical section rhythm (--gap-section) so the spacing reads correct at the
+   narrower width. Scoped to .landing-scope, so the board is untouched; gated at 1024px, so
+   mobile and tablet are unchanged. */
+@media (min-width:1024px){
+  .landing-scope{ --rail: 1040px; --gap-section: 12px; }
+}
 
 /* C1 depth — press behaviour is JS-driven (see ui/pressable.js): iOS Safari does not
    apply :active without a bound touch handler, so CSS :active alone is dead on a phone.

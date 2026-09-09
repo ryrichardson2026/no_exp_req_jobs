@@ -6,8 +6,12 @@ import { h, s } from "./h.js";
 
 export function Header({ productName = "NoProbJobs.com", onAlerts, wide = false }){
   return h("header", { style: s("flex:none;background:var(--ink)") },
-    h("div", { style: s("max-width:1120px;margin:0 auto;min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 14px") },
-      h("div", { style: s("display:flex;align-items:center;gap:12px;min-width:0") },
+    h("div", { style: s("max-width:var(--rail,1120px);margin:0 auto;min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 14px") },
+      // The brand lockup is a link to the root landing (/), from any page — NOT the current
+      // sub-page (e.g. /washington-jobs). text-decoration:none + hv-underline-none keep it
+      // looking like a logo, not a text link; the inner spans keep their own colours.
+      h("a", { href: "/", "aria-label": productName + " home", className: "hv-underline-none",
+          style: s("display:flex;align-items:center;gap:12px;min-width:0;text-decoration:none") },
         // Logo slot — the NoProbJobs mark, left of the wordmark. Circle-clipped PNG on a
         // transparent ground (built by prerender/assets.mjs), so the yellow disc reads on
         // the navy bar. Shown on both mobile (34px) and desktop (40px); fixed box, so no
@@ -19,8 +23,11 @@ export function Header({ productName = "NoProbJobs.com", onAlerts, wide = false 
           h("div", { style: s("font-size:13px;line-height:1.35;color:var(--surface);white-space:nowrap") }, "No experience? No problem.")
         )
       ),
-      h("button", { type: "button", onClick: onAlerts, "aria-haspopup": "dialog",
-        style: s("flex:none;min-height:44px;display:inline-flex;align-items:center;padding:0 16px;border:0;border-radius:3px;font-size:13.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink);background:var(--surface);cursor:pointer") },
+      // Change #3: the job-alert CTA is marigold (the "this is us" mark colour), not white.
+      // Label stays navy (--mark-ink === --ink): navy-on-marigold clears WCAG AA comfortably.
+      // Hover/focus/active live in styles.css (.alert-cta) using existing tokens/filters only.
+      h("button", { type: "button", onClick: onAlerts, "aria-haspopup": "dialog", className: "alert-cta",
+        style: s("flex:none;min-height:44px;display:inline-flex;align-items:center;padding:0 16px;border:0;border-radius:3px;font-size:13.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--mark-ink);background:var(--mark);cursor:pointer") },
         "Get job alerts")
     )
   );
