@@ -142,7 +142,12 @@ async function bake(page, route){
           document.head.appendChild(t.content.firstChild);
         }, route.ld);
       }
-      const html = await page.evaluate(() => "<!DOCTYPE html>\n" + document.documentElement.outerHTML);
+      const html = await page.evaluate(() => {
+        // Drop the gtm.js/gtag script the GTM loader injected at render time; the static
+        // loader stays and re-injects once on the client, so GTM never fires twice.
+        document.querySelectorAll('script[src*="googletagmanager.com"]').forEach((el) => el.remove());
+        return "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      });
       await writeBaked(route.path, html);
       return { path: route.path, type: route.type, bytes: Buffer.byteLength(html, "utf8"), ld: !!route.ld };
     } catch (e) {
