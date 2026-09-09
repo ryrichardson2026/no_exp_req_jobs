@@ -106,7 +106,7 @@ function middlewareSource(expiredBack, live){
 // still leaves out/ deployable. The baked landing owns out/index.html, so it is NOT copied.
 async function assembleDeploy(live, expiredBack, browse){
   for (const f of ["board.html", "board.js", "landing.js", "styles.css", "404.html",
-                   "favicon.ico", "icon-192.png", "apple-touch-icon.png", "og.png"]) await copyFile(join(SITE, f), join(OUT, f));
+                   "favicon.ico", "icon-192.png", "apple-touch-icon.png", "og.png", "logo.png"]) await copyFile(join(SITE, f), join(OUT, f));
   for (const d of ["data", "ui", "vendor"]) await cp(join(SITE, d), join(OUT, d), { recursive: true });
 
   const base = SITE_URL;
@@ -297,6 +297,26 @@ async function main(){
     await Promise.all(workers);
   }
 
+  // Self-heal: the only failures a healthy run produces are protocolTimeout flakes — a
+  // page.evaluate that queued too long behind the 6-wide pool. Re-bake the failed routes
+  // ONE at a time (no pool, no contention) and swap each success back into results. What
+  // still fails after this is a real error, not a flake. Runs only on a non-aborted build.
+  async function healFailures(){
+    const failed = routes.filter((r) => results.some((x) => x.path === r.path && x.error));
+    if (!failed.length) return;
+    process.stderr.write("  ~~ healing " + failed.length + " failed route(s) sequentially\n");
+    const page = await browser.newPage();
+    await page.setViewport(MOBILE);
+    await attachCache(page, cache);
+    for (const route of failed){
+      const res = await bake(page, route);
+      const idx = results.findIndex((x) => x.path === route.path && x.error);
+      if (!res.error && idx !== -1) { results[idx] = res; breaker.fails--; process.stderr.write("  ~~ healed " + route.path + "\n"); }
+      else if (res.error) process.stderr.write("  ~~ still failing " + route.path + ": " + res.error + "\n");
+    }
+    await page.close();
+  }
+
   try {
     const jobRoutes = routes.filter((r) => r.type === "job");
     const nonJob = routes.filter((r) => r.type !== "job");
@@ -312,6 +332,7 @@ async function main(){
       breaker.smokeFailed = results.some((r) => r.error);
       if (!breaker.smokeFailed && !breaker.aborted) await runRoutes(jobRoutes.slice(SMOKE));
     }
+    if (!breaker.aborted && !breaker.smokeFailed) await healFailures();
   } finally {
     await browser.close();
     server.close();
