@@ -779,8 +779,18 @@ class BoardApp extends React.Component {
             : h("p", { style: s("color:var(--ink-muted)") }, "Loading…")
         )
       ),
+      this.renderFooter(),
       this.renderAlerts()
     );
+  }
+
+  // Slim site footer carrying the privacy-policy link, on every board surface (app shell +
+  // standalone job page). flex:none, so on the 100vh app shell it just shrinks the scrolling
+  // panes above it rather than breaking the height. External link -> new tab.
+  renderFooter(){
+    return h("footer", { style: s("flex:none;background:var(--ink);padding:8px 14px;display:flex;justify-content:center") },
+      h("a", { href: RT.PRIVACY_URL, target: "_blank", rel: "noopener noreferrer",
+        style: s("min-height:32px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Privacy"));
   }
 
   render(){
@@ -789,6 +799,7 @@ class BoardApp extends React.Component {
     return h("div", { style: s("height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative;background:var(--surface)") },
       h(Header, { productName: PRODUCT, onAlerts: this.openAlerts, wide: this.state.wide }),
       this.state.wide ? this.renderWide(d) : this.renderMobile(d),
+      this.renderFooter(),
       this.renderAlerts()
     );
   }

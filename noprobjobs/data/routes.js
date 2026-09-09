@@ -21,6 +21,10 @@ import { CATEGORIES } from "./record.js";
    named value, not a derivation from whatever states happen to be in the data. */
 export const MARKET = "WA";
 
+/* External privacy policy (hosted on TermsFeed). Linked from every page's footer — one
+   source of truth so landing, board, and job pages can never drift. */
+export const PRIVACY_URL = "https://www.termsfeed.com/live/60736fc4-8d67-4f8f-89e4-f84456f7dc22";
+
 export const STATE_SLUG = {
   AL:"alabama", AK:"alaska", AZ:"arizona", AR:"arkansas", CA:"california", CO:"colorado",
   CT:"connecticut", DE:"delaware", DC:"district-of-columbia", FL:"florida", GA:"georgia",
