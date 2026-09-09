@@ -548,6 +548,48 @@
         ]
       }
     },
+    "uhaul": {
+      "label": "U-Haul (U-Haul International / AMERCO)",
+      "host": "uhaul.wd1.myworkdayjobs.com",
+      "tenant": "uhaul",
+      "site": "UhaulJobs",
+      "language": "en-US",
+      "url_style": "myworkdayjobs",
+      "careers_url": "https://uhaul.wd1.myworkdayjobs.com/en-US/UhaulJobs",
+      "terms_reference": null,
+      "employer_domain": "uhaul.com",
+      "nlx_wa_jobs": null,
+      "source_class": "direct-employer",
+      "sector": "retail",
+      "verified": "2026-09-09 PROVISIONAL - Case A on workday confirmed by live capture: jobs.uhaul.com/OpenJobs (ASP.NET skin) fronts Workday tenant 'uhaul' site 'UhaulJobs' (self-identified via the site's own Returning Applicants + Francais links to uhaul.wd1.myworkdayjobs.com). CXS POST /wday/cxs/uhaul/UhaulJobs/jobs returns 200. Board ~3021 (front-end honest count); Workday header says '2000 JOBS FOUND' - the same rounded cap Target reported vs its real 12k, a diagnostic only (QA rule 4), so --index pages to a genuinely empty page. Under the 10000 ceiling, so whole-board capture + client-side WA filter, no facet scoping. GATES NOT YET CLEARED: --inspect (pin location_filter to the named listing field + its state format), openers derivation, validation, baseline.",
+      "applied_facets": {
+        "locationRegionStateProvince": [
+          "de9b48948ef8421db97ddf4ea206e931"
+        ]
+      },
+      "applied_facets_note": "2026-09-09 - Washington state facet on this tenant (facetParameter locationRegionStateProvince), id + count 52 read live from the CXS facets block. SCOPING JUSTIFIED, not a shortcut: the whole board is ~3021 but the CXS 'total' field is a bogus 2000 cap - verified the CXS keeps serving full pages past offset 2000 (offsets 2000/2020/2980 all returned 20) while total stays 2000, the same cap Target reported against its real 12k. workday.py mode_index trusts extract_total() as a STOP condition (violates QA rule 4) and therefore halts at offset 2000, undercounting WA (31 of 52 captured on the unfaceted board). Applying the WA facet yields an HONEST total (52) AND a complete set: faceted offset pagination WORKS on this tenant (offset 0->20, 20->20, 40->12 = 52 distinct req_ids, then wraps), UNLIKE Target where an applied facet froze offset pagination. Facet IDs are per-tenant - never reuse across employers; re-read from the CXS facets block if the board is rebuilt.",
+      "location_filter": {
+        "_note": "match_any is [] BY DESIGN: applied_facets already scopes the CXS to Washington (like MultiCare's WA-only board), so no client-side filter is applied - and using the ', Washington' token here would UNDERCOUNT vs the facet by dropping any multi-site posting whose locationsText reads 'N Locations' (no state string). The named field + token below are the VERIFIED cross-check, not the active filter.",
+        "_confirmed": "2026-09-09 --inspect on a live listing record: location is the named field 'locationsText' = 'City, FullStateName' (e.g. 'Litchfield Park, Arizona'). Unlike MultiCare (no locationsText, location in bulletFields[0]) this tenant carries the named field. The ', Washington' token pins to the STATE position so it cannot fire on a city named Washington ('Washington, Utah' has no ', Washington') nor on DC ('Washington, District of Columbia').",
+        "field": "locationsText",
+        "match_any": []
+      },
+      "extraction": {
+        "_note": "Forked opener vocabulary, U-Haul only. DERIVED 2026-09-09 from this tenant's OWN 52-record WA capture, nothing inherited. The requirements section is delimited by exactly two colon headings, and they are DISJOINT (partition the corpus): 'Minimum Qualifications:' 41/52 (often prefixed with the job title, e.g. 'Customer Service Representative Minimum Qualifications:' - the colon match fires on the heading regardless of the title prefix before it) and 'Requirements:' 10/52 (includes the 'Minimum Requirements:' variant x4; colon anchor catches both). 41+10=51/52 covered; the remaining 1 returns NOT_STATED by construction, never defaulted. NO PREFERRED openers - U-Haul states only a minimum bar ('preferred/required qualifications:' measured 0/52). EXCLUDED on purpose (measured, high-frequency, but NOT qualifications - duties/benefits/working-conditions and useful only as END boundaries): Responsibilities: 48, Work Environment: 47, Physical Demands: 46, U-Haul Offers: 36, Primary Responsibilities: 15. The bare 'requirements' colon opener is SAFE here unlike Allied's prose-collision (145/146 as prose): colon-terminated 'requirements:' appears ONLY as the real heading on this board (prefix scan found only 'U-Haul University. Requirements:' and 'Minimum Requirements:', no 'Physical Requirements:'/'licensing requirements:'). Content bar is almost always 'High school diploma or equivalent' + 'Valid driver's license' + on-the-job training = no prior work experience, the Kroger/DG high-density regime.",
+        "openers": [
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          }
+        ]
+      }
+    },
     "target": {
       "label": "Target",
       "host": "target.wd5.myworkdayjobs.com",

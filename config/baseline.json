@@ -7,6 +7,7 @@
     "compass_group":   { "records": 301,  "applicable": 79,  "density": 23.9 },
     "target":          { "records": 230,  "applicable": 220, "density": 95.7 },
     "dollar_general":  { "records": 203,  "applicable": 196, "density": 96.6 },
-    "allied_security": { "records": 146,  "applicable": 37,  "density": 25.3 }
+    "allied_security": { "records": 146,  "applicable": 37,  "density": 25.3 },
+    "uhaul":           { "records": 51,   "applicable": 38,  "density": 74.5 }
   }
 }
