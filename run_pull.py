@@ -399,6 +399,19 @@ def main(argv):
             print(f"  {u['tenant']:<16} {results[u['tenant']]['modes']}")
         return 0
 
+    # ---- enrich: persist verdicts + category onto normalized.jsonl (THE MISSING LAYER) ----
+    # Adapters leave experience_condition/evidence_clauses/credentials/category empty by
+    # construction; normalize/enrich.py fills them on disk. report.py recomputes the verdict
+    # fields in memory but NOT category (it reads category off the enriched record), so without
+    # this step category lands empty and every record reads as a category regression. Runs over
+    # all tenants on disk (idempotent, additive), same as report.py's glob.
+    print("\n--- enrich: normalize/enrich.py (persist verdicts + category) ---")
+    rc, _ = run([sys.executable, "-m", "normalize.enrich"])
+    if rc != 0:
+        print("!! enrich failed - cannot consolidate correctly. Run is PARTIAL.")
+        return _finish(units, results, prior_counts, baseline, None, None, partial=True,
+                       publish=a.publish, complete=False, movement=None)
+
     # ---- consolidate: report.py -> out/applicable.jsonl (BEFORE audit + push) ----
     # Snapshot the prior applicable set in memory first, then let report.py overwrite it.
     prior_applicable = read_applicable(APPLICABLE)
