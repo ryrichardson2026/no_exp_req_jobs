@@ -36,6 +36,11 @@ power on. If you need it to fire regardless of the machine, that requires an alw
 blocked from datacenter IPs — or leaving this PC on/asleep with WakeToRun). Pick a `$Time` in
 `register_pull_task.ps1` when the machine is normally on if you want it same-day every day.
 
+## Adding a new employer to the pull
+Follow the SOP: [`docs/onboarding-a-tenant.md`](../docs/onboarding-a-tenant.md). In a Claude
+Code session you can run the slash command **`/add-tenant <employer> [ATS]`**, which walks that
+SOP interactively (probe/inspect gates, opener derivation, config edits, validation).
+
 ## Files
 - `run_pull_daily.ps1` — the wrapper (lock, load `.env.local`, run, log, prune 30-day logs).
 - `register_pull_task.ps1` — creates/updates the scheduled task (`-Force` to re-run).

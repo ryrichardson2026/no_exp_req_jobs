@@ -1,5 +1,5 @@
 {
-  "_comment": "Config is data. No adapter may branch on tenant identity. Add an employer by adding an entry here.",
+  "_comment": "Config is data. No adapter may branch on tenant identity. Add an employer by adding an entry here - but FIRST follow the required SOP: docs/onboarding-a-tenant.md (probe/inspect/derive-openers gates, then this entry).",
   "_sources": {
     "call_shape": "https://github.com/Masterjx9/OpenPostings/discussions/16 and https://jobo.world/ats/oraclecloud",
     "oracle_docs": "https://docs.oracle.com/en/cloud/saas/human-resources/farws/api-recruiting-ce-job-requisitions.html",
