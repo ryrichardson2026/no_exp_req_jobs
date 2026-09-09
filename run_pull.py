@@ -35,9 +35,11 @@ COMPLETE flag is true AND --publish is set AND this is not a dry run.
 
 import argparse
 import glob
+import importlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 from collections import defaultdict
@@ -46,6 +48,7 @@ from datetime import datetime, timezone
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_DIR = os.path.join(ROOT, "config")
 OUT = os.path.join(ROOT, "out")
+RAW = os.path.join(ROOT, "raw")
 PRERENDER = os.path.join(ROOT, "prerender")
 DEPLOY_DIR = os.path.join(PRERENDER, "out")
 APPLICABLE = os.path.join(OUT, "applicable.jsonl")
@@ -316,6 +319,94 @@ def update_baseline(new_rows):
 # main
 # --------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# clean-capture: fresh enumerate + reconcile the detail cache to today's live set
+# ---------------------------------------------------------------------------
+# Correctness rule (settled with the operator): a job is LIVE iff its URL/id came back in
+# THIS pull's listing (the index). The adapters, built for one-shot onboarding, fetch detail
+# incrementally and never prune, and normalize reads the whole detail cache - so a job that
+# left the board keeps a cached detail file, is re-emitted, and gets last_seen refreshed (a
+# zombie). Fixed WITHOUT touching the adapters: before each pull, clear the enumerate output
+# so the in-scope set is exactly this pull's, then reconcile the detail cache against that
+# fresh in-scope set. A guard aborts the purge if the reconstructed live set doesn't reproduce
+# the cache, so a scheme change can never delete live jobs. first_seen survives (seen_state
+# lives in out/, not raw/).
+
+# Enumerate output cleared before the enumerate mode (the detail cache is kept + reconciled,
+# never wiped). (name, is_dir) under raw/<platform>/<tenant>/.
+_ENUMERATE_ARTIFACT = {
+    "oracle_orc": ("index", True), "workday": ("index", True),
+    "radancy_tb": ("rows.jsonl", False), "target": ("discovery", True),
+    "jibe_api": ("pages", True), "compass_api": ("pages", True),
+}
+
+
+def clean_enumerate(platform, tenant):
+    name, is_dir = _ENUMERATE_ARTIFACT.get(platform, (None, None))
+    if not name:
+        return
+    path = os.path.join(RAW, platform, tenant, name)
+    try:
+        if is_dir and os.path.isdir(path):
+            shutil.rmtree(path)
+        elif not is_dir and os.path.isfile(path):
+            os.remove(path)
+    except OSError as e:
+        print(f"    reconcile: could not clear {path}: {e}")
+
+
+def _live_detail_names(platform, tenant_key):
+    """Detail filenames implied by TODAY's in-scope index (+ extension), computed with the
+    adapter's OWN load/in_scope so 'live' matches the adapter's own definition. Returns
+    (set, ext), or (None, None) for platforms with no detail cache."""
+    mod = importlib.import_module(f"adapters.{platform}")
+    t = mod.load_tenant(tenant_key)
+    if platform == "oracle_orc":
+        return {f"{mod.job_id(j)}.json" for j in mod.load_index(t) if mod.in_scope(j, t) and mod.job_id(j)}, ".json"
+    if platform == "workday":
+        return {f"{mod.safe_name(mod.req_id(j))}.json" for j in mod.load_index(t) if mod.in_scope(j, t) and mod.req_id(j)}, ".json"
+    if platform == "radancy_tb":
+        return {f"{r['internal_id']}.html" for r in mod.load_rows(t) if mod.in_scope(r, t) and r.get("internal_id")}, ".html"
+    if platform == "target":
+        # discovery IS the live WA set; a superset of what detail holds, so it is purge-safe.
+        return {f"{mod.safe_name(d.get('requisitionid'))}.json" for d in mod.load_discovery(t) if d.get("requisitionid")}, ".json"
+    return None, None
+
+
+def reconcile_detail(platform, tenant):
+    """Drop detail files whose URL/id isn't in today's live index. Guarded and reversible:
+    dead files move to raw/<platform>/<tenant>/_purged/ (cleared each run), never deleted."""
+    detdir = os.path.join(RAW, platform, tenant, "detail")
+    if not os.path.isdir(detdir):
+        return
+    try:
+        live, ext = _live_detail_names(platform, tenant)
+    except Exception as e:
+        print(f"    reconcile {tenant}: SKIP - could not compute live set ({type(e).__name__}: {e}); nothing purged")
+        return
+    if live is None:
+        return
+    ondisk = [f for f in os.listdir(detdir) if f.endswith(ext)]
+    dead = [f for f in ondisk if f not in live]
+    kept = len(ondisk) - len(dead)
+    if not dead:
+        print(f"    reconcile {tenant}: {len(ondisk)} detail files, all live")
+        return
+    # Guard: the live set must reproduce the cache. If it doesn't (scheme drift), kept
+    # collapses and we must NOT purge - leave the zombies, flag it, let the run continue.
+    if not (len(live) > 0 and kept >= 0.80 * len(live)):
+        print(f"    reconcile {tenant}: SKIP - live set ({len(live)}) did not reproduce cache "
+              f"(kept {kept}/{len(ondisk)}); {len(dead)} left in place")
+        return
+    pdir = os.path.join(RAW, platform, tenant, "_purged")
+    if os.path.isdir(pdir):
+        shutil.rmtree(pdir)
+    os.makedirs(pdir, exist_ok=True)
+    for f in dead:
+        shutil.move(os.path.join(detdir, f), os.path.join(pdir, f))
+    print(f"    reconcile {tenant}: purged {len(dead)} dead (URL gone from board), kept {kept} live")
+
+
 def main(argv):
     ap = argparse.ArgumentParser(description="Recurring pull orchestrator (config-driven).")
     g = ap.add_mutually_exclusive_group(required=True)
@@ -376,10 +467,14 @@ def main(argv):
         print(f"\n--- {tenant} ({platform}) : {' -> '.join(modes)}"
               + ("   [dry-run: index/discovery only]" if a.dry_run else "") + " ---")
         mres, failed_mode = {}, None
+        if not a.dry_run:
+            clean_enumerate(platform, tenant)   # fresh enumerate so in-scope == this pull's board
         for mode in u["modes"]:
             if mode not in modes:
                 mres[mode] = "skip"
                 continue
+            if mode == "normalize":
+                reconcile_detail(platform, tenant)   # drop detail whose URL left the board
             rc, _ = run(adapter_cmd(platform, tenant, mode))
             if rc != 0:
                 mres[mode] = "FAIL"
