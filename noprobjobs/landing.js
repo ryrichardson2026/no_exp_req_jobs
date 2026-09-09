@@ -32,7 +32,7 @@ class LandingApp extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      recs: null, cities: [], zips: {},
+      recs: props.initialRecs || null, cities: [], zips: {},
       cats: [], locDraft: "", radius: 15, catOpen: false,
       fbOpen: false, fbName: "", fbEmail: "", fbText: "",
       alertOpen: false, alertEmail: "", alertLoc: "", alertCats: [], alertCatOpen: false,
@@ -71,10 +71,14 @@ class LandingApp extends React.Component {
     this._onMql = () => this.setState({ wide: this._mql.matches });
     this._mql.addEventListener("change", this._onMql);
     SB.pulledAt().then((d) => R.setToday(d)).catch(() => {});
-    SB.listJobs().then((recs) => {
-      this.setState({ recs });
-      this.preflightLogos(recs);
-    }).catch((e) => { console.error("jobs_list failed to load", e); this.setState({ recs: [] }); });
+    if (this.state.recs) {
+      this.preflightLogos(this.state.recs);                 // seeded at mount — no refetch, no wipe
+    } else {
+      SB.listJobs().then((recs) => {
+        this.setState({ recs });
+        this.preflightLogos(recs);
+      }).catch((e) => { console.error("jobs_list failed to load", e); this.setState({ recs: [] }); });
+    }
     import("./data/cities.js").then((m) => this.setState({ cities: m.CITIES }))
       .catch((e) => console.error("cities.js failed to load", e));
     import("./data/zips.js").then((m) => this.setState({ zips: m.ZIPS }))
@@ -210,7 +214,15 @@ class LandingApp extends React.Component {
   shape(r){
     const domain = r.employer_domain || "";
     const showLogo = R.ownsDomain(r.company_name, domain) && !!this.state.logoOk[domain];
-    const go = () => { window.location.href = RT.jobPath(r); };   // /jobs/{slug}-{id}
+    // The crawlable href stays the flat job permalink (SEO internal link + right-click-open);
+    // a click, though, drops the visitor INTO the board filtered to the job's category with
+    // its detail open — the browsing experience, not the isolated reading page. Falls back to
+    // the permalink if we can't form a board URL (no category or no job_number).
+    const primaryCat = R.recordCats(r)[0];
+    const boardJobHref = (primaryCat && r.job_number != null)
+      ? RT.browsePath(r.state, primaryCat) + "?job=" + r.job_number
+      : RT.jobPath(r) + "/";
+    const go = () => { window.location.href = boardJobHref; };
     return Object.assign({}, r, {
       id: r.internal_id,
       company: r.company_name.split(" /")[0],
@@ -223,7 +235,8 @@ class LandingApp extends React.Component {
       expLabel: R.EXP_LABEL[r.experience_condition] || null,
       expStrong: r.experience_condition === "NONE_NEEDED" || r.experience_condition === "WAIVED",
       expSoft: r.experience_condition === "PREFERRED",
-      href: RT.jobPath(r) + "/",              // real crawlable link; on the landing the <a> just navigates
+      href: RT.jobPath(r) + "/",              // crawlable permalink; the click is intercepted below
+      onCardClick: (e) => { if (e && e.preventDefault) e.preventDefault(); go(); },
       isSelected: false, open: go,
       openKey: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } },
     });
@@ -539,5 +552,12 @@ class LandingApp extends React.Component {
   }
 }
 
-const root = window.ReactDOM.createRoot(document.getElementById("root"));
-root.render(h(LandingApp));
+// Mount only once the job list is in hand, seeded as initialRecs, so the first client render
+// already has content matching the prerendered HTML. The baked page stays on screen during
+// the fetch instead of being wiped to a blank loading state (that wipe was the load gap).
+// If the fetch fails, mount anyway and let the app fall back to its own empty/loading path.
+const mount = (initialRecs) => {
+  const root = window.ReactDOM.createRoot(document.getElementById("root"));
+  root.render(h(LandingApp, initialRecs ? { initialRecs } : null));
+};
+SB.listJobs().then(mount).catch(() => mount(null));

@@ -52,7 +52,7 @@ const BACK_CHEV = '<svg width="9" height="15" viewBox="0 0 9 15" fill="none" str
 class BoardApp extends React.Component {
   constructor(props){
     super(props);
-    this.state = { openId: null, recs: null, logoOk: {}, details: {}, stateCtx: null,
+    this.state = { openId: null, recs: props.initialRecs || null, logoOk: {}, details: {}, stateCtx: null,
       cities: [], zips: {}, cityGeo: {}, cats: [], catDraft: [], loc: "", locDraft: "", radius: 15,
       showsPay: false, shifts: [], types: [], sheet: null, sort: "newest", pg: 1,
       alertsOpen: false, alertEmail: "", alertLoc: "", alertCats: [], alertCatOpen: false, alertPhase: "form", alertError: "",
@@ -148,7 +148,9 @@ class BoardApp extends React.Component {
     else if (route.kind === "browse") { out.stateCtx = route.state; if (route.category) out.cats = [route.category]; }
     // legacy ?job=nxj_… (pre-D1 / a shared preview link); resolved + canonicalised on load
     const legacyJob = p.get("job");
-    if (legacyJob && !out._jobRef) out._jobRef = { internalId: legacyJob };
+    // ?job= takes a job_number (numeric, how the landing deep-links into the board) or a
+    // legacy internal_id (nxj_…, a pre-D1 shared link). Resolved to a record + panel on load.
+    if (legacyJob && !out._jobRef) out._jobRef = /^\d+$/.test(legacyJob) ? { jobNumber: parseInt(legacyJob, 10) } : { internalId: legacyJob };
     // query refinements (and legacy ?category=, which is multi-select anyway)
     const listOf = (key, allowed) => String(p.get(key) || "").split(",").map((v) => v.trim()).filter((v) => allowed.indexOf(v) >= 0);
     const qcats = listOf("category", R.CATEGORIES);
@@ -241,9 +243,10 @@ class BoardApp extends React.Component {
     this._opens = urlState.loc ? 1 : 0;
     const jobRef = urlState._jobRef || null;
     SB.pulledAt().then((d) => R.setToday(d)).catch(() => {});
-    SB.listJobs().then((recs) => {
-      // resolve the URL ref -> a record -> openId (internal_id, the app's key). Prefer
-      // job_number; fall back to a legacy internal_id ref for the transition.
+    // resolve the URL ref -> a record -> openId (internal_id, the app's key). Prefer
+    // job_number; fall back to a legacy internal_id ref for the transition. Then canonicalise
+    // (legacy id / ?job= / ?category= -> the path form).
+    const resolve = (recs) => {
       let openId = null;
       if (jobRef) {
         const rec = jobRef.internalId
@@ -251,10 +254,11 @@ class BoardApp extends React.Component {
           : recs.find((r) => r.job_number === jobRef.jobNumber);
         openId = rec ? rec.internal_id : null;
       }
-      // canonicalise once records are in: legacy id / ?job= / ?category= -> the path form
       this.setState({ recs, openId }, () => this.writeUrl({}));
       this.preflightLogos(recs);
-    }).catch((e) => { console.error("jobs_list failed to load", e); this.setState({ recs: [] }); });
+    };
+    if (this.state.recs) resolve(this.state.recs);            // seeded at mount — no refetch, no wipe
+    else SB.listJobs().then(resolve).catch((e) => { console.error("jobs_list failed to load", e); this.setState({ recs: [] }); });
     import("./data/cities.js").then((m) => this.setState({ cities: m.CITIES })).catch((e) => console.error("cities.js failed to load", e));
     import("./data/zips.js").then((m) => this.setState({ zips: m.ZIPS })).catch((e) => console.error("zips.js failed to load", e));
     import("./data/cities-geo.js").then((m) => this.setState({ cityGeo: m.CITY_GEO })).catch((e) => console.error("cities-geo.js failed to load", e));
@@ -790,5 +794,12 @@ class BoardApp extends React.Component {
   }
 }
 
-const root = window.ReactDOM.createRoot(document.getElementById("root"));
-root.render(h(BoardApp));
+// Mount only once the job list is in hand, seeded as initialRecs, so the first client render
+// already has content matching the prerendered HTML — the baked page stays on screen during
+// the fetch instead of being wiped to a blank loading state (that wipe was the load gap).
+// If the fetch fails, mount anyway and let the app fall back to its own empty/loading path.
+const mount = (initialRecs) => {
+  const root = window.ReactDOM.createRoot(document.getElementById("root"));
+  root.render(h(BoardApp, initialRecs ? { initialRecs } : null));
+};
+SB.listJobs().then(mount).catch(() => mount(null));
