@@ -44,8 +44,13 @@ const CLOSE = '<svg width="13" height="13" viewBox="0 0 15 15" fill="none" strok
 const CLOSE15 = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.6 1.6l11.8 11.8"></path><path d="M13.4 1.6L1.6 13.4"></path></svg>';
 // Pixel-art thumbs up for the signup confirmation (matches the landing + the hero star).
 const THUMB_UP = '<svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true" style="display:block"><path d="M17 4 H29 V22 H52 V52 H10 V22 H17 Z" fill="var(--mark)" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="miter"></path><path d="M22 30 H46 M22 38 H46 M22 46 H41" stroke="var(--ink)" stroke-width="2.5" fill="none"></path></svg>';
-// Shown in the detail pane while jobs_detail (description_html) is fetched on open.
-const DESC_LOADING = h("p", { style: s("color:var(--ink-muted)") }, "Loading…");
+// Shown in the detail pane while jobs_detail (description_html) is fetched on open. A
+// multi-line skeleton (not a bare "Loading…") so the pane holds roughly a paragraph of
+// height and the real description doesn't pop in from a single line — no jump on arrival.
+const DESC_LOADING = h("div", { role: "status", "aria-label": "Loading description",
+    style: s("display:grid;gap:11px;padding:4px 0;max-width:60ch") },
+  [96, 88, 92, 74, 90, 84, 62, 80, 68].map((w, i) =>
+    h("div", { key: i, style: s("height:13px;width:" + w + "%;background:var(--surface-sunk);border-radius:3px;animation:sk 1.4s ease-in-out infinite") })));
 // Leading chevron for the standalone page's destination back-link.
 const BACK_CHEV = '<svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="2" style="flex:none" aria-hidden="true"><path d="M7.5 1.5 2 7.5l5.5 6"></path></svg>';
 

@@ -247,36 +247,31 @@ class LandingApp extends React.Component {
     const payTop = this._payTop();
     if (!payTop) return null;
     const label = "Most jobs pay up to $" + payTop + " an hour";
-    const px = this.state.wide ? 112 : 96;
-    const fs = this.state.wide ? 28 : 24, sm = this.state.wide ? 10 : 9;
-    const pos = this.state.wide ? "position:absolute;top:50%;right:0;margin-top:-56px;width:112px;height:112px"
-                                : "position:absolute;top:8px;right:0;width:96px;height:96px";
-    return h("div", { role: "img", "aria-label": label, style: s(pos) },
-      raw(STAR(px)),
-      h("div", { style: s("position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:1px;text-align:center") },
-        h("span", { style: s("font-size:" + sm + "px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--mark-ink)") }, "Up to"),
-        h("span", { style: s("font-family:var(--font-display);font-weight:800;font-size:" + fs + "px;line-height:1;white-space:nowrap;color:var(--mark-ink)") }, "$" + payTop),
-        h("span", { style: s("font-size:" + sm + "px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--mark-ink)") }, "an hour")
+    // One DOM; size/position/font come from CSS (.hero-burst*) per the viewer's width. The
+    // star SVG is rendered at 112 and scaled to fit the container via `.hero-burst svg`.
+    return h("div", { className: "hero-burst", role: "img", "aria-label": label },
+      raw(STAR(112)),
+      h("div", { className: "hero-burst-txt" },
+        h("span", { className: "hero-burst-cap" }, "Up to"),
+        h("span", { className: "hero-burst-amt" }, "$" + payTop),
+        h("span", { className: "hero-burst-cap" }, "an hour")
       )
     );
   }
   renderHero(){
-    if (this.state.wide) return h("div", { style: s("position:relative;display:grid;justify-items:center;gap:10px;padding:20px 0 8px") },
+    // One DOM for both widths; CSS (.hero*) handles the mobile/desktop differences so the
+    // prerendered mobile markup doesn't jump to the desktop hero on mount. (see styles.css)
+    return h("div", { className: "hero" },
       this.burst(),
-      h("h1", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:min(46px,5.1cqw);line-height:1.02;letter-spacing:-0.01em;text-transform:uppercase;color:var(--ink);white-space:nowrap") }, "Companies hiring now."),
-      h("div", { style: s("display:inline-flex;align-items:center;min-height:32px;padding:0 14px;background:var(--accent);font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--accent-ink)") }, "No experience needed")
-    );
-    return h("div", { style: s("position:relative;display:grid;justify-items:start;gap:8px;padding:14px 0 4px") },
-      this.burst(),
-      h("h1", { style: s("margin:0;max-width:min(520px,calc(100% - 108px));font-family:var(--font-display);font-weight:800;font-size:min(34px,8.4cqw);line-height:1.02;letter-spacing:-0.01em;text-transform:uppercase;color:var(--ink);text-wrap:balance") }, "Companies hiring now."),
-      h("div", { style: s("display:inline-flex;align-items:center;min-height:30px;padding:0 12px;background:var(--accent);font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--accent-ink)") }, "No experience needed")
+      h("h1", { className: "hero-h1" }, "Companies hiring now."),
+      h("div", { className: "hero-badge" }, "No experience needed")
     );
   }
 
   // ── category selector (search card) ───────────────────────
   catOptions(){
     const picked = this.state.cats;
-    return (this.state.recs === null ? [] : R.CATEGORIES).map((c) => ({
+    return R.CATEGORIES.map((c) => ({          // static list — never gated on recs, so the chips are stable from first paint
       label: c, isOn: picked.indexOf(c) >= 0, isOff: picked.indexOf(c) < 0, pick: this.toggleCat(c),
     }));
   }
@@ -325,13 +320,16 @@ class LandingApp extends React.Component {
     const isZipDraft = /^\d{5}$/.test(String(this.state.locDraft).trim());
     const radiusOptions = L.RADII.map((r) => ({ label: r + " mi", value: r, isOnCurrent: r === this.state.radius, isOnOther: r !== this.state.radius, pick: this.setRadius(r) }));
     return h("div", { style: s("width:100%;box-sizing:border-box;background:var(--surface-raised);border:2px solid var(--ink);border-radius:3px;padding:12px;display:grid;gap:10px") },
-      wide ? this.renderCatWide() : this.renderCatMobile(),
+      // Both layouts in the DOM; CSS (.cat-wide/.cat-narrow) shows the one that fits the
+      // viewer's width, so the prerendered mobile markup doesn't jump to the chip row on mount.
+      h("div", { key: "cw", className: "cat-wide" }, this.renderCatWide()),
+      h("div", { key: "cn", className: "cat-narrow" }, this.renderCatMobile()),
       // location row
       h("div", { style: s("width:100%;max-width:520px;margin:0 auto;display:flex;gap:8px;align-items:stretch") },
         h("div", { className: "fw-bd-accent", style: s("flex:1;min-width:0;display:flex;align-items:stretch;border:2px solid var(--ink);border-radius:3px;background:var(--surface-raised);overflow:hidden") },
           h("input", { type: "text", value: this.state.locDraft, onChange: this.onLocDraft, onKeyDown: this.onSubmitKey, placeholder: "City, state, or ZIP", "aria-label": "City, state, or ZIP", style: s("flex:1;min-width:0;box-sizing:border-box;min-height:48px;padding:0 12px;border:0;background:transparent;font-size:16px;color:var(--ink);outline:0") }),
           h("button", { type: "button", onClick: this.submit, "aria-label": "See jobs", style: s("flex:none;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 18px;border:0;background:var(--accent);color:var(--accent-ink);font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;cursor:pointer") },
-            raw(SEARCH_ICON), wide && h("span", { key: "t" }, "See jobs"))
+            raw(SEARCH_ICON), h("span", { key: "t", className: "see-jobs-txt" }, "See jobs"))
         )
       ),
       isZipDraft && h("div", { key: "rad", style: s("display:grid;gap:6px") },
@@ -342,8 +340,8 @@ class LandingApp extends React.Component {
         h("div", { style: s("font-size:12.5px;line-height:1.4;color:var(--ink-muted)") }, "Radius applies to a ZIP code. A city or state name filters to that area.")
       ),
       // help lines
-      h("div", { style: s(wide ? "font-size:15px;line-height:1.35;color:var(--ink-muted);text-align:center;text-wrap:pretty" : "font-size:15px;line-height:1.35;color:var(--ink-muted);text-wrap:pretty") }, "Full-time, part-time, and overnight jobs"),
-      h("div", { style: s(wide ? "display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink)" : "display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink)") },
+      h("div", { className: "search-help", style: s("font-size:15px;line-height:1.35;color:var(--ink-muted);text-wrap:pretty") }, "Full-time, part-time, and overnight jobs"),
+      h("div", { className: "search-ticks", style: s("display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink)") },
         h("span", { style: s("display:inline-flex;align-items:center;gap:5px") }, raw(TICK), "Free to use"),
         h("span", { style: s("display:inline-flex;align-items:center;gap:5px") }, raw(TICK), "No resume required")
       ),

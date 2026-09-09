@@ -75,6 +75,42 @@ button{font:inherit;color:inherit}
 .skip-link{position:absolute;left:-9999px;top:0;z-index:100;padding:10px 16px;background:var(--ink);color:#fff;font-weight:700;text-decoration:none;border-radius:0 0 3px 0}
 .skip-link:focus{left:0;top:0}
 
+/* Search-card category control: BOTH layouts (desktop chip row, mobile dropdown) live in the
+   DOM and CSS shows the one that fits the viewer's actual width. The page is prerendered at
+   mobile width, so a desktop visitor would otherwise see the short dropdown and then watch the
+   section jump to the tall chip row when the client mounts (state.wide flips). Driving it in
+   CSS instead means the prerendered markup already lays out correctly at any width — no
+   JS-driven relayout, no jump. Breakpoint matches landing BP (min-width:768px). */
+.cat-wide{display:block}
+.cat-narrow{display:none}
+@media (max-width:767px){ .cat-wide{display:none} .cat-narrow{display:block} }
+
+/* Hero + pay burst + the search button's label: same reasoning as the category control —
+   these differ between mobile and desktop, and driving the difference in JS (state.wide) made
+   the prerendered mobile hero jump to the desktop hero on mount. CSS media queries keep the
+   prerendered markup correct at the viewer's width from first paint. Mobile is the base;
+   desktop overrides at the landing BP (768px). */
+.hero{position:relative;display:grid;justify-items:start;gap:8px;padding:14px 0 4px}
+.hero-h1{margin:0;max-width:min(520px,calc(100% - 108px));font-family:var(--font-display);font-weight:800;font-size:min(34px,8.4cqw);line-height:1.02;letter-spacing:-0.01em;text-transform:uppercase;color:var(--ink);text-wrap:balance}
+.hero-badge{display:inline-flex;align-items:center;min-height:30px;padding:0 12px;background:var(--accent);font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--accent-ink)}
+.hero-burst{position:absolute;top:8px;right:0;width:96px;height:96px}
+.hero-burst svg{width:100%;height:100%;display:block}
+.hero-burst-txt{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:1px;text-align:center}
+.hero-burst-cap{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--mark-ink)}
+.hero-burst-amt{font-family:var(--font-display);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;color:var(--mark-ink)}
+.see-jobs-txt{display:none}
+@media (min-width:768px){
+  .hero{justify-items:center;gap:10px;padding:20px 0 8px}
+  .hero-h1{max-width:none;font-size:min(46px,5.1cqw);white-space:nowrap;text-wrap:initial}
+  .hero-badge{min-height:32px;padding:0 14px;font-size:15px}
+  .hero-burst{top:50%;margin-top:-56px;width:112px;height:112px}
+  .hero-burst-cap{font-size:10px}
+  .hero-burst-amt{font-size:28px}
+  .see-jobs-txt{display:inline}
+  .search-help{text-align:center}
+  .search-ticks{justify-content:center}
+}
+
 /* §4 (step 0): the result-list fade. ONE keyframe, ONE class — the whole effect
    lives here. Delete these two rules to remove it; edit the timing to tune it.
    The component replays it by remounting the list container (key change) only on a
