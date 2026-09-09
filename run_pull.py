@@ -241,23 +241,25 @@ def movement_audit(prior, new, stamp):
         if _cred(a) != _cred(b):
             changes.append((emp(b), title(b), "credential", ",".join(_cred(a)) or "-", ",".join(_cred(b)) or "-"))
 
-    moved_ids = entered | left | {k for k in both
-                                  if _cat(prior[k]) != _cat(new[k])
-                                  or _exp(prior[k]) != _exp(new[k])
-                                  or _cred(prior[k]) != _cred(new[k])}
-    denom = max(len(new_ids), len(prior_ids), 1)
-    overall_pct = len(moved_ids) / denom * 100.0
+    # The movement guard gates on VERDICT/CATEGORY CHANGES to jobs present in BOTH pulls
+    # (the "36 demoted" / "2 guards mistagged" cases the guard exists for). Jobs entering or
+    # leaving is normal board turnover: a collapse is already caught by the record-floor halt
+    # (step 6) and growth is never bad, so entered/left are REPORTED but do NOT gate the
+    # publish - otherwise ordinary daily churn would halt every run and nothing could ship.
+    changed_ids = {k for k in both
+                   if _cat(prior[k]) != _cat(new[k])
+                   or _exp(prior[k]) != _exp(new[k])
+                   or _cred(prior[k]) != _cred(new[k])}
+    denom = max(len(both), 1)                         # changes measured against the shared set
+    overall_pct = len(changed_ids) / denom * 100.0
 
-    # per-employer movement over the union of that employer's ids
-    union_by_emp = defaultdict(set)
-    for k in new_ids:
-        union_by_emp[emp(new[k])].add(k)
-    for k in prior_ids:
-        union_by_emp[emp(prior[k])].add(k)
+    # per-employer CHANGE rate over that employer's shared (present-in-both) set
+    both_by_emp = defaultdict(set)
+    for k in both:
+        both_by_emp[emp(new[k])].add(k)
     emp_pct = {}
-    for e, ids in union_by_emp.items():
-        moved_e = len(ids & moved_ids)
-        emp_pct[e] = moved_e / max(len(ids), 1) * 100.0
+    for e, ids in both_by_emp.items():
+        emp_pct[e] = len(ids & changed_ids) / max(len(ids), 1) * 100.0
     worst_emp, worst_pct = (None, 0.0)
     if emp_pct:
         worst_emp = max(emp_pct, key=emp_pct.get)
@@ -266,16 +268,18 @@ def movement_audit(prior, new, stamp):
     halt = overall_pct > MAX_SET_MOVEMENT_PCT or worst_pct > MAX_EMPLOYER_MOVEMENT_PCT
 
     L.append(f"MOVEMENT AUDIT  {stamp}")
-    L.append(f"prior set {len(prior_ids)}   new set {len(new_ids)}   moved {len(moved_ids)}"
-             f"   ({overall_pct:.2f}% of the set)")
-    L.append(f"entered {len(entered)}   left {len(left)}   verdict/category changes {len(changes)}")
-    L.append(f"thresholds: set>{MAX_SET_MOVEMENT_PCT}% OR any employer>{MAX_EMPLOYER_MOVEMENT_PCT}%"
+    L.append(f"prior set {len(prior_ids)}   new set {len(new_ids)}   shared {len(both)}")
+    L.append(f"verdict/category CHANGES {len(changed_ids)} of shared ({overall_pct:.2f}%)  [gates publish]")
+    L.append(f"entered {len(entered)}   left {len(left)}   [board turnover - reported, does NOT gate]")
+    L.append(f"thresholds: changes >{MAX_SET_MOVEMENT_PCT}% of shared OR any employer >{MAX_EMPLOYER_MOVEMENT_PCT}%"
              f"  ->  {'HALT' if halt else 'within threshold'}")
     L.append("")
-    L.append("PER-EMPLOYER MOVEMENT (union-of-ids basis):")
+    L.append("PER-EMPLOYER CHANGE RATE (verdict/category flips over the shared set):")
     for e in sorted(emp_pct, key=emp_pct.get, reverse=True):
+        if not emp_pct[e]:
+            continue    # only list employers with an actual change; keeps the file readable
         flag = "  <-- OVER" if emp_pct[e] > MAX_EMPLOYER_MOVEMENT_PCT else ""
-        L.append(f"  {emp_pct[e]:6.2f}%  {len(union_by_emp[e]):>4}  {e}{flag}")
+        L.append(f"  {emp_pct[e]:6.2f}%  {len(both_by_emp[e]):>4}  {e}{flag}")
     L.append("")
     L.append("FIELD CHANGES (in both sets, verdict/category moved):")
     for e, t, f, a, b in sorted(changes):
