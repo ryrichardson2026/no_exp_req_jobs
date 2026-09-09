@@ -24,6 +24,9 @@ const ROW_CHECK = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" s
 const VP_CHECK = '<svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="var(--mark-ink)" stroke-width="1.9"><circle cx="8" cy="8" r="6.6"></circle><path d="M5 8.3l2.1 2.1L11 6.1"></path></svg>';
 const TICK = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="2.4" style="flex:none" aria-hidden="true"><path d="M3 8.4l3 3L13 4.6"></path></svg>';
 const CLOSE = '<svg width="13" height="13" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.6 1.6l11.8 11.8"></path><path d="M13.4 1.6L1.6 13.4"></path></svg>';
+// Pixel-art thumbs up for the signup confirmation — blocky orthogonal outline, marigold
+// fill + ink outline (matches the hero star), with folded-finger lines on the fist.
+const THUMB_UP = '<svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true" style="display:block"><path d="M17 4 H29 V22 H52 V52 H10 V22 H17 Z" fill="var(--mark)" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="miter"></path><path d="M22 30 H46 M22 38 H46 M22 46 H41" stroke="var(--ink)" stroke-width="2.5" fill="none"></path></svg>';
 
 class LandingApp extends React.Component {
   constructor(props){
@@ -472,9 +475,11 @@ class LandingApp extends React.Component {
           h("span", { "aria-hidden": "true", style: s("width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite") }),
           h("div", { role: "status", style: s("font-size:15px;font-weight:600;color:var(--ink)") }, "Creating alert…"))
       : phase === "done"
-      ? h("div", { key: "dn", style: s("font-size:16.5px;line-height:1.62;color:var(--ink-muted);text-wrap:pretty") }, "We’ll email new jobs as they’re posted. Unsubscribe anytime.")
+      ? h("div", { key: "dn", style: s("display:grid;justify-items:center;gap:14px;padding:6px 0 8px;text-align:center") },
+          h("div", { style: s("font-size:16.5px;line-height:1.6;color:var(--ink-muted);text-wrap:pretty") }, "We’ll email new jobs as they’re posted."),
+          raw(THUMB_UP))
       : h("div", { key: "fm", style: s("display:grid;gap:12px") },
-          h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "New listings sent as they’re posted."),
+          h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "Get alerted when no-experience needed jobs get posted."),
           field("Email", h("input", { type: "email", value: this.state.alertEmail, onChange: this.onAlertEmail, onKeyDown: this.onAlertKey, placeholder: "you@example.com", className: "fc-bd-accent", style: s(inputStyle) })),
           field("Location", h("input", { type: "text", value: this.state.alertLoc, onChange: this.onAlertLoc, onKeyDown: this.onAlertKey, placeholder: "City or ZIP — optional", className: "fc-bd-accent", style: s(inputStyle) })),
           field("Job type", h("div", { style: s("position:relative") },
@@ -491,7 +496,7 @@ class LandingApp extends React.Component {
       h("div", { onClick: this.closeAlerts, style: s("position:absolute;inset:0;background:rgba(10,58,117,0.42);animation:scrimin 180ms ease-out") }),
       h("div", { role: "dialog", "aria-modal": "true", "aria-label": "Get new jobs by email", style: s("position:sticky;top:64px;z-index:1;width:390px;max-width:calc(100% - 32px);margin:0 auto;box-sizing:border-box;background:var(--surface);border:2px solid var(--ink);border-radius:3px;box-shadow:0 14px 30px rgba(10,58,117,0.22);display:grid;gap:12px;padding:16px;animation:sheetup 220ms cubic-bezier(.22,.61,.36,1)") },
         h("div", { style: s("display:flex;align-items:flex-start;justify-content:space-between;gap:8px") },
-          h("div", { style: s("font-size:16px;font-weight:800;color:var(--ink)") }, phase === "done" ? "You’re on the list" : "Get new jobs by email"),
+          h("div", { style: s("font-size:16px;font-weight:800;color:var(--ink)") }, phase === "done" ? "You’re on the list" : "Get Job Alerts"),
           h("button", { type: "button", onClick: this.closeAlerts, "aria-label": "Close", className: "hv-bg-sunk-tx-ink", style: s("flex:none;width:44px;height:44px;margin:-10px -10px 0 0;display:grid;place-items:center;background:transparent;border:0;border-radius:8px;cursor:pointer;color:var(--ink-muted)") }, raw(CLOSE))),
         body
       )

@@ -41,6 +41,8 @@ const FILTERS_ICON = '<svg width="15" height="15" viewBox="0 0 16 16" fill="none
 const FILTERS_ICON_MUTED = '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ink-muted)" stroke-width="1.8" aria-hidden="true"><path d="M2 4.2h12"></path><path d="M4.4 8h7.2"></path><path d="M6.6 11.8h2.8"></path></svg>';
 const CLOSE = '<svg width="13" height="13" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.6 1.6l11.8 11.8"></path><path d="M13.4 1.6L1.6 13.4"></path></svg>';
 const CLOSE15 = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.6 1.6l11.8 11.8"></path><path d="M13.4 1.6L1.6 13.4"></path></svg>';
+// Pixel-art thumbs up for the signup confirmation (matches the landing + the hero star).
+const THUMB_UP = '<svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true" style="display:block"><path d="M17 4 H29 V22 H52 V52 H10 V22 H17 Z" fill="var(--mark)" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="miter"></path><path d="M22 30 H46 M22 38 H46 M22 46 H41" stroke="var(--ink)" stroke-width="2.5" fill="none"></path></svg>';
 // Shown in the detail pane while jobs_detail (description_html) is fetched on open.
 const DESC_LOADING = h("p", { style: s("color:var(--ink-muted)") }, "Loading…");
 // Leading chevron for the standalone page's destination back-link.
@@ -714,13 +716,14 @@ class BoardApp extends React.Component {
           h("span", { "aria-hidden": "true", style: s("width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite") }),
           h("div", { role: "status", style: s("font-size:15px;font-weight:600;color:var(--ink)") }, "Creating alert…"))
       : phase === "done"
-      ? h("div", { key: "dn", style: s("display:grid;gap:6px;padding-right:40px") },
+      ? h("div", { key: "dn", style: s("display:grid;justify-items:center;gap:14px;padding:4px 0 6px;text-align:center") },
           h("div", { className: "dsp", style: s("font-size:21px;line-height:1.16;font-weight:800;color:var(--ink)") }, "You’re on the list"),
-          h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "We’ll email new jobs as they’re posted. Unsubscribe anytime."))
+          h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "We’ll email new jobs as they’re posted."),
+          raw(THUMB_UP))
       : h("div", { key: "fm", style: s("display:grid;gap:12px") },
           h("div", { style: s("display:grid;gap:5px;padding-right:40px") },
-            h("div", { className: "dsp", style: s("font-size:21px;line-height:1.16;font-weight:800;color:var(--ink);text-wrap:pretty") }, "Get new jobs by email"),
-            h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "New listings sent as they’re posted.")),
+            h("div", { className: "dsp", style: s("font-size:21px;line-height:1.16;font-weight:800;color:var(--ink);text-wrap:pretty") }, "Get Job Alerts"),
+            h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "Get alerted when no-experience needed jobs get posted.")),
           field("Email", h("input", { type: "email", value: this.state.alertEmail, onChange: this.onAlertEmail, onKeyDown: this.onAlertKey, placeholder: "you@email.com", "aria-label": "Email address", className: "fc-bd-ink", style: s(inputStyle) })),
           field("Location", h("input", { type: "text", value: this.state.alertLoc, onChange: this.onAlertLoc, onKeyDown: this.onAlertKey, placeholder: "City or ZIP — optional", "aria-label": "Location", className: "fc-bd-ink", style: s(inputStyle) })),
           field("Job type", h("div", { style: s("position:relative") },
