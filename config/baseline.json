@@ -1,0 +1,12 @@
+{
+  "_comment": "QA baseline for run_pull.py halt checks (spec step 5 / Finding 41 - the unbuilt QA that should exist). Per-tenant records/applicable/density from the last ACCEPTED run. run_pull.py reads this to gate a pull: a tenant returning zero, under 50% of baseline records, or a density more than 15 points off baseline makes the run PARTIAL (no publish). It is updated ONLY on an accepted run and never automatically - run `python run_pull.py --update-baseline` after a COMPLETE run whose numbers and movement file you have inspected. Seeded 2026-09-09 from the operator-provided table; density is applicable/records * 100.",
+  "tenants": {
+    "multicare":       { "records": 1369, "applicable": 61,  "density": 4.5 },
+    "providence":      { "records": 851,  "applicable": 119, "density": 14.0 },
+    "kroger":          { "records": 462,  "applicable": 272, "density": 58.9 },
+    "compass_group":   { "records": 301,  "applicable": 79,  "density": 23.9 },
+    "target":          { "records": 230,  "applicable": 220, "density": 95.7 },
+    "dollar_general":  { "records": 203,  "applicable": 196, "density": 96.6 },
+    "allied_security": { "records": 146,  "applicable": 37,  "density": 25.3 }
+  }
+}
