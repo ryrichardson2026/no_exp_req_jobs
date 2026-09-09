@@ -113,6 +113,8 @@ export function jobPostingLd(r, countryBySource){
     },
   };
 
+  if (r.job_number != null) ld.identifier = { "@type": "PropertyValue", name: ld.hiringOrganization.name, value: String(r.job_number) };
+
   if (r.posted_at) {
     const d = String(r.posted_at).slice(0, 10);
     if (/^\d{4}-\d{2}-\d{2}$/.test(d)) ld.datePosted = d;

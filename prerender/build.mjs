@@ -20,6 +20,7 @@ import { fileURLToPath } from "node:url";
 import puppeteer from "puppeteer-core";
 import { jobPostingLd, jobPostingScript } from "../noprobjobs/data/jobPosting.js";
 import { jobPath, browsePath, CAT_SLUG, STATE_SLUG, backTo } from "../noprobjobs/data/routes.js";
+import * as PM from "../noprobjobs/data/pageMeta.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SITE = join(HERE, "..", "noprobjobs");
@@ -30,6 +31,7 @@ const REST = "https://eyatyzatcmjnmazmaghd.supabase.co/rest/v1";
 const KEY = "sb_publishable_T49bDaIS8d7-AhQ8SsFU0g_ZA55yNQE";
 const PORT = 8795;
 const CONC = 6;                                     // concurrent Chrome pages
+const SITE_URL = (process.env.SITE_URL || "https://noprobjobs.com").replace(/\/$/, "");   // canonical + OG + sitemap base
 const MOBILE = { width: 412, height: 915, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
 const MIME = { ".html":"text/html",".js":"text/javascript",".mjs":"text/javascript",".css":"text/css",
   ".json":"application/json",".svg":"image/svg+xml",".png":"image/png",".ico":"image/x-icon",".woff2":"font/woff2",".map":"application/json" };
@@ -103,10 +105,11 @@ function middlewareSource(expiredBack, live){
 // (live URLs only) + vercel.json + the edge middleware. Idempotent, so a targeted rebake
 // still leaves out/ deployable. The baked landing owns out/index.html, so it is NOT copied.
 async function assembleDeploy(live, expiredBack, browse){
-  for (const f of ["board.html", "board.js", "landing.js", "styles.css", "404.html"]) await copyFile(join(SITE, f), join(OUT, f));
+  for (const f of ["board.html", "board.js", "landing.js", "styles.css", "404.html",
+                   "favicon.ico", "icon-192.png", "apple-touch-icon.png", "og.png"]) await copyFile(join(SITE, f), join(OUT, f));
   for (const d of ["data", "ui", "vendor"]) await cp(join(SITE, d), join(OUT, d), { recursive: true });
 
-  const base = (process.env.SITE_URL || "https://noprobjobs.com").replace(/\/$/, "");
+  const base = SITE_URL;
   const locs = ["/", ...browse, ...live];                          // expired/retired excluded
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + locs.map((u) => "  <url><loc>" + base + u + "</loc></url>").join("\n") + "\n</urlset>\n";
@@ -141,6 +144,28 @@ async function bake(page, route){
           const t = document.createElement("template"); t.innerHTML = html.trim();
           document.head.appendChild(t.content.firstChild);
         }, route.ld);
+      }
+      // Per-page metadata. Browse counts come from the rendered "N jobs found" on the page
+      // (same source as displayed, never recomputed). Sets <title>, injects meta/canonical/
+      // OG/favicon, and absolutizes the ItemList item urls the board rendered relative.
+      let meta = route.meta;
+      if (route.type === "browse") {
+        const n = await page.evaluate(() => { const m = (document.body.textContent || "").match(/([\d,]+)\s+jobs?\s+found/i); return m ? m[1].replace(/,/g, "") : ""; });
+        meta = route.state
+          ? (route.category
+              ? { title: PM.categoryTitle(route.category, route.state), description: PM.categoryDescription(route.category, route.state, n) }
+              : { title: PM.stateTitle(route.state), description: PM.stateDescription(route.state, n) })
+          : { title: "Jobs Hiring Now - No Experience Needed | NoProbJobs", description: n + " jobs hiring now, no experience required. No sign-up, no resume, free to apply." };
+      }
+      if (meta) {
+        const canonical = SITE_URL + route.path;
+        const headHtml = PM.metaHead({ title: meta.title, description: meta.description, canonical, ogImage: SITE_URL + "/og.png" });
+        await page.evaluate((title, head, base) => {
+          document.title = title;
+          const t = document.createElement("template"); t.innerHTML = head;
+          document.head.appendChild(t.content);
+          document.querySelectorAll('meta[itemprop="url"]').forEach((m) => { if (m.content && m.content.charAt(0) === "/") m.content = base + m.content; });
+        }, meta.title, headHtml, SITE_URL);
       }
       const html = await page.evaluate(() => {
         // Drop the gtm.js/gtag script the GTM loader injected at render time; the static
@@ -212,18 +237,21 @@ async function main(){
     if (r.retired) { retiredCount++; continue; }                              // retired -> not baked; retire.mjs removes any stale file
     const ld = r.expired ? null : jobPostingScript(jobPostingLd(r, COUNTRY)); // parity: no JSON-LD once expired
     if (r.expired) expiredCount++; if (ld) ldCount++;
-    routes.push({ type: "job", path: jobPath(r) + "/", url: null, ld, num: r.job_number });
+    routes.push({ type: "job", path: jobPath(r) + "/", url: null, ld, num: r.job_number,
+      meta: { title: PM.jobTitle(r), description: PM.jobDescription(r) } });
   }
-  // browse: states present, and categories present within each state
+  // browse: states present, and categories present within each state. state/category ride
+  // on the route so bake() can build the title; the count comes from the rendered page.
   const byState = {};
   for (const r of recs) { if (!r.state) continue; (byState[r.state] = byState[r.state] || new Set()); (r.category || []).forEach((c) => byState[r.state].add(c)); }
   const browsePaths = new Set(["/jobs/"]);
+  routes.push({ type: "browse", path: "/jobs/", url: null, state: null, category: null });
   for (const st of Object.keys(byState)) {
-    browsePaths.add(browsePath(st, null));
-    for (const c of byState[st]) if (CAT_SLUG[c]) browsePaths.add(browsePath(st, c));
+    const sp = browsePath(st, null); browsePaths.add(sp);
+    routes.push({ type: "browse", path: sp, url: null, state: st, category: null });
+    for (const c of byState[st]) if (CAT_SLUG[c]) { const cp = browsePath(st, c); browsePaths.add(cp); routes.push({ type: "browse", path: cp, url: null, state: st, category: c }); }
   }
-  for (const p of browsePaths) routes.push({ type: "browse", path: p, url: null, ld: null });
-  routes.push({ type: "landing", path: "/", url: null, ld: null });
+  routes.push({ type: "landing", path: "/", url: null, meta: { title: PM.landingTitle(), description: PM.landingDescription() } });
 
   const server = serve();
   await new Promise((r) => server.listen(PORT, r));

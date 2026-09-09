@@ -223,6 +223,7 @@ class LandingApp extends React.Component {
       expLabel: R.EXP_LABEL[r.experience_condition] || null,
       expStrong: r.experience_condition === "NONE_NEEDED" || r.experience_condition === "WAIVED",
       expSoft: r.experience_condition === "PREFERRED",
+      href: RT.jobPath(r) + "/",              // real crawlable link; on the landing the <a> just navigates
       isSelected: false, open: go,
       openKey: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } },
     });

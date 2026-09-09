@@ -13,6 +13,7 @@ import * as R from "./data/record.js";
 import * as L from "./data/resolve.js";
 import * as SB from "./data/supabase.js";
 import * as RT from "./data/routes.js";
+import * as PM from "./data/pageMeta.js";
 
 const React = window.React;
 const BP = "(min-width:900px)";
@@ -335,6 +336,7 @@ class BoardApp extends React.Component {
 
   open(r){
     return (e) => {
+      if (e && e.preventDefault) e.preventDefault();   // the card is an <a href>; open the panel instead of navigating
       const node = (e && e.currentTarget && e.currentTarget.closest("[data-list-scroller]")) || this._list;
       this._scrollNode = node; this._scroll = node ? node.scrollTop : 0;
       this._opens = (this._opens || 0) + 1;
@@ -378,6 +380,8 @@ class BoardApp extends React.Component {
       expStrong: r.experience_condition === "NONE_NEEDED" || r.experience_condition === "WAIVED",
       expSoft: r.experience_condition === "PREFERRED",
       isSelected: this.state.openId === r.internal_id,
+      href: RT.jobPath(r) + "/",              // real crawlable link (canonical, trailing slash)
+      onCardClick: this.open(r),              // intercepts the link -> opens the panel in-app
       open: this.open(r),
       openKey: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); this.open(r)(e); } },
     });
@@ -524,6 +528,9 @@ class BoardApp extends React.Component {
       noCityMatchLine: "No city starting with “" + st.locDraft + "” has jobs under the filters you’ve set.",
       openRec, effectiveId, onPage, page,
       resultLabel: total === 1 ? "1 job found" : total + " jobs found",
+      browseH1: st.stateCtx
+        ? (cats.length === 1 ? PM.categoryH1(cats[0], st.stateCtx) : PM.stateH1(st.stateCtx))
+        : "Jobs hiring now, no experience needed",
       isLoading: loading, isList: !loading && total > 0, realEmpty, locEmpty, genericEmpty, locEmptyName,
       elsewhereJobs, hasElsewhere: elsewhereJobs.length > 0, elsewhereHeading,
       emptyLine, emptyFix,
@@ -556,10 +563,13 @@ class BoardApp extends React.Component {
       h("div", { style: s((wide ? "font-size:19px" : "font-size:17px") + ";font-weight:700;color:var(--ink)") }, d.emptyLine),
       h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);max-width:" + (wide ? "34ch" : "30ch") + ";text-wrap:pretty") }, d.emptyFix),
       d.hasEmptyCta && h("button", { key: "cta", type: "button", onClick: d.emptyCta, style: s("margin-top:8px;min-height:44px;padding:0 18px;border-radius:3px;background:var(--accent);color:var(--accent-ink);border:0;font-size:15px;font-weight:600;cursor:pointer") }, d.emptyCtaLabel));
-    // list
+    // list — an ItemList (structured data about the LIST, not the jobs): H1 = itemprop
+    // name, each card = a ListItem with its rendered position + canonical URL. build.mjs
+    // absolutizes the relative itemprop urls at bake time.
     const cards = wide ? d.deskJobs : d.jobs;
-    return h("div", null,
-      h("div", { key: d.animKey, role: "list", className: d.animClass }, cards.map((job) => h(JobCard, { key: job.id, job }))),
+    return h("div", { itemScope: true, itemType: "https://schema.org/ItemList" },
+      h("h1", { itemProp: "name", style: s("margin:0;padding:14px 16px 8px;font-family:var(--font-display);font-size:19px;line-height:1.15;font-weight:800;letter-spacing:-0.005em;color:var(--ink)") }, d.browseH1),
+      h("div", { key: d.animKey, role: "list", className: d.animClass }, cards.map((job, i) => h(JobCard, { key: job.id, job, listMeta: { position: i + 1, url: job.href } }))),
       d.pager
     );
   }
