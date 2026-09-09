@@ -13,6 +13,9 @@ grid_*/
 scratchpad/
 *.zip
 
+# Daily-pull run logs (ops/run_pull_daily.ps1).
+logs/
+
 # Python
 __pycache__/
 .venv/
