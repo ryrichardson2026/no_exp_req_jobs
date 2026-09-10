@@ -183,6 +183,7 @@ class LandingApp extends React.Component {
   preflightLogos(recs){
     const seen = {};
     recs.forEach((r) => {
+      if (R.localLogo(r.company_name)) return;   // hand-picked local logo shows directly — no favicon probe
       const d = r.employer_domain;
       if (!d || seen[d] || !R.ownsDomain(r.company_name, d)) return;
       seen[d] = true;
@@ -229,7 +230,9 @@ class LandingApp extends React.Component {
 
   shape(r){
     const domain = r.employer_domain || "";
-    const showLogo = R.ownsDomain(r.company_name, domain) && !!this.state.logoOk[domain];
+    const local = R.localLogo(r.company_name);          // hand-picked logo wins over the domain favicon
+    const logoSrc = local || R.logoUrl(domain);
+    const showLogo = local ? true : (R.ownsDomain(r.company_name, domain) && !!this.state.logoOk[domain]);
     // The crawlable href stays the flat job permalink (SEO internal link + right-click-open);
     // a click, though, drops the visitor INTO the board filtered to the job's category with
     // its detail open — the browsing experience, not the isolated reading page. Falls back to
@@ -241,9 +244,9 @@ class LandingApp extends React.Component {
     const go = () => { window.location.href = boardJobHref; };
     return Object.assign({}, r, {
       id: r.internal_id,
-      company: r.company_name.split(" /")[0],
+      company: R.companyLabel(r.company_name),
       cardTitle: R.cardTitle(r.title),
-      logoImg: showLogo ? R.logoImg(R.logoUrl(domain), 20) : null,
+      logoImg: showLogo ? R.logoImg(logoSrc, 20) : null,
       showLogo, showMonogram: !showLogo,
       monogram: (r.company_name || "?").trim().charAt(0).toUpperCase(),
       locationLine: [L.cityName(r.city), r.state].filter(Boolean).join(", "),

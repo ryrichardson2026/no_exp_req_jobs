@@ -21,6 +21,8 @@
    monthsOfExperience appears ONLY in the REQUIRED+months branch — never on PREFERRED,
    which the schema treats as a minimum requirement a preference is not. */
 
+import { companyLabel } from "./record.js";   // pure at import time; shared display name (drops " / …" and "(…)")
+
 // pay_period -> schema QuantitativeValue unitText
 const UNIT = { HOURLY: "HOUR", DAILY: "DAY", WEEKLY: "WEEK", MONTHLY: "MONTH", ANNUAL: "YEAR" };
 
@@ -109,7 +111,7 @@ export function jobPostingLd(r, countryBySource){
     description: r.description_html || r.description_text,
     hiringOrganization: {
       "@type": "Organization",
-      name: String(r.company_name || "").split(" /")[0],   // the name shown on the page
+      name: companyLabel(r.company_name),   // the name shown on the page
     },
   };
 

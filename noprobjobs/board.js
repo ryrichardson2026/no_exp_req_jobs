@@ -305,6 +305,7 @@ class BoardApp extends React.Component {
   preflightLogos(recs){
     const seen = {};
     recs.forEach((r) => {
+      if (R.localLogo(r.company_name)) return;   // hand-picked local logo shows directly — no favicon probe
       const d = r.employer_domain;
       if (!d || seen[d] || !R.ownsDomain(r.company_name, d)) return;
       seen[d] = true;
@@ -378,13 +379,17 @@ class BoardApp extends React.Component {
 
   shape(r){
     const domain = r.employer_domain || "";
-    const showLogo = R.ownsDomain(r.company_name, domain) && !!this.state.logoOk[domain];
+    // A hand-picked local logo wins over the domain favicon (and bypasses ownsDomain,
+    // which is exactly why Fred Meyer/QFC on kroger.com get their real mark now).
+    const local = R.localLogo(r.company_name);
+    const logoSrc = local || R.logoUrl(domain);
+    const showLogo = local ? true : (R.ownsDomain(r.company_name, domain) && !!this.state.logoOk[domain]);
     return Object.assign({}, r, {
       id: r.internal_id,
-      company: r.company_name.split(" /")[0],
+      company: R.companyLabel(r.company_name),
       cardTitle: R.cardTitle(r.title),
-      logoImg: showLogo ? R.logoImg(R.logoUrl(domain), 20) : null,
-      pageLogoImg: showLogo ? R.logoImg(R.logoUrl(domain), 24) : null,
+      logoImg: showLogo ? R.logoImg(logoSrc, 20) : null,
+      pageLogoImg: showLogo ? R.logoImg(logoSrc, 24) : null,
       showLogo, showMonogram: !showLogo,
       monogram: (r.company_name || "?").trim().charAt(0).toUpperCase(),
       locationLine: [L.cityName(r.city), r.state].filter(Boolean).join(", "),
@@ -492,7 +497,7 @@ class BoardApp extends React.Component {
         // Change #5: payload for the apply_click dataLayer push, fired from the Apply link in
         // jobPage.js. job_id prefers the public job_number, falls back to internal_id.
         applyEvt: { job_id: openRec.job_number != null ? openRec.job_number : openRec.internal_id,
-          employer: (openRec.company_name || "").split(" /")[0], category: R.recordCats(openRec)[0] || null },
+          employer: R.companyLabel(openRec.company_name), category: R.recordCats(openRec)[0] || null },
       });
     }
 

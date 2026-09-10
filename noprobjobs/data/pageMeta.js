@@ -10,6 +10,7 @@
      "N jobs found" number off the page and passes it in, so the description count is
      literally the same number the page shows. */
 import { stateName, MARKET } from "./routes.js";
+import { companyLabel } from "./record.js";   // shared display name (drops " / …" and "(…)")
 
 const BRAND = "NoProbJobs";                      // titles use the bare brand; the domain shows above it in results
 const DIFF = "No sign-up, no resume, free to apply.";
@@ -37,7 +38,7 @@ function locClause(r){
   const city = cityDisplay(r.city), st = r.state;
   return city && st ? " in " + city + ", " + st : (st ? " in " + st : "");   // null-state -> no clause
 }
-const employerOf = (r) => String(r.company_name || "").split(" /")[0];
+const employerOf = (r) => companyLabel(r.company_name);
 
 export function jobTitle(r){ return r.title + " at " + employerOf(r) + locClause(r) + " | " + BRAND; }
 export function jobDescription(r){
