@@ -45,6 +45,8 @@ import sys
 from collections import defaultdict
 from datetime import datetime, timezone
 
+import runlog          # durable per-run record + local dashboard (additive; never fatal)
+
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_DIR = os.path.join(ROOT, "config")
 OUT = os.path.join(ROOT, "out")
@@ -511,8 +513,8 @@ def main(argv):
     rc, _ = run([sys.executable, "-m", "normalize.enrich"])
     if rc != 0:
         print("!! enrich failed - cannot consolidate correctly. Run is PARTIAL.")
-        return _finish(units, results, prior_counts, baseline, None, None, partial=True,
-                       publish=a.publish, complete=False, movement=None)
+        return _finish(stamp, units, results, prior_counts, baseline, None, None, partial=True,
+                       publish=a.publish, complete=False, movement=["enrich (normalize.enrich) exited non-zero"])
 
     # ---- consolidate: report.py -> out/applicable.jsonl (BEFORE audit + push) ----
     # Snapshot the prior applicable set in memory first, then let report.py overwrite it.
@@ -521,8 +523,8 @@ def main(argv):
     rc, _ = run([sys.executable, "-m", "analyze.report"])
     if rc != 0:
         print("!! report.py failed - cannot consolidate. Run is PARTIAL.")
-        return _finish(units, results, prior_counts, baseline, None, None, partial=True,
-                       publish=a.publish, complete=False, movement=None)
+        return _finish(stamp, units, results, prior_counts, baseline, None, None, partial=True,
+                       publish=a.publish, complete=False, movement=["report (analyze.report) exited non-zero"])
 
     table = parse_report_table(open(REPORT_TXT, encoding="utf-8").read())
     new_applicable = read_applicable(APPLICABLE)
@@ -555,11 +557,11 @@ def main(argv):
         halts.append(f"movement {mv_pct:.2f}% of set / worst employer {worst_emp} {worst_pct:.2f}% over threshold")
 
     complete = not halts
-    return _finish(units, results, prior_counts, baseline, table, (mv_pct, worst_emp, worst_pct, mv_path),
+    return _finish(stamp, units, results, prior_counts, baseline, table, (mv_pct, worst_emp, worst_pct, mv_path),
                    partial=not complete, publish=a.publish, complete=complete, movement=halts)
 
 
-def _finish(units, results, prior_counts, baseline, table, mv, partial, publish, complete, movement):
+def _finish(stamp, units, results, prior_counts, baseline, table, mv, partial, publish, complete, movement):
     # ---- output table (step 9) ----
     print("\n" + "=" * 78)
     print("RUN TABLE")
@@ -569,6 +571,7 @@ def _finish(units, results, prior_counts, baseline, table, mv, partial, publish,
     print("-" * len(hdr))
     total_appl = 0
     base_total_appl = 0
+    tenant_rows = []          # same data as the printed table, kept for the run record
     for u in units:
         t, plat = u["tenant"], u["platform"]
         mres = results[t]["modes"]
@@ -589,6 +592,9 @@ def _finish(units, results, prior_counts, baseline, table, mv, partial, publish,
         elif base and (recs == 0 or recs < 0.5 * base["records"] or abs(d_dens) > MAX_DENSITY_MOVE):
             flag = "FLAG"
         print(f"{t:<16}{plat:<12}{modestr:<22}{recs:>6}{d_recs:>+7}{appl:>6}{dens:>6.1f}%{d_dens:>+7.1f}  {flag}")
+        tenant_rows.append({"tenant": t, "platform": plat, "modes": modestr, "records": recs,
+                            "d_records": d_recs, "applicable": appl, "density": round(dens, 1),
+                            "d_density": round(d_dens, 1), "flag": flag})
 
     print("-" * len(hdr))
     print(f"total applicable: {total_appl}   (baseline {base_total_appl}, delta {total_appl - base_total_appl:+d})")
@@ -604,23 +610,64 @@ def _finish(units, results, prior_counts, baseline, table, mv, partial, publish,
                 print(f"  - {h}")
 
     # ---- downstream: only on COMPLETE + --publish (structurally gated) ----
+    pub = {"published": False, "publish_status": None, "deploy_url": None,
+           "bake_job_pages": None, "bake_listing_views": None}
+    rc = 0 if complete else 1
     if complete and publish:
-        return _publish()
-    if publish and not complete:
+        rc, pub = _publish()
+    elif publish and not complete:
         print("\n--publish requested but run is PARTIAL - publish withheld.")
+        pub["publish_status"] = "withheld (PARTIAL)"
     elif not publish:
         print("\n(no --publish: stopped at the table.)")
-    return 0 if complete else 1
+        pub["publish_status"] = "not requested"
+
+    # ---- durable run record + local dashboard (BOTH: out/runs/ + Supabase mirror) ----
+    # Fully guarded: a record/dashboard/mirror fault must never change the run's outcome.
+    try:
+        if pub["published"]:
+            severity = "good"
+        elif pub["publish_status"] and "FAILED" in pub["publish_status"]:
+            severity = "critical"
+        elif complete:
+            severity = "good"
+        else:
+            severity = "warning"
+        live, expired = _lifecycle_counts()
+        record = {
+            "stamp": stamp, "ran_at": runlog.iso_from_stamp(stamp),
+            "status": status, "severity": severity,
+            "published": pub["published"], "publish_status": pub["publish_status"],
+            "deploy_url": pub["deploy_url"],
+            "total_applicable": total_appl, "baseline_applicable": base_total_appl,
+            "applicable_delta": total_appl - base_total_appl,
+            "movement_pct": round(mv[0], 2) if mv else None,
+            "worst_employer": mv[1] if mv else None,
+            "worst_employer_pct": round(mv[2], 2) if mv else None,
+            "bake_job_pages": pub["bake_job_pages"], "bake_listing_views": pub["bake_listing_views"],
+            "live_jobs": live, "expired_jobs": expired,
+            "git_head": _git_head(), "halts": list(movement or []), "tenants": tenant_rows,
+        }
+        dash, note = runlog.emit(record)
+        print(f"\nrun record: {dash}   (supabase: {note})")
+    except Exception as e:
+        print(f"\n(run record/dashboard skipped - non-fatal: {type(e).__name__}: {e})")
+    return rc
 
 
 def _publish():
     """In order, halting immediately on any non-zero exit. report.py already ran at
     consolidation (it produces the applicable.jsonl the push consumes); site_data.py/jobs.js
     is intentionally omitted (dead - Supabase is the source of truth). A halt here leaves the
-    prior production build serving."""
+    prior production build serving.
+
+    Returns (rc, info) where info feeds the run record: published bool, publish_status,
+    deploy_url, and the bake summary (job pages / listing views parsed from build.mjs's line)."""
     print("\n" + "=" * 78)
     print("PUBLISH (COMPLETE)")
     print("=" * 78)
+    info = {"published": False, "publish_status": None, "deploy_url": None,
+            "bake_job_pages": None, "bake_listing_views": None}
 
     # capture=True on the node stages so their (stderr) output flows through the tee and
     # a non-zero exit is seen. A silent bake failure and a good bake used to log identically.
@@ -631,27 +678,53 @@ def _publish():
     ]
     for name, cmd, cwd, cap in steps:
         print(f"\n--- {name} ---")
-        rc, _ = run(cmd, cwd=cwd, capture=cap)
+        rc, out = run(cmd, cwd=cwd, capture=cap)
+        if name.startswith("bake"):
+            m = re.search(r"BAKE COMPLETE:\s*(\d+)\s+job pages,\s*(\d+)\s+listing views", out or "")
+            if m:
+                info["bake_job_pages"], info["bake_listing_views"] = int(m.group(1)), int(m.group(2))
         if rc != 0:
             print(f"\n!! {name} exited {rc} - halting publish. Prior production build keeps serving.")
             if name.startswith("bake"):
+                info["publish_status"] = f"BAKE FAILED (exit {rc})"
                 print(f"STATUS: BAKE FAILED (exit {rc})")
             else:
+                info["publish_status"] = f"PUBLISH FAILED at {name} (exit {rc})"
                 print(f"STATUS: PUBLISH FAILED at {name} (exit {rc})")
-            return 1
+            return 1, info
 
     print("\n--- deploy (vercel --prod) ---")
     rc, out = run(["vercel", "deploy", "--prod", "--yes"], cwd=DEPLOY_DIR, capture=True)
     if rc != 0:
         print("\n!! deploy exited non-zero - halting. Prior production build keeps serving.")
+        info["publish_status"] = f"PUBLISH FAILED at deploy (exit {rc})"
         print(f"STATUS: PUBLISH FAILED at deploy (exit {rc})")
-        return 1
+        return 1, info
     url = ""
     for m in re.finditer(r"https://\S+\.vercel\.app", out or ""):
         url = m.group(0)
+    info["published"], info["deploy_url"], info["publish_status"] = True, url, "PUBLISH COMPLETE"
     print(f"\ndeploy: {url or '(url not captured - check vercel output)'}")
     print("STATUS: PUBLISH COMPLETE")
-    return 0
+    return 0, info
+
+
+def _git_head():
+    try:
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT,
+                              text=True, capture_output=True).stdout.strip() or None
+    except Exception:
+        return None
+
+
+def _lifecycle_counts():
+    """live/expired job counts from the last bake's manifest (latest-only; may lag a PARTIAL)."""
+    path = os.path.join(DEPLOY_DIR, "_lifecycle.json")
+    try:
+        d = load_json(path)
+        return len(d.get("live", [])), len(d.get("expired", []))
+    except Exception:
+        return None, None
 
 
 if __name__ == "__main__":
