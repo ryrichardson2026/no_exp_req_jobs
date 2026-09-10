@@ -48,7 +48,7 @@ export function jobDescription(r){
   return d;
 }
 
-export function landingTitle(){ return BRAND + " — Jobs Hiring Now, No Experience Needed"; }
+export function landingTitle(){ return BRAND + " — Get Hired Now, No Experience Needed"; }
 export function landingDescription(){ return stateName(MARKET) + " jobs hiring now, no experience required. " + DIFF; }
 
 /* The Washington lander (change #2): the landing page served at /washington-jobs, whose only

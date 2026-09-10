@@ -60,7 +60,7 @@ const ogHtml = '<div style="width:1200px;height:630px;box-sizing:border-box;back
   + '<div style="flex:none">' + circle(300) + '</div>'
   + '<div style="min-width:0">'
   + '<div style="font-size:36px;font-weight:800;color:' + MARK + ';letter-spacing:1px">NoProbJobs.com</div>'
-  + '<div style="font-size:78px;font-weight:900;line-height:1.03;margin-top:16px;text-transform:uppercase">Jobs hiring now.</div>'
+  + '<div style="font-size:78px;font-weight:900;line-height:1.03;margin-top:16px;text-transform:uppercase">Get hired now.</div>'
   + '<div style="background:' + RED + ';color:#fff;font-size:30px;font-weight:800;padding:11px 22px;margin-top:26px;display:inline-block;text-transform:uppercase;letter-spacing:1px">No experience needed</div>'
   + '</div></div>';
 

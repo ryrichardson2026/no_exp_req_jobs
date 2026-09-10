@@ -242,6 +242,18 @@ class BoardApp extends React.Component {
     this._mql.addEventListener("change", this._onMql);
     const urlState = this.readUrl();
     this.setState(urlState);
+    // Arrivals from an expired/retired page carry ?alerts=1 (+ the job's cat/city): open the
+    // email-only modal and stash the context so submitAlerts captures it silently (change #1
+    // kept the RPC's category/location args; only the form stopped collecting them). Opened via
+    // setState post-mount, so baked pages (which never carry ?alerts) keep baked/mounted parity.
+    try {
+      const ap = new URL(window.location.href).searchParams;
+      if (ap.get("alerts") === "1") {
+        this._alertCtx = { cat: ap.get("cat") || null, city: ap.get("city") || null };
+        track({ event: "job_alert_open", source_page: sourcePage() });
+        this.setState({ alertsOpen: true, alertPhase: "form", alertError: "" });
+      }
+    } catch (e) {}
     // Alert-intent weighting (see landing.js): a completed search WITH a location is full
     // intent, so arriving on the board with a location seeds the counter by one; job views
     // (open()) add the rest. The prompt is only ever evaluated inside open(), so the modal
@@ -340,7 +352,9 @@ class BoardApp extends React.Component {
     // capture_alert is a fixed 4-arg RPC (no defaults): the wire keeps the now-empty
     // p_categories/p_location (defaulted in supabase.js) — the form stopped collecting them,
     // the columns/signature are untouched (change #1).
-    Promise.all([SB.captureAlert({ email, source: "board" }), wait])
+    const ctx = this._alertCtx || null;   // set when arriving from an expired/retired page (?alerts=1)
+    Promise.all([SB.captureAlert({ email, source: ctx ? "expired" : "board",
+        categories: ctx && ctx.cat ? [ctx.cat] : [], location: ctx ? ctx.city : null }), wait])
       .then(() => { track({ event: "email_capture_submit", source_page: sourcePage() }); this.writeFlag(); this.setState({ alertPhase: "done" }); })
       .catch(() => this.setState({ alertPhase: "form", alertError: "Couldn’t save that — please try again." }));
   };
@@ -552,7 +566,7 @@ class BoardApp extends React.Component {
       resultLabel: total === 1 ? "1 job found" : total + " jobs found",
       browseH1: st.stateCtx
         ? (cats.length === 1 ? PM.categoryH1(cats[0], st.stateCtx) : PM.stateH1(st.stateCtx))
-        : "Jobs hiring now, no experience needed",
+        : "Get hired now, no experience needed",
       isLoading: loading, isList: !loading && total > 0, realEmpty, locEmpty, genericEmpty, locEmptyName,
       elsewhereJobs, hasElsewhere: elsewhereJobs.length > 0, elsewhereHeading,
       emptyLine, emptyFix,

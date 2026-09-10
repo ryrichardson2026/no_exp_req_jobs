@@ -85,21 +85,27 @@ function middlewareSource(expiredBack, live){
     + "const LIVE = new Set(" + JSON.stringify(live) + ");\n"
     + "export const config = { matcher: '/jobs/:path*' };\n";
   const body = [
-    "function gone(back){",
+    "function gone(info){",
+    "  var back = info.back || '/jobs/';",
+    "  var q = 'alerts=1' + (info.cat ? '&cat=' + encodeURIComponent(info.cat) : '') + (info.city ? '&city=' + encodeURIComponent(info.city) : '');",
+    "  var alertsUrl = back + (back.indexOf('?') < 0 ? '?' : '&') + q;",
     "  return '<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">'",
     "    + '<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">'",
-    "    + '<title>Job no longer accepting applications</title>'",
-    "    + '<style>body{font-family:system-ui,-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:72px 22px;color:#132a4a}h1{font-size:26px;line-height:1.15;margin:0 0 10px}p{color:#5a6b83;line-height:1.6}a{display:inline-block;margin-top:20px;background:#132a4a;color:#fff;padding:12px 20px;border-radius:3px;text-decoration:none;font-weight:700}</style>'",
-    "    + '</head><body><h1>This job is no longer accepting applications.</h1>'",
-    "    + '<p>The employer removed the posting. Plenty of other companies are hiring right now with no experience required.</p>'",
-    "    + '<a href=\"' + back + '\">Browse more jobs</a></body></html>';",
+    "    + '<title>Job no longer available — NoProbJobs.com</title>'",
+    "    + '<style>body{font-family:system-ui,-apple-system,\"Segoe UI\",sans-serif;background:#f7f9fc;margin:0;color:#132a4a}main{max-width:560px;margin:0 auto;padding:72px 22px}.badge{display:inline-block;padding:4px 10px;border-radius:3px;background:#c8102e;color:#fff;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}h1{font-size:30px;line-height:1.14;margin:18px 0 10px;letter-spacing:-.01em}p{font-size:16.5px;line-height:1.6;color:#5a6b83;margin:0 0 22px;max-width:46ch}a.cta{display:inline-flex;align-items:center;min-height:46px;padding:0 20px;border-radius:3px;background:#c8102e;color:#fff;text-decoration:none;font-weight:700;font-size:15.5px}a.alt{display:inline-block;margin-left:14px;color:#132a4a;font-weight:600;font-size:15px}</style>'",
+    "    + '</head><body><main><span class=\"badge\">No experience needed</span>'",
+    "    + '<h1>Unfortunately, this job is no longer available.</h1>'",
+    "    + '<p>Sign up for job alerts and we\\'ll email you when similar jobs are posted.</p>'",
+    "    + '<a class=\"cta\" href=\"' + alertsUrl + '\">Get job alerts</a>'",
+    "    + '<a class=\"alt\" href=\"' + back + '\">Browse more jobs</a>'",
+    "    + '</main></body></html>';",
     "}",
     "export default async function middleware(request){",
     "  const { pathname } = new URL(request.url);",
     "  const p = pathname.endsWith('/') ? pathname : pathname + '/';",
     "  if (!/^\\/jobs\\/.+-\\d+\\/$/.test(p)) return;                 // not a job detail page -> static",
-    "  const back = EXPIRED[p];",
-    "  if (back) return new Response(gone(back), { status: 410, headers: { 'content-type': 'text/html; charset=utf-8' } });",
+    "  const info = EXPIRED[p];",
+    "  if (info) return new Response(gone(info), { status: 410, headers: { 'content-type': 'text/html; charset=utf-8' } });",
     "  if (LIVE.has(p)) return;                                       // live -> baked static page",
     "  const r = await fetch(new URL('/404.html', request.url));     // retired/unknown -> named 404",
     "  return new Response(r.body, { status: 404, headers: { 'content-type': 'text/html; charset=utf-8' } });",
@@ -167,7 +173,7 @@ async function bake(page, route){
           ? (route.category
               ? { title: PM.categoryTitle(route.category, route.state), description: PM.categoryDescription(route.category, route.state, n) }
               : { title: PM.stateTitle(route.state), description: PM.stateDescription(route.state, n) })
-          : { title: "Jobs Hiring Now - No Experience Needed | NoProbJobs", description: n + " jobs hiring now, no experience required. No sign-up, no resume, free to apply." };
+          : { title: "Get Hired Now - No Experience Needed | NoProbJobs", description: n + " jobs hiring now, no experience required. No sign-up, no resume, free to apply." };
       }
       if (meta) {
         const canonical = SITE_URL + route.path;
@@ -390,7 +396,12 @@ async function main(){
   await writeFile(join(OUT, "_lifecycle.json"), JSON.stringify(manifest), "utf8");
 
   const expiredBack = {};
-  for (const r of recs) if (r.expired && !r.retired) expiredBack[jobPath(r) + "/"] = backTo(r.state, r.category).href;
+  for (const r of recs) if (r.expired && !r.retired) {
+    // Carry the job's browse path + its category/city so the 410 page's "Get job alerts"
+    // link can seed the (email-only) modal silently — the highest-intent signal on the site.
+    expiredBack[jobPath(r) + "/"] = { back: backTo(r.state, r.category).href,
+      cat: (r.category && r.category[0]) || null, city: r.city || null };
+  }
   const deploy = await assembleDeploy(live, expiredBack, [...browsePaths]);
 
   const secs = (Date.now() - t0) / 1000;

@@ -133,7 +133,10 @@ class LandingApp extends React.Component {
       .map((r) => r.salary_max || r.salary_min).filter((v) => v > 0)
       .sort((a, b) => a - b);
     if (rates.length < 4) return null;
-    return Math.ceil(rates[Math.floor(0.75 * (rates.length - 1))]);
+    // p95 of stated hourly pay (was p75): close to the true ceiling so "up to" is honest,
+    // but immune to a lone extreme (the set still runs to ~$86/hr). Rounds up; derived every
+    // bake from the live set, never hardcoded.
+    return Math.ceil(rates[Math.floor(0.95 * (rates.length - 1))]);
   }
   _topCats(){
     if (this.state.recs === null) return [];
