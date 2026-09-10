@@ -132,6 +132,13 @@ export function companyLabel(name){
   if (p > 0) s = s.slice(0, p);
   return s.trim();
 }
+/* Employer-filter slug (Item 13): a URL-safe key off the DISPLAY label (companyLabel), so
+   the ?emp= query stays clean and any company_name variants that share a label group into
+   one option. Compass's brands are stored as their own company_names, so this lists brands
+   (Bon Appetit, Eurest, …), never a "Compass Group" parent (which isn't in the data). */
+export function employerSlug(name){
+  return companyLabel(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
 /* Brand slug from a company name, matching the logo FILE naming: drop the parent-brand
    tail ("Providence / …" → "Providence") and any parenthetical ("U-Haul (…)" → "U-Haul"),
    then lowercase and hyphenate. Fred Meyer/QFC (which share kroger.com and so fail

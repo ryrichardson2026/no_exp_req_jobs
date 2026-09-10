@@ -59,7 +59,7 @@ class BoardApp extends React.Component {
     super(props);
     this.state = { openId: null, recs: props.initialRecs || null, logoOk: {}, details: {}, stateCtx: null,
       cities: [], zips: {}, cityGeo: {}, cats: [], catDraft: [], loc: "", locDraft: "", radius: 15,
-      showsPay: false, shifts: [], types: [], exps: [], sheet: null, sort: "newest", pg: 1,
+      showsPay: false, shifts: [], types: [], exps: [], employers: [], sheet: null, sort: "newest", pg: 1,
       // Change #1: email-only capture — location/type-of-work fields and their state removed.
       alertsOpen: false, alertEmail: "", alertPhase: "form", alertError: "",
       wide: window.matchMedia(BP).matches };
@@ -100,6 +100,7 @@ class BoardApp extends React.Component {
   toggleShift = (s2) => () => this.toggleIn("shifts", s2);
   toggleType = (t) => () => this.toggleIn("types", t);
   toggleExp = (e2) => () => this.toggleIn("exps", e2);
+  toggleEmployer = (slug) => () => this.toggleIn("employers", slug);
   // "Apply all" select-all checkboxes for the multi-select menus. Category rides the draft
   // (committed by the menu's Apply); shift/type apply live like their individual options.
   selectAllCatDraft = () => this.setState((st) => ({ catDraft: (st.catDraft || []).length === R.CATEGORIES.length ? [] : R.CATEGORIES.slice() }));
@@ -110,10 +111,12 @@ class BoardApp extends React.Component {
   // ONLY (exps=["none"]), off = no experience filter. Reuses the Item 8 exp filter so it stays
   // in sync with the Filters drawer and the ?exp=none URL.
   toggleNoExp = () => { const on = this.state.exps.length === 1 && this.state.exps[0] === "none"; const n = on ? [] : ["none"]; this.setState({ exps: n, openId: null, pg: 1 }); this.writeUrl({ exps: n, openId: null, page: 1 }); };
+  // Employer list is dynamic (from the live set), so "Apply all" is computed from recs, not a const.
+  selectAllEmployers = () => { const slugs = [...new Set((this.state.recs || []).map((r) => R.employerSlug(r.company_name)).filter(Boolean))]; const n = this.state.employers.length === slugs.length ? [] : slugs; this.setState({ employers: n, openId: null, pg: 1 }); this.writeUrl({ employers: n, openId: null, page: 1 }); };
   togglePay = () => { const v = !this.state.showsPay; this.setState({ showsPay: v, openId: null, pg: 1 }); this.writeUrl({ showsPay: v, openId: null, page: 1 }); };
   clearAll = () => {
-    this.setState({ cats: [], catDraft: [], loc: "", locDraft: "", showsPay: false, shifts: [], types: [], exps: [], openId: null, sheet: null, pg: 1 });
-    this.writeUrl({ cats: [], loc: "", showsPay: false, shifts: [], types: [], exps: [], openId: null, page: 1 });
+    this.setState({ cats: [], catDraft: [], loc: "", locDraft: "", showsPay: false, shifts: [], types: [], exps: [], employers: [], openId: null, sheet: null, pg: 1 });
+    this.writeUrl({ cats: [], loc: "", showsPay: false, shifts: [], types: [], exps: [], employers: [], openId: null, page: 1 });
   };
   openSheet = (which) => (e) => { this._trigger = e && e.currentTarget ? e.currentTarget : null; this.setState({ sheet: which, locDraft: this.state.loc, catDraft: (this.state.cats || []).slice() }); };
   closeSheet = () => { const t = this._trigger; this.setState({ sheet: null }, () => { if (t && t.isConnected) t.focus(); this._trigger = null; }); };
@@ -170,6 +173,7 @@ class BoardApp extends React.Component {
     out.shifts = listOf("shift", R.SHIFT_FACETS);
     out.types = listOf("type", R.TYPE_FACETS);
     out.exps = listOf("exp", R.EXP_FACETS);
+    out.employers = String(p.get("emp") || "").split(",").map((v) => v.trim()).filter(Boolean);   // dynamic set; validated by matching in derive
     out.showsPay = p.get("pay") === "1";
     const loc = p.get("location");
     if (loc) { out.loc = loc; out.locDraft = loc; }
@@ -206,6 +210,7 @@ class BoardApp extends React.Component {
         const shifts = pick("shifts") || []; if (shifts.length) q.set("shift", shifts.join(","));
         const types = pick("types") || []; if (types.length) q.set("type", types.join(","));
         const exps = pick("exps") || []; if (exps.length) q.set("exp", exps.join(","));
+        const employers = pick("employers") || []; if (employers.length) q.set("emp", employers.join(","));
         const sort = pick("sort"); if (sort && sort !== "newest") q.set("sort", sort);
         if (page > 1) q.set("page", String(page));
       }
@@ -260,7 +265,7 @@ class BoardApp extends React.Component {
       const jobRef = u._jobRef; delete u._jobRef;
       let openId = null;
       if (jobRef) { const rec = (this.state.recs || []).find((r) => jobRef.internalId ? r.internal_id === jobRef.internalId : r.job_number === jobRef.jobNumber); openId = rec ? rec.internal_id : null; }
-      this.setState(Object.assign({ stateCtx: null, cats: [], shifts: [], types: [], exps: [], loc: "", locDraft: "", showsPay: false, sort: "newest", pg: 1, sheet: null }, u, { openId }));
+      this.setState(Object.assign({ stateCtx: null, cats: [], shifts: [], types: [], exps: [], employers: [], loc: "", locDraft: "", showsPay: false, sort: "newest", pg: 1, sheet: null }, u, { openId }));
     };
     window.addEventListener("popstate", this._onPop);
     const urlState = this.readUrl();
@@ -455,7 +460,7 @@ class BoardApp extends React.Component {
     const recs = st.recs;
     const loading = recs === null;
     const all = recs || [];
-    const cats = st.cats || [], shifts = st.shifts || [], types = st.types || [], exps = st.exps || [];
+    const cats = st.cats || [], shifts = st.shifts || [], types = st.types || [], exps = st.exps || [], employers = st.employers || [];
     const res = L.resolveLocation(st.loc, st.cities, st.zips);
     const radius = st.radius;
     const inLoc = (r) => {
@@ -473,8 +478,9 @@ class BoardApp extends React.Component {
     const inShift = (r) => !shifts.length || R.shiftFacets(r.shift_raw).some((f) => shifts.indexOf(f) >= 0);
     const inType = (r) => !types.length || types.indexOf(R.typeFacet(r.employment_type)) >= 0;
     const inExp = (r) => !exps.length || exps.indexOf(R.expFacet(r.experience_condition)) >= 0;
+    const inEmp = (r) => !employers.length || employers.indexOf(R.employerSlug(r.company_name)) >= 0;
 
-    const list = all.filter((r) => inCat(r) && inLoc(r) && inPay(r) && inShift(r) && inType(r) && inExp(r)).sort(R.COMPARATORS[st.sort] || R.newestFirst);
+    const list = all.filter((r) => inCat(r) && inLoc(r) && inPay(r) && inShift(r) && inType(r) && inExp(r) && inEmp(r)).sort(R.COMPARATORS[st.sort] || R.newestFirst);
     const total = list.length;
     const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
     const pg = Math.min(Math.max(1, st.pg || 1), totalPages);
@@ -482,8 +488,8 @@ class BoardApp extends React.Component {
     const pageRecs = list.slice(start, start + PER_PAGE);
 
     const availUnder = (skip) => all.filter((r) =>
-      (skip === "cat" || inCat(r)) && (skip === "loc" || inLoc(r)) && (skip === "pay" || inPay(r)) && (skip === "shift" || inShift(r)) && (skip === "type" || inType(r)) && (skip === "exp" || inExp(r)));
-    const shiftPool = availUnder("shift"), typePool = availUnder("type"), expPool = availUnder("exp"), locPool = availUnder("loc");
+      (skip === "cat" || inCat(r)) && (skip === "loc" || inLoc(r)) && (skip === "pay" || inPay(r)) && (skip === "shift" || inShift(r)) && (skip === "type" || inType(r)) && (skip === "exp" || inExp(r)) && (skip === "emp" || inEmp(r)));
+    const shiftPool = availUnder("shift"), typePool = availUnder("type"), expPool = availUnder("exp"), locPool = availUnder("loc"), empPool = availUnder("emp");
 
     const opt = (label, on, avail, pick) => ({ label, isOn: on, isOff: !on && avail, isUnavailable: !on && !avail, pick });
     const catOptions = R.CATEGORIES.map((c) => opt(c, cats.indexOf(c) >= 0, true, this.toggleCat(c)));
@@ -492,6 +498,12 @@ class BoardApp extends React.Component {
     const shiftOptions = R.SHIFT_FACETS.map((s2) => opt(s2, shifts.indexOf(s2) >= 0, shiftPool.some((r) => R.shiftFacets(r.shift_raw).indexOf(s2) >= 0), this.toggleShift(s2)));
     const typeOptions = R.TYPE_FACETS.map((t) => opt(t, types.indexOf(t) >= 0, typePool.some((r) => R.typeFacet(r.employment_type) === t), this.toggleType(t)));
     const expOptions = R.EXP_FACETS.map((e2) => opt(R.EXP_FACET_LABEL[e2], exps.indexOf(e2) >= 0, expPool.some((r) => R.expFacet(r.experience_condition) === e2), this.toggleExp(e2)));
+    // Employer options are dynamic: every employer in the live set (item 13), alphabetical,
+    // no counts. Brands are their own company_names, so this lists brands, not a parent.
+    const empSeen = {};
+    all.forEach((r) => { const g = R.employerSlug(r.company_name); if (g && !(g in empSeen)) empSeen[g] = R.companyLabel(r.company_name); });
+    const empEntries = Object.keys(empSeen).map((g) => ({ slug: g, label: empSeen[g] })).sort((a, b) => a.label.localeCompare(b.label));
+    const employerOptions = empEntries.map((e2) => opt(e2.label, employers.indexOf(e2.slug) >= 0, true, this.toggleEmployer(e2.slug)));
 
     const draft = L.cityKey(st.locDraft);
     const isZipDraft = /^\d{5}$/.test(draft);
@@ -512,6 +524,7 @@ class BoardApp extends React.Component {
     if (shifts.length) narrowing.push({ label: "Shift", fix: "Clear the shift filter — most postings don’t state a shift.", open: this.openSheet("shift") });
     if (types.length) narrowing.push({ label: "Employment type", fix: "Clear the employment type filter.", open: this.openSheet("type") });
     if (exps.length) narrowing.push({ label: "Experience", fix: "Clear the experience filter.", open: this.openSheet("exp") });
+    if (employers.length) narrowing.push({ label: "Employer", fix: "Clear the employer filter or add another employer.", open: this.openSheet("emp") });
     if (st.showsPay) narrowing.push({ label: "Shows pay", fix: "Turn off Shows pay — most employers don’t state pay.", open: null });
     if (res.kind !== "all") narrowing.push({ label: "Location", fix: "Try a wider radius, or a different city.", open: this.openSheet("loc") });
     if (cats.length) narrowing.push({ label: "Type of work", fix: "Add another type of work.", open: this.openSheet("cat") });
@@ -568,18 +581,19 @@ class BoardApp extends React.Component {
     const elsewhereHeading = cats.length ? "Jobs elsewhere in " + listOf(cats) : "Newest jobs";
 
     // §4 fade: replay on a user-triggered filter/sort/page change via list remount key.
-    const sig = JSON.stringify([cats, st.loc, radius, st.showsPay, shifts, types, exps, st.sort, pg]);
+    const sig = JSON.stringify([cats, st.loc, radius, st.showsPay, shifts, types, exps, employers, st.sort, pg]);
     if (this._sig === undefined) this._sig = sig;
     else if (sig !== this._sig) { this._sig = sig; this._animEpoch = (this._animEpoch || 0) + 1; this._animOn = true; }
 
     return {
       loading, list, total, totalPages, pg, pageRecs, res, radius, isZipDraft,
-      catOptions, catDraftOptions, shiftOptions, typeOptions, expOptions, cityOptions, locLabel, listOf,
+      catOptions, catDraftOptions, shiftOptions, typeOptions, expOptions, employerOptions, cityOptions, locLabel, listOf,
       catAllOn: catDraft.length === R.CATEGORIES.length,
       shiftAllOn: shifts.length === R.SHIFT_FACETS.length,
       typeAllOn: types.length === R.TYPE_FACETS.length,
       expAllOn: exps.length === R.EXP_FACETS.length,
-      cats, shifts, types, exps,
+      employerAllOn: employers.length === empEntries.length,
+      cats, shifts, types, exps, employers,
       catLabel: cats.length ? listOf(cats) : null,
       // Mobile chip: first selection plus a count, never concatenated names that get
       // cut mid-word at 390px (B4). One selection shows its name alone.
@@ -587,8 +601,9 @@ class BoardApp extends React.Component {
       shiftLabel: shifts.length ? listOf(shifts) : null,
       typeLabel: types.length ? listOf(types) : null,
       expLabel: exps.length ? listOf(exps.map((e2) => R.EXP_FACET_LABEL[e2])) : null,
-      anyFilter: !!(cats.length || res.kind !== "all" || st.showsPay || shifts.length || types.length || exps.length),
-      extraCount: (shifts.length ? 1 : 0) + (types.length ? 1 : 0) + (exps.length ? 1 : 0) + (st.showsPay ? 1 : 0),
+      employerLabel: employers.length ? listOf(employers.map((s2) => empSeen[s2] || s2)) : null,
+      anyFilter: !!(cats.length || res.kind !== "all" || st.showsPay || shifts.length || types.length || exps.length || employers.length),
+      extraCount: (shifts.length ? 1 : 0) + (types.length ? 1 : 0) + (exps.length ? 1 : 0) + (employers.length ? 1 : 0) + (st.showsPay ? 1 : 0),
       sortLabel: (R.SORTS.find((s2) => s2.id === st.sort) || R.SORTS[0]).label,
       sortOptions: R.SORTS.map((s2) => ({ label: s2.label, isCurrent: s2.id === st.sort, notCurrent: s2.id !== st.sort, pick: this.setSort(s2.id) })),
       radiusOptions: L.RADII.map((r) => ({ label: r + " mi", value: r, isOff: !isZipDraft, isOnCurrent: isZipDraft && r === radius, isOnOther: isZipDraft && r !== radius, pick: this.setRadius(r) })),
@@ -647,7 +662,7 @@ class BoardApp extends React.Component {
 
   filterProps(d, flags){
     return Object.assign({
-      sortOptions: d.sortOptions, catOptions: d.catOptions, shiftOptions: d.shiftOptions, typeOptions: d.typeOptions, expOptions: d.expOptions,
+      sortOptions: d.sortOptions, catOptions: d.catOptions, shiftOptions: d.shiftOptions, typeOptions: d.typeOptions, expOptions: d.expOptions, employerOptions: d.employerOptions,
       cityOptions: d.cityOptions, radiusOptions: d.radiusOptions, radiusInactive: d.radiusInactive,
       unmatched: d.unmatched, unmatchedLine: d.unmatchedLine, noCityMatch: d.noCityMatch, noCityMatchLine: d.noCityMatchLine,
       locDraft: this.state.locDraft, onLocDraft: this.onLocDraft, onLocKey: this.onLocKey, applyDraft: this.applyLoc(),
@@ -656,6 +671,7 @@ class BoardApp extends React.Component {
       shiftAll: this.selectAllShifts, shiftAllOn: d.shiftAllOn,
       typeAll: this.selectAllTypes, typeAllOn: d.typeAllOn,
       expAll: this.selectAllExps, expAllOn: d.expAllOn,
+      employerAll: this.selectAllEmployers, employerAllOn: d.employerAllOn,
     }, flags);
   }
 
@@ -679,6 +695,7 @@ class BoardApp extends React.Component {
       d.shifts.length ? this.pill(true, d.shiftLabel, this.openSheet("shift"), sheet === "shift") : this.pill(false, "Shift", this.openSheet("shift"), sheet === "shift"),
       d.types.length ? this.pill(true, d.typeLabel, this.openSheet("type"), sheet === "type") : this.pill(false, "Employment type", this.openSheet("type"), sheet === "type"),
       d.exps.length ? this.pill(true, d.expLabel, this.openSheet("exp"), sheet === "exp") : this.pill(false, "Experience", this.openSheet("exp"), sheet === "exp"),
+      d.employers.length ? this.pill(true, d.employerLabel, this.openSheet("emp"), sheet === "emp") : this.pill(false, "Employer", this.openSheet("emp"), sheet === "emp"),
       d.anyFilter && h("button", { key: "clr", type: "button", onClick: this.clearAll, className: "hv-tx-accent", style: s("min-height:38px;padding:0 8px;background:transparent;border:0;font-size:14px;font-weight:600;color:var(--accent);cursor:pointer;flex:none") }, "Clear"),
       h("span", { style: s("flex:1") }),
       d.isList && h("span", { key: "rl", style: s("margin-left:auto;font-size:14px;font-weight:600;color:var(--ink)") }, d.resultLabel),
@@ -706,7 +723,7 @@ class BoardApp extends React.Component {
       h("div", { style: s("flex:none;display:flex;justify-content:flex-end;padding:6px 6px 0") },
         h("button", { type: "button", onClick: this.closeSheet, "aria-label": "Close filter menu", className: "hv-bg-sunk-tx-ink", style: s("width:36px;height:36px;display:grid;place-items:center;background:transparent;border:0;border-radius:3px;cursor:pointer;color:var(--ink-muted)") }, raw(CLOSE))),
       h("div", { style: s("flex:1;min-height:0;overflow-y:auto;margin-top:-8px") },
-        h(FilterPanel, this.filterProps(d, { isSort: sheet === "sort", isCat: isCat, isLoc: sheet === "loc", isShift: sheet === "shift", isType: sheet === "type", isExp: sheet === "exp", catOptions: d.catDraftOptions }))),
+        h(FilterPanel, this.filterProps(d, { isSort: sheet === "sort", isCat: isCat, isLoc: sheet === "loc", isShift: sheet === "shift", isType: sheet === "type", isExp: sheet === "exp", isEmployer: sheet === "emp", catOptions: d.catDraftOptions }))),
       isCat && this.applyFooter()
     );
   }
@@ -792,7 +809,7 @@ class BoardApp extends React.Component {
               h("div", { style: s("display:flex;align-items:center;gap:2px") },
                 d.anyFilter && h("button", { key: "ca", type: "button", onClick: this.clearAll, style: s("min-height:44px;padding:0 10px;background:transparent;border:0;font-size:14px;font-weight:600;color:var(--accent);cursor:pointer") }, "Clear all"),
                 h("button", { type: "button", onClick: this.closeSheet, "aria-label": "Close filters", className: "hv-bg-sunk", style: s("width:44px;height:44px;display:grid;place-items:center;background:transparent;border:0;border-radius:3px;cursor:pointer;color:var(--ink)") }, raw(CLOSE15)))),
-            h("div", { style: s("flex:1;min-height:0;overflow-y:auto") }, h(FilterPanel, this.filterProps(d, { isSort: true, isCat: true, isLoc: true, isPay: true, isShift: true, isType: true, isExp: true, divided: true }))),
+            h("div", { style: s("flex:1;min-height:0;overflow-y:auto") }, h(FilterPanel, this.filterProps(d, { isSort: true, isCat: true, isLoc: true, isPay: true, isShift: true, isType: true, isExp: true, isEmployer: true, divided: true }))),
             h("div", { style: s("flex:none;padding:12px 16px;border-top:1px solid var(--line)") },
               h("button", { type: "button", onClick: this.closeSheet, style: s("width:100%;min-height:48px;border-radius:3px;background:var(--accent);border:0;font-size:16px;font-weight:700;color:var(--accent-ink);cursor:pointer") }, "Show jobs"))))
       ),

@@ -110,6 +110,14 @@ export function FilterPanel(p){
     h("div", { style: s("display:flex;flex-wrap:wrap;gap:8px") }, (p.expOptions || []).map((e2, i) => pill(e2, i)))
   ));
 
+  if (p.divided) kids.push(sep("demp"));
+  if (p.isEmployer) kids.push(h("div", { key: "emp", style: s("display:grid;gap:6px") },
+    h("div", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, "Employer"),
+    // Long dynamic list -> checkbox rows (like Type of work), alphabetical, no counts.
+    h("div", { style: s("display:grid;gap:2px") },
+      (p.employerAll ? [applyAllRow(p.employerAllOn, p.employerAll)] : []).concat((p.employerOptions || []).map((e2, i) => catRow(e2, i))))
+  ));
+
   if (p.divided) kids.push(sep("d5"));
   if (p.isLoc) kids.push(h("div", { key: "loc", style: s("display:grid;gap:14px") },
     h("div", { style: s("display:flex;align-items:baseline;justify-content:space-between;gap:12px") },
