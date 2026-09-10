@@ -304,10 +304,7 @@ class LandingApp extends React.Component {
     }));
   }
   renderCatWide(){
-    const allOn = this.state.cats.length === R.CATEGORIES.length;
     return h("div", { role: "group", "aria-label": "Type of work", style: s("display:flex;flex-wrap:wrap;justify-content:center;gap:8px") },
-      h("button", { key: "all", type: "button", onClick: this.selectAllCats, "aria-pressed": allOn, className: allOn ? undefined : "hv-bg-fact",
-          style: s("min-height:46px;display:inline-flex;align-items:center;padding:0 15px;border:1px solid var(--ink);border-radius:3px;background:" + (allOn ? "var(--ink)" : "var(--surface-raised)") + ";font-size:15px;font-weight:700;color:" + (allOn ? "var(--surface)" : "var(--ink)") + ";cursor:pointer;white-space:nowrap") }, "Apply all"),
       this.catOptions().map((c, i) => c.isOn
         ? h("button", { key: i, type: "button", onClick: c.pick, "aria-pressed": true, style: s("min-height:46px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);font-size:15px;font-weight:700;color:var(--surface);cursor:pointer;white-space:nowrap") }, raw(catIconSvg(c.label, 20, "currentColor")), h("span", null, c.label))
         : h("button", { key: i, type: "button", onClick: c.pick, "aria-pressed": false, className: "hv-bg-fact", style: s("min-height:46px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border:1px solid var(--ink);border-radius:3px;background:var(--surface-raised);font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;white-space:nowrap") }, raw(catIconSvg(c.label, 20)), h("span", null, c.label)))
@@ -382,17 +379,15 @@ class LandingApp extends React.Component {
     return { title, body };
   }
   renderValueProps(){
-    // C3: now that this section follows the jobs, the first card is the curation
-    // claim — states the work happened without explaining the process. "100% free"
-    // is still stated on the search card ("Free to use") and the closing CTA.
+    // "What you landed on" — the value props the visitor just experienced.
     const items = [
-      ["Checked first", "Every job is read against the employer’s requirements before it’s listed."],
-      ["Posted this week", "Job listings updated daily."],
-      ["Real employers", "Apply directly with the employer."],
-      ["Requirements up front", "Less time spent on the wrong jobs."],
+      ["100% free", "No sign-up or resume required to apply."],
+      ["Real employers, direct", "Every job comes from the company’s own careers page."],
+      ["Requirements up front", "Spend less time searching and more time applying."],
+      ["Employer-stated pay", "Shown when the employer states it. Never estimated."],
     ];
     if (this.state.wide) return h("section", { style: s("margin:0 -14px;padding:16px 14px;background:var(--ink);display:grid;gap:10px") },
-      h("h2", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--mark)") }, "What’s different"),
+      h("h2", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--mark)") }, "What you landed on"),
       h("div", { style: s("display:grid;grid-template-columns:repeat(4,1fr);gap:8px") },
         items.map(([t, b], i) => h("div", { key: i, style: s("display:grid;align-content:start;gap:6px;padding:12px;background:var(--surface-raised);border:1px solid var(--ink);border-radius:3px") },
           h("span", { "aria-hidden": "true", style: s("width:32px;height:32px;border-radius:3px;background:var(--mark);display:grid;place-items:center") }, raw(VP_CHECK)),
@@ -400,7 +395,7 @@ class LandingApp extends React.Component {
           h("span", { style: s("font-size:15px;line-height:1.35;color:var(--ink-muted);text-wrap:pretty") }, b))))
     );
     return h("section", { style: s("margin:0 -14px;padding:16px 14px;background:var(--ink);display:grid;gap:14px") },
-      h("h2", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--mark)") }, "What’s different"),
+      h("h2", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--mark)") }, "What you landed on"),
       h("div", { style: s("display:grid;grid-template-columns:repeat(auto-fit,minmax(min(400px,100%),1fr));gap:10px 20px") },
         items.map(([t, b], i) => h("div", { key: i, style: s("display:flex;gap:10px;align-items:flex-start") },
           h("span", { "aria-hidden": "true", style: s("flex:none;width:32px;height:32px;border-radius:3px;background:var(--mark);display:grid;place-items:center") }, raw(VP_CHECK)),

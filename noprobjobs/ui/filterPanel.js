@@ -146,5 +146,12 @@ export function FilterPanel(p){
     p.noCityMatch && h("div", { key: "nc", style: s("font-size:15px;line-height:1.5;color:var(--ink);text-wrap:pretty") }, p.noCityMatchLine)
   ));
 
+  // Location leads the mobile Filters drawer (item request). Only the drawer renders every
+  // section (divided), so move Location + its separator to the front there; desktop shows one
+  // section per popover, so order is moot. Keyed React elements re-render in the new order.
+  if (p.divided) {
+    const li = kids.findIndex((k) => k && k.key === "loc");
+    if (li > 0) { const [loc] = kids.splice(li, 1); const [sepr] = kids.splice(li - 1, 1); kids.unshift(sepr); kids.unshift(loc); }
+  }
   return h("div", { style: s("display:grid;gap:12px;padding:12px 12px 14px") }, kids);
 }
