@@ -106,6 +106,10 @@ class BoardApp extends React.Component {
   selectAllShifts = () => { const n = this.state.shifts.length === R.SHIFT_FACETS.length ? [] : R.SHIFT_FACETS.slice(); this.setState({ shifts: n, openId: null, pg: 1 }); this.writeUrl({ shifts: n, openId: null, page: 1 }); };
   selectAllTypes = () => { const n = this.state.types.length === R.TYPE_FACETS.length ? [] : R.TYPE_FACETS.slice(); this.setState({ types: n, openId: null, pg: 1 }); this.writeUrl({ types: n, openId: null, page: 1 }); };
   selectAllExps = () => { const n = this.state.exps.length === R.EXP_FACETS.length ? [] : R.EXP_FACETS.slice(); this.setState({ exps: n, openId: null, pg: 1 }); this.writeUrl({ exps: n, openId: null, page: 1 }); };
+  // Mobile flagship toggle (the product's whole promise): a clean binary — on = no-experience
+  // ONLY (exps=["none"]), off = no experience filter. Reuses the Item 8 exp filter so it stays
+  // in sync with the Filters drawer and the ?exp=none URL.
+  toggleNoExp = () => { const on = this.state.exps.length === 1 && this.state.exps[0] === "none"; const n = on ? [] : ["none"]; this.setState({ exps: n, openId: null, pg: 1 }); this.writeUrl({ exps: n, openId: null, page: 1 }); };
   togglePay = () => { const v = !this.state.showsPay; this.setState({ showsPay: v, openId: null, pg: 1 }); this.writeUrl({ showsPay: v, openId: null, page: 1 }); };
   clearAll = () => {
     this.setState({ cats: [], catDraft: [], loc: "", locDraft: "", showsPay: false, shifts: [], types: [], exps: [], openId: null, sheet: null, pg: 1 });
@@ -700,6 +704,18 @@ class BoardApp extends React.Component {
     );
   }
 
+  // Dedicated "No experience required" toggle for mobile — its own row so the product's
+  // core filter isn't buried in the Filters drawer. Navy when on (selected = navy), no count.
+  renderNoExpToggle(){
+    const on = this.state.exps.length === 1 && this.state.exps[0] === "none";
+    return h("div", { key: "noexp", style: s("flex:none;display:flex;padding:8px 12px 0") },
+      h("button", { type: "button", onClick: this.toggleNoExp, "aria-pressed": on,
+        style: s("min-height:40px;display:inline-flex;align-items:center;gap:7px;padding:0 14px;border-radius:3px;cursor:pointer;font-size:14.5px;font-weight:700;"
+          + (on ? "background:var(--ink);border:1px solid var(--ink);color:var(--accent-ink)"
+                : "background:var(--surface-raised);border:1px solid var(--line);color:var(--ink)")) },
+        on ? raw(CHECK14) : null, h("span", { style: s("white-space:nowrap") }, "No experience required")));
+  }
+
   // ── mobile ────────────────────────────────────────────────────────────
   renderMobile(d){
     const sheet = this.state.sheet;
@@ -717,6 +733,8 @@ class BoardApp extends React.Component {
           ? h("button", { type: "button", onClick: this.openSheet("all"), "aria-expanded": sheet === "all", "aria-haspopup": "true", "aria-label": "Filters", style: s("min-height:44px;display:flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);font-size:14px;font-weight:700;color:var(--accent-ink);cursor:pointer;flex:none") }, raw(FILTERS_ICON), h("span", null, "Filters"), h("span", { style: s("min-width:19px;height:19px;display:grid;place-items:center;padding:0 5px;border-radius:3px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:800") }, d.extraCount))
           : h("button", { type: "button", onClick: this.openSheet("all"), "aria-expanded": sheet === "all", "aria-haspopup": "true", "aria-label": "Filters", className: "hv-bd-accent", style: s("min-height:44px;display:flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;flex:none") }, raw(FILTERS_ICON_MUTED), h("span", null, "Filters"))
       ),
+      // Flagship one-tap: no experience required — its own row, above the rest.
+      this.renderNoExpToggle(),
       // Clear all — collapsed-state clear path, shown whenever any filter is active so
       // categories (and the rest) can be cleared without opening a menu first (B4).
       d.anyFilter && h("div", { key: "clrall", style: s("flex:none;display:flex;padding:2px 12px 6px") },
