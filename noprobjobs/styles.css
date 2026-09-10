@@ -160,7 +160,11 @@ button{font:inherit;color:inherit}
    narrower width. Scoped to .landing-scope, so the board is untouched; gated at 1024px, so
    mobile and tablet are unchanged. */
 @media (min-width:1024px){
-  .landing-scope{ --rail: 1040px; --gap-section: 12px; }
+  /* One source of truth for the centred desktop rail — the landing AND the board read it,
+     so the two surfaces can't drift to different widths (the failure mode change #4 warns
+     about). --gap-section tightening stays landing-only (the board shell doesn't use it). */
+  .landing-scope, .board-scope{ --rail: 1040px; }
+  .landing-scope{ --gap-section: 12px; }
 }
 
 /* C1 depth — press behaviour is JS-driven (see ui/pressable.js): iOS Safari does not

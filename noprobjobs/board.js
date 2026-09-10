@@ -661,7 +661,7 @@ class BoardApp extends React.Component {
     const sheet = this.state.sheet;
     if (!sheet || sheet === "all") return null;
     const isCat = sheet === "cat";
-    return h("div", { "data-filter-pop": "true", role: "dialog", "aria-label": "Filters", style: s("position:absolute;top:106px;left:28px;z-index:6;width:372px;background:var(--surface-raised);border:1px solid var(--ink);border-radius:3px;box-shadow:0 12px 32px rgba(10,58,117,0.16);max-height:520px;display:flex;flex-direction:column") },
+    return h("div", { "data-filter-pop": "true", role: "dialog", "aria-label": "Filters", style: s("position:absolute;top:50px;left:28px;z-index:6;width:372px;background:var(--surface-raised);border:1px solid var(--ink);border-radius:3px;box-shadow:0 12px 32px rgba(10,58,117,0.16);max-height:520px;display:flex;flex-direction:column") },
       h("div", { style: s("flex:none;display:flex;justify-content:flex-end;padding:6px 6px 0") },
         h("button", { type: "button", onClick: this.closeSheet, "aria-label": "Close filter menu", className: "hv-bg-sunk-tx-ink", style: s("width:36px;height:36px;display:grid;place-items:center;background:transparent;border:0;border-radius:3px;cursor:pointer;color:var(--ink-muted)") }, raw(CLOSE))),
       h("div", { style: s("flex:1;min-height:0;overflow-y:auto;margin-top:-8px") },
@@ -671,7 +671,11 @@ class BoardApp extends React.Component {
   }
 
   renderWide(d){
-    return [
+    // Change #4: constrain the board to the same centred rail the landing uses (var(--rail),
+    // 1040px on desktop via .board-scope). The navy header/footer stay full-bleed (they're
+    // outside this container); the filter bar, list and detail pane centre within it. The
+    // detail pane's own measure is capped independently at 68ch (see [data-desc-html]).
+    return h("div", { style: s("flex:1;min-height:0;width:100%;max-width:var(--rail,1120px);margin:0 auto;display:flex;flex-direction:column;position:relative") },
       this.renderFilterBarWide(d),
       this.renderPopover(d),
       h("div", { key: "body", style: s("flex:1;min-height:0;display:flex;background:var(--surface-sunk)") },
@@ -682,7 +686,7 @@ class BoardApp extends React.Component {
             ? h(JobPage, { page: d.page, categories: R.CATEGORIES, back: this.back, isMobilePage: false, isPanel: false, isPermanent: true })
             : h("div", { style: s("position:absolute;inset:0;display:grid;place-content:center;justify-items:center;padding:40px") }, h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-align:center") }, "No job to show.")))
       )
-    ];
+    );
   }
 
   // ── mobile ────────────────────────────────────────────────────────────
@@ -815,7 +819,7 @@ class BoardApp extends React.Component {
   render(){
     const d = this.derive();
     if (this._standalone) return this.renderStandalone(d);
-    return h("div", { style: s("height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative;background:var(--surface)") },
+    return h("div", { className: "board-scope", style: s("height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative;background:var(--surface)") },
       h(Header, { productName: PRODUCT, onAlerts: this.openAlerts, wide: this.state.wide }),
       this.state.wide ? this.renderWide(d) : this.renderMobile(d),
       this.renderFooter(),
