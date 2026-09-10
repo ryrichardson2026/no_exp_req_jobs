@@ -11,7 +11,12 @@ outputs/
 pull_*/
 grid_*/
 scratchpad/
+scratch/
 *.zip
+
+# Local dev artifacts: one-off probes/fixtures + screenshot scripts. Kept on disk, not tracked.
+aggregator_probe.jsonl
+prerender/_gap.mjs
 
 # Daily-pull run logs (ops/run_pull_daily.ps1).
 logs/
