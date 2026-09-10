@@ -423,7 +423,21 @@ async function main(){
     concurrency: CONC,
   };
   console.log(JSON.stringify(summary, null, 2));
-  if (stopped || failures.length) process.exitCode = 1;
+
+  // Terminal summary line in the house format ($ echo / output / one summary line), so a
+  // silent bake failure can no longer read like a success. On any abort/route failure this
+  // exits non-zero, which run_pull.py surfaces as STATUS: BAKE FAILED and halts the publish
+  // before deploy. (Write failures throw out of main() -> the catch below -> exit 1.)
+  const listingViews = summary.browse_pages_ok + summary.landing_ok;
+  if (stopped || failures.length) {
+    process.exitCode = 1;
+    console.error("BAKE FAILED: " + summary.job_pages_ok + " job pages ok, "
+      + failures.length + " route failure(s)"
+      + (summary.abort_reason ? " — " + summary.abort_reason : ""));
+  } else {
+    console.log("BAKE COMPLETE: " + summary.job_pages_ok + " job pages, "
+      + listingViews + " listing views");
+  }
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

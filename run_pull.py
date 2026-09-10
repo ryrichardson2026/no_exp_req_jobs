@@ -124,7 +124,10 @@ def run(cmd, cwd=ROOT, capture=False):
         if p.stdout:
             print(p.stdout, flush=True)
         if p.stderr:
-            print(p.stderr, file=sys.stderr, flush=True)
+            # Fold the child's stderr into the tee'd stdout stream. Node (build.mjs,
+            # retire.mjs) writes ALL its progress to stderr; routed to sys.stderr it
+            # bypasses the per-stage tee and the stage logs empty (the bug this fixes).
+            print(p.stderr, flush=True)
         return p.returncode, p.stdout
     return subprocess.run(cmd, cwd=cwd).returncode, None
 
@@ -619,27 +622,35 @@ def _publish():
     print("PUBLISH (COMPLETE)")
     print("=" * 78)
 
+    # capture=True on the node stages so their (stderr) output flows through the tee and
+    # a non-zero exit is seen. A silent bake failure and a good bake used to log identically.
     steps = [
         ("push to Supabase", [sys.executable, "-m", "analyze.supabase_sink"], ROOT, False),
-        ("bake (prerender build)", ["node", "build.mjs"], PRERENDER, False),
-        ("retire", ["node", "retire.mjs"], PRERENDER, False),
+        ("bake (prerender build)", ["node", "build.mjs"], PRERENDER, True),
+        ("retire", ["node", "retire.mjs"], PRERENDER, True),
     ]
     for name, cmd, cwd, cap in steps:
         print(f"\n--- {name} ---")
         rc, _ = run(cmd, cwd=cwd, capture=cap)
         if rc != 0:
-            print(f"!! {name} exited {rc} - halting publish. Prior production build keeps serving.")
+            print(f"\n!! {name} exited {rc} - halting publish. Prior production build keeps serving.")
+            if name.startswith("bake"):
+                print(f"STATUS: BAKE FAILED (exit {rc})")
+            else:
+                print(f"STATUS: PUBLISH FAILED at {name} (exit {rc})")
             return 1
 
     print("\n--- deploy (vercel --prod) ---")
     rc, out = run(["vercel", "deploy", "--prod", "--yes"], cwd=DEPLOY_DIR, capture=True)
     if rc != 0:
-        print("!! deploy exited non-zero - halting. Prior production build keeps serving.")
+        print("\n!! deploy exited non-zero - halting. Prior production build keeps serving.")
+        print(f"STATUS: PUBLISH FAILED at deploy (exit {rc})")
         return 1
     url = ""
     for m in re.finditer(r"https://\S+\.vercel\.app", out or ""):
         url = m.group(0)
-    print(f"\nSTATUS: COMPLETE + PUBLISHED   deploy: {url or '(url not captured - check vercel output)'}")
+    print(f"\ndeploy: {url or '(url not captured - check vercel output)'}")
+    print("STATUS: PUBLISH COMPLETE")
     return 0
 
 
