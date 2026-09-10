@@ -698,7 +698,11 @@ class BoardApp extends React.Component {
     const sheet = this.state.sheet;
     if (!sheet || sheet === "all") return null;
     const isCat = sheet === "cat";
-    return h("div", { "data-filter-pop": "true", role: "dialog", "aria-label": "Filters", style: s("position:absolute;top:50px;left:28px;z-index:6;width:372px;background:var(--surface-raised);border:1px solid var(--ink);border-radius:3px;box-shadow:0 12px 32px rgba(10,58,117,0.16);max-height:520px;display:flex;flex-direction:column") },
+    // Item 14: the menu aligns to its trigger. Sort sits at the RIGHT of the filter bar, so
+    // its menu is right-aligned (right edge meets the button's); the left-hand filter pills
+    // keep their left alignment. width 372 < the 1040 rail, so neither edge overflows.
+    const align = sheet === "sort" ? "right:28px" : "left:28px";
+    return h("div", { "data-filter-pop": "true", role: "dialog", "aria-label": "Filters", style: s("position:absolute;top:50px;" + align + ";z-index:6;width:372px;background:var(--surface-raised);border:1px solid var(--ink);border-radius:3px;box-shadow:0 12px 32px rgba(10,58,117,0.16);max-height:520px;display:flex;flex-direction:column") },
       h("div", { style: s("flex:none;display:flex;justify-content:flex-end;padding:6px 6px 0") },
         h("button", { type: "button", onClick: this.closeSheet, "aria-label": "Close filter menu", className: "hv-bg-sunk-tx-ink", style: s("width:36px;height:36px;display:grid;place-items:center;background:transparent;border:0;border-radius:3px;cursor:pointer;color:var(--ink-muted)") }, raw(CLOSE))),
       h("div", { style: s("flex:1;min-height:0;overflow-y:auto;margin-top:-8px") },
