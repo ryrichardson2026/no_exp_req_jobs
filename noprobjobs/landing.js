@@ -36,9 +36,6 @@ const ROW_CHECK = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" s
 const VP_CHECK = '<svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="var(--mark-ink)" stroke-width="1.9"><circle cx="8" cy="8" r="6.6"></circle><path d="M5 8.3l2.1 2.1L11 6.1"></path></svg>';
 const TICK = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="2.4" style="flex:none" aria-hidden="true"><path d="M3 8.4l3 3L13 4.6"></path></svg>';
 const CLOSE = '<svg width="13" height="13" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.6 1.6l11.8 11.8"></path><path d="M13.4 1.6L1.6 13.4"></path></svg>';
-// Pixel-art thumbs up for the signup confirmation — blocky orthogonal outline, marigold
-// fill + ink outline (matches the hero star), with folded-finger lines on the fist.
-const THUMB_UP = '<svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true" style="display:block"><path d="M17 4 H29 V22 H52 V52 H10 V22 H17 Z" fill="var(--mark)" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="miter"></path><path d="M22 30 H46 M22 38 H46 M22 46 H41" stroke="var(--ink)" stroke-width="2.5" fill="none"></path></svg>';
 
 class LandingApp extends React.Component {
   constructor(props){
@@ -515,7 +512,7 @@ class LandingApp extends React.Component {
       : phase === "done"
       ? h("div", { key: "dn", style: s("display:grid;justify-items:center;gap:14px;padding:6px 0 8px;text-align:center") },
           h("div", { style: s("font-size:16.5px;line-height:1.6;color:var(--ink-muted);text-wrap:pretty") }, "We’ll email new jobs as they’re posted."),
-          raw(THUMB_UP))
+          h("img", { src: "/logo.png", alt: "", width: 56, height: 56, style: s("width:56px;height:56px;object-fit:contain") }))
       : h("div", { key: "fm", style: s("display:grid;gap:12px") },
           h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "Get alerted when no-experience needed jobs get posted."),
           field("Email", h("input", { type: "email", value: this.state.alertEmail, onChange: this.onAlertEmail, onKeyDown: this.onAlertKey, placeholder: "you@example.com", className: "fc-bd-accent", style: s(inputStyle) })),

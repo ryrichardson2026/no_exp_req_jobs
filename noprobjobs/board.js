@@ -43,7 +43,6 @@ const FILTERS_ICON_MUTED = '<svg width="15" height="15" viewBox="0 0 16 16" fill
 const CLOSE = '<svg width="13" height="13" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.6 1.6l11.8 11.8"></path><path d="M13.4 1.6L1.6 13.4"></path></svg>';
 const CLOSE15 = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.6 1.6l11.8 11.8"></path><path d="M13.4 1.6L1.6 13.4"></path></svg>';
 // Pixel-art thumbs up for the signup confirmation (matches the landing + the hero star).
-const THUMB_UP = '<svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true" style="display:block"><path d="M17 4 H29 V22 H52 V52 H10 V22 H17 Z" fill="var(--mark)" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="miter"></path><path d="M22 30 H46 M22 38 H46 M22 46 H41" stroke="var(--ink)" stroke-width="2.5" fill="none"></path></svg>';
 // Shown in the detail pane while jobs_detail (description_html) is fetched on open. A
 // multi-line skeleton (not a bare "Loading…") so the pane holds roughly a paragraph of
 // height and the real description doesn't pop in from a single line — no jump on arrival.
@@ -839,7 +838,7 @@ class BoardApp extends React.Component {
       ? h("div", { key: "dn", style: s("display:grid;justify-items:center;gap:14px;padding:4px 0 6px;text-align:center") },
           h("div", { className: "dsp", style: s("font-size:21px;line-height:1.16;font-weight:800;color:var(--ink)") }, "You’re on the list"),
           h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "We’ll email new jobs as they’re posted."),
-          raw(THUMB_UP))
+          h("img", { src: "/logo.png", alt: "", width: 56, height: 56, style: s("width:56px;height:56px;object-fit:contain") }))
       : h("div", { key: "fm", style: s("display:grid;gap:12px") },
           h("div", { style: s("display:grid;gap:5px;padding-right:40px") },
             h("div", { className: "dsp", style: s("font-size:21px;line-height:1.16;font-weight:800;color:var(--ink);text-wrap:pretty") }, "Get Job Alerts"),
