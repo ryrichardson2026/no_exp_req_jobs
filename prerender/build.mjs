@@ -151,7 +151,7 @@ async function assembleDeploy(live, expiredBack, browse){
   return { sitemap_urls: locs.length };
 }
 
-async function bake(page, route){
+async function bake(page, route, cache){
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       await page.goto(route.url, { waitUntil: "domcontentloaded", timeout: 30000 });
@@ -196,8 +196,16 @@ async function bake(page, route){
         document.querySelectorAll('link[as="style"][rel="stylesheet"]').forEach((el) => { el.rel = "preload"; });
         return "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
       });
-      await writeBaked(route.path, html);
-      return { path: route.path, type: route.type, bytes: Buffer.byteLength(html, "utf8"), ld: !!route.ld };
+      // Landing pages ship their data INLINE so the client renders from it with no Supabase
+      // query (drops the ~2.8s critical-path call and the freshCount/R.today() flash). The blob
+      // is the same jobs_list the bake rendered from, so baked and hydrated DOM stay identical.
+      let out = html;
+      if (route.type === "landing" && cache) {
+        const blob = JSON.stringify({ list: JSON.parse(cache.list), pulledAt: cache.pulledAt || null }).replace(/</g, "\\u003c");
+        out = out.replace("</body>", '<script id="__npj_data" type="application/json">' + blob + "</script></body>");
+      }
+      await writeBaked(route.path, out);
+      return { path: route.path, type: route.type, bytes: Buffer.byteLength(out, "utf8"), ld: !!route.ld };
     } catch (e) {
       if (attempt === 1) return { path: route.path, type: route.type, error: String(e && e.message || e) };
     }
@@ -275,7 +283,7 @@ async function main(){
   const recs = await fetchAll("/jobs_detail?select=*&limit=2000");
   const list = await fetchAll("/jobs_list?select=*&limit=2000");
   const meta = await fetchAll("/site_meta?select=pulled_at");
-  const cache = { list: JSON.stringify(list), meta: JSON.stringify(meta), byId: {}, byNum: {} };
+  const cache = { list: JSON.stringify(list), meta: JSON.stringify(meta), byId: {}, byNum: {}, pulledAt: (meta[0] && meta[0].pulled_at) || null };
   for (const r of recs) { cache.byId[r.internal_id] = r; cache.byNum[String(r.job_number)] = r; }
 
   // enumerate routes
@@ -327,7 +335,7 @@ async function main(){
       await attachCache(page, cache);
       while (!breaker.aborted) {
         const i = next++; if (i >= list.length) break;
-        const res = await bake(page, list[i]);
+        const res = await bake(page, list[i], cache);
         results.push(res); breaker.attempted++; breaker.done++;
         if (res.error) {
           breaker.fails++; breaker.consec++;
@@ -360,7 +368,7 @@ async function main(){
     await page.setViewport(MOBILE);
     await attachCache(page, cache);
     for (const route of failed){
-      const res = await bake(page, route);
+      const res = await bake(page, route, cache);
       const idx = results.findIndex((x) => x.path === route.path && x.error);
       if (!res.error && idx !== -1) { results[idx] = res; breaker.fails--; process.stderr.write("  ~~ healed " + route.path + "\n"); }
       else if (res.error) process.stderr.write("  ~~ still failing " + route.path + ": " + res.error + "\n");

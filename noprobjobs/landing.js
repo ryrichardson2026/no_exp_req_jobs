@@ -81,7 +81,8 @@ class LandingApp extends React.Component {
     this._mql = window.matchMedia(BP);
     this._onMql = () => this.setState({ wide: this._mql.matches });
     this._mql.addEventListener("change", this._onMql);
-    SB.pulledAt().then((d) => R.setToday(d)).catch(() => {});
+    // R.setToday is set in boot() (from the inline blob's pulledAt) before first render, so
+    // freshCount is deterministic — no async SB.pulledAt() race that made the banner flash.
     if (this.state.recs) {
       this.preflightLogos(this.state.recs);                 // seeded at mount — no refetch, no wipe
     } else {
@@ -573,4 +574,22 @@ const mount = (initialRecs) => {
   const root = window.ReactDOM.createRoot(document.getElementById("root"));
   root.render(h(LandingApp, initialRecs ? { initialRecs } : null));
 };
-SB.listJobs().then(mount).catch(() => mount(null));
+// The landing is static daily content, so it ships its data INLINE (baked by prerender/
+// build.mjs) and renders from it with NO client query — the Supabase call was the slowest
+// request on the page (~2.8s critical path) and the source of the count/burst flash. Set
+// today from the baked pulled_at before first render, then mount. Fall back to a live fetch
+// only if the inline blob is missing (e.g. an un-baked shell). The board stays live.
+const boot = () => {
+  const el = document.getElementById("__npj_data");
+  if (el) {
+    try {
+      const d = JSON.parse(el.textContent);
+      if (d.pulledAt) R.setToday(d.pulledAt);
+      mount(d.list || []);
+      return;
+    } catch (e) { /* malformed blob -> fall through to a live fetch */ }
+  }
+  Promise.all([SB.listJobs().catch(() => null), SB.pulledAt().catch(() => null)])
+    .then(([list, pa]) => { if (pa) R.setToday(pa); mount(list); });
+};
+boot();
