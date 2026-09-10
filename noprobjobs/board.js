@@ -326,6 +326,9 @@ class BoardApp extends React.Component {
 
   ensureDetail(id){
     if (!id || (this.state.details && this.state.details[id])) return;
+    // Standalone page: description_html is baked and rendered from BAKED_DESC (see mount), so
+    // the jobs_detail fetch would only re-fetch already-on-screen content. Skip it.
+    if (this._standalone && BAKED_DESC && this.state.openId) return;
     this._detailPending = this._detailPending || {};
     if (this._detailPending[id]) return;
     this._detailPending[id] = true;
@@ -547,7 +550,8 @@ class BoardApp extends React.Component {
       if (openRec.shift_raw) mods.push({ value: R.shiftLabel(openRec.shift_raw), isShift: true });
       if (openRec.fte) mods.push({ value: (+(openRec.fte * 100).toFixed(1)) + "% of full-time hours", isFte: true });
       page = Object.assign(this.shape(openRec), {
-        description: detailReady ? description(openRec) : DESC_LOADING, modifiers: mods, hasFacts: mods.length > 0,
+        description: detailReady ? description(openRec)
+          : (this._standalone && BAKED_DESC && st.openId ? raw(BAKED_DESC) : DESC_LOADING), modifiers: mods, hasFacts: mods.length > 0,
         expVerbatim: R.verbatim(openRec),
         verbatimNeedsLabel: openRec.experience_condition === "PREFERRED" && !!R.verbatim(openRec),
         verbatimBare: openRec.experience_condition === "WAIVED" && !!R.verbatim(openRec),
@@ -901,6 +905,16 @@ class BoardApp extends React.Component {
     );
   }
 }
+
+// A standalone /jobs/{slug} page already bakes the job's full description (the data/describe.js
+// output, serialized by the bake). jobs_detail's ONLY runtime contribution to what this page
+// renders is description_html — every other field it shows (title, pay, experience, expired,
+// apply) comes from jobs_list, which is fetched live at mount. So on standalone we render the
+// baked description verbatim and skip the jobs_detail round trip entirely: no second fetch, and
+// no blank window where React would show DESC_LOADING until that fetch returns. Captured before
+// createRoot().render() replaces #root. (In-app opens keep the fetch — no baked description
+// exists for an arbitrarily-opened job there.)
+const BAKED_DESC = (() => { try { const el = document.querySelector('[data-desc-html]'); return el ? el.innerHTML : null; } catch (e) { return null; } })();
 
 // Mount only once the job list is in hand, seeded as initialRecs, so the first client render
 // already has content matching the prerendered HTML — the baked page stays on screen during

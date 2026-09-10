@@ -234,15 +234,14 @@ class LandingApp extends React.Component {
     const local = R.localLogo(r.company_name);          // hand-picked logo wins over the domain favicon
     const logoSrc = local || R.logoUrl(domain);
     const showLogo = local ? true : (R.ownsDomain(r.company_name, domain) && !!this.state.logoOk[domain]);
-    // The crawlable href stays the flat job permalink (SEO internal link + right-click-open);
-    // a click, though, drops the visitor INTO the board filtered to the job's category with
-    // its detail open — the browsing experience, not the isolated reading page. Falls back to
-    // the permalink if we can't form a board URL (no category or no job_number).
-    const primaryCat = R.recordCats(r)[0];
-    const boardJobHref = (primaryCat && r.job_number != null)
-      ? RT.browsePath(r.state, primaryCat) + "?job=" + r.job_number
-      : RT.jobPath(r) + "/";
-    const go = () => { window.location.href = boardJobHref; };
+    // A landing card navigates straight to the job's own baked page (/jobs/{slug}), NOT the
+    // board's category URL. The board-category route (/washington/{cat}/?job=N) painted its
+    // baked category list first and only opened the detail after jobs_list fetched — on mobile
+    // that's a full-screen list flash (a different job on top) for the whole fetch window; on
+    // desktop a browse→panel jump. The standalone page bakes the actual job (title + body), so
+    // it paints the right job instantly, cold, with no fetch, no list, no overlay delay.
+    const jobHref = RT.jobPath(r) + "/";
+    const go = () => { window.location.href = jobHref; };
     return Object.assign({}, r, {
       id: r.internal_id,
       company: R.companyLabel(r.company_name),
@@ -255,8 +254,10 @@ class LandingApp extends React.Component {
       expLabel: R.EXP_LABEL[r.experience_condition] || null,
       expStrong: r.experience_condition === "NONE_NEEDED" || r.experience_condition === "WAIVED",
       expSoft: r.experience_condition === "PREFERRED",
-      href: RT.jobPath(r) + "/",              // crawlable permalink; the click is intercepted below
-      onCardClick: (e) => { if (e && e.preventDefault) e.preventDefault(); go(); },
+      href: jobHref,                          // crawlable permalink AND the click destination
+      // href IS the destination now, so let modified clicks (new tab / new window / middle) use
+      // the native anchor; only plain left-clicks are handled programmatically.
+      onCardClick: (e) => { if (e && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1)) return; if (e && e.preventDefault) e.preventDefault(); go(); },
       isSelected: false, open: go,
       openKey: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } },
     });
