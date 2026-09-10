@@ -102,16 +102,18 @@ export function payFirst(a, b){
 export const SORTS = [{ id: "newest", label: "Newest first" }, { id: "pay", label: "Highest pay first" }];
 export const COMPARATORS = { newest: newestFirst, pay: payFirst };
 
-/* A stated posted date always renders. Old postings get coarser wording, never
-   suppression. Only a genuinely absent posted_at produces no row. */
+/* Item 12: a posted date older than 30 days is NOT displayed — an evergreen req carrying a
+   2019 posted_date (Dollar General's feed does exactly this: posted_date 2019 while the req
+   is create/update-stamped this month) reads as a dead site otherwise. This suppresses only
+   the DISPLAY (the date row, via the conditional-row rule): the real posted_at still drives
+   the sort key (newestFirst) and still emits as datePosted in the JobPosting markup, and the
+   record itself is never dropped. Absent/future dates also produce no row. */
 export function postedLabel(s){
   const t = parseDate(s);
   if (t === null) return null;              // no posted_at → no date row at all
   const n = Math.round((TODAY - t) / 86400000);
-  if (n >= 365) return "Posted in " + new Date(t).getFullYear();
-  if (n >= 60) return "Posted " + Math.round(n / 30) + " months ago";
-  if (n >= 31) return "Posted last month";
   if (n < 0) return null;                   // a future date is not a freshness signal
+  if (n > 30) return null;                  // older than 30 days → shown nowhere (markup + sort keep it)
   if (n === 0) return "Posted today";
   if (n === 1) return "Posted yesterday";
   return "Posted " + n + " days ago";
