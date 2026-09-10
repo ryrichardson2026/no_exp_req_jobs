@@ -181,8 +181,8 @@ class BoardApp extends React.Component {
     if (pg >= 1) out.pg = pg;
     return out;
   }
-  syncUrl(id){ this.writeUrl({ openId: id }); }
-  writeUrl(over){
+  syncUrl(id){ this.writeUrl({ openId: id }, !!id); }   // opening a job pushes a history entry; closing replaces
+  writeUrl(over, push){
     const o = over || {};
     const pick = (k) => (o[k] !== undefined ? o[k] : this.state[k]);
     const job = o.openId !== undefined ? o.openId : this.state.openId;
@@ -210,7 +210,11 @@ class BoardApp extends React.Component {
         if (page > 1) q.set("page", String(page));
       }
       const qs = q.toString();
-      window.history.replaceState(null, "", path + (qs ? "?" + qs : "") + window.location.hash);
+      const url = path + (qs ? "?" + qs : "") + window.location.hash;
+      // pushState only when a job OPENS, so browser Back returns to the list (items 10/11);
+      // filters/sort/page changes and mount canonicalisation replaceState (no extra entries).
+      if (push) window.history.pushState({ panel: true }, "", url);
+      else window.history.replaceState(null, "", url);
     } catch (e) { /* sandboxed */ }
   }
 
@@ -248,6 +252,17 @@ class BoardApp extends React.Component {
     this._mql = window.matchMedia(BP);
     this._onMql = () => this.setState({ wide: this._mql.matches });
     this._mql.addEventListener("change", this._onMql);
+    // Back/forward: re-derive board state from the URL so Back from a job returns to the
+    // filtered list in the state it was left (item 10), not out of the board. Job-opens are
+    // pushState entries (see writeUrl); the list entry below still carries its filter query.
+    this._onPop = () => {
+      const u = this.readUrl();
+      const jobRef = u._jobRef; delete u._jobRef;
+      let openId = null;
+      if (jobRef) { const rec = (this.state.recs || []).find((r) => jobRef.internalId ? r.internal_id === jobRef.internalId : r.job_number === jobRef.jobNumber); openId = rec ? rec.internal_id : null; }
+      this.setState(Object.assign({ stateCtx: null, cats: [], shifts: [], types: [], exps: [], loc: "", locDraft: "", showsPay: false, sort: "newest", pg: 1, sheet: null }, u, { openId }));
+    };
+    window.addEventListener("popstate", this._onPop);
     const urlState = this.readUrl();
     this.setState(urlState);
     // Arrivals from an expired/retired page carry ?alerts=1 (+ the job's cat/city): open the
@@ -318,6 +333,7 @@ class BoardApp extends React.Component {
   componentWillUnmount(){
     window.removeEventListener("keydown", this.onKeyDown);
     window.removeEventListener("mousedown", this.onDocDown, true);
+    if (this._onPop) window.removeEventListener("popstate", this._onPop);
     if (this._mql) this._mql.removeEventListener("change", this._onMql);
     clearTimeout(this._t);
   }
@@ -383,7 +399,13 @@ class BoardApp extends React.Component {
       this.syncUrl(r.internal_id);
     };
   }
-  back = () => { this.setState({ openId: null }); this.syncUrl(null); };
+  back = () => {
+    // If the panel was opened with a pushed history entry, pop it so browser + in-app back
+    // agree and the popstate handler restores the filtered list. Otherwise (a cold arrival
+    // that opened the panel at mount, replaceState) just close it in place.
+    if (window.history.state && window.history.state.panel) { window.history.back(); return; }
+    this.setState({ openId: null }); this.syncUrl(null);
+  };
 
   onDocDown = (e) => {
     const st = this.state.sheet;
@@ -770,11 +792,14 @@ class BoardApp extends React.Component {
             h("div", { style: s("flex:none;padding:12px 16px;border-top:1px solid var(--line)") },
               h("button", { type: "button", onClick: this.closeSheet, style: s("width:100%;min-height:48px;border-radius:3px;background:var(--accent);border:0;font-size:16px;font-weight:700;color:var(--accent-ink);cursor:pointer") }, "Show jobs"))))
       ),
-      // list
-      h("div", { ref: this.setListEl, "data-list-scroller": "true", style: s("flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch") }, this.listBody(d, false)),
-      // full-page job overlay
-      d.onPage && h("div", { key: "page", style: s("position:absolute;inset:0;z-index:1;background:var(--surface)") },
-        h(JobPage, { page: d.page, categories: R.CATEGORIES, back: this.back, isMobilePage: true, isPanel: false }))
+      // Content region. Item 9: the open job overlays ONLY this region, so the filter bar +
+      // "No experience required" toggle above stay visible and tappable while reading a job.
+      // The list stays mounted underneath (scroll preserved); filters change it, ‹ back returns
+      // to it. (Previously a full-screen inset:0 overlay hid the whole filter bar on mobile.)
+      h("div", { style: s("flex:1;min-height:0;position:relative") },
+        h("div", { ref: this.setListEl, "data-list-scroller": "true", style: s("position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch") }, this.listBody(d, false)),
+        d.onPage && h("div", { key: "page", style: s("position:absolute;inset:0;z-index:1;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--surface)") },
+          h(JobPage, { page: d.page, categories: R.CATEGORIES, back: this.back, isMobilePage: true, isPanel: false })))
     );
   }
 
