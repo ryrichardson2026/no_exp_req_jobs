@@ -189,6 +189,11 @@ async function bake(page, route){
         // Drop the gtm.js/gtag script the GTM loader injected at render time; the static
         // loader stays and re-injects once on the client, so GTM never fires twice.
         document.querySelectorAll('script[src*="googletagmanager.com"]').forEach((el) => el.remove());
+        // The non-blocking font link (rel=preload as=style onload→stylesheet) has its onload
+        // fire DURING the bake, so it serializes as a render-blocking rel="stylesheet". Reset
+        // it to rel="preload" so the baked HTML ships non-blocking; the client's onload
+        // re-activates it. Without this the bake silently defeats the font de-block (item 6).
+        document.querySelectorAll('link[as="style"][rel="stylesheet"]').forEach((el) => { el.rel = "preload"; });
         return "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
       });
       await writeBaked(route.path, html);
