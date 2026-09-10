@@ -416,6 +416,104 @@ def reconcile_detail(platform, tenant):
     print(f"    reconcile {tenant}: purged {len(dead)} dead (URL gone from board), kept {kept} live")
 
 
+# ---------------------------------------------------------------------------
+# enumerate-completeness guard (root fix for false expiry)
+# ---------------------------------------------------------------------------
+# The expiry path trusts each pull's enumerate as a COMPLETE list of what is live. It is not:
+# offset pagination over a date-desc sort while new jobs post shifts records across page seams,
+# so a live job is skipped even though pagination "finished" (proven: Kroger req 203617 live on
+# the site, absent from that day's enumerate, false-expired). Two layers, from the adapters'
+# own run_log (no adapter changes needed):
+#   (a) source-total assertion — if the adapter logs a `total`, `captured` must reach it. Even a
+#       few short (kroger 490/494) false-expires the missed jobs, so this is strict.
+#   (b) delta band — no source total (radancy/compass/jibe): in_scope must stay within the band
+#       of the trailing runs. Loose to start (15%); tighten from data, never loosen under load.
+# A tenant that fails HOLDS its whole source_id (fail-closed, option A: records key by source_id,
+# so a shared platform can't hold one tenant). supabase_sink then skips held sources entirely.
+ENUM_BAND = 0.85   # layer (b): in_scope must be >= 85% of the trailing reference
+
+
+def _latest_index_events(platform, tenant, n=6):
+    path = os.path.join(RAW, platform, tenant, "run_log.jsonl")
+    evs = []
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    e = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if e.get("event") == "index":
+                    evs.append(e)
+    except OSError:
+        return []
+    return evs[-n:]
+
+
+def enumerate_complete(platform, tenant):
+    """(ok, reason). Layer (a) source-total if the adapter logs one; else layer (b) delta band.
+    No run_log or no prior reference -> ok (nothing to compare against, e.g. first run)."""
+    evs = _latest_index_events(platform, tenant)
+    if not evs:
+        return True, "no run_log (uncheckable)"
+    cur = evs[-1]
+    total, captured = cur.get("total"), cur.get("captured")
+    if total is not None and captured is not None:                 # layer (a): authoritative
+        if captured < total:
+            return False, f"truncated enumerate: captured {captured} < source total {total}"
+        return True, f"complete: captured {captured} >= total {total}"
+    metric = "in_scope" if cur.get("in_scope") is not None else "captured"   # layer (b)
+    curv = cur.get(metric)
+    prior = [e.get(metric) for e in evs[:-1] if e.get(metric) is not None]
+    if curv is None or not prior:
+        return True, "no prior reference (uncheckable)"
+    ref = max(prior)
+    if curv < ENUM_BAND * ref:
+        return False, f"short enumerate: {metric} {curv} < {int(ENUM_BAND * 100)}% of trailing {ref}"
+    return True, f"within band: {metric} {curv} vs trailing {ref}"
+
+
+def run_guard(units, results, stamp):
+    """Per-tenant completeness -> per-source_id status {ok|skipped|failed}, fail-closed. 'failed'
+    (adapter mode exited non-zero) outranks a completeness 'skipped'. Writes out/guard_status.json
+    for supabase_sink (which holds any non-ok source at its prior state). Returns the status dict."""
+    src = {}          # source_id -> ok|skipped|failed
+    reasons = {}
+    for u in units:
+        plat, tenant = u["platform"], u["tenant"]
+        if results[tenant]["failed_mode"]:
+            src[plat] = "failed"
+            reasons.setdefault(plat, []).append(f"{tenant}: adapter mode '{results[tenant]['failed_mode']}' exited non-zero")
+            continue
+        ok, why = enumerate_complete(plat, tenant)
+        if not ok:
+            if src.get(plat) != "failed":
+                src[plat] = "skipped"
+            reasons.setdefault(plat, []).append(f"{tenant}: {why}")
+        else:
+            src.setdefault(plat, "ok")
+    try:
+        os.makedirs(OUT, exist_ok=True)
+        with open(os.path.join(OUT, "guard_status.json"), "w", encoding="utf-8") as fh:
+            json.dump({"stamp": stamp, "sources": src, "reasons": reasons}, fh, indent=2)
+    except OSError as e:
+        print(f"    guard_status write skipped: {e}")
+    skipped = sorted(s for s, v in src.items() if v == "skipped")
+    failed = sorted(s for s, v in src.items() if v == "failed")
+    if skipped or failed:
+        print("\n--- enumerate guard ---")
+        for s in failed:
+            print(f"    FAILED (held, source broke): {s} — {'; '.join(reasons.get(s, []))}")
+        for s in skipped:
+            print(f"    SKIPPED (held, enumerate short — pipeline working): {s} — {'; '.join(reasons.get(s, []))}")
+    else:
+        print("\n--- enumerate guard: all sources complete ---")
+    return src
+
+
 def main(argv):
     ap = argparse.ArgumentParser(description="Recurring pull orchestrator (config-driven).")
     g = ap.add_mutually_exclusive_group(required=True)
@@ -502,6 +600,11 @@ def main(argv):
         for u in units:
             print(f"  {u['tenant']:<16} {results[u['tenant']]['modes']}")
         return 0
+
+    # ---- enumerate-completeness guard: which sources are complete enough to push. A short or
+    #      broken enumerate HOLDS its source_id at prior state (supabase_sink reads guard_status),
+    #      so a partial pull can no longer false-expire the board. Runs before the push.
+    run_guard(units, results, stamp)
 
     # ---- enrich: persist verdicts + category onto normalized.jsonl (THE MISSING LAYER) ----
     # Adapters leave experience_condition/evidence_clauses/credentials/category empty by

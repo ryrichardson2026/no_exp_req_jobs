@@ -120,29 +120,54 @@ def _row(rec, pull_ts, seed):
     return row
 
 
+GUARD_STATUS = os.path.join(ROOT, "out", "guard_status.json")
+
+
+def _guard_sources():
+    """{source_id: 'ok'|'skipped'|'failed'} written by run_pull's enumerate-completeness guard.
+    Absent (standalone/manual run) -> every source treated as ok. Only 'ok' sources are pushed
+    + reconciled; a skipped/failed source is HELD at its prior state (no last_seen advance, no
+    absence increment) so a short/broken enumerate can never false-expire the board."""
+    try:
+        return (json.load(open(GUARD_STATUS, encoding="utf-8")) or {}).get("sources", {})
+    except Exception:
+        return {}
+
+
 def main(argv):
     seed = "--seed" in argv
     recs = [json.loads(l) for l in open(APPLICABLE_PATH, encoding="utf-8") if l.strip()]
+    guard = _guard_sources()
+    ok = lambda s: guard.get(s, "ok") == "ok"
+    all_sources = sorted({r.get("source_id") for r in recs if r.get("source_id")})
+    push_sources = [s for s in all_sources if ok(s)]
+    held = [s for s in all_sources if not ok(s)]
+    push_recs = [r for r in recs if ok(r.get("source_id"))]
     pull_ts = datetime.now(timezone.utc).isoformat()
-    sources = sorted({r.get("source_id") for r in recs if r.get("source_id")})
 
-    # 1. open the pulls row (per-source expiry + crawl date depend on this)
+    # 1. open the pulls row — record ONLY the sources this pull actually covers (guard-passed),
+    #    so a held source's coverage isn't misattributed to this pull's crawl.
     created = _req("POST", "/rest/v1/pulls",
-                   body={"started_at": pull_ts, "sources": sources},
+                   body={"started_at": pull_ts, "sources": push_sources},
                    prefer="return=representation")
     pull_id = created[0]["id"]
 
-    # 2. upsert jobs in batches via the upsert_jobs RPC. Its DO UPDATE SET names ONLY
-    #    pull-managed columns, so first_seen / killed / kill_* are physically never
-    #    touched. (PostgREST's own merge-duplicates was observed to RESET omitted
-    #    columns to their defaults — which would revive a killed listing — so the
-    #    durable-state guarantee lives in the function, not in PostgREST semantics.)
-    rows = [_row(r, pull_ts, seed) for r in recs]
+    # 2. upsert the passed-source records via upsert_jobs. Its DO UPDATE SET names ONLY
+    #    pull-managed columns, so first_seen / killed / kill_* are physically never touched
+    #    (PostgREST merge-duplicates was observed to RESET omitted columns to their defaults).
+    rows = [_row(r, pull_ts, seed) for r in push_recs]
     for i in range(0, len(rows), BATCH):
         _req("POST", "/rest/v1/rpc/upsert_jobs",
              body={"rows": rows[i:i + BATCH], "pull_ts": pull_ts})
 
-    # 3. close the pulls row
+    # 3. maintain the absence counter (expiry grace = absent_pulls >= 2): reset seen -> 0,
+    #    increment missed -> +1, scoped to guard-PASSED sources only. Held sources untouched.
+    seen_ids = [r.get("internal_id") for r in push_recs if r.get("internal_id")]
+    if push_sources:
+        _req("POST", "/rest/v1/rpc/reconcile_absence",
+             body={"p_sources": push_sources, "p_seen_ids": seen_ids})
+
+    # 4. close the pulls row
     _req("PATCH", "/rest/v1/pulls?id=eq." + str(pull_id),
          body={"finished_at": datetime.now(timezone.utc).isoformat(),
                "record_count": len(rows)},
@@ -150,7 +175,9 @@ def main(argv):
 
     print(f"pull {pull_id} {'(SEED) ' if seed else ''}-> {len(rows)} rows upserted into jobs")
     print(f"  last_seen   {pull_ts}")
-    print(f"  sources     {', '.join(sources)}")
+    print(f"  sources     {', '.join(push_sources)}")
+    if held:
+        print(f"  HELD (guard skipped/failed, prior state kept): {', '.join(held)}")
     print(f"  first_seen  {'seeded from file' if seed else 'untouched (default now() for new rows)'}")
     return 0
 
