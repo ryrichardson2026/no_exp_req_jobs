@@ -34,6 +34,19 @@ export function typeFacet(raw){
 /* WAIVED and NONE_NEEDED carry the same promise to the applicant — nothing blocks
    applying — so they share one label. */
 export const EXP_LABEL = { NONE_NEEDED:"No experience required", PREFERRED:"Experience preferred, not required", WAIVED:"No experience required" };
+
+/* Experience filter facets (Item 8). Query-string slugs, because the labels carry a comma
+   ("Experience preferred, not required") that the CSV param can't hold. Labels reuse
+   EXP_LABEL so the filter reads exactly like the card ("one phrase, four places"). WAIVED
+   renders "No experience required" on the card, so it folds into that option (operator
+   decision). expFacet(null) drops records with no stated condition from either option. */
+export const EXP_FACETS = ["none", "preferred"];
+export const EXP_FACET_LABEL = { none: EXP_LABEL.NONE_NEEDED, preferred: EXP_LABEL.PREFERRED };
+export function expFacet(cond){
+  if (cond === "NONE_NEEDED" || cond === "WAIVED") return "none";
+  if (cond === "PREFERRED") return "preferred";
+  return null;
+}
 const PERIOD = { HOURLY:"/hr", ANNUAL:"/yr", WEEKLY:"/wk", MONTHLY:"/mo", DAILY:"/day" };
 /* Set from data/jobs.js's PULLED_AT as soon as the records load. Until then it is
    the last known pull, so a label is never computed against the reader's clock —

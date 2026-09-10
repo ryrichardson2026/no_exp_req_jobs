@@ -103,6 +103,13 @@ export function FilterPanel(p){
     h("div", { style: s("display:flex;flex-wrap:wrap;gap:8px") }, (p.typeOptions || []).map((t, i) => pill(t, i)))
   ));
 
+  if (p.divided) kids.push(sep("dexp"));
+  if (p.isExp) kids.push(h("div", { key: "exp", style: s("display:grid;gap:8px") },
+    h("div", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, "Experience"),
+    p.expAll && applyAllRow(p.expAllOn, p.expAll),
+    h("div", { style: s("display:flex;flex-wrap:wrap;gap:8px") }, (p.expOptions || []).map((e2, i) => pill(e2, i)))
+  ));
+
   if (p.divided) kids.push(sep("d5"));
   if (p.isLoc) kids.push(h("div", { key: "loc", style: s("display:grid;gap:14px") },
     h("div", { style: s("display:flex;align-items:baseline;justify-content:space-between;gap:12px") },
