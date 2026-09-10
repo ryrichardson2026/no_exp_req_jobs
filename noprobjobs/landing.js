@@ -433,7 +433,15 @@ class LandingApp extends React.Component {
     const loading = this.state.recs === null;
     let jobs = [];
     if (!loading) {
-      const list = (this.state.recs || []).filter((r) => R.recordCats(r).length > 0).slice().sort(R.newestFirst);
+      // Item 7: the landing's promise is jobs that need no experience, so the recent section
+      // shows NONE_NEEDED records only — newest-first (unchanged two-tier order), capped at
+      // 2/employer. If fewer than `want` survive the cap, render fewer; never backfill with
+      // PREFERRED (a short honest section beats a full one that mostly says "experience
+      // preferred"). This is a landing selection rule only — the board's default sort is
+      // untouched.
+      const list = (this.state.recs || [])
+        .filter((r) => r.experience_condition === "NONE_NEEDED" && R.recordCats(r).length > 0)
+        .slice().sort(R.newestFirst);
       const want = this.state.wide ? 9 : 6;
       jobs = this.capByEmployer(list, want).map((r) => this.shape(r));
     }
