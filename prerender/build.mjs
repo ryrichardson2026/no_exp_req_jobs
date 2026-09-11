@@ -42,12 +42,16 @@ const MIME = { ".html":"text/html",".js":"text/javascript",".mjs":"text/javascri
   ".json":"application/json",".svg":"image/svg+xml",".png":"image/png",".ico":"image/x-icon",".woff2":"font/woff2",".map":"application/json" };
 
 const WAIT = {
-  job: "document.querySelectorAll('[data-desc-html]').length >= 2 && !!document.querySelector('h1')",
+  // Job page = board chrome + seeded panel + skeleton list. Wait for the panel's description to
+  // POPULATE (jobs_detail resolves during the bake), not merely exist — its loading skeleton has
+  // no text, the real description has plenty. The list is intentionally a skeleton, so don't wait
+  // on it. h1 (the panel title / list heading) is present well before this.
+  job: "(function(){var d=document.querySelector('[data-desc-html]');return !!d && d.textContent.trim().length>40 && !!document.querySelector('h1');})()",
   browse: "document.querySelectorAll(\"[role='list'] > *\").length > 0",
   landing: "document.getElementById('root') && document.getElementById('root').children.length > 0",
 };
 
-function serve(){
+function serve(cache){
   return createServer(async (req, res) => {
     let p = decodeURIComponent(req.url.split("?")[0]);
     try {
@@ -58,8 +62,17 @@ function serve(){
       // "/" and the Washington lander are the landing SPA (index.html → landing.js); every
       // other virtual path is the board SPA (board.html → board.js).
       const isLanding = p === "/" || p.replace(/\/+$/, "") === WA_LANDER.replace(/\/+$/, "");
+      let html = await readFile(join(SITE, isLanding ? "index.html" : "board.html"), "utf8");
+      // A job route (/jobs/{slug}-{num}) inlines its panel-seed blob BEFORE the app boots, so the
+      // bake paints the panel (chrome + panel + skeleton list) — attachCache withholds jobs_list
+      // for job routes, so the list stays a skeleton. Same blob the runtime page ships.
+      const jm = !isLanding && cache && /-(\d+)\/?$/.exec(p);
+      if (jm && cache.listByNum[jm[1]]) {
+        const blob = JSON.stringify({ job: cache.listByNum[jm[1]], pulledAt: cache.pulledAt || null }).replace(/</g, "\\u003c");
+        html = html.replace("</body>", '<script id="__npj_job" type="application/json">' + blob + "</script></body>");
+      }
       res.writeHead(200, { "content-type": "text/html" });
-      res.end(await readFile(join(SITE, isLanding ? "index.html" : "board.html")));
+      res.end(html);
     } catch (e) { res.writeHead(500); res.end(String(e)); }
   });
 }
@@ -254,6 +267,11 @@ function attachCache(page, cache){
         // The SPA sends an Authorization header, so the browser fires a CORS preflight.
         // Answer OPTIONS with the CORS headers (not a body), or the real GET never fires.
         if (req.method() === "OPTIONS") return req.respond({ status: 204, headers: CORS });
+        // On a JOB route the list must bake as a SKELETON, so leave its jobs_list fetch pending
+        // (never respond) — recs stays null → skeleton. The panel is seeded from the inlined blob
+        // (serve()), and the description from jobs_detail below, so the page still bakes fully.
+        // The pending request is discarded when the page navigates to the next route.
+        if (u.includes("/jobs_list") && /\/jobs\/.+-\d+\/?$/.test(page.url())) return;   // job route only, NOT the /jobs/ browse list
         let body = "[]";
         if (u.includes("/jobs_list")) body = cache.list;
         else if (u.includes("/site_meta")) body = cache.meta;
@@ -310,8 +328,11 @@ async function main(){
   const meta = await fetchAll("/site_meta?select=pulled_at");
   const jobsTotal = await countExact("/jobs_detail");   // authoritative — asserted against the fetch below
   const listTotal = await countExact("/jobs_list");
-  const cache = { list: JSON.stringify(list), meta: JSON.stringify(meta), byId: {}, byNum: {}, pulledAt: (meta[0] && meta[0].pulled_at) || null };
+  const cache = { list: JSON.stringify(list), meta: JSON.stringify(meta), byId: {}, byNum: {}, listByNum: {}, pulledAt: (meta[0] && meta[0].pulled_at) || null };
   for (const r of recs) { cache.byId[r.internal_id] = r; cache.byNum[String(r.job_number)] = r; }
+  // listByNum = the jobs_list row per job_number (no description_html) — the slim panel-seed
+  // blob a job page inlines so its panel paints before jobs_list hydrates the list.
+  for (const r of list) cache.listByNum[String(r.job_number)] = r;
 
   // enumerate routes
   const routes = [];
@@ -339,7 +360,7 @@ async function main(){
   // own path so bake() writes out/washington-jobs/index.html and sets canonical to itself.
   routes.push({ type: "landing", path: WA_LANDER, url: null, meta: { title: PM.waLanderTitle(), description: PM.waLanderDescription() } });
 
-  const server = serve();
+  const server = serve(cache);
   await new Promise((r) => server.listen(PORT, r));
   const base = "http://localhost:" + PORT;
   routes.forEach((r) => { r.url = base + r.path; });

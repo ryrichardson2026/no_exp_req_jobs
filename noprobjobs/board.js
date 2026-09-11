@@ -56,19 +56,23 @@ const BACK_CHEV = '<svg width="9" height="15" viewBox="0 0 9 15" fill="none" str
 class BoardApp extends React.Component {
   constructor(props){
     super(props);
-    this.state = { openId: null, recs: props.initialRecs || null, logoOk: {}, details: {}, stateCtx: null,
+    // A job URL (/jobs/{slug}) loaded COLD renders the FULL board — same chrome, same panel as
+    // an in-board click — with the requested job's detail SEEDED from props.openJob so it paints
+    // immediately, and the list a skeleton until jobs_list hydrates. No headless page. Decided
+    // once from the entry URL, so the first render already carries the panel + chrome. In-board
+    // browsing never sets _jobPage — clicking a card there opens the panel via the normal
+    // jobs_detail path, untouched. _initialJobId scopes the baked-description reuse + no-fetch to
+    // the ENTRY job only: opening a different job from the (now-loaded) list fetches normally.
+    this._jobPage = false;
+    try { this._jobPage = RT.parsePath(window.location.pathname).kind === "job"; } catch (e) {}
+    this._openJob = props.openJob || null;                        // seed record for the panel (no description_html)
+    this._initialJobId = this._openJob ? this._openJob.internal_id : null;
+    this.state = { openId: this._initialJobId, recs: props.initialRecs || null, logoOk: {}, details: {}, stateCtx: null,
       cities: [], zips: {}, cityGeo: {}, cats: [], catDraft: [], loc: "", locDraft: "", radius: 15,
       showsPay: false, shifts: [], types: [], exps: [], employers: [], sheet: null, sort: "newest", pg: 1,
       // Change #1: email-only capture — location/type-of-work fields and their state removed.
       alertsOpen: false, alertEmail: "", alertPhase: "form", alertError: "",
       wide: window.matchMedia(BP).matches };
-    // A job URL loaded COLD renders a standalone reading document (what the prerender
-    // bakes and what a crawler / shared link gets), not the board with a panel. Decided
-    // once, from the entry URL, so the very first render is already standalone (no flash
-    // of the board shell). In-app browsing never sets this — clicking a card there opens
-    // the master-detail panel client-side, so that behaviour is untouched.
-    this._standalone = false;
-    try { this._standalone = RT.parsePath(window.location.pathname).kind === "job"; } catch (e) {}
   }
 
   // ── state changes: every filter/sort resets to page one ──────────────
@@ -307,6 +311,10 @@ class BoardApp extends React.Component {
     import("./data/cities.js").then((m) => this.setState({ cities: m.CITIES })).catch((e) => console.error("cities.js failed to load", e));
     import("./data/zips.js").then((m) => this.setState({ zips: m.ZIPS })).catch((e) => console.error("zips.js failed to load", e));
     import("./data/cities-geo.js").then((m) => this.setState({ cityGeo: m.CITY_GEO })).catch((e) => console.error("cities-geo.js failed to load", e));
+    // Job page: kick the entry job's description fetch now so the BAKE populates [data-desc-html]
+    // deterministically (WAIT.job gates on it, and jobs_list is withheld during a job-route bake).
+    // At runtime BAKED_DESC is set, so ensureDetail skips this — no round trip.
+    if (this._jobPage && this._initialJobId) this.ensureDetail(this._initialJobId);
   }
   componentDidUpdate(prevProps, prevState){
     const wasOpen = prevState ? prevState.openId : this._wasOpen;
@@ -326,9 +334,10 @@ class BoardApp extends React.Component {
 
   ensureDetail(id){
     if (!id || (this.state.details && this.state.details[id])) return;
-    // Standalone page: description_html is baked and rendered from BAKED_DESC (see mount), so
-    // the jobs_detail fetch would only re-fetch already-on-screen content. Skip it.
-    if (this._standalone && BAKED_DESC && this.state.openId) return;
+    // Job page, ENTRY job only: its description_html is baked and rendered from BAKED_DESC (see
+    // mount), so the jobs_detail fetch would only re-fetch on-screen content. Skip it. A DIFFERENT
+    // job opened from the list has no baked description, so it falls through and fetches.
+    if (this._jobPage && BAKED_DESC && id === this._initialJobId) return;
     this._detailPending = this._detailPending || {};
     if (this._detailPending[id]) return;
     this._detailPending[id] = true;
@@ -531,7 +540,12 @@ class BoardApp extends React.Component {
     if (res.kind !== "all") narrowing.push({ label: "Location", fix: "Try a wider radius, or a different city.", open: this.openSheet("loc") });
     if (cats.length) narrowing.push({ label: "Type of work", fix: "Add another type of work.", open: this.openSheet("cat") });
 
-    let openRec = all.find((r) => r.internal_id === st.openId) || pageRecs[0] || null;
+    // On a cold job page the list is a skeleton (recs still loading), so the open job isn't in
+    // `all` yet — fall back to the seeded panel record so the panel paints immediately. Once
+    // jobs_list hydrates, the record resolves from `all` as normal.
+    let openRec = all.find((r) => r.internal_id === st.openId)
+      || (this._openJob && this._openJob.internal_id === st.openId ? this._openJob : null)
+      || pageRecs[0] || null;
     const effectiveId = openRec ? openRec.internal_id : null;
     this._effectiveId = effectiveId;                 // componentDidUpdate fetches its detail
     const det = effectiveId ? (st.details || {})[effectiveId] : null;
@@ -551,7 +565,7 @@ class BoardApp extends React.Component {
       if (openRec.fte) mods.push({ value: (+(openRec.fte * 100).toFixed(1)) + "% of full-time hours", isFte: true });
       page = Object.assign(this.shape(openRec), {
         description: detailReady ? description(openRec)
-          : (this._standalone && BAKED_DESC && st.openId ? raw(BAKED_DESC) : DESC_LOADING), modifiers: mods, hasFacts: mods.length > 0,
+          : (this._jobPage && BAKED_DESC && st.openId === this._initialJobId ? raw(BAKED_DESC) : DESC_LOADING), modifiers: mods, hasFacts: mods.length > 0,
         expVerbatim: R.verbatim(openRec),
         verbatimNeedsLabel: openRec.experience_condition === "PREFERRED" && !!R.verbatim(openRec),
         verbatimBare: openRec.experience_condition === "WAIVED" && !!R.verbatim(openRec),
@@ -654,11 +668,16 @@ class BoardApp extends React.Component {
       d.hasEmptyCta && h("button", { key: "cta", type: "button", onClick: d.emptyCta, style: s("margin-top:8px;min-height:44px;padding:0 18px;border-radius:3px;background:var(--accent);color:var(--accent-ink);border:0;font-size:15px;font-weight:600;cursor:pointer") }, d.emptyCtaLabel));
     // list — an ItemList (structured data about the LIST, not the jobs): H1 = itemprop
     // name, each card = a ListItem with its rendered position + canonical URL. build.mjs
-    // absolutizes the relative itemprop urls at bake time.
+    // absolutizes the relative itemprop urls at bake time. On a JOB page the list is
+    // navigation beside the panel's one JobPosting, not the page's subject — so it carries
+    // NO ItemList/ListItem markup (no itemScope, no itemProp name, no per-card listMeta).
     const cards = wide ? d.deskJobs : d.jobs;
-    return h("div", { itemScope: true, itemType: "https://schema.org/ItemList" },
-      h("h1", { itemProp: "name", style: s("margin:0;padding:14px 16px 8px;font-family:var(--font-display);font-size:19px;line-height:1.15;font-weight:800;letter-spacing:-0.005em;color:var(--ink)") }, d.browseH1),
-      h("div", { key: d.animKey, role: "list", className: d.animClass }, cards.map((job, i) => h(JobCard, { key: job.id, job, listMeta: { position: i + 1, url: job.href } }))),
+    const listSchema = this._jobPage ? {} : { itemScope: true, itemType: "https://schema.org/ItemList" };
+    const h1Attrs = { style: s("margin:0;padding:14px 16px 8px;font-family:var(--font-display);font-size:19px;line-height:1.15;font-weight:800;letter-spacing:-0.005em;color:var(--ink)") };
+    if (!this._jobPage) h1Attrs.itemProp = "name";
+    return h("div", listSchema,
+      h("h1", h1Attrs, d.browseH1),
+      h("div", { key: d.animKey, role: "list", className: d.animClass }, cards.map((job, i) => h(JobCard, { key: job.id, job, listMeta: this._jobPage ? null : { position: i + 1, url: job.href } }))),
       d.pager
     );
   }
@@ -861,30 +880,6 @@ class BoardApp extends React.Component {
   }
 
   // ── standalone job page (cold job-URL load / prerendered document) ───────
-  // A normal scrolling document, not the 100vh app shell: title, employer, pay,
-  // experience, full description, Apply — and nothing else (the payload the 6.6MB board
-  // never was). The back affordance is an <a href> naming its destination, so a cold
-  // arrival with no history still has somewhere real to go.
-  renderStandalone(d){
-    const rec = d.openRec;
-    const back = rec ? RT.backTo(rec.state, R.recordCats(rec)) : { href: "/jobs/", label: "All jobs" };
-    return h("div", { style: s("min-height:100vh;display:flex;flex-direction:column;background:var(--surface)") },
-      h(Header, { productName: PRODUCT, onAlerts: this.openAlerts, wide: this.state.wide }),
-      h("main", { style: s("flex:1;padding:14px 20px 56px") },
-        h("div", { style: s("max-width:760px;margin:0 auto;display:grid;gap:12px") },
-          h("a", { href: back.href, className: "hv-tx-accent",
-            style: s("display:inline-flex;align-items:center;gap:7px;min-height:44px;font-size:15px;font-weight:600;color:var(--accent);text-decoration:none") },
-            raw(BACK_CHEV), h("span", null, back.label)),
-          rec
-            ? h(JobPage, { page: d.page, isStandalone: true })
-            : h("p", { style: s("color:var(--ink-muted)") }, "Loading…")
-        )
-      ),
-      this.renderFooter(),
-      this.renderAlerts()
-    );
-  }
-
   // Slim site footer carrying the privacy-policy link, on every board surface (app shell +
   // standalone job page). flex:none, so on the 100vh app shell it just shrinks the scrolling
   // panes above it rather than breaking the height. External link -> new tab.
@@ -896,7 +891,8 @@ class BoardApp extends React.Component {
 
   render(){
     const d = this.derive();
-    if (this._standalone) return this.renderStandalone(d);
+    // Every page is the board — including a cold /jobs/{slug} arrival (job panel seeded, list
+    // skeleton). There is no headless job document.
     return h("div", { className: "board-scope", style: s("height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative;background:var(--surface)") },
       h(Header, { productName: PRODUCT, onAlerts: this.openAlerts, wide: this.state.wide }),
       this.state.wide ? this.renderWide(d) : this.renderMobile(d),
@@ -916,12 +912,21 @@ class BoardApp extends React.Component {
 // exists for an arbitrarily-opened job there.)
 const BAKED_DESC = (() => { try { const el = document.querySelector('[data-desc-html]'); return el ? el.innerHTML : null; } catch (e) { return null; } })();
 
-// Mount only once the job list is in hand, seeded as initialRecs, so the first client render
-// already has content matching the prerendered HTML — the baked page stays on screen during
-// the fetch instead of being wiped to a blank loading state (that wipe was the load gap).
-// If the fetch fails, mount anyway and let the app fall back to its own empty/loading path.
-const mount = (initialRecs) => {
+const mount = (props) => {
   const root = window.ReactDOM.createRoot(document.getElementById("root"));
-  root.render(h(BoardApp, initialRecs ? { initialRecs } : null));
+  root.render(h(BoardApp, props));
 };
-SB.listJobs().then(mount).catch(() => mount(null));
+// A /jobs/{slug} arrival is a JOB PAGE: seed the panel from the inlined record blob (id
+// __npj_job — the job's jobs_list row, no description_html) and paint immediately — chrome +
+// panel + skeleton list. The list hydrates from jobs_list in componentDidMount; the panel's
+// description comes from the baked DOM (BAKED_DESC), no jobs_detail round trip. Every OTHER
+// route pre-fetches jobs_list first so the baked list stays on screen during the fetch (the
+// browse/landing behaviour is untouched).
+const isJobRoute = (() => { try { return RT.parsePath(window.location.pathname).kind === "job"; } catch (e) { return false; } })();
+if (isJobRoute) {
+  let openJob = null;
+  try { const el = document.getElementById("__npj_job"); if (el) openJob = (JSON.parse(el.textContent) || {}).job || null; } catch (e) {}
+  mount({ openJob: openJob });
+} else {
+  SB.listJobs().then((recs) => mount({ initialRecs: recs })).catch(() => mount(null));
+}

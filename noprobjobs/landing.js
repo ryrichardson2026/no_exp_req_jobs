@@ -17,6 +17,14 @@ const React = window.React;
 const BP = "(min-width:768px)";
 const PRODUCT = "NoProbJobs.com";
 
+// Landing-only curated entry point: five type-of-work chips in a FIXED order (never sorted by
+// volume — someone who learned where a chip sits must find it there next visit). The board menu
+// keeps all nine (R.CATEGORIES); the removed four still have live records, browse pages and
+// filters — this is a narrowed doorway, not a taxonomy change. Icons resolve from the labels via
+// catIconSvg (Retail→shopping-bag, Sales→tag, Food Services→chef-hat, Security→shield,
+// Warehouse→package), so keeping these labels keeps the icons correct.
+const LANDING_CATS = ["Retail", "Sales", "Food Services", "Security", "Warehouse"];
+
 // Change #2: the Washington lander is this same landing page served at /washington-jobs.
 // The ONLY content difference is the hero headline; everything else (job data, components,
 // CTAs) is identical. Detected from the path so the one bundle serves both routes, and the
@@ -138,11 +146,14 @@ class LandingApp extends React.Component {
   }
   _topCats(){
     if (this.state.recs === null) return [];
-    return R.CATEGORIES.map((c) => {
+    // The "browse by category" cards mirror the five chips (same set, same fixed order) —
+    // no volume sort, so a card sits where the visitor learned it. Counts stay (these cards
+    // are the counts-bearing browse surface; the chips carry none).
+    return LANDING_CATS.map((c) => {
       const n = (this.state.recs || []).filter((r) => R.recordCats(r).indexOf(c) >= 0).length;
       return { label: c, n: n, count: n + (n === 1 ? " job" : " jobs"), hasCount: n > 0,
                href: this.boardHref({ category: c, loc: "" }) };
-    }).sort((a, b) => b.n - a.n);   // C4: all nine show (no "+4 more"); ordered by volume
+    });
   }
 
   // Open with the current filters pre-filled — someone browsing Retail in Seattle who
@@ -206,7 +217,7 @@ class LandingApp extends React.Component {
   // completed search with a location seeds it there). The landing keeps the explicit
   // "Get job alerts" button.
   toggleCat = (c) => () => this.setState((st) => ({ cats: st.cats.indexOf(c) >= 0 ? st.cats.filter((v) => v !== c) : st.cats.concat([c]) }));
-  selectAllCats = () => this.setState((st) => ({ cats: st.cats.length === R.CATEGORIES.length ? [] : R.CATEGORIES.slice() }));   // "Apply all" select-all, live
+  selectAllCats = () => this.setState((st) => ({ cats: st.cats.length === LANDING_CATS.length ? [] : LANDING_CATS.slice() }));   // "Apply all" = the five shown, not the full nine
   onLocDraft = (e) => this.setState({ locDraft: e.target.value });
   onSubmitKey = (e) => { if (e.key === "Enter") { e.preventDefault(); this.submit(); } };
   setRadius = (r) => () => this.setState({ radius: r });
@@ -298,7 +309,7 @@ class LandingApp extends React.Component {
   // ── category selector (search card) ───────────────────────
   catOptions(){
     const picked = this.state.cats;
-    return R.CATEGORIES.map((c) => ({          // static list — never gated on recs, so the chips are stable from first paint
+    return LANDING_CATS.map((c) => ({          // five curated chips, fixed order; never gated on recs, so stable from first paint
       label: c, isOn: picked.indexOf(c) >= 0, isOff: picked.indexOf(c) < 0, pick: this.toggleCat(c),
     }));
   }
@@ -311,7 +322,7 @@ class LandingApp extends React.Component {
   }
   renderCatMobile(){
     const picked = this.state.cats;
-    const allOn = picked.length === R.CATEGORIES.length;
+    const allOn = picked.length === LANDING_CATS.length;
     const listOf = (arr) => (arr.length > 2 ? arr.slice(0, 2).join(", ") + " +" + (arr.length - 2) : arr.join(", "));
     const catLabel = picked.length ? listOf(picked) : null;
     return h("div", { style: s("position:relative") },
