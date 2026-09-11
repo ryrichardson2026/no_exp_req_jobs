@@ -52,12 +52,12 @@ export function JobCard({ job, flush, listMeta, dense }){
         ),
         h("div", { style: s("min-width:0;display:grid;gap:3px") },
           h("div", { style: s("display:flex;align-items:flex-start;gap:7px") },
-            h("h2", { style: s("margin:0;flex:1;min-width:0;font-family:var(--font-display);font-size:16px;line-height:1.25;font-weight:700;letter-spacing:-0.005em;color:var(--ink);text-wrap:pretty") }, job.cardTitle),
+            h("h2", { style: s("margin:0;flex:1;min-width:0;font-family:var(--font-display);font-size:17px;line-height:1.25;font-weight:700;letter-spacing:-0.005em;color:var(--ink);text-wrap:pretty") }, job.cardTitle),
             job.isNew && h("span", { key: "new", style: s("flex:none;margin-top:2px;display:inline-flex;align-items:center;padding:1px 6px;border-radius:3px;background:var(--mark);color:var(--mark-ink);font-size:11px;font-weight:800;letter-spacing:0.03em;text-transform:uppercase") }, "New")
           ),
-          metaLine && h("div", { key: "meta", style: s("font-size:13px;line-height:1.35;color:var(--ink-muted)") }, metaLine),
+          metaLine && h("div", { key: "meta", style: s("font-size:13.5px;line-height:1.35;color:var(--ink-muted)") }, metaLine),
           (job.pay || chip) && h("div", { key: "pe", style: s("display:flex;align-items:center;flex-wrap:wrap;gap:8px") },
-            job.pay && h("span", { key: "pay", style: s("font-size:14.5px;line-height:1.3;font-weight:600;color:var(--ink)") }, job.pay),
+            job.pay && h("span", { key: "pay", style: s("font-size:15px;line-height:1.3;font-weight:600;color:var(--ink)") }, job.pay),
             chip)
         )
       )
