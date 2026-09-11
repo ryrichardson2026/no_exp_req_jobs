@@ -27,6 +27,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 RUNS_DIR = os.path.join(HERE, "out", "runs")
 INDEX = os.path.join(RUNS_DIR, "index.jsonl")
 DASHBOARD = os.path.join(RUNS_DIR, "dashboard.html")
+APPLICABLE = os.path.join(HERE, "out", "applicable.jsonl")   # analyze/report.py output
 KEEP = 120          # runs retained in the index + embedded in the dashboard
 
 SUPABASE_URL = (os.environ.get("SUPABASE_URL")
@@ -122,10 +123,42 @@ def mirror_supabase(record):
 # dashboard (self-contained local HTML, data embedded inline)
 # --------------------------------------------------------------------------
 
+def category_snapshot():
+    """Live functional-category counts over the CURRENT applicable set
+    (out/applicable.jsonl, rewritten by analyze/report.py each run). Categories are
+    ADDITIVE, so a job tagged N categories counts in N bars; 'uncategorized' counts
+    jobs with no category at all - that is the dashboard alert. Defensive: a
+    missing/unreadable/partial file yields an empty snapshot, never an exception
+    (the dashboard render must never break a run - same contract as emit())."""
+    counts, total, uncategorized = {}, 0, 0
+    try:
+        with open(APPLICABLE, "r", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    r = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                total += 1
+                cats = r.get("category") or []
+                if not cats:
+                    uncategorized += 1
+                for c in cats:
+                    counts[c] = counts.get(c, 0) + 1
+    except (OSError, ValueError):
+        return {"total": 0, "uncategorized": 0, "counts": []}
+    ranked = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+    return {"total": total, "uncategorized": uncategorized,
+            "counts": [{"name": k, "n": v} for k, v in ranked]}
+
+
 def render_dashboard(runs, generated_iso):
     os.makedirs(RUNS_DIR, exist_ok=True)
     html = (_TEMPLATE
             .replace("__RUNS_JSON__", json.dumps(runs, ensure_ascii=False))
+            .replace("__CATEGORIES_JSON__", json.dumps(category_snapshot(), ensure_ascii=False))
             .replace("__GENERATED__", generated_iso or ""))
     with open(DASHBOARD, "w", encoding="utf-8") as fh:
         fh.write(html)
@@ -212,6 +245,17 @@ _TEMPLATE = r"""<!doctype html>
   svg{display:block;width:100%;height:auto;overflow:visible}
   .legend{display:flex;gap:16px;flex-wrap:wrap;margin:8px 4px 2px;font-size:12px;color:var(--ink2)}
   .legend span{display:inline-flex;align-items:center;gap:6px}
+  .catalert,.catok{display:flex;align-items:center;gap:8px;font-size:13px;border-radius:10px;
+    padding:9px 12px;margin-bottom:10px;border:1px solid var(--border)}
+  .catalert{background:color-mix(in srgb,var(--warning) 14%,transparent);color:var(--ink)}
+  .catok{background:color-mix(in srgb,var(--good) 12%,transparent);color:var(--good-ink)}
+  .catcard{padding:12px 16px;display:flex;flex-direction:column;gap:7px}
+  .catrow{display:grid;grid-template-columns:150px 1fr 96px;align-items:center;gap:12px}
+  .catname{font-size:13px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .catbar{background:color-mix(in srgb,var(--series) 12%,transparent);border-radius:6px;height:16px;overflow:hidden}
+  .catbar>span{display:block;height:100%;background:var(--series);border-radius:6px;min-width:2px}
+  .catnum{text-align:right;font-size:13px;white-space:nowrap}
+  @media(max-width:560px){.catrow{grid-template-columns:110px 1fr 76px;gap:8px}}
   .tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--border);
     border-radius:8px;padding:7px 10px;font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,.14);
     opacity:0;transition:opacity .08s;white-space:nowrap;color:var(--ink)}
@@ -245,6 +289,7 @@ _TEMPLATE = r"""<!doctype html>
 </div>
 <script>
 const RUNS = __RUNS_JSON__;
+const CATS = __CATEGORIES_JSON__;
 const GENERATED = "__GENERATED__";
 
 const SEV = {good:{cls:"good",label:"OK"},warning:{cls:"warning",label:"Partial"},critical:{cls:"critical",label:"Failed"}};
@@ -299,6 +344,7 @@ function render(){
       ${tile("Live jobs", fmt(latest.live_jobs), latest.expired_jobs!=null?`${fmt(latest.expired_jobs)} expired (410)`:"")}
       ${tile("Baked", latest.bake_job_pages!=null?fmt(latest.bake_job_pages)+" pages":"–", bakeCov)}
     </div>
+    ${catSection()}
     <section class="block">
       <h2>Applicable set over the last ${byTime.length} run${byTime.length>1?"s":""}</h2>
       <div class="chartwrap" id="cw"><div class="tip" id="tip"></div></div>
@@ -323,6 +369,32 @@ function render(){
 
 function tile(k,v,d){ return `<div class="tile"><div class="k">${k}</div><div class="v num">${v}</div><div class="d">${d||"&nbsp;"}</div></div>`; }
 function esc(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+
+// Job-category breakdown of the CURRENT applicable set (CATS is a live snapshot of
+// out/applicable.jsonl, computed at render). Tags are additive so bar counts sum to
+// more than the total; the uncategorized count is the alert (jobs no functional
+// category matched). Renders nothing if the snapshot is empty (older run/no file).
+function catSection(){
+  if(!CATS || !CATS.total){ return ""; }
+  const cs = CATS.counts||[];
+  const max = cs.reduce((m,c)=>Math.max(m,c.n),0)||1;
+  const pct = n => (100*n/CATS.total).toFixed(1);
+  const bars = cs.map(c=>`
+    <div class="catrow">
+      <div class="catname">${esc(c.name)}</div>
+      <div class="catbar"><span style="width:${(100*c.n/max).toFixed(1)}%"></span></div>
+      <div class="catnum num">${fmt(c.n)} <span class="subtle">${pct(c.n)}%</span></div>
+    </div>`).join("");
+  const u = CATS.uncategorized||0;
+  const alert = u>0
+    ? `<div class="catalert"><span class="dot g-warning"></span><b>${fmt(u)}</b>&nbsp;uncategorized applicable job${u===1?"":"s"} <span class="subtle">(${pct(u)}%) — no functional category matched; add title patterns to normalize/category.py</span></div>`
+    : `<div class="catok"><span class="dot g-good"></span>every applicable job is categorized</div>`;
+  return `<section class="block">
+    <h2>Job categories <span class="subtle">· current applicable set (${fmt(CATS.total)} jobs · additive tags)</span></h2>
+    ${alert}
+    <div class="card catcard">${bars||'<div class="subtle" style="padding:8px">no categorized jobs</div>'}</div>
+  </section>`;
+}
 
 function buildRows(){
   const tb=document.getElementById("rows");
