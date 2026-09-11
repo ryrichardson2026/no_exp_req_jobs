@@ -383,6 +383,15 @@
         "match_any": [
           ", WA,"
         ]
+      },
+      "extraction": {
+        "_note": "PROBE+CALIBRATED 2026-09-11: requirements live in the detail record's ExternalQualificationsStr (mapped to qualifications_html), NOT the description body, under 'Minimum Requirements:' + 'Preferred Qualifications:' (colon; ~2/42 render colon-less, so bare variants included). Experience sits in Preferred for most retail/store roles -> PREFERRED (applicable); roles that put a year of experience in the Minimum section -> REQUIRED (excluded). Live yield 38/42 applicable; split spot-checked correct (Field Store Associate -> PREFERRED, Branch Coordinator Lead / Sales Rep with Minimum-section experience -> REQUIRED). 1 straggler with no qual section stays NOT_STATED (fails safe). Forked vocabulary, no engine change.",
+        "openers": [
+          {"text": "Minimum Requirements", "role": "REQUIRED", "match": "colon"},
+          {"text": "Preferred Qualifications", "role": "PREFERRED", "match": "colon"},
+          {"text": "Minimum Requirements", "role": "REQUIRED", "match": "bare"},
+          {"text": "Preferred Qualifications", "role": "PREFERRED", "match": "bare"}
+        ]
       }
     }
   },
@@ -1028,7 +1037,14 @@
         "compensation": "Compensation",
         "benefits": "Benefits"
       },
-      "verified": "2026-09-11 geo scope live-verified: locationsearch=WA&searchby=location returns 60 WA results over 3 pages (startrow 0/25/50), all in-market. Endpoint SHAPE (host, /search/, /job/{slug}/{posting_id}/, apply_pattern) is still platform convention - run --probe/--inspect before trusting the detail-page field map. Two ids per posting: source_job_id = the RMK posting id in the URL path; the SuccessFactors req number on the page is carried separately, dropped in normalize (no contract slot). Shift is a STRUCTURED label, distinct from Schedule. /go/ links excluded, slugs may be percent-encoded."
+      "verified": "2026-09-11 geo scope live-verified: locationsearch=WA&searchby=location returns 60 WA results over 3 pages (startrow 0/25/50), all in-market. Endpoint SHAPE (host, /search/, /job/{slug}/{posting_id}/, apply_pattern) is still platform convention - run --probe/--inspect before trusting the detail-page field map. Two ids per posting: source_job_id = the RMK posting id in the URL path; the SuccessFactors req number on the page is carried separately, dropped in normalize (no contract slot). Shift is a STRUCTURED label, distinct from Schedule. /go/ links excluded, slugs may be percent-encoded.",
+      "extraction": {
+        "_note": "PROBE+CALIBRATED 2026-09-11: requirements sit under an own-line 'Skills/Qualifications' heading (matches section_headings.skills_qualifications). Experience bullets there make sales/HVAC/management roles REQUIRED (correctly excluded); production/warehouse roles carry only physical/soft-skill lines and resolve NONE_NEEDED. Live yield 27/60 applicable; the REQUIRED/NONE_NEEDED split was spot-checked correct (Sales Rep + Maintenance Tech -> REQUIRED, Production Associate + Loader -> NONE_NEEDED). Forked vocabulary, no engine change.",
+        "openers": [
+          {"text": "Skills/Qualifications", "role": "REQUIRED", "match": "bare"},
+          {"text": "Preferred Skills", "role": "PREFERRED", "match": "colon"}
+        ]
+      }
     }
   },
   "adp_wfn": {
@@ -1072,7 +1088,7 @@
         "page_size": 10,
         "pagination": {
           "cursor_param": "$skip",
-          "_note": "OData $skip, UNTESTED. --probe reports whether page 2 (skip=page_size) has zero overlap with page 1; if the cursor is ignored, find the real pagination param before --pull."
+          "_note": "OData $skip, VERIFIED 2026-09-11 via --probe: page 2 ($skip=10) had zero overlap with page 1 (10 + 8 = 18, matching the board's total). Cursor honored on apply-custom-filters."
         }
       },
       "field_map": {
@@ -1081,10 +1097,18 @@
         "internal_title": "jobTitle",
         "client_req_id": "clientRequisitionID",
         "description_html": "jobDescription",
-        "qualifications_html": "jobQualifications",
+        "qualifications_html": "",
+        "_qualifications_html_note": "DELIBERATELY EMPTY (calibrated 2026-09-11): Gensco's jobQualifications field carries the BENEFITS list, not requirements - the real requirements (the '<Role> Requirements' section: HS diploma / 18+ / physical) live in jobDescription. Mapping benefits here mislabels them and risks leaking a benefit line (e.g. 'Tuition reimbursement for degree programs' -> education cue) into a section span. Empty string -> dig() returns None -> the extractor reads requirements from the description only.",
         "employment_type": "type",
         "work_level": "workLevelCode",
         "posted_text": "postingDate"
+      },
+      "extraction": {
+        "_note": "PROBE+CALIBRATED 2026-09-11: requirements sit under an own-line, colon-less '<Role> Requirements' heading in jobDescription (e.g. 'Warehouse Team Member Requirements'), which lists HS diploma / age / physical and states NO experience -> NONE_NEEDED. Driver variants that add 'Previous driving experience required' resolve REQUIRED (correctly excluded). Only two heading variants exist across the board, matched as exact bare headings (a new title would fail safe to NOT_STATED, never a false positive). Live yield 7/9 applicable; split spot-checked correct. Forked vocabulary, no engine change.",
+        "openers": [
+          {"text": "Warehouse Team Member Requirements", "role": "REQUIRED", "match": "bare"},
+          {"text": "Warehouse/Delivery Driver Team Member Requirements", "role": "REQUIRED", "match": "bare"}
+        ]
       },
       "headers": {
         "Referer": "https://myjobs.adp.com/genscocareers/cx/job-listing",
