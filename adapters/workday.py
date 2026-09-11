@@ -835,36 +835,54 @@ def mode_categories(t):
         return 1
 
     assign, totals, requests_made = {}, {}, 1    # 1 = the session GET
+    incomplete = []                              # categories whose query truncated after retries
     for c in cats:
         name = c["name"]
         st = c.get("searchText", "")
         af = c.get("appliedFacets") or {}
         offset, seen, total = 0, 0, None
-        payload = None
-        while True:
-            r = fetch_page(s, t, offset, limit=PAGE_LIMIT, search_text=st, applied_facets=af)
-            requests_made += 1
-            if r.status_code != 200:
-                print(f"  {name}: POST {r.status_code} at offset {offset} - stopping this query")
-                break
-            payload = r.json()
-            if total is None:
-                total = extract_total(payload)
-                totals[name] = total
-            jobs = extract_jobs(payload)
-            if not jobs:
-                break
-            for j in jobs:
-                rid = req_id(j)
-                if rid:
-                    assign.setdefault(rid, set()).add(name)
-            seen += len(jobs)
-            if total is not None and offset + len(jobs) >= total:
-                break
-            offset += len(jobs)
-            time.sleep(DELAY_SECONDS)
+        try:
+            while True:
+                r = fetch_paged(
+                    lambda: fetch_page(s, t, offset, limit=PAGE_LIMIT, search_text=st, applied_facets=af),
+                    label=f"{name} offset {offset}: ")
+                requests_made += 1
+                payload = r.json()
+                if total is None:
+                    total = extract_total(payload)
+                    totals[name] = total
+                jobs = extract_jobs(payload)
+                if not jobs:
+                    break
+                for j in jobs:
+                    rid = req_id(j)
+                    if rid:
+                        assign.setdefault(rid, set()).add(name)
+                seen += len(jobs)
+                if total is not None and offset + len(jobs) >= total:
+                    break
+                offset += len(jobs)
+                time.sleep(DELAY_SECONDS)
+        except Truncated as e:
+            # A supplementary map (source_category enrichment), so don't sink the whole build
+            # on one query - but record it LOUD and, below, refuse to overwrite the prior
+            # complete map with a partial one (that would silently under-tag source_category).
+            print(f"  !! {name}: {e} - category query INCOMPLETE")
+            log(t, "categories_partial", category=name, detail=str(e), captured=seen)
+            incomplete.append(name)
         print(f"  {name:<30} total {str(total):>5}  captured {seen}")
         time.sleep(DELAY_SECONDS)
+
+    if incomplete:
+        # Same rule as the index loops: never write a partial capture as complete. Keep the
+        # prior categories.json (stale-but-complete beats fresh-but-partial for a tag) and fail
+        # loud so the run marks this non-zero. Re-run recovers it once the source is back.
+        print(f"\n!! categories map INCOMPLETE - {len(incomplete)} quer"
+              f"{'y' if len(incomplete) == 1 else 'ies'} truncated after retries: "
+              f"{', '.join(incomplete)}. categories.json NOT rewritten (prior map kept). "
+              f"Re-run when the source recovers.")
+        log(t, "categories_incomplete", failed=incomplete)
+        return 1
 
     out = {rid: sorted(names) for rid, names in assign.items()}
     p = paths(t)
