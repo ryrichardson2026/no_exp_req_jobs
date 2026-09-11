@@ -697,6 +697,11 @@
             "match": "colon"
           },
           {
+            "text": "minimum requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
             "text": "preferred qualifications (nice to have)",
             "role": "PREFERRED",
             "match": "colon"

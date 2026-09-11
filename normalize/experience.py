@@ -295,7 +295,11 @@ AFTER_HIRE_CUES = (
 # preferred, not a gate. After-hire wins if both are present.
 PREFERRED_CUES = ("preferred", "desired", " a plus", "nice to have")
 
-EXPERIENCE_CUES = ("experience", "years in", "yrs", "background in",
+EXPERIENCE_CUES = ("experience", "years in", "yrs",
+                   "background in ",   # trailing space intentional: matches "background in
+                                       # security / law enforcement" (real experience) but NOT
+                                       # "background investigation" — a background-CHECK boilerplate
+                                       # clause that must not read as required work experience.
                    "work history", "previously worked", "journeyman",
                    "journey level", "journey-level")
 EDUCATION_CUES = ("degree", "diploma", "ged", "high school", "coursework",
