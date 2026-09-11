@@ -121,6 +121,13 @@ def wc_l(path):
 def run(cmd, cwd=ROOT, capture=False):
     """Run a child command, streaming its output. Returns (returncode, stdout_or_None)."""
     print(f"    $ {' '.join(cmd)}", flush=True)
+    # Windows: npm-installed CLIs (vercel) are .CMD/.ps1 shims with no .exe. CreateProcess
+    # (shell=False) only appends .exe, so a bare "vercel" raises FileNotFoundError and sinks
+    # the whole publish. Resolve the real path via PATHEXT-aware which() so node/python/vercel
+    # all launch uniformly (no-op when cmd[0] is already an absolute/.exe path).
+    exe = shutil.which(cmd[0])
+    if exe:
+        cmd = [exe, *cmd[1:]]
     if capture:
         p = subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
         if p.stdout:
