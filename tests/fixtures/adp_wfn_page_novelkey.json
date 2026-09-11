@@ -1,0 +1,21 @@
+{
+  "meta": {"page": 1, "requestId": "abc-123"},
+  "totalCount": 1,
+  "myCustomRequisitionRows": [
+    {
+      "reqId": "REQ-2001",
+      "publishedJobTitle": "Inventory Clerk",
+      "jobTitle": "Inventory Clerk",
+      "type": "Part-time",
+      "workLevelCode": "Individual Contributor",
+      "clientRequisitionID": "GEN-2001",
+      "postingDate": "2026-09-07",
+      "jobDescription": "Cycle-count and stock inventory.",
+      "jobQualifications": "No prior warehouse experience necessary.",
+      "workLocations": ["Spokane, WA"],
+      "requisitionLocations": [
+        {"nameCode": "Spokane DC", "address": {"cityName": "Spokane", "countrySubdivisionLevel1": {"codeValue": "WA"}}}
+      ]
+    }
+  ]
+}

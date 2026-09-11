@@ -1,0 +1,54 @@
+{
+  "jobRequisitions": [
+    {
+      "reqId": "REQ-1001",
+      "publishedJobTitle": "Warehouse Associate - Swing Shift",
+      "jobTitle": "Warehouse Associate",
+      "type": "Full-time",
+      "workLevelCode": "Individual Contributor",
+      "clientRequisitionID": "GEN-1001",
+      "postingDate": "2026-09-01T00:00:00Z",
+      "jobDescription": "<p>Load and unload trucks.</p><p>Operate a forklift in a fast-paced distribution center.</p>",
+      "jobQualifications": "<ul><li>No experience required &mdash; we train.</li><li>Ability to lift 50 lbs.</li></ul>",
+      "workLocations": "Tacoma, WA",
+      "requisitionLocations": []
+    },
+    {
+      "reqId": "REQ-1002",
+      "publishedJobTitle": "Delivery Driver",
+      "jobTitle": "Driver",
+      "type": "Full-time",
+      "workLevelCode": "Individual Contributor",
+      "clientRequisitionID": "GEN-1002",
+      "postingDate": "2026-08-28",
+      "jobDescription": "Deliver product to Gensco customers across the region.",
+      "jobQualifications": "Valid driver's license required.",
+      "workLocations": ["Kent, WA", "Fife, WA"],
+      "requisitionLocations": ["Kent, WA"]
+    },
+    {
+      "reqId": "REQ-1003",
+      "publishedJobTitle": "Counter Sales Representative",
+      "jobTitle": "Counter Sales",
+      "type": "Full-time",
+      "workLevelCode": "Individual Contributor",
+      "clientRequisitionID": "GEN-1003",
+      "postingDate": "2026-09-05T00:00:00Z",
+      "jobDescription": "Assist customers at the counter and pull orders.",
+      "jobQualifications": "High school diploma or equivalent.",
+      "workLocations": [
+        {
+          "nameCode": {"shortName": "Portland Branch"},
+          "address": {
+            "cityName": "Portland",
+            "countrySubdivisionLevel1": {"codeValue": "OR"},
+            "postalCode": "97201"
+          }
+        }
+      ],
+      "requisitionLocations": [
+        {"address": {"city": "Portland", "state": "OR"}}
+      ]
+    }
+  ]
+}

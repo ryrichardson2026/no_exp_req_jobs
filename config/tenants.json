@@ -349,6 +349,41 @@
           }
         ]
       }
+    },
+    "sherwin_williams": {
+      "label": "Sherwin-Williams",
+      "company_name": "Sherwin-Williams",
+      "host": "ejhp.fa.us6.oraclecloud.com",
+      "site_number": "CX_2",
+      "api_version": "11.13.18.05",
+      "language": "en",
+      "careers_url": "https://ejhp.fa.us6.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_2/jobs",
+      "public_base": "https://ejhp.fa.us6.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_2",
+      "terms_reference": null,
+      "employer_domain": "sherwin-williams.com",
+      "nlx_wa_jobs": null,
+      "_nlx_gap": "Not on the current NLx WA employer discovery list (the 88-row capture). Discovery-list gap, recorded here.",
+      "source_class": "direct-employer",
+      "sector": "retail",
+      "finder_extra": {
+        "selectedLocationsFacet": "300000063029048"
+      },
+      "geo_scope": {
+        "verified": "2026-09-11",
+        "method": "selectedLocationsFacet=300000063029048 ('WA, United States') spliced into the findReqs finder via finder_extra (oracle_orc splices it generically)",
+        "national": 2271,
+        "in_market": 44,
+        "note": "The facet is NOT a hard filter - returned rows still include multi-location OR reqs (locationsFacet reports OR 4, ID 1). The client-side PrimaryLocation ', WA,' filter below is REQUIRED on top. Both, always."
+      },
+      "verified": "GEO SCOPE live-verified 2026-09-11: 2271 national -> 44 WA via selectedLocationsFacet=300000063029048. End-to-end gates NOT cleared (no --probe this push). Pod host ejhp.fa.us6 is OPAQUE - company_name lives in config, NEVER derived from host. Offset/Limit live INSIDE the finder string; the envelope hasMore/limit/offset describe the outer wrapper (count 1) - walk until offset >= items[0].TotalJobsCount (oracle_orc already does this). DETAIL CALL REQUIRED: ExternalQualificationsStr / ExternalResponsibilitiesStr are null in the list response; requirements text is only on the detail record - so exclusion cannot be decided from the list, fetch detail then gate.",
+      "_parse_findings": "For the normalize/gate step (notes, not adapter changes this push): (1) JobFamily is USELESS - all 44 WA rows are 'Sales' incl. Store Associate/CSR/Delivery Driver (Sales is 1862/2271 nationally); never route on JobFamily. (2) No structured fields - JobSchedule/JobShift/JobType/WorkerType/ContractType/StudyLevel/WorkHours/WorkDays all null on every row. (3) Pay + employment type are PROSE inside ShortDescriptionStr: 'This is a Part Time role paying $22.00 Hourly.' / 'This is a Full-Time Role paying $24.00 Hourly.' - hyphenation + casing vary, parse case-insensitively, accept both; store number + street address share the field. (4) Bilingual is sometimes a REQUIRED gate ('This Role Requires Bilingual Fluency in Spanish and English') vs preferred - a language lever (not experience); the classifier must catch required-vs-preferred. (5) 'Distance' is a millisecond timestamp, not a distance - ignore. Summer internships stay excluded; the four '2027 Management & Sales Training Program' postings do NOT auto-exclude (gate on requirements, not title); Territory Sales Rep needs testing against the gate.",
+      "location_filter": {
+        "_note": "Client-side verification on top of the server facet (which is not a hard filter). --inspect must pin PrimaryLocation (the Providence/Kroger 'City, ST, United States' format). WA-DC drift guarded: ', WA,' anchors the state position so 'Washington, DC' cannot false-match.",
+        "field": "PrimaryLocation",
+        "match_any": [
+          ", WA,"
+        ]
+      }
     }
   },
   "workday": {
@@ -645,6 +680,80 @@
           }
         ]
       }
+    },
+    "sysco": {
+      "label": "Sysco",
+      "host": "wd5.myworkdaysite.com",
+      "tenant": "sysco",
+      "site": "syscocareers",
+      "language": "en-US",
+      "url_style": "myworkdaysite",
+      "careers_url": "https://wd5.myworkdaysite.com/en-US/recruiting/sysco/syscocareers",
+      "list_url": "https://wd5.myworkdaysite.com/wday/cxs/sysco/syscocareers/jobs",
+      "detail_base": "https://wd5.myworkdaysite.com/wday/cxs/sysco/syscocareers",
+      "terms_reference": null,
+      "employer_domain": "sysco.com",
+      "nlx_wa_jobs": 62,
+      "source_class": "direct-employer",
+      "sector": "food-distribution",
+      "req_id": "R\\d{6}",
+      "geo_scope": {
+        "verified_via": "Radancy TalentBrew index (careers.sysco.com WA search), 2026-09-11: 23 WA results",
+        "radancy_wa_index_url": "https://careers.sysco.com/en/search-jobs/Washington%2C%20US/1105/3/6252001-5815135/47x50012/-120x50147/50/2",
+        "radancy_path_shape": "/en/search-jobs/{display}/{orgId=1105}/{facetType=3 state}/{geoPath=6252001-5815135 geonames US-WA}/{lat}/{lng}/{radius}/{n}; pagination &p=N, 15/page, server-rendered",
+        "wa_req_ids": [
+          "R234195",
+          "R240377",
+          "R249685",
+          "R252733",
+          "R252735",
+          "R256360",
+          "R257316",
+          "R258261",
+          "R259085",
+          "R259323",
+          "R260104",
+          "R261577",
+          "R262427",
+          "R263140",
+          "R263328",
+          "R264562",
+          "R264570",
+          "R265270",
+          "R265321",
+          "R265324",
+          "R265327",
+          "R265755",
+          "R265838"
+        ],
+        "path_decision": "PENDING - RY DECIDES, do not pick unilaterally. A) Radancy as index (scrape req ids from the WA search page's ExtRef block) + Workday CXS for records - Workday stays source of truth, WA scoping free. B) Radancy for everything - server-rendered job pages carry full descriptions + the Minimum/Preferred split, ~24 requests, employer's own site so no ATS-spine conflict. A plain Workday --index has NO WA facet; an unscoped nationwide pull is FORBIDDEN.",
+        "national": "national board",
+        "in_market": 23
+      },
+      "verified": "Workday params live (url_style myworkdaysite - builder already supports it, no code change). Sysco runs Radancy TalentBrew (careers.sysco.com, org 1105) over Workday CXS. WA geo scope VERIFIED via Radancy (23 results); the Radancy WA page's ExtRef block enumerates every WA Workday req id (geo_scope.wa_req_ids), so no Workday facet probe is needed to enumerate WA. PATH A vs B is Ry's open call - config carries both. Density warning: category facet Sales 10 / Transportation 7 (CDL A+B, hard licence gate) / Warehouse 5 / Operations 1 -> ~5-6 applicable statewide. Reconcile: NLx lists Sysco 62 WA, this returns 23.",
+      "location_filter": {
+        "_note": "Client-side WA verification on the returned Workday location field (never a location query string, per direction). field omitted -> whole-blob match pre-inspect.",
+        "field": null,
+        "match_any": [
+          ", WA",
+          "Washington"
+        ]
+      },
+      "extraction": {
+        "_note": "Sysco splits Minimum Requirements and Preferred Requirements as distinct headed sections; both openers below, colon-anchored. Observed minimum '0 - 1 Year relevant work experience': OPEN ITEM - the classifier must treat a zero-inclusive range as OPEN (no-experience qualifies), not a 1-year bar.",
+        "openers": [
+          {
+            "text": "minimum requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred requirements",
+            "role": "PREFERRED",
+            "match": "colon"
+          }
+        ]
+      }
     }
   },
   "radancy_tb": {
@@ -813,7 +922,10 @@
       "_query_note": "A LIST OF PAIRS, not a dict - filter[state][0] and filter[state][1] are repeated array-index keys and a dict would collapse them. Captured verbatim from the XHR and confirmed at page_number=2. The API accepts BOTH 'WA' and 'Washington' in one call, which is why no abbreviation token is needed at the query layer - a first. radius=15 is the site default and is what pulls the out-of-state strays noted in location_filter; it is kept as captured rather than pruned on a guess.",
       "body_extra": {
         "disable_switch_search_mode": false,
-        "site_available_languages": ["en", "en-us"]
+        "site_available_languages": [
+          "en",
+          "en-us"
+        ]
       },
       "_body_note": "VERIFIED 2026-09-02 from the Payload tab, 78 bytes, matching the observed content-length. The body carries SITE CONFIGURATION (search-mode switch, available languages), not filters - which is why the filters live in the query string, not here. The 'ct=' JWT session cookie remains UNVERIFIED as a requirement and no session handling is implemented. If the 403 persists with this body set, THAT is the next gate: it needs the cookie captured from a live session, not guessed.",
       "terms_reference": null,
@@ -863,6 +975,116 @@
       "_credential_open": "WA MAST CLASS 12 PERMIT is named on live postings on this board (alcohol service, Levy at Lumen Field) alongside the WA Food Handlers Permit. Food Handler is already on the Finding 25 qualifying list. MAST IS NOT. It is a WA alcohol-server permit - genuinely quick and prerequisite-free, so it very likely qualifies - but gate 3 disqualifies any credential not on the list, so every alcohol-serving role will be excluded until it is added. Unlike the Allied guard-card question this one has a known answer; it still needs a CEO decision and a Career Bridge obtainability check rather than being assumed. WATCH THE CREDENTIAL-GATE LINE in the attribution report.",
       "_age_gate": "'Must be 21 years of age or older' appears on alcohol-service roles here, same as Dollar General. Label-only per CEO decision 2 Sep 2026, dropped from active tracking. Gates nothing.",
       "_pay_note": "Pay is STATED and prominent but in description prose: 'Fixed Pay Rate: $26.05 per hour', 'Pay Range: $21.13 per hour to $26.08', 'Salary: $81,000 - 86,500/year'. Fourth pattern across tenants and the most varied - hourly fixed, hourly range, and annual salary all appear. A parse, not a field read, and the hourly-ceiling guard matters here because salaried and hourly are mixed on one board."
+    }
+  },
+  "successfactors_rmk": {
+    "_platform_note": "SuccessFactors Recruiting Marketing (RMK / career-site-builder), server-rendered. The key names ONE verified fetch shape: a /search/ listing walked by a startrow cursor, and /job/{slug}/{posting_id}/ detail pages. Two ids per posting - the RMK posting id in the URL path (source_job_id) and the SuccessFactors requisition number printed on the page (dropped in normalize; reposts reuse a req across posting ids). Shift is a STRUCTURED labeled field here, distinct from Schedule. ENDPOINTS BELOW ARE UNVERIFIED platform convention - run --probe and --inspect against the live board before trusting them; if the fetch shape differs, a new tenant gets its own key. Config is data; one key never covers two fetch shapes.",
+    "cintas": {
+      "label": "Cintas",
+      "host": "https://careers.cintas.com",
+      "endpoints": {
+        "search": "https://careers.cintas.com/search/",
+        "job_base": "https://careers.cintas.com/job/",
+        "apply_pattern": "https://careers.cintas.com/talentcommunity/apply/{posting_id}/?locale=en_US"
+      },
+      "page_size": 25,
+      "search_params": {
+        "q": "",
+        "locationsearch": "WA",
+        "searchby": "location",
+        "d": "50",
+        "sortColumn": "referencedate",
+        "sortDirection": "desc"
+      },
+      "geo_scope": {
+        "verified": "2026-09-11",
+        "method": "search params locationsearch=WA&searchby=location (state match; d=50 effectively ignored, includes Spokane/Yakima/Wenatchee; no Washington-DC drift)",
+        "national": "full board",
+        "in_market": 60
+      },
+      "employer_name": "Cintas",
+      "company_name": "Cintas",
+      "employer_domain": "cintas.com",
+      "market": null,
+      "state": "WA",
+      "source_class": "direct-employer",
+      "apply_class": "employer-direct",
+      "terms_reference": null,
+      "labeled_fields": {
+        "requisition_number": "Requisition Number",
+        "job_category": "Job Category",
+        "organization": "Organization",
+        "employee_status": "Employee Status",
+        "schedule": "Schedule",
+        "shift": "Shift",
+        "nearest_major_market": "Nearest Major Market",
+        "nearest_secondary_market": "Nearest Secondary Market",
+        "job_segment": "Job Segment"
+      },
+      "section_headings": {
+        "job_description": "Job Description",
+        "skills_qualifications": "Skills/Qualifications",
+        "compensation": "Compensation",
+        "benefits": "Benefits"
+      },
+      "verified": "2026-09-11 geo scope live-verified: locationsearch=WA&searchby=location returns 60 WA results over 3 pages (startrow 0/25/50), all in-market. Endpoint SHAPE (host, /search/, /job/{slug}/{posting_id}/, apply_pattern) is still platform convention - run --probe/--inspect before trusting the detail-page field map. Two ids per posting: source_job_id = the RMK posting id in the URL path; the SuccessFactors req number on the page is carried separately, dropped in normalize (no contract slot). Shift is a STRUCTURED label, distinct from Schedule. /go/ links excluded, slugs may be percent-encoded."
+    }
+  },
+  "adp_wfn": {
+    "_platform_note": "NAMED FOR THE READ SURFACE. ADP Workforce Now public staffing search API behind an ADP-hosted career site (myjobs.adp.com/{site}/cx). SINGLE-CALL SOURCE: the list $select returns jobDescription AND jobQualifications inline, so there is NO detail fetch. THREE UNKNOWNS at add time (all surfaced by --probe/--inspect before --pull): (1) envelope key varies - unwrap tries jobRequisitions/requisitions/items/value/results/data then the first list-of-objects; (2) workLocations AND requisitionLocations shapes differ - loc_strings flattens string/list/nested defensively; (3) TENANT SCOPING UNRESOLVED - nothing in the URL names Gensco and $filter is empty, so scoping must arrive via header/cookie. headers.Referer is a starting guess; the note flags headers uncaptured. UNVERIFIED - no live capture on disk; run --probe (checks titles/locations look like Gensco) and --inspect before --pull.",
+    "gensco": {
+      "label": "Gensco (myjobs.adp.com/genscocareers, ADP Workforce Now)",
+      "employer_name": "Gensco",
+      "employer_domain": "gensco.com",
+      "market": null,
+      "state": "WA",
+      "source_class": "direct-employer",
+      "apply_class": "employer-direct",
+      "terms_reference": null,
+      "nlx_wa_jobs": null,
+      "verified": null,
+      "geo_scope": {
+        "exempt": true,
+        "reason": "small PNW-centric board (~dozens of reqs); a full-board pull is dozens of requests, not thousands",
+        "still_client_filter": true
+      },
+      "endpoints": {
+        "list": "https://my.adp.com/myadp_prefix/mycareer/public/staffing/v1/job-requisitions/search-custom-filters",
+        "listing_page": "https://myjobs.adp.com/genscocareers/cx/job-listing"
+      },
+      "list_request": {
+        "params": {
+          "$select": "reqId,jobTitle,publishedJobTitle,type,jobDescription,jobQualifications,workLocations,workLevelCode,clientRequisitionID,postingDate,requisitionLocations",
+          "$top": 10,
+          "$filter": "",
+          "tz": "America/Los_Angeles"
+        },
+        "page_size": 10,
+        "pagination": {
+          "cursor_param": "$skip",
+          "_note": "OData $skip, UNTESTED. --probe reports whether page 2 (skip=page_size) has zero overlap with page 1; if the cursor is ignored, find the real pagination param before --pull."
+        }
+      },
+      "field_map": {
+        "source_job_id": "reqId",
+        "title": "publishedJobTitle",
+        "internal_title": "jobTitle",
+        "client_req_id": "clientRequisitionID",
+        "description_html": "jobDescription",
+        "qualifications_html": "jobQualifications",
+        "employment_type": "type",
+        "work_level": "workLevelCode",
+        "posted_text": "postingDate"
+      },
+      "headers": {
+        "Referer": "https://myjobs.adp.com/genscocareers/cx/job-listing",
+        "note": "HEADERS NOT YET CAPTURED. Referer is a SCOPING GUESS only. ADP WFN scoping arrives via header/cookie, not the URL ($filter empty, nothing in the path names Gensco). If --probe returns non-Gensco titles or a non-JSON body, capture the real Request Headers (Cookie, Referer, Origin, any oauth/bearer token) from the live board's XHR in devtools and add them here as string keys - the adapter reads every string header from this block and skips 'note'."
+      },
+      "rate_limit": {
+        "requests_per_second": 1,
+        "max_retries": 4,
+        "backoff_seconds": 3
+      }
     }
   }
 }
