@@ -19,9 +19,8 @@ const PRODUCT = "NoProbJobs.com";
 
 // Landing-only curated entry point: five type-of-work chips in a FIXED order (never sorted by
 // volume — someone who learned where a chip sits must find it there next visit). The board menu
-// keeps the full set (R.CATEGORIES, now thirteen after the 2026-09-11 expansion); the non-chip
-// categories still have live records, browse pages and filters — this is a narrowed doorway, not
-// a taxonomy change. Icons resolve from the labels via
+// keeps all nine (R.CATEGORIES); the removed four still have live records, browse pages and
+// filters — this is a narrowed doorway, not a taxonomy change. Icons resolve from the labels via
 // catIconSvg (Retail→shopping-bag, Sales→tag, Food Services→chef-hat, Security→shield,
 // Warehouse→package), so keeping these labels keeps the icons correct.
 const LANDING_CATS = ["Retail", "Sales", "Food Services", "Security", "Warehouse"];

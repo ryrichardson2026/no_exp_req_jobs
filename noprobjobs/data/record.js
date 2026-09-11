@@ -10,7 +10,7 @@ import { LOGOS } from "./logos.js";
    stays in the menu and stays enabled, including the thin ones: a near-empty category
    is a sourcing gap that fills as employers are added, not a broken state.
    Category is a FILTER INPUT ONLY — it is never printed on a card or a job page. */
-export const CATEGORIES = ["Administrative","Customer Service","Sales","Retail","Warehouse","Construction","Security","Facilities","Food Services","Healthcare Support","Production","Driver","Automotive"];
+export const CATEGORIES = ["Administrative","Customer Service","Sales","Retail","Warehouse","Construction","Security","Facilities","Food Services"];
 export function recordCats(r){ return Array.isArray(r.category) ? r.category : (r.category ? [r.category] : []); }
 
 /* Presence filters. Facets group the employers' own raw values; the card and page
