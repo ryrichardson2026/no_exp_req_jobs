@@ -15,9 +15,24 @@ function get(path){
   });
 }
 
-/* The applicable list, no description_html. 895 < PostgREST's 1000-row default cap
-   today; server-side filter/sort/pagination is a later optimization, not needed yet. */
-export function listJobs(){ return get("/jobs_list?select=*&limit=2000"); }
+/* PostgREST caps result rows at db-max-rows (1000) regardless of ?limit=, so a single fetch
+   SILENTLY truncates once a view passes 1000 rows — dropping the newest job_numbers with no
+   error. jobs_list crossed ~950 and grows every pull, so page through with offset+limit until
+   a short page returns. Offset paging needs a stable &order= to not skip/repeat rows. */
+function getAll(path){
+  const PAGE = 1000;
+  const base = path.replace(/[?&]limit=\d+/i, "");
+  const sep = base.includes("?") ? "&" : "?";
+  const out = [];
+  const step = (from) => get(base + sep + "offset=" + from + "&limit=" + PAGE).then((batch) => {
+    out.push(...batch);
+    return (Array.isArray(batch) && batch.length === PAGE) ? step(from + PAGE) : out;
+  });
+  return step(0);
+}
+
+/* The applicable list, no description_html. Paged (getAll) so it never caps at 1000. */
+export function listJobs(){ return getAll("/jobs_list?select=*&order=job_number.asc"); }
 
 /* One job's full detail (adds description_html), fetched when a job opens. */
 export function jobDetail(internalId){

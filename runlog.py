@@ -275,7 +275,11 @@ function render(){
   const byTime=[...RUNS].sort((a,b)=>(a.ran_at||"").localeCompare(b.ran_at||""));
   const latest=byTime[byTime.length-1];
   const sev=SEV[latest.severity]||SEV.warning;
-  const bake=latest.bake_job_pages!=null? `${fmt(latest.bake_job_pages)} pages · ${fmt(latest.bake_listing_views)} views`:"–";
+  // Bake coverage signal: rows fetched vs the DB's authoritative count. A truncated fetch (the
+  // PostgREST 1000-row cap that once shipped 1000 of 1086 jobs) shows here as INCOMPLETE.
+  const bakeCov = latest.bake_complete===false
+      ? `<span class="flag-FAIL">⚠ INCOMPLETE — fetched ${fmt(latest.bake_jobs_fetched)} of ${fmt(latest.bake_jobs_total)} jobs</span>`
+      : (latest.bake_jobs_total!=null ? `all ${fmt(latest.bake_jobs_total)} jobs covered` : `${fmt(latest.bake_listing_views)} views`);
   const pub = latest.published
       ? `Published — <a href="${latest.deploy_url||"#"}" target="_blank" rel="noopener">${(latest.deploy_url||"").replace(/^https?:\/\//,"")||"deploy"}</a>`
       : `Not published — ${latest.publish_status||"–"}`;
@@ -293,7 +297,7 @@ function render(){
       ${tile("Applicable", fmt(latest.total_applicable), dAppl!=null?`<span class="${dAppl>=0?'up':'down'}">${signed(dAppl)} vs baseline</span>`:"")}
       ${tile("Movement", (latest.movement_pct!=null?latest.movement_pct.toFixed(2):"–")+"%", latest.worst_employer?`worst ${esc(latest.worst_employer)} ${(latest.worst_employer_pct||0).toFixed(1)}%`:"")}
       ${tile("Live jobs", fmt(latest.live_jobs), latest.expired_jobs!=null?`${fmt(latest.expired_jobs)} expired (410)`:"")}
-      ${tile("Baked", bake, "")}
+      ${tile("Baked", latest.bake_job_pages!=null?fmt(latest.bake_job_pages)+" pages":"–", bakeCov)}
     </div>
     <section class="block">
       <h2>Applicable set over the last ${byTime.length} run${byTime.length>1?"s":""}</h2>
@@ -353,7 +357,10 @@ function detailHtml(r){
     h+=`</tbody></table>`;
   }
   if(r.halts&&r.halts.length){ h+=`<ul class="halts">${r.halts.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`; }
-  h+=`<div class="subtle" style="padding:6px 2px 2px">git ${esc(r.git_head||"–")} · bake ${r.bake_job_pages!=null?fmt(r.bake_job_pages)+" pages / "+fmt(r.bake_listing_views)+" views":"–"} · ${esc(r.stamp)}</div>`;
+  const cov = r.bake_complete===false
+      ? `<span class="flag-FAIL">bake INCOMPLETE ${fmt(r.bake_jobs_fetched)}/${fmt(r.bake_jobs_total)} jobs</span>`
+      : (r.bake_jobs_total!=null?`bake ${fmt(r.bake_jobs_fetched)}/${fmt(r.bake_jobs_total)} jobs`:"");
+  h+=`<div class="subtle" style="padding:6px 2px 2px">git ${esc(r.git_head||"–")} · bake ${r.bake_job_pages!=null?fmt(r.bake_job_pages)+" pages / "+fmt(r.bake_listing_views)+" views":"–"}${cov?" · "+cov:""} · ${esc(r.stamp)}</div>`;
   return h;
 }
 

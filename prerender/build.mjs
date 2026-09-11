@@ -65,9 +65,34 @@ function serve(){
 }
 
 async function fetchAll(path){
-  const r = await fetch(REST + path, { headers: { apikey: KEY, Authorization: "Bearer " + KEY } });
-  if (!r.ok) throw new Error(path + " -> " + r.status);
-  return r.json();
+  // PostgREST caps result rows at db-max-rows (1000 here) regardless of ?limit=, so a single
+  // fetch SILENTLY truncates once a view exceeds 1000 rows (jobs_detail hit 1086 after U-Haul
+  // onboarded). The dropped rows were the newest job_numbers, so their /jobs/{slug} pages were
+  // never baked and served the "gone" fallback while live. Page through with offset+limit until
+  // a short page returns. Callers must supply a stable &order= (offset paging is unstable
+  // otherwise); paths that can't (single-row meta) simply return on the first short page.
+  const PAGE = 1000;
+  const base = path.replace(/[?&]limit=\d+/i, "");          // our paging owns the window
+  const sep = base.includes("?") ? "&" : "?";
+  const out = [];
+  for (let from = 0; ; from += PAGE) {
+    const r = await fetch(REST + base + sep + "offset=" + from + "&limit=" + PAGE, { headers: { apikey: KEY, Authorization: "Bearer " + KEY } });
+    if (!r.ok) throw new Error(path + " -> " + r.status);
+    const batch = await r.json();
+    out.push(...batch);
+    if (!Array.isArray(batch) || batch.length < PAGE) break;
+  }
+  return out;
+}
+
+// Authoritative row count, INDEPENDENT of how many rows a fetch returned. `count=exact` puts
+// the true total in Content-Range (".../N") even with limit=1, so it catches a truncated
+// fetchAll that would otherwise pass silently (the 1000-cap that shipped 1000 of 1086 jobs).
+async function countExact(view){
+  const r = await fetch(REST + view + "?select=job_number&limit=1", { headers: { apikey: KEY, Authorization: "Bearer " + KEY, Prefer: "count=exact" } });
+  if (!r.ok && r.status !== 206) throw new Error(view + " count -> " + r.status);
+  const total = parseInt(((r.headers.get("content-range") || "").split("/")[1] || ""), 10);
+  return Number.isFinite(total) ? total : null;
 }
 
 async function writeBaked(routePath, html){
@@ -280,9 +305,11 @@ async function main(){
   // (skipped below), and its stale expired page stays on disk until retire.mjs deletes it;
   // that is the retire step's real work. Paths are stable (slug + job_number are write-once),
   // so live/expired pages just overwrite and nothing orphans.
-  const recs = await fetchAll("/jobs_detail?select=*&limit=2000");
-  const list = await fetchAll("/jobs_list?select=*&limit=2000");
+  const recs = await fetchAll("/jobs_detail?select=*&order=job_number.asc");   // &order= = stable offset paging
+  const list = await fetchAll("/jobs_list?select=*&order=job_number.asc");
   const meta = await fetchAll("/site_meta?select=pulled_at");
+  const jobsTotal = await countExact("/jobs_detail");   // authoritative — asserted against the fetch below
+  const listTotal = await countExact("/jobs_list");
   const cache = { list: JSON.stringify(list), meta: JSON.stringify(meta), byId: {}, byNum: {}, pulledAt: (meta[0] && meta[0].pulled_at) || null };
   for (const r of recs) { cache.byId[r.internal_id] = r; cache.byNum[String(r.job_number)] = r; }
 
@@ -435,6 +462,12 @@ async function main(){
     manifest_live: live.length,
     manifest_expired: expired.length,
     manifest_retired: retired.length,
+    // Coverage: rows fetched vs the DB's authoritative count. A truncated fetch (row cap) shows
+    // here and fails the bake, instead of silently shipping a partial site. jobs_fetched should
+    // equal manifest_live+manifest_expired+retired on a healthy run.
+    jobs_fetched: recs.length, jobs_total: jobsTotal,
+    list_fetched: list.length, list_total: listTotal,
+    coverage_complete: (jobsTotal == null || recs.length >= jobsTotal) && (listTotal == null || list.length >= listTotal),
     sitemap_urls: deploy.sitemap_urls,
     browse_pages_ok: results.filter((r) => r.type === "browse" && !r.error).length,
     landing_ok: results.filter((r) => r.type === "landing" && !r.error).length,
@@ -453,11 +486,17 @@ async function main(){
   // exits non-zero, which run_pull.py surfaces as STATUS: BAKE FAILED and halts the publish
   // before deploy. (Write failures throw out of main() -> the catch below -> exit 1.)
   const listingViews = summary.browse_pages_ok + summary.landing_ok;
-  if (stopped || failures.length) {
+  const truncated = !summary.coverage_complete;
+  // Always emit coverage (parsed into the run record / dashboard signal), even on failure.
+  console.log("BAKE COVERAGE: jobs " + summary.jobs_fetched + "/" + (summary.jobs_total ?? "?")
+    + " list " + summary.list_fetched + "/" + (summary.list_total ?? "?") + " complete=" + summary.coverage_complete);
+  if (stopped || failures.length || truncated) {
     process.exitCode = 1;
     console.error("BAKE FAILED: " + summary.job_pages_ok + " job pages ok, "
       + failures.length + " route failure(s)"
-      + (summary.abort_reason ? " — " + summary.abort_reason : ""));
+      + (summary.abort_reason ? " — " + summary.abort_reason : "")
+      + (truncated ? " — FETCH TRUNCATED: saw " + summary.jobs_fetched + " of " + summary.jobs_total
+          + " jobs (" + summary.list_fetched + " of " + summary.list_total + " live) — PostgREST row cap? fetchAll must paginate" : ""));
   } else {
     console.log("BAKE COMPLETE: " + summary.job_pages_ok + " job pages, "
       + listingViews + " listing views");

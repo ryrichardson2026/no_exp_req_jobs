@@ -714,7 +714,8 @@ def _finish(stamp, units, results, prior_counts, baseline, table, mv, partial, p
 
     # ---- downstream: only on COMPLETE + --publish (structurally gated) ----
     pub = {"published": False, "publish_status": None, "deploy_url": None,
-           "bake_job_pages": None, "bake_listing_views": None}
+           "bake_job_pages": None, "bake_listing_views": None,
+           "bake_jobs_fetched": None, "bake_jobs_total": None, "bake_complete": None}
     rc = 0 if complete else 1
     if complete and publish:
         rc, pub = _publish()
@@ -728,7 +729,9 @@ def _finish(stamp, units, results, prior_counts, baseline, table, mv, partial, p
     # ---- durable run record + local dashboard (BOTH: out/runs/ + Supabase mirror) ----
     # Fully guarded: a record/dashboard/mirror fault must never change the run's outcome.
     try:
-        if pub["published"]:
+        if pub.get("bake_complete") is False:
+            severity = "critical"          # fetch truncated -> partial site; loud regardless of the rest
+        elif pub["published"]:
             severity = "good"
         elif pub["publish_status"] and "FAILED" in pub["publish_status"]:
             severity = "critical"
@@ -748,6 +751,8 @@ def _finish(stamp, units, results, prior_counts, baseline, table, mv, partial, p
             "worst_employer": mv[1] if mv else None,
             "worst_employer_pct": round(mv[2], 2) if mv else None,
             "bake_job_pages": pub["bake_job_pages"], "bake_listing_views": pub["bake_listing_views"],
+            "bake_jobs_fetched": pub.get("bake_jobs_fetched"), "bake_jobs_total": pub.get("bake_jobs_total"),
+            "bake_complete": pub.get("bake_complete"),
             "live_jobs": live, "expired_jobs": expired,
             "git_head": _git_head(), "halts": list(movement or []), "tenants": tenant_rows,
         }
@@ -770,7 +775,8 @@ def _publish():
     print("PUBLISH (COMPLETE)")
     print("=" * 78)
     info = {"published": False, "publish_status": None, "deploy_url": None,
-            "bake_job_pages": None, "bake_listing_views": None}
+            "bake_job_pages": None, "bake_listing_views": None,
+            "bake_jobs_fetched": None, "bake_jobs_total": None, "bake_complete": None}
 
     # capture=True on the node stages so their (stderr) output flows through the tee and
     # a non-zero exit is seen. A silent bake failure and a good bake used to log identically.
@@ -786,6 +792,13 @@ def _publish():
             m = re.search(r"BAKE COMPLETE:\s*(\d+)\s+job pages,\s*(\d+)\s+listing views", out or "")
             if m:
                 info["bake_job_pages"], info["bake_listing_views"] = int(m.group(1)), int(m.group(2))
+            # Coverage signal: rows fetched vs the DB's authoritative count. Parsed even on a
+            # BAKE FAILED exit (the line is emitted regardless), so the dashboard shows WHY.
+            c = re.search(r"BAKE COVERAGE:\s*jobs\s*(\d+)/(\d+|\?)\s+list\s*(\d+)/(\d+|\?)\s+complete=(true|false)", out or "")
+            if c:
+                info["bake_jobs_fetched"] = int(c.group(1))
+                info["bake_jobs_total"] = None if c.group(2) == "?" else int(c.group(2))
+                info["bake_complete"] = (c.group(5) == "true")
         if rc != 0:
             print(f"\n!! {name} exited {rc} - halting publish. Prior production build keeps serving.")
             if name.startswith("bake"):
