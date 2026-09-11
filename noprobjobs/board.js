@@ -916,17 +916,35 @@ const mount = (props) => {
   const root = window.ReactDOM.createRoot(document.getElementById("root"));
   root.render(h(BoardApp, props));
 };
+// Seed handed over from the landing's "See jobs" / card tap (sessionStorage) — the jobs_list it
+// already held. One-shot: read + clear, so a later reload of the board fetches fresh. Lets the
+// board mount with data immediately: no ~0.9MB fetch on the critical path, and no stale
+// baked-list→filtered-list flash when arriving with a search.
+const readSeed = () => {
+  try { const s = window.sessionStorage.getItem("npj_seed"); if (s) { window.sessionStorage.removeItem("npj_seed"); const a = JSON.parse(s); if (Array.isArray(a) && a.length) return a; } } catch (e) {}
+  return null;
+};
+const seed = readSeed();
+
 // A /jobs/{slug} arrival is a JOB PAGE: seed the panel from the inlined record blob (id
 // __npj_job — the job's jobs_list row, no description_html) and paint immediately — chrome +
-// panel + skeleton list. The list hydrates from jobs_list in componentDidMount; the panel's
-// description comes from the baked DOM (BAKED_DESC), no jobs_detail round trip. Every OTHER
-// route pre-fetches jobs_list first so the baked list stays on screen during the fetch (the
-// browse/landing behaviour is untouched).
+// panel + list. Without a handed-over seed the list is a skeleton that hydrates from jobs_list
+// in componentDidMount; WITH a seed it fills instantly. The panel's description comes from the
+// baked DOM (BAKED_DESC), no jobs_detail round trip.
 const isJobRoute = (() => { try { return RT.parsePath(window.location.pathname).kind === "job"; } catch (e) { return false; } })();
 if (isJobRoute) {
   let openJob = null;
   try { const el = document.getElementById("__npj_job"); if (el) openJob = (JSON.parse(el.textContent) || {}).job || null; } catch (e) {}
-  mount({ openJob: openJob });
+  mount(seed ? { openJob: openJob, initialRecs: seed } : { openJob: openJob });
+} else if (seed) {
+  mount({ initialRecs: seed });                                  // handed the list — mount with data, no fetch, no flash
+} else if (window.location.search.length > 1) {
+  // A FILTERED arrival (any query — location/category/pay/sort/…) that the location-agnostic
+  // baked page can't reflect. Mount a skeleton NOW and fetch jobs_list in componentDidMount,
+  // rather than leaving the stale baked (unfiltered) list up for the length of the fetch.
+  mount({});
 } else {
+  // Clean path (/washington/{cat}/ with no query): the baked list already matches the result,
+  // so keep it on screen during the fetch (mount only once data is in hand) — no skeleton.
   SB.listJobs().then((recs) => mount({ initialRecs: recs })).catch(() => mount(null));
 }

@@ -238,7 +238,11 @@ class LandingApp extends React.Component {
     }
     return path + (q.length ? "?" + q.join("&") : "");
   }
-  submit = () => { window.location.href = this.boardHref(); };
+  // Hand the board the jobs_list we already hold, so it mounts with data — no ~0.9MB fetch on
+  // the critical path and no baked-list→filtered flash on a search. One-shot: the board reads +
+  // clears it, so a later reload of the board still fetches fresh.
+  stashSeed = () => { try { if (this.state.recs) window.sessionStorage.setItem("npj_seed", JSON.stringify(this.state.recs)); } catch (e) {} };
+  submit = () => { this.stashSeed(); window.location.href = this.boardHref(); };
 
   shape(r){
     const domain = r.employer_domain || "";
@@ -252,7 +256,7 @@ class LandingApp extends React.Component {
     // desktop a browse→panel jump. The standalone page bakes the actual job (title + body), so
     // it paints the right job instantly, cold, with no fetch, no list, no overlay delay.
     const jobHref = RT.jobPath(r) + "/";
-    const go = () => { window.location.href = jobHref; };
+    const go = () => { this.stashSeed(); window.location.href = jobHref; };   // seed the board's list too (job page fills its list instantly)
     return Object.assign({}, r, {
       id: r.internal_id,
       company: R.companyLabel(r.company_name),
