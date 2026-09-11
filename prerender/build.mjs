@@ -42,11 +42,11 @@ const MIME = { ".html":"text/html",".js":"text/javascript",".mjs":"text/javascri
   ".json":"application/json",".svg":"image/svg+xml",".png":"image/png",".ico":"image/x-icon",".woff2":"font/woff2",".map":"application/json" };
 
 const WAIT = {
-  // Job page = board chrome + seeded panel + skeleton list. Wait for the panel's description to
-  // POPULATE (jobs_detail resolves during the bake), not merely exist — its loading skeleton has
-  // no text, the real description has plenty. The list is intentionally a skeleton, so don't wait
-  // on it. h1 (the panel title / list heading) is present well before this.
-  job: "(function(){var d=document.querySelector('[data-desc-html]');return !!d && d.textContent.trim().length>40 && !!document.querySelector('h1');})()",
+  // Job page = board chrome + seeded panel + skeleton list. The panel's description renders as
+  // TWO nested [data-desc-html] (jobPage wrapper + describe.js output) only once jobs_detail has
+  // resolved during the bake; the loading skeleton is a single wrapper. So >=2 means "the real
+  // description is in", regardless of its length. The list stays a skeleton — not waited on.
+  job: "document.querySelectorAll('[data-desc-html]').length >= 2 && !!document.querySelector('h1')",
   browse: "document.querySelectorAll(\"[role='list'] > *\").length > 0",
   landing: "document.getElementById('root') && document.getElementById('root').children.length > 0",
 };
@@ -67,8 +67,8 @@ function serve(cache){
       // bake paints the panel (chrome + panel + skeleton list) — attachCache withholds jobs_list
       // for job routes, so the list stays a skeleton. Same blob the runtime page ships.
       const jm = !isLanding && cache && /-(\d+)\/?$/.exec(p);
-      if (jm && cache.listByNum[jm[1]]) {
-        const blob = JSON.stringify({ job: cache.listByNum[jm[1]], pulledAt: cache.pulledAt || null }).replace(/</g, "\\u003c");
+      if (jm && cache.blobByNum[jm[1]]) {
+        const blob = JSON.stringify({ job: cache.blobByNum[jm[1]], pulledAt: cache.pulledAt || null }).replace(/</g, "\\u003c");
         html = html.replace("</body>", '<script id="__npj_job" type="application/json">' + blob + "</script></body>");
       }
       res.writeHead(200, { "content-type": "text/html" });
@@ -328,11 +328,16 @@ async function main(){
   const meta = await fetchAll("/site_meta?select=pulled_at");
   const jobsTotal = await countExact("/jobs_detail");   // authoritative — asserted against the fetch below
   const listTotal = await countExact("/jobs_list");
-  const cache = { list: JSON.stringify(list), meta: JSON.stringify(meta), byId: {}, byNum: {}, listByNum: {}, pulledAt: (meta[0] && meta[0].pulled_at) || null };
-  for (const r of recs) { cache.byId[r.internal_id] = r; cache.byNum[String(r.job_number)] = r; }
-  // listByNum = the jobs_list row per job_number (no description_html) — the slim panel-seed
-  // blob a job page inlines so its panel paints before jobs_list hydrates the list.
-  for (const r of list) cache.listByNum[String(r.job_number)] = r;
+  const cache = { list: JSON.stringify(list), meta: JSON.stringify(meta), byId: {}, byNum: {}, blobByNum: {}, pulledAt: (meta[0] && meta[0].pulled_at) || null };
+  for (const r of recs) {
+    cache.byId[r.internal_id] = r; cache.byNum[String(r.job_number)] = r;
+    // blobByNum = each job's panel-seed record, from jobs_detail so it covers EVERY job incl.
+    // expired ones (jobs_list omits expired — an expired /jobs page must still seed its panel).
+    // Strip the big description/qualifications HTML so the inlined blob stays small (the panel's
+    // description comes from the baked DOM, not this blob).
+    const { description_html, description_text, qualifications_html, qualifications, ...slim } = r;
+    cache.blobByNum[String(r.job_number)] = slim;
+  }
 
   // enumerate routes
   const routes = [];
