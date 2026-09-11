@@ -145,6 +145,11 @@ button{font:inherit;color:inherit}
 .hv-tx-ink:hover{color:var(--ink)}
 .hv-underline-none:hover{text-decoration:none}
 .hv-bg-white10:hover{background:rgba(255,255,255,0.1)}
+/* Mobile filter strip: one horizontally scrollable row. Hide the scrollbar — touch devices
+   use overlay bars anyway, and this reclaims the ~15px a desktop scrollbar would steal from
+   the strip's height (pushing the first card down). Scroll still works by drag/swipe. */
+.brd-fstrip{scrollbar-width:none;-ms-overflow-style:none}
+.brd-fstrip::-webkit-scrollbar{display:none;width:0;height:0}
 .fc-bd-accent:focus{border-color:var(--accent)}
 .fc-bd-ink:focus{border-color:var(--ink)}
 .fw-bd-accent:focus-within{border-color:var(--accent)}

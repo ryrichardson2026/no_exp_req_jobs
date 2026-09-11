@@ -453,11 +453,12 @@ class BoardApp extends React.Component {
       company: R.companyLabel(r.company_name),
       cardTitle: R.cardTitle(r.title),
       logoImg: showLogo ? R.logoImg(logoSrc, 20) : null,
+      logoSrc: showLogo ? logoSrc : null,   // dense card builds its own <img> (onError → monogram)
       pageLogoImg: showLogo ? R.logoImg(logoSrc, 24) : null,
       showLogo, showMonogram: !showLogo,
       monogram: (r.company_name || "?").trim().charAt(0).toUpperCase(),
       locationLine: [L.cityName(r.city), r.state].filter(Boolean).join(", "),
-      pay: R.money(r), posted: R.postedLabel(r.posted_at),
+      pay: R.money(r), posted: R.postedLabel(r.posted_at), isNew: R.isNew(r.posted_at),
       expLabel: R.EXP_LABEL[r.experience_condition] || null,
       expStrong: r.experience_condition === "NONE_NEEDED" || r.experience_condition === "WAIVED",
       expSoft: r.experience_condition === "PREFERRED",
@@ -665,7 +666,7 @@ class BoardApp extends React.Component {
         h("button", { type: "button", onClick: this.openAlerts, style: s("margin-top:8px;min-height:44px;padding:0 18px;border-radius:3px;background:var(--accent);color:var(--accent-ink);border:0;font-size:15px;font-weight:600;cursor:pointer") }, "Get job alerts")),
       d.hasElsewhere && h("div", { key: "elsew" },
         h("div", { style: s("padding:10px " + (wide ? "32px" : "24px") + ";font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink);background:var(--surface-sunk);border-top:1px solid var(--line);border-bottom:1px solid var(--line)") }, d.elsewhereHeading),
-        h("div", { role: "list" }, d.elsewhereJobs.map((job) => h(JobCard, { key: job.id, job })))));
+        h("div", { role: "list" }, d.elsewhereJobs.map((job) => h(JobCard, { key: job.id, job, dense: !wide })))));
     if (d.genericEmpty) return h("div", { style: s(wide ? "padding:64px 32px;display:grid;gap:8px;justify-items:start" : "padding:56px 24px;display:grid;gap:8px;justify-items:start") },
       h("div", { style: s((wide ? "font-size:19px" : "font-size:17px") + ";font-weight:700;color:var(--ink)") }, d.emptyLine),
       h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);max-width:" + (wide ? "34ch" : "30ch") + ";text-wrap:pretty") }, d.emptyFix),
@@ -681,7 +682,7 @@ class BoardApp extends React.Component {
     if (!this._jobPage) h1Attrs.itemProp = "name";
     return h("div", listSchema,
       h("h1", h1Attrs, d.browseH1),
-      h("div", { key: d.animKey, role: "list", className: d.animClass }, cards.map((job, i) => h(JobCard, { key: job.id, job, listMeta: this._jobPage ? null : { position: i + 1, url: job.href } }))),
+      h("div", { key: d.animKey, role: "list", className: d.animClass }, cards.map((job, i) => h(JobCard, { key: job.id, job, dense: !wide, listMeta: this._jobPage ? null : { position: i + 1, url: job.href } }))),
       d.pager
     );
   }
@@ -773,16 +774,18 @@ class BoardApp extends React.Component {
     );
   }
 
-  // Dedicated "No experience required" toggle for mobile — its own row so the product's
-  // core filter isn't buried in the Filters drawer. Navy when on (selected = navy), no count.
-  renderNoExpToggle(){
+  // Flagship filter — "no experience required", the product's whole promise. Now the LEAD
+  // pill in the mobile filter strip (no longer a dedicated row, for density); same pill
+  // vocabulary as the other filters, navy when on, no count. 44px touch target held.
+  renderNoExpPill(){
     const on = this.state.exps.length === 1 && this.state.exps[0] === "none";
-    return h("div", { key: "noexp", style: s("flex:none;display:flex;padding:8px 12px 0") },
-      h("button", { type: "button", onClick: this.toggleNoExp, "aria-pressed": on,
-        style: s("min-height:40px;display:inline-flex;align-items:center;gap:7px;padding:0 14px;border-radius:3px;cursor:pointer;font-size:14.5px;font-weight:700;"
-          + (on ? "background:var(--ink);border:1px solid var(--ink);color:var(--accent-ink)"
-                : "background:var(--surface-raised);border:1px solid var(--line);color:var(--ink)")) },
-        on ? raw(CHECK14) : null, h("span", { style: s("white-space:nowrap") }, "No experience required")));
+    return on
+      ? h("button", { key: "noexp", type: "button", onClick: this.toggleNoExp, "aria-pressed": true,
+          style: s("min-height:44px;display:flex;align-items:center;gap:6px;padding:0 11px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);font-size:14px;font-weight:700;color:var(--accent-ink);cursor:pointer;flex:none") },
+          raw(CHECK14), h("span", { style: s("white-space:nowrap") }, "No experience"))
+      : h("button", { key: "noexp", type: "button", onClick: this.toggleNoExp, "aria-pressed": false, className: "hv-bd-accent",
+          style: s("min-height:44px;display:flex;align-items:center;padding:0 11px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;flex:none") },
+          h("span", { style: s("white-space:nowrap") }, "No experience"));
   }
 
   // ── mobile ────────────────────────────────────────────────────────────
@@ -793,21 +796,22 @@ class BoardApp extends React.Component {
     // rail — a "goes wide then centers" jump. Constrain it to the same rail so the outer width is
     // stable across the mobile→desktop handoff. On phones (<768px) the rule is off — full width.
     return h("div", { className: "brd-body-m", style: s("display:flex;flex-direction:column;height:100%;min-height:0;position:relative") },
-      // filter row
-      h("div", { style: s("flex:none;display:flex;align-items:center;gap:6px;padding:8px 12px 8px;border-bottom:1px solid var(--line)") },
-        d.cats.length
-          ? h("button", { type: "button", onClick: this.openSheet("cat"), "aria-expanded": sheet === "cat", "aria-haspopup": "true", style: s("min-height:44px;display:flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);font-size:14px;font-weight:700;color:var(--accent-ink);cursor:pointer;flex:none") }, h("span", { style: s("white-space:nowrap") }, d.catChipLabel), raw(CHEV))
-          : h("button", { type: "button", onClick: this.openSheet("cat"), "aria-expanded": sheet === "cat", "aria-haspopup": "true", className: "hv-bd-accent", style: s("min-height:44px;display:flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;flex:none") }, h("span", { style: s("white-space:nowrap") }, "Type of work"), raw(CHEV_MUTED)),
-        h("div", { className: "fw-bd-accent", style: s("flex:1;min-width:70px;display:flex;align-items:stretch;gap:2px;min-height:44px;padding:0 6px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised)") },
+      // filter row — one horizontally scrollable strip. Order: City/ZIP (most-used on a job
+      // board, so first-visible) + flagship "No experience" pill + Type of work + Filters.
+      // The dedicated "No experience required" row is gone (density); label shortened to fit.
+      h("div", { className: "brd-fstrip", style: s("flex:none;display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch") },
+        h("div", { className: "fw-bd-accent", style: s("flex:1 0 150px;min-width:150px;display:flex;align-items:stretch;gap:2px;min-height:44px;padding:0 6px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised)") },
           h("button", { type: "button", onClick: this.applyLoc(), "aria-label": "Search location", className: "hv-tx-accent", style: s("flex:none;width:36px;align-self:stretch;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;color:var(--ink-muted)") }, raw(SEARCH_ICON)),
           h("input", { type: "text", value: this.state.locDraft, onChange: this.onLocDraft, onKeyDown: this.onLocKey, placeholder: "City or ZIP", "aria-label": "City, state or ZIP", style: s("flex:1;min-width:0;align-self:stretch;height:auto;border:0;outline:none;background:transparent;font-size:15px;color:var(--ink);padding:0") }),
           d.hasLoc && h("button", { key: "clr", type: "button", onClick: this.clearLoc, "aria-label": "Clear location", className: "hv-tx-ink", style: s("flex:none;width:34px;align-self:stretch;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;color:var(--ink-muted)") }, raw(X_SMALL))),
+        this.renderNoExpPill(),
+        d.cats.length
+          ? h("button", { type: "button", onClick: this.openSheet("cat"), "aria-expanded": sheet === "cat", "aria-haspopup": "true", style: s("min-height:44px;display:flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);font-size:14px;font-weight:700;color:var(--accent-ink);cursor:pointer;flex:none") }, h("span", { style: s("white-space:nowrap") }, d.catChipLabel), raw(CHEV))
+          : h("button", { type: "button", onClick: this.openSheet("cat"), "aria-expanded": sheet === "cat", "aria-haspopup": "true", className: "hv-bd-accent", style: s("min-height:44px;display:flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;flex:none") }, h("span", { style: s("white-space:nowrap") }, "Type of work"), raw(CHEV_MUTED)),
         d.extraCount
           ? h("button", { type: "button", onClick: this.openSheet("all"), "aria-expanded": sheet === "all", "aria-haspopup": "true", "aria-label": "Filters", style: s("min-height:44px;display:flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);font-size:14px;font-weight:700;color:var(--accent-ink);cursor:pointer;flex:none") }, raw(FILTERS_ICON), h("span", null, "Filters"), h("span", { style: s("min-width:19px;height:19px;display:grid;place-items:center;padding:0 5px;border-radius:3px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:800") }, d.extraCount))
           : h("button", { type: "button", onClick: this.openSheet("all"), "aria-expanded": sheet === "all", "aria-haspopup": "true", "aria-label": "Filters", className: "hv-bd-accent", style: s("min-height:44px;display:flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;flex:none") }, raw(FILTERS_ICON_MUTED), h("span", null, "Filters"))
       ),
-      // Flagship one-tap: no experience required — its own row, above the rest.
-      this.renderNoExpToggle(),
       // Clear all — collapsed-state clear path, shown whenever any filter is active so
       // categories (and the rest) can be cleared without opening a menu first (B4).
       d.anyFilter && h("div", { key: "clrall", style: s("flex:none;display:flex;padding:2px 12px 6px") },
@@ -821,7 +825,7 @@ class BoardApp extends React.Component {
             this.applyFooter()))),
       d.locResolved && h("div", { key: "showing", style: s("flex:none;display:flex;align-items:center;gap:8px;padding:0 12px 8px;font-size:13px;color:var(--ink-muted)") }, h("span", null, "Showing " + d.locLabel)),
       // result count + sort
-      h("div", { style: s("flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 12px;border-bottom:1px solid var(--line)") },
+      h("div", { style: s("flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:3px 12px;border-bottom:1px solid var(--line)") },
         d.isList && h("span", { key: "rl", style: s("font-size:14px;font-weight:600;color:var(--ink)") }, d.resultLabel),
         h("button", { type: "button", onClick: this.openSheet("sort"), "aria-expanded": sheet === "sort", "aria-haspopup": "true", className: "hv-tx-accent", style: s("margin-left:auto;min-height:44px;display:flex;align-items:center;gap:5px;padding:0 6px;background:transparent;border:0;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer") },
           raw(SORT_ICON), h("span", { style: s("white-space:nowrap") }, d.sortLabel), raw(CHEV_MUTED))),
