@@ -360,6 +360,13 @@ EXPLICIT_NONE_RX = (
 WAIVER_RX = (
     r"\bin lieu of experience\b",
     r"\bexperience (?:may|can|will) be (?:substituted|accepted)\b",
+    # A high-school-level credential offered as an ALTERNATIVE to experience within one
+    # clause ("HS diploma or equivalent, OR N years of verifiable experience"): a plain
+    # diploma qualifies, so experience is not a barrier -> WAIVED. Scoped to HS/GED (NOT a
+    # degree, which would stay a real bar) and requires a duration, so a separate "diploma
+    # required" bullet + a separate "3 years experience" bullet never trips it — only the
+    # one-clause substitution phrasing does. Measured on Allied; matched per requirement clause.
+    r"\b(?:high school diploma|hs diploma|ged)\b[^.]*\bor\b[^.]*\b(?:years?|yrs?)\b[^.]*\bexperience\b",
 )
 
 
