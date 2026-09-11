@@ -9,7 +9,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from adapters import workday, oracle_orc, successfactors_rmk, adp_wfn  # noqa: E402
+from adapters import workday, oracle_orc, successfactors_rmk, adp_wfn, radancy_tb  # noqa: E402
 
 TENANTS = json.load(open(os.path.join(ROOT, "config", "tenants.json"), encoding="utf-8"))
 fails = []
@@ -21,21 +21,29 @@ def check(name, got, want):
 
 
 # --- Sysco: Workday 'myworkdaysite' style (tenant in the PATH) ---
-sysco = TENANTS["workday"]["sysco"]
-careers, cxs = workday.base_urls(sysco)
-check("sysco cxs list", cxs + "/jobs",
-      "https://wd5.myworkdaysite.com/wday/cxs/sysco/syscocareers/jobs")
-check("sysco careers/public", careers,
-      "https://wd5.myworkdaysite.com/en-US/recruiting/sysco/syscocareers")
-check("sysco config list_url matches builder", sysco["list_url"], cxs + "/jobs")
-
-# --- Acceptance #3: the SAME builder resolves an existing 'myworkdayjobs' tenant ---
+# --- Acceptance #3: the Workday URL builder handles BOTH host styles from ONE code path.
+# Under Sysco Path B, Sysco is a radancy_tb tenant (asserted below), so the 'myworkdaysite'
+# style is exercised with a synthetic config; the live 'myworkdayjobs' style is U-Haul.
 uhaul = TENANTS["workday"]["uhaul"]
 _, uhaul_cxs = workday.base_urls(uhaul)
 check("uhaul (myworkdayjobs) cxs", uhaul_cxs,
       "https://uhaul.wd1.myworkdayjobs.com/wday/cxs/uhaul/UhaulJobs")
-assert sysco.get("url_style") == "myworkdaysite" and uhaul.get("url_style") == "myworkdayjobs", \
-    "both host styles must be exercised"
+mws = {"url_style": "myworkdaysite", "host": "wd5.myworkdaysite.com",
+       "tenant": "sysco", "site": "syscocareers", "language": "en-US"}
+mws_careers, mws_cxs = workday.base_urls(mws)
+check("myworkdaysite cxs (same builder)", mws_cxs + "/jobs",
+      "https://wd5.myworkdaysite.com/wday/cxs/sysco/syscocareers/jobs")
+check("myworkdaysite careers (same builder)", mws_careers,
+      "https://wd5.myworkdaysite.com/en-US/recruiting/sysco/syscocareers")
+assert uhaul.get("url_style") == "myworkdayjobs" and mws["url_style"] == "myworkdaysite", \
+    "both Workday host styles must be exercised from the same base_urls()"
+
+# --- Sysco (Path B): a radancy_tb tenant now; its WA-scoped Radancy index + &p=N resolve ---
+sysco = radancy_tb.load_tenant("sysco")
+check("sysco radancy page1 = index_url", radancy_tb.page_url(sysco, 1), sysco["index_url"])
+check("sysco radancy page2 uses &p", radancy_tb.page_url(sysco, 2), sysco["index_url"] + "&p=2")
+assert "careers.sysco.com/en/search-jobs/Washington" in sysco["index_url"], \
+    "sysco index_url must be the WA-scoped Radancy search path"
 
 # --- Sherwin-Williams: oracle_orc list/detail = host + the adapter's REST paths ---
 sw = TENANTS["oracle_orc"]["sherwin_williams"]
@@ -68,5 +76,5 @@ if fails:
     for f in fails:
         print("  " + f)
     sys.exit(1)
-print("OK: sysco (myworkdaysite) + uhaul (myworkdayjobs) + sherwin endpoints resolve to the literal spec strings")
+print("OK: workday both host styles (uhaul myworkdayjobs + synthetic myworkdaysite), sysco radancy &p pagination, sherwin/cintas/gensco endpoints all resolve to spec")
 sys.exit(0)

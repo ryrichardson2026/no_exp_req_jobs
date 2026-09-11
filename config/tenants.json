@@ -680,80 +680,6 @@
           }
         ]
       }
-    },
-    "sysco": {
-      "label": "Sysco",
-      "host": "wd5.myworkdaysite.com",
-      "tenant": "sysco",
-      "site": "syscocareers",
-      "language": "en-US",
-      "url_style": "myworkdaysite",
-      "careers_url": "https://wd5.myworkdaysite.com/en-US/recruiting/sysco/syscocareers",
-      "list_url": "https://wd5.myworkdaysite.com/wday/cxs/sysco/syscocareers/jobs",
-      "detail_base": "https://wd5.myworkdaysite.com/wday/cxs/sysco/syscocareers",
-      "terms_reference": null,
-      "employer_domain": "sysco.com",
-      "nlx_wa_jobs": 62,
-      "source_class": "direct-employer",
-      "sector": "food-distribution",
-      "req_id": "R\\d{6}",
-      "geo_scope": {
-        "verified_via": "Radancy TalentBrew index (careers.sysco.com WA search), 2026-09-11: 23 WA results",
-        "radancy_wa_index_url": "https://careers.sysco.com/en/search-jobs/Washington%2C%20US/1105/3/6252001-5815135/47x50012/-120x50147/50/2",
-        "radancy_path_shape": "/en/search-jobs/{display}/{orgId=1105}/{facetType=3 state}/{geoPath=6252001-5815135 geonames US-WA}/{lat}/{lng}/{radius}/{n}; pagination &p=N, 15/page, server-rendered",
-        "wa_req_ids": [
-          "R234195",
-          "R240377",
-          "R249685",
-          "R252733",
-          "R252735",
-          "R256360",
-          "R257316",
-          "R258261",
-          "R259085",
-          "R259323",
-          "R260104",
-          "R261577",
-          "R262427",
-          "R263140",
-          "R263328",
-          "R264562",
-          "R264570",
-          "R265270",
-          "R265321",
-          "R265324",
-          "R265327",
-          "R265755",
-          "R265838"
-        ],
-        "path_decision": "PENDING - RY DECIDES, do not pick unilaterally. A) Radancy as index (scrape req ids from the WA search page's ExtRef block) + Workday CXS for records - Workday stays source of truth, WA scoping free. B) Radancy for everything - server-rendered job pages carry full descriptions + the Minimum/Preferred split, ~24 requests, employer's own site so no ATS-spine conflict. A plain Workday --index has NO WA facet; an unscoped nationwide pull is FORBIDDEN.",
-        "national": "national board",
-        "in_market": 23
-      },
-      "verified": "Workday params live (url_style myworkdaysite - builder already supports it, no code change). Sysco runs Radancy TalentBrew (careers.sysco.com, org 1105) over Workday CXS. WA geo scope VERIFIED via Radancy (23 results); the Radancy WA page's ExtRef block enumerates every WA Workday req id (geo_scope.wa_req_ids), so no Workday facet probe is needed to enumerate WA. PATH A vs B is Ry's open call - config carries both. Density warning: category facet Sales 10 / Transportation 7 (CDL A+B, hard licence gate) / Warehouse 5 / Operations 1 -> ~5-6 applicable statewide. Reconcile: NLx lists Sysco 62 WA, this returns 23.",
-      "location_filter": {
-        "_note": "Client-side WA verification on the returned Workday location field (never a location query string, per direction). field omitted -> whole-blob match pre-inspect.",
-        "field": null,
-        "match_any": [
-          ", WA",
-          "Washington"
-        ]
-      },
-      "extraction": {
-        "_note": "Sysco splits Minimum Requirements and Preferred Requirements as distinct headed sections; both openers below, colon-anchored. Observed minimum '0 - 1 Year relevant work experience': OPEN ITEM - the classifier must treat a zero-inclusive range as OPEN (no-experience qualifies), not a 1-year bar.",
-        "openers": [
-          {
-            "text": "minimum requirements",
-            "role": "REQUIRED",
-            "match": "colon"
-          },
-          {
-            "text": "preferred requirements",
-            "role": "PREFERRED",
-            "match": "colon"
-          }
-        ]
-      }
     }
   },
   "radancy_tb": {
@@ -824,6 +750,81 @@
       },
       "_credential_gate_open": "CEO DECISION PENDING, flagged before the density number is read. Finding 25's qualifying credential list has no entry for a Washington security guard licence, and gate 3 disqualifies any job naming a credential that is not on the list. This tenant could therefore return near-zero applicable for a CONFIG GAP, not a finding about Allied Universal. Obtainability is a Career Bridge lookup (program length is a structured, state-audited field per Finding 17), not a judgment call. The Seattle grid separately measured 14 postings naming a guard card.",
       "_sector_baseline": "First security-sector tenant. No baseline exists, so there is no smoke alarm for this capture (Finding 31): healthcare ~4-13% and retail ~65-89% cannot say whether a security number is right. Whatever comes back is n=1 and provisional. Two per sector is the threshold - Securitas (47 WA) is the natural second."
+    },
+    "sysco": {
+      "label": "Sysco (careers.sysco.com, TalentBrew org 1105)",
+      "employer_name": "Sysco",
+      "host": "https://careers.sysco.com",
+      "careers_base": "https://careers.sysco.com",
+      "careers_url": "https://careers.sysco.com/en/search-jobs",
+      "sitemap_url": "https://careers.sysco.com/sitemap",
+      "locate_hint": "washington",
+      "org_id": "1105",
+      "site_id": "62419",
+      "terms_reference": null,
+      "employer_domain": "sysco.com",
+      "state": "WA",
+      "source_class": "direct-employer",
+      "sector": "food-distribution",
+      "_path_decision": "Path B (Radancy for everything), DECIDED 2026-09-11: careers.sysco.com is TalentBrew markup (org 1105) over a Workday CXS backend. The server-rendered HTML carries full descriptions incl. the Minimum/Preferred split, so this radancy_tb entry pulls both the WA index and the job pages. This is a DIFFERENT fetch shape from Allied only in three parameterised spots - the job-href locale prefix, the source-id source, the &p=N page separator, plus a body_fields block - all config-gated so Allied stays byte-identical. See workday.sysco for the retained ATS recon / req-id cross-check.",
+      "source_job_id_from": "url_tail",
+      "_source_job_id_note": "source_job_id is the TalentBrew job id = the tail of ld['url'] (e.g. .../1105/99722303904 -> 99722303904), NOT ld['identifier']. ld['identifier'] is the Workday req id (R######, e.g. R264570) - a SECONDARY id with no contract slot, so it is dropped from the normalized record and lives only in raw (the Cintas precedent). req_id is enumerable off the WA index and cross-checks against workday.sysco.geo_scope.wa_req_ids.",
+      "page_url_sep": "&",
+      "_page_url_sep_note": "Sysco's search-jobs URL is PATH-based with no query string, so the default page_url logic would emit '?p=N'; the site serves the page as '&p=N' (per radancy_path_shape). page_url_sep forces '&'. Could not be live-probed in this push (NO network) - config-selectable and defaulted so Allied ('?'-carrying index_url -> '&p=N' unchanged) is untouched. If a future probe shows the server honours '?p=N' here, drop this key.",
+      "index_url": "https://careers.sysco.com/en/search-jobs/Washington%2C%20US/1105/3/6252001-5815135/47x50012/-120x50147/50",
+      "geo_scope": {
+        "verified": "2026-09-11",
+        "method": "careers.sysco.com WA state search (Radancy TalentBrew), server-rendered, 15/page, pagination &p=N",
+        "markets": {
+          "WA": {
+            "display": "Washington, US",
+            "display_encoded": "Washington%2C%20US",
+            "facet_type": 3,
+            "geo_path": "6252001-5815135",
+            "lat": "47x50012",
+            "lng": "-120x50147",
+            "radius": 50,
+            "page_size": 15,
+            "index_url": "https://careers.sysco.com/en/search-jobs/Washington%2C%20US/1105/3/6252001-5815135/47x50012/-120x50147/50",
+            "in_market": 23
+          }
+        },
+        "search_path_shape": "/en/search-jobs/{display}/{org_id}/{facet_type}/{geo_path}/{lat}/{lng}/{radius}/{n}",
+        "national": "national board",
+        "in_market_confirmed": "23 WA — CONFIRMED correct, aligns with the site's own WA count. NLx is not a WA benchmark for this pipeline (the pull is authoritative); do not treat any pull-vs-NLx delta as a discrepancy."
+      },
+      "location_filter": {
+        "_note": "index_url scopes to Washington server-side via the state geo facet (facet_type 3, geo_path 6252001-5815135), so every returned record is already WA - match_any is [] BY DESIGN, same pattern as Allied's server-side WA scope. A ', WA' anchor-text token would only SUBTRACT (dropping any multi-site posting whose anchor lacks the state string).",
+        "field": null,
+        "match_any": []
+      },
+      "body_fields": {
+        "_note": "Server-rendered labeled fields the JSON-LD does NOT carry. Parsed from <b>Label</b> value inside the STABLE job-info class (the wrapper class is misspelled job-fecets and the tag alternates <p>/<span>, so the parse keys on job-info, never the tag/wrapper). Only the two labels below are mapped; the boilerplate fields (Compensation Range, Overview, Job Profile Summary, AFFIRMATIVE ACTION STATEMENT, Description) are DROPPED. description_html stays the JSON-LD description (the single canonical copy), not the visible body.",
+        "field_class": "job-info",
+        "employment_type_label": "Employment Type",
+        "compensation_label": "Compensation",
+        "compensation_period": "HOURLY",
+        "_compensation_period_note": "Warehouse hourly rates ('31.53-35.47'); the sub-$200 magnitude is the hourly convention. Period is config-declared here, never guessed from the number.",
+        "apply_url_meta": "search-job-apply-url",
+        "_apply_url_note": "apply_url is the wd5.myworkdaysite.com Workday apply URL from the <meta name='search-job-apply-url'> tag, not ld['url'] (which is the careers.sysco.com job page). source_url stays the careers.sysco.com page."
+      },
+      "extraction": {
+        "_note": "Sysco splits Minimum Requirements and Preferred Requirements as distinct headed sections; the gate reads Minimum, Preferred never bars. OPEN ITEM measured 2026-09-11: in the JSON-LD description the headings are colon-LESS ('<b>Minimum Requirements</b>', no ':'), so these colon openers do NOT fire on the JSON-LD body as captured (the extractor returns NOT_STATED). Enrich-time concern, not an adapter change - flagged for the openers-derivation gate. Also: '0 - 1 Year relevant work experience' is a zero-inclusive minimum that SHOULD read as OPEN; the shared classifier currently reads any to-apply experience line as REQUIRED (the zero-range-as-open lever is not built). The en-dash itself parses fine (fold_punct + the DURATION regex both handle it) - no dash fix needed. Openers are BARE (colon-less): the JSON-LD body renders headings as <p><u><b>Minimum Requirements</b></u></p>, which enrich BLOCK_RX turns into an own-line colon-less heading, so bare fires where colon did not (verified on the fixture).",
+        "openers": [
+          {
+            "text": "minimum requirements",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "preferred requirements",
+            "role": "PREFERRED",
+            "match": "bare"
+          }
+        ],
+        "experience_range_open_at_zero": true
+      },
+      "nlx_wa_jobs": null
     }
   },
   "jibe_api": {

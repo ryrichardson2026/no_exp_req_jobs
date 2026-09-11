@@ -58,7 +58,12 @@ MAX_PAGES = 800         # safety stop, not a business rule
 TIMEOUT = 45
 
 # Job links: /job/{city-slug}/{title-slug}/{orgId}/{internalId}
-_JOB_HREF = re.compile(r'href="(/job/[^"]+/(\d+)/(\d+))"')
+# The optional 2-letter locale segment (/en/job/...) is what a tenant that serves
+# its board under a locale prefix (Sysco) emits; a bare /job/... (Allied) still
+# matches identically because the locale group is optional and the org/id capture
+# groups are unchanged. It cannot swallow /en/search-jobs/ - that path has no
+# '/job/' segment after the optional locale.
+_JOB_HREF = re.compile(r'href="(/(?:[a-z]{2}/)?job/[^"]+/(\d+)/(\d+))"')
 # Req ID as printed in the link text: "Req ID: 2026-1671802"
 _REQ_ID = re.compile(r"Req ID:\s*([0-9]{4}-[0-9]+)")
 # Stated page count, diagnostic only - never a stop condition (QA rule 4)
@@ -143,11 +148,17 @@ def decoded_text(r):
 
 
 def page_url(tenant, page):
-    """Page 1 is the bare index_url. Radancy appends &p=N to existing params."""
+    """Page 1 is the bare index_url. Radancy appends &p=N to existing params.
+
+    Default: '&' when the index_url already carries a query string, else '?'
+    (Allied's index_url has params, so it gets '&p=N' - unchanged). A tenant whose
+    index_url is PATH-based with no query string but whose server still wants the
+    page as an '&' param (Sysco: /en/search-jobs/.../50 served with &p=N) forces the
+    separator via config page_url_sep, since the default would emit '?p=N' there."""
     base = tenant["index_url"]
     if page <= 1:
         return base
-    sep = "&" if "?" in base else "?"
+    sep = tenant.get("page_url_sep") or ("&" if "?" in base else "?")
     return f"{base}{sep}p={page}"
 
 
@@ -494,6 +505,52 @@ def strip_html(s):
     return " ".join(txt.split())
 
 
+# Server-rendered labeled fields on the detail page: <b>Label</b> value inside an
+# element carrying the job-info class. The wrapper class is MISSPELLED job-fecets on
+# this board and the tag alternates <p>/<span>, so this keys on the STABLE job-info
+# class on the field element, never on the tag or the wrapper. Only tenants with a
+# body_fields config block run this; a tenant without it (Allied) never reaches it.
+_BODY_FIELD_RX = re.compile(
+    r'class="[^"]*\bjob-info\b[^"]*"[^>]*>\s*<b>\s*(.*?)\s*</b>\s*(.*?)</(?:p|span)>',
+    re.S | re.I,
+)
+_META_CONTENT_RX = r'<meta\s+name="{}"\s+content="([^"]*)"'
+
+
+def parse_body_fields(html, field_class="job-info"):
+    """{label: value} for every <b>Label</b> value field on the detail page.
+
+    Values are plain text for the fields this maps (Employment Type, Compensation);
+    fields whose value carries nested markup (Description) are captured truncated,
+    which is harmless because they are never mapped. Labels are trimmed so a stray
+    trailing space inside <b> (the 'Compensation Range ' boilerplate label) does not
+    collide with a real label."""
+    out = {}
+    for m in _BODY_FIELD_RX.finditer(html or ""):
+        label = " ".join(strip_html(m.group(1)).split())
+        value = " ".join(strip_html(m.group(2)).split())
+        if label and label not in out:
+            out[label] = value
+    return out
+
+
+def parse_meta_content(html, name):
+    """The content of a named <meta> tag, or None."""
+    m = re.search(_META_CONTENT_RX.format(re.escape(name)), html or "", re.I)
+    return m.group(1) if m else None
+
+
+def parse_comp_range(s):
+    """(min, max) from a body-field compensation string like '31.53-35.47'. Returns
+    (None, None) when no number is present. A single number sets both."""
+    nums = re.findall(r"\d+(?:\.\d+)?", s or "")
+    if not nums:
+        return None, None
+    lo, _ = model.parse_money(nums[0])
+    hi, _ = model.parse_money(nums[-1])
+    return lo, hi
+
+
 def extract_jobposting(html):
     """The JSON-LD JobPosting object from a stored detail page, or None.
 
@@ -559,14 +616,27 @@ def parse_salary(ld):
     return lo, hi, True, _UNIT_TO_PERIOD.get(unit, "UNKNOWN"), None
 
 
-def map_record(ld, t, retrieved_at):
+def map_record(ld, t, retrieved_at, html=None):
     """Radancy JSON-LD JobPosting -> normalized contract. Every Radancy field name
-    in this adapter lives here."""
+    in this adapter lives here.
+
+    `html` is the stored detail page, threaded through so a tenant with a
+    body_fields config block can read the server-rendered labeled fields the
+    JSON-LD does not carry (Sysco's Employment Type, Compensation, apply URL).
+    Allied has no body_fields, so html is never read and its output is unchanged."""
     r = model.new_record()
     warnings = []
 
     r["source_id"] = PLATFORM
-    r["source_job_id"] = str(ld.get("identifier") or "") or None
+    # Default (Allied): the JSON-LD identifier is the source's stable id. A tenant
+    # whose identifier is a SECONDARY id with no contract slot (Sysco's Workday req
+    # id R###### - the Cintas precedent) sets source_job_id_from='url_tail' to take
+    # the TalentBrew job id from the tail of the canonical url instead.
+    if t.get("source_job_id_from") == "url_tail":
+        tail = (str(ld.get("url") or "").rstrip("/").rsplit("/", 1)[-1]).strip()
+        r["source_job_id"] = tail or None
+    else:
+        r["source_job_id"] = str(ld.get("identifier") or "") or None
     org = ld.get("hiringOrganization")
     r["company_name"] = (org.get("name") if isinstance(org, dict) else None) \
         or t.get("label")
@@ -618,6 +688,32 @@ def map_record(ld, t, retrieved_at):
     r["source_url"] = ld.get("url")
     r["retrieved_at"] = retrieved_at
     r["terms_reference"] = t.get("terms_reference")
+
+    # Body-field parse - ADDITIVE, config-gated. Only a tenant that declares a
+    # body_fields block and only when the detail html is available. Allied declares
+    # none, so this whole block is skipped and its record is byte-identical.
+    bf = t.get("body_fields")
+    if bf and html:
+        fields = parse_body_fields(html, bf.get("field_class", "job-info"))
+        et_label = bf.get("employment_type_label")
+        if et_label and fields.get(et_label):
+            r["employment_type"] = fields[et_label]
+        comp_label = bf.get("compensation_label")
+        if comp_label and fields.get(comp_label):
+            lo, hi = parse_comp_range(fields[comp_label])
+            if lo is not None or hi is not None:
+                r["salary_min"] = lo
+                r["salary_max"] = hi
+                r["salary_is_stated"] = True
+                # Hourly warehouse rates - the sub-$200 hourly convention. Period
+                # is config-declared so it is never guessed from the magnitude.
+                r["pay_period"] = bf.get("compensation_period", "UNKNOWN")
+        apply_meta = bf.get("apply_url_meta")
+        if apply_meta:
+            au = parse_meta_content(html, apply_meta)
+            if au:
+                r["apply_url"] = au
+
     r["dedupe_hash"] = model.dedupe_hash(r["company_name"], r["title"],
                                          r["location_raw"])
     return r, warnings
@@ -625,7 +721,9 @@ def map_record(ld, t, retrieved_at):
 
 def load_details(t):
     """Every stored detail page, parsed to its JSON-LD JobPosting. Returns a list
-    of (filename, jobposting_or_None)."""
+    of (filename, jobposting_or_None, html). The raw html is carried alongside so a
+    body_fields tenant can read the server-rendered labeled fields; a tenant without
+    body_fields never looks at it."""
     p = paths(t)
     if not os.path.isdir(p["detail"]):
         sys.exit("no detail records - run --detail first")
@@ -634,7 +732,8 @@ def load_details(t):
         if not fn.endswith(".html"):
             continue
         with open(os.path.join(p["detail"], fn), "r", encoding="utf-8") as fh:
-            out.append((fn, extract_jobposting(fh.read())))
+            html = fh.read()
+        out.append((fn, extract_jobposting(html), html))
     return out
 
 
@@ -660,11 +759,11 @@ def mode_normalize(t):
     known_before = len(seen_state)
 
     mapped, invalid, warns, no_ld = [], [], [], 0
-    for fn, ld in details:
+    for fn, ld, html in details:
         if ld is None:
             no_ld += 1
             continue
-        rec, w = map_record(ld, t, retrieved)
+        rec, w = map_record(ld, t, retrieved, html)
         model.apply_seen_state(rec, seen_state, now)
         rec["is_new"] = True if known_before == 0 else rec["first_seen"] == now
         problems = model.validate(rec)

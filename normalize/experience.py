@@ -411,7 +411,7 @@ def classify_line(line, section_modality):
             "trade_ticket": any(t in low for t in TRADE_TICKET)}
 
 
-def derive_condition(reqs, found_required):
+def derive_condition(reqs, found_required, zero_range_open=False):
     """Absence counts only where a section was actually read. A populated required
     section with nothing blocking application - including one whose every item is
     AFTER_HIRE - is NONE_NEEDED, not NOT_STATED. After-hire items ARE content.
@@ -424,7 +424,15 @@ def derive_condition(reqs, found_required):
     statement (strong), or the absence-inference at the tail (weaker) - both are
     the same condition, distinguished only by evidence."""
     to_apply = [r for r in reqs if r["modality"] == TO_APPLY]
-    apply_exp = [r for r in to_apply if EXPERIENCE in r["types"]]
+    # Zero-inclusive experience ranges ("0 - 1 Year relevant work experience", parsed
+    # minimum 0) do NOT bar a no-experience applicant - BUT ONLY when the tenant opts in via
+    # extraction.experience_range_open_at_zero (threaded here as zero_range_open). OFF by
+    # default: every tenant that has not opted in is byte-identical (a 0-month clause still
+    # bars), so this lever's blast radius is exactly the config that asked for it and it can
+    # never SILENTLY change another build. Clauses with no number still bar; positives bar.
+    # (0.0 == 0 in Python, so `months != 0` keeps None and positive minimums.)
+    apply_exp = [r for r in to_apply if EXPERIENCE in r["types"]
+                 and (r.get("months") != 0 or not zero_range_open)]
     pref_exp = [r for r in reqs
                 if r["modality"] == PREFERRED_M and EXPERIENCE in r["types"]]
 
@@ -456,7 +464,8 @@ def extract(html, text_fallback="", qualifications_html="", openers=None):
             if r:
                 reqs.append(r)
 
-    condition, evidence = derive_condition(reqs, found_required)
+    zero_range_open = bool(openers.get("zero_range_open")) if isinstance(openers, dict) else False
+    condition, evidence = derive_condition(reqs, found_required, zero_range_open)
     to_apply = [r for r in reqs if r["modality"] == TO_APPLY]
     months = [r["months"] for r in to_apply
               if EXPERIENCE in r["types"] and r["months"]]
@@ -494,7 +503,11 @@ def load_openers(tenant):
         if isinstance(tenants, dict) and tenant in tenants \
                 and isinstance(tenants[tenant], dict):
             ext = tenants[tenant].get("extraction") or {}
-            return compile_openers(ext.get("openers") or [])
+            m = compile_openers(ext.get("openers") or [])
+            # Per-tenant opt-in: open zero-inclusive experience ranges (0 - N years).
+            # Off unless the config sets it, so the lever is scoped to this tenant.
+            m["zero_range_open"] = bool(ext.get("experience_range_open_at_zero"))
+            return m
     sys.exit(f"tenant '{tenant}' not found in {CONFIG_PATH}")
 
 
