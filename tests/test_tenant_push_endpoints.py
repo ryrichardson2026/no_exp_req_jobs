@@ -42,8 +42,13 @@ assert uhaul.get("url_style") == "myworkdayjobs" and mws["url_style"] == "mywork
 sysco = radancy_tb.load_tenant("sysco")
 check("sysco radancy page1 = index_url", radancy_tb.page_url(sysco, 1), sysco["index_url"])
 check("sysco radancy page2 uses &p", radancy_tb.page_url(sysco, 2), sysco["index_url"] + "&p=2")
-assert "careers.sysco.com/en/search-jobs/Washington" in sysco["index_url"], \
-    "sysco index_url must be the WA-scoped Radancy search path"
+# PROBE-CORRECTED 2026-09-11: the WA scope is the query-param search form (alp=<state
+# geonames>&alt=3, Allied's shape), NOT the path/radius browse form that failed to scope
+# or paginate live. The '?' means page_url's default emits '&p=N' (no page_url_sep key).
+assert "careers.sysco.com/en/search-jobs?alp=6252001-5815135&alt=3" in sysco["index_url"], \
+    "sysco index_url must be the WA-scoped query-param Radancy search form"
+assert "?" in sysco["index_url"] and sysco.get("page_url_sep") is None, \
+    "query-form index_url + no page_url_sep keeps Sysco on Allied's exact &p=N default path"
 
 # --- Sherwin-Williams: oracle_orc list/detail = host + the adapter's REST paths ---
 sw = TENANTS["oracle_orc"]["sherwin_williams"]

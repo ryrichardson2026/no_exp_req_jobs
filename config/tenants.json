@@ -769,12 +769,11 @@
       "_path_decision": "Path B (Radancy for everything), DECIDED 2026-09-11: careers.sysco.com is TalentBrew markup (org 1105) over a Workday CXS backend. The server-rendered HTML carries full descriptions incl. the Minimum/Preferred split, so this radancy_tb entry pulls both the WA index and the job pages. This is a DIFFERENT fetch shape from Allied only in three parameterised spots - the job-href locale prefix, the source-id source, the &p=N page separator, plus a body_fields block - all config-gated so Allied stays byte-identical. See workday.sysco for the retained ATS recon / req-id cross-check.",
       "source_job_id_from": "url_tail",
       "_source_job_id_note": "source_job_id is the TalentBrew job id = the tail of ld['url'] (e.g. .../1105/99722303904 -> 99722303904), NOT ld['identifier']. ld['identifier'] is the Workday req id (R######, e.g. R264570) - a SECONDARY id with no contract slot, so it is dropped from the normalized record and lives only in raw (the Cintas precedent). req_id is enumerable off the WA index and cross-checks against workday.sysco.geo_scope.wa_req_ids.",
-      "page_url_sep": "&",
-      "_page_url_sep_note": "Sysco's search-jobs URL is PATH-based with no query string, so the default page_url logic would emit '?p=N'; the site serves the page as '&p=N' (per radancy_path_shape). page_url_sep forces '&'. Could not be live-probed in this push (NO network) - config-selectable and defaulted so Allied ('?'-carrying index_url -> '&p=N' unchanged) is untouched. If a future probe shows the server honours '?p=N' here, drop this key.",
-      "index_url": "https://careers.sysco.com/en/search-jobs/Washington%2C%20US/1105/3/6252001-5815135/47x50012/-120x50147/50",
+      "index_url": "https://careers.sysco.com/en/search-jobs?alp=6252001-5815135&alt=3",
+      "_index_url_note": "PROBE-CORRECTED 2026-09-11: the earlier path/radius browse form (/en/search-jobs/Washington%2C%20US/1105/3/6252001-5815135/47x50012/-120x50147/50) did NOT server-scope and ignored &p=N (probe: page 2 == page 1, ~93 national pages, first row Olathe KS). Switched to the query-param search form (same shape as Allied: alp=<state geonames>&alt=3), which returns WA-only and paginates via &p=N. Live-verified 23 unique WA (15 on p1 + 8 on p2), matching the confirmed site count. No page_url_sep key: the '?' in index_url makes page_url's default emit '&p=N' - Allied's exact code path, byte-identical.",
       "geo_scope": {
         "verified": "2026-09-11",
-        "method": "careers.sysco.com WA state search (Radancy TalentBrew), server-rendered, 15/page, pagination &p=N",
+        "method": "careers.sysco.com WA state search (Radancy TalentBrew) via the query-param search form (alp=<state geonames>&alt=3), server-rendered, 15/page, pagination &p=N. Live-verified 2026-09-11.",
         "markets": {
           "WA": {
             "display": "Washington, US",
@@ -785,11 +784,12 @@
             "lng": "-120x50147",
             "radius": 50,
             "page_size": 15,
-            "index_url": "https://careers.sysco.com/en/search-jobs/Washington%2C%20US/1105/3/6252001-5815135/47x50012/-120x50147/50",
+            "index_url": "https://careers.sysco.com/en/search-jobs?alp=6252001-5815135&alt=3",
+            "_index_url_superseded": "https://careers.sysco.com/en/search-jobs/Washington%2C%20US/1105/3/6252001-5815135/47x50012/-120x50147/50 (path/radius browse form; did not scope or paginate live - see top-level _index_url_note)",
             "in_market": 23
           }
         },
-        "search_path_shape": "/en/search-jobs/{display}/{org_id}/{facet_type}/{geo_path}/{lat}/{lng}/{radius}/{n}",
+        "search_form_shape": "/en/search-jobs?alp={geo_path}&alt={facet_type}  (query-param search; the geo_path 6252001-5815135 is the WA state geonames id, alt=3 = state-level facet. The lat/lng/radius fields above are vestigial provenance from the superseded path/radius browse form.)",
         "national": "national board",
         "in_market_confirmed": "23 WA — CONFIRMED correct, aligns with the site's own WA count. NLx is not a WA benchmark for this pipeline (the pull is authoritative); do not treat any pull-vs-NLx delta as a discrepancy."
       },
