@@ -486,9 +486,7 @@ class LandingApp extends React.Component {
       h("div", { style: s("max-width:var(--rail,1120px);margin:0 auto;padding:12px 14px;display:grid;justify-items:center;gap:2px") },
         h("button", { type: "button", onClick: this.openFeedback, "aria-haspopup": "dialog", "aria-expanded": this.state.fbOpen, className: "hv-bg-white10", style: s("min-height:36px;display:inline-flex;align-items:center;padding:0 16px;border:0;border-radius:3px;background:transparent;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--mark);cursor:pointer") }, "Tell us what’s missing"),
         h("div", { style: s("display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px") },
-          h("a", { href: "#terms", style: s("min-height:44px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Terms"),
-          h("a", { href: RT.PRIVACY_URL, target: "_blank", rel: "noopener noreferrer", style: s("min-height:44px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Privacy"),
-          h("a", { href: "#accessibility", style: s("min-height:44px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Accessibility"))
+          h("a", { href: RT.PRIVACY_URL, target: "_blank", rel: "noopener noreferrer", style: s("min-height:44px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Privacy"))
       )
     );
   }

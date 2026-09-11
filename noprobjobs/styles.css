@@ -105,6 +105,9 @@ button{font:inherit;color:inherit}
 .hero-burst-amt{font-family:var(--font-display);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;color:var(--mark-ink)}
 .see-jobs-txt{display:none}
 @media (min-width:768px){
+  /* Center the mobile-baked board content to the rail on desktop, so the static HTML doesn't
+     flash full-width before React switches to the desktop rail (renderWide is already centered). */
+  .brd-body-m{max-width:var(--rail,1120px);margin-left:auto;margin-right:auto}
   .hero{justify-items:center;gap:10px;padding:20px 0 8px}
   .hero-h1{max-width:none;font-size:min(46px,5.1cqw);white-space:nowrap;text-wrap:initial}
   .hero-badge{min-height:32px;padding:0 14px;font-size:15px}

@@ -12,6 +12,13 @@ import { description } from "./data/describe.js";
 import * as R from "./data/record.js";
 import * as L from "./data/resolve.js";
 import * as SB from "./data/supabase.js";
+// Location data is STATIC (not a dynamic import) so resolveLocation works on the FIRST render.
+// When it was deferred, a URL like ?location=Seattle applied before cities loaded, so
+// resolveLocation("Seattle", [], …) returned "unmatched" → an empty-list flash until cities
+// arrived. Combined ~26KB, loaded in parallel with board.js/react — off the critical path.
+import { CITIES } from "./data/cities.js";
+import { ZIPS } from "./data/zips.js";
+import { CITY_GEO } from "./data/cities-geo.js";
 import * as RT from "./data/routes.js";
 import * as PM from "./data/pageMeta.js";
 
@@ -68,7 +75,7 @@ class BoardApp extends React.Component {
     this._openJob = props.openJob || null;                        // seed record for the panel (no description_html)
     this._initialJobId = this._openJob ? this._openJob.internal_id : null;
     this.state = { openId: this._initialJobId, recs: props.initialRecs || null, logoOk: {}, details: {}, stateCtx: null,
-      cities: [], zips: {}, cityGeo: {}, cats: [], catDraft: [], loc: "", locDraft: "", radius: 15,
+      cities: CITIES, zips: ZIPS, cityGeo: CITY_GEO, cats: [], catDraft: [], loc: "", locDraft: "", radius: 15,
       showsPay: false, shifts: [], types: [], exps: [], employers: [], sheet: null, sort: "newest", pg: 1,
       // Change #1: email-only capture — location/type-of-work fields and their state removed.
       alertsOpen: false, alertEmail: "", alertPhase: "form", alertError: "",
@@ -308,9 +315,6 @@ class BoardApp extends React.Component {
     };
     if (this.state.recs) resolve(this.state.recs);            // seeded at mount — no refetch, no wipe
     else SB.listJobs().then(resolve).catch((e) => { console.error("jobs_list failed to load", e); this.setState({ recs: [] }); });
-    import("./data/cities.js").then((m) => this.setState({ cities: m.CITIES })).catch((e) => console.error("cities.js failed to load", e));
-    import("./data/zips.js").then((m) => this.setState({ zips: m.ZIPS })).catch((e) => console.error("zips.js failed to load", e));
-    import("./data/cities-geo.js").then((m) => this.setState({ cityGeo: m.CITY_GEO })).catch((e) => console.error("cities-geo.js failed to load", e));
     // Job page: kick the entry job's description fetch now so the BAKE populates [data-desc-html]
     // deterministically (WAIT.job gates on it, and jobs_list is withheld during a job-route bake).
     // At runtime BAKED_DESC is set, so ensureDetail skips this — no round trip.
@@ -784,7 +788,11 @@ class BoardApp extends React.Component {
   // ── mobile ────────────────────────────────────────────────────────────
   renderMobile(d){
     const sheet = this.state.sheet;
-    return h("div", { style: s("display:flex;flex-direction:column;height:100%;min-height:0;position:relative") },
+    // brd-body-m: on desktop the STATIC (mobile-baked) HTML shows until React mounts and switches
+    // to renderWide. Without this it painted edge-to-edge full-width, then snapped to the centered
+    // rail — a "goes wide then centers" jump. Constrain it to the same rail so the outer width is
+    // stable across the mobile→desktop handoff. On phones (<768px) the rule is off — full width.
+    return h("div", { className: "brd-body-m", style: s("display:flex;flex-direction:column;height:100%;min-height:0;position:relative") },
       // filter row
       h("div", { style: s("flex:none;display:flex;align-items:center;gap:6px;padding:8px 12px 8px;border-bottom:1px solid var(--line)") },
         d.cats.length
