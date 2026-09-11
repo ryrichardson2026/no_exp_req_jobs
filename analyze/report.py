@@ -72,6 +72,20 @@ MANAGEMENT_RX = re.compile(
 # Protected occupations: kept unless the title is also management.
 PROTECT_RX = re.compile(r"\b(assistant|trainee|apprentice)\b", re.IGNORECASE)
 
+# Entry pipelines phrased as a PROGRAM, not a person. "Management Trainee" is
+# already protected (head noun 'trainee'), but "Management & Sales Training
+# Program" has head noun 'Program' (or a '(City)' tail), so the head-noun protect
+# misses it. This phrase-level override defers such titles from title-exclusion to
+# the REQUIREMENTS gate ("gate on requirements, not title") - a program that
+# demands no experience reaches applicable; one that requires experience is still
+# excluded downstream, and genuine Manager/Director roles are untouched. Shared
+# gate by design: any employer's management/leadership *training program* routes
+# to requirements, which is the correct entry-pipeline semantics.
+TRAINING_PROGRAM_RX = re.compile(
+    r"\b(?:training program|(?:management|leadership|sales)"
+    r"(?:\s*(?:&|and)\s*\w+)*\s+(?:development|training)\s+program)\b",
+    re.IGNORECASE)
+
 # Licensed clinical occupations. For these the TITLE is the credential - an "RN"
 # posting need not restate "RN license required", so the credential gate never sees
 # it and the role reaches applicable. Excluded by TITLE at gate 1, like management.
@@ -201,7 +215,7 @@ def gate_exclusion(r):
     primary = re.split(r"\s[-–—]\s|[,/]", title)[0]
     toks = re.findall(r"[A-Za-z]+", primary)
     head = toks[-1] if toks else ""
-    protected = bool(PROTECT_RX.search(head))
+    protected = bool(PROTECT_RX.search(head)) or bool(TRAINING_PROGRAM_RX.search(title))
     if not protected and MANAGEMENT_RX.search(title):
         return False, "occupation-management"
     # Licensed clinical occupation: the title IS the credential. Excluded here
