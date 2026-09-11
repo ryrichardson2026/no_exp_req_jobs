@@ -53,6 +53,7 @@ RAW_ROOT = os.path.join(ROOT, "raw", "compass_api")
 # The adapter imports the contract. The contract never imports an adapter.
 sys.path.insert(0, ROOT)
 from normalize import model  # noqa: E402
+from adapters.paginate import fetch_paged, Truncated  # noqa: E402
 
 PLATFORM = "compass_api"
 DELAY_SECONDS = 1.0
@@ -310,30 +311,33 @@ def mode_index(tenant):
     sess, _ = open_session(tenant)
     page = tenant.get("first_page", 1)
     seen, all_jobs = 0, []
-    while page - tenant.get("first_page", 1) < MAX_PAGES:
-        r = fetch_page(tenant, page, session=sess)
-        if r.status_code != 200:
-            print(f"stopped at page {page}: status {r.status_code}")
-            log(tenant, "index_error", page=page, status=r.status_code)
-            break
+    try:
+        while page - tenant.get("first_page", 1) < MAX_PAGES:
+            r = fetch_paged(lambda: fetch_page(tenant, page, session=sess), label=f"page {page}: ")
+            payload = r.json()
+            jobs = extract_jobs(payload)
+            if not jobs:
+                print(f"empty page at {page} - done")
+                break
 
-        payload = r.json()
-        jobs = extract_jobs(payload)
-        if not jobs:
-            print(f"empty page at {page} - done")
-            break
+            with open(os.path.join(p["pages"], f"page_{page:04d}.json"), "w",
+                      encoding="utf-8") as fh:
+                json.dump(payload, fh, ensure_ascii=False)
 
-        with open(os.path.join(p["pages"], f"page_{page:04d}.json"), "w",
-                  encoding="utf-8") as fh:
-            json.dump(payload, fh, ensure_ascii=False)
+            all_jobs.extend(jobs)
+            seen += len(jobs)
+            scoped = sum(1 for j in jobs if in_scope(j, tenant))
+            print(f"  page {page:>4}  +{len(jobs):>3}  in-scope {scoped:>3}  running {seen}")
 
-        all_jobs.extend(jobs)
-        seen += len(jobs)
-        scoped = sum(1 for j in jobs if in_scope(j, tenant))
-        print(f"  page {page:>4}  +{len(jobs):>3}  in-scope {scoped:>3}  running {seen}")
-
-        page += 1
-        time.sleep(DELAY_SECONDS)
+            page += 1
+            time.sleep(DELAY_SECONDS)
+    except Truncated as e:
+        # Never write a partial set as complete - fail LOUD so run_pull marks this source
+        # FAILED (not SKIPPED). Raised mid-loop, so the records.jsonl write below is skipped.
+        print(f"\n!! ABORT: {e}. Partial capture DISCARDED (prior data kept); records.jsonl "
+              f"NOT rewritten. Re-run when the source recovers.")
+        log(tenant, "index_abort", detail=str(e), captured_before_abort=seen)
+        return 1
 
     ids = {job_id(j) for j in all_jobs}
     scoped_all = [j for j in all_jobs if in_scope(j, tenant)]

@@ -65,6 +65,7 @@ RAW_ROOT = os.path.join(ROOT, "raw", "target")
 
 sys.path.insert(0, ROOT)
 from normalize import model  # noqa: E402
+from adapters.paginate import fetch_paged, Truncated  # noqa: E402
 
 PLATFORM = "target"          # this is source_id - one identity for both requests
 DELAY_SECONDS = 1.0          # record: 1-2s; corporate API tolerated 0.5-0.6s in test
@@ -445,27 +446,31 @@ def mode_discovery(t):
     d = t["discovery"]
 
     page, seen, count = 1, 0, None
-    while page <= MAX_PAGES:
-        r = fetch_discovery_page(s, t, page)
-        if r.status_code != 200:
-            print(f"stopped at page {page}: status {r.status_code}")
-            log(t, "discovery_error", page=page, status=r.status_code)
-            break
-        payload = r.json()
-        docs = discovery_docs(payload)
-        if count is None:
-            count = discovery_count(payload)
-            print(f"declared count: {count}")
-        if not docs:
-            print(f"empty page {page} - done")
-            break
-        with open(os.path.join(p["discovery"], f"page_{page:04d}.json"), "w",
-                  encoding="utf-8") as fh:
-            json.dump(payload, fh, ensure_ascii=False)
-        seen += len(docs)
-        print(f"  page {page:>3}  +{len(docs):>3}  running {seen}")
-        page += 1
-        time.sleep(DELAY_SECONDS)
+    try:
+        while page <= MAX_PAGES:
+            r = fetch_paged(lambda: fetch_discovery_page(s, t, page), label=f"page {page}: ")
+            payload = r.json()
+            docs = discovery_docs(payload)
+            if count is None:
+                count = discovery_count(payload)
+                print(f"declared count: {count}")
+            if not docs:
+                print(f"empty page {page} - done")
+                break
+            with open(os.path.join(p["discovery"], f"page_{page:04d}.json"), "w",
+                      encoding="utf-8") as fh:
+                json.dump(payload, fh, ensure_ascii=False)
+            seen += len(docs)
+            print(f"  page {page:>3}  +{len(docs):>3}  running {seen}")
+            page += 1
+            time.sleep(DELAY_SECONDS)
+    except Truncated as e:
+        # Never read a truncated discovery as complete (load reads every page on disk).
+        # Fail LOUD so run_pull marks this source FAILED (not SKIPPED) and holds.
+        print(f"\n!! ABORT: {e}. Discovery INCOMPLETE; not treated as complete. "
+              f"Re-run when the source recovers.")
+        log(t, "discovery_abort", detail=str(e), page=page, captured_before_abort=seen)
+        return 1
 
     print(f"\ndiscovery complete: {seen} of {count} -> {p['discovery']}")
     # The discovery request URL is logged so the two-source pair stays traceable.

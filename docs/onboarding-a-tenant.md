@@ -79,6 +79,13 @@ Checklist (do in order):
 - [ ] **Write `adapters/<platform>.py`** with the standard modes (`--probe --inspect --index/
       --discovery --detail --report --normalize`, plus any surface-specific mode). Write output
       to `out/<PLATFORM>/<tenant>/normalized.jsonl` and detail to `raw/<platform>/<tenant>/detail/`.
+- [ ] **Paginate the index/discovery loop through `adapters.paginate.fetch_paged`** — never
+      hand-roll `if r.status_code != 200: break`. That shape silently truncated Compass (a 502
+      at page 16 → 150 of 316 written as complete) and had been copied into all six adapters.
+      `fetch_paged` retries transient 5xx/429, and on exhaustion raises `Truncated`; wrap the
+      loop in `try/except Truncated` → log + `return 1`, so a short read fails LOUD (run_pull
+      marks the source FAILED) and **never writes a partial set as complete**. The output write
+      must sit *after* the loop, outside the `try`, so an abort skips it.
 - [ ] **Add a `config/pull.json` platform entry:** `{ "platform": "<x>", "modes": [ordered
       modes], "section": "<x>" }`. Add `"tenants": [...]` only if it shares another platform's
       `tenants.json` section (the Target/Workday case).

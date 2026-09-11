@@ -58,6 +58,7 @@ RAW_ROOT = os.path.join(ROOT, "raw", "workday")
 
 sys.path.insert(0, ROOT)
 from normalize import model  # noqa: E402
+from adapters.paginate import fetch_paged, Truncated  # noqa: E402
 
 PLATFORM = "workday"
 PAGE_LIMIT = 20          # verified in the live request body
@@ -401,38 +402,42 @@ def mode_index(t):
     os.makedirs(p["index"], exist_ok=True)
 
     offset, page, seen, total = 0, 0, 0, None
-    while page < MAX_PAGES:
-        r = fetch_page(s, t, offset)
-        if r.status_code != 200:
-            print(f"stopped at offset {offset}: status {r.status_code}")
-            log(t, "index_error", offset=offset, status=r.status_code)
-            break
-        payload = r.json()
-        jobs = extract_jobs(payload)
-        if total is None:
-            total = extract_total(payload)
-            print(f"board total: {total}")
-            if total and total >= RESULT_CAP:
-                print(f"** at or above the {RESULT_CAP} ceiling - the tail will "
-                      f"be unreachable. Scope with applied_facets. **")
-        if not jobs:
-            print(f"empty page at offset {offset} - done")
-            break
+    try:
+        while page < MAX_PAGES:
+            r = fetch_paged(lambda: fetch_page(s, t, offset), label=f"offset {offset}: ")
+            payload = r.json()
+            jobs = extract_jobs(payload)
+            if total is None:
+                total = extract_total(payload)
+                print(f"board total: {total}")
+                if total and total >= RESULT_CAP:
+                    print(f"** at or above the {RESULT_CAP} ceiling - the tail will "
+                          f"be unreachable. Scope with applied_facets. **")
+            if not jobs:
+                print(f"empty page at offset {offset} - done")
+                break
 
-        with open(os.path.join(p["index"], f"page_{page:04d}.json"), "w",
-                  encoding="utf-8") as fh:
-            json.dump(payload, fh, ensure_ascii=False)
+            with open(os.path.join(p["index"], f"page_{page:04d}.json"), "w",
+                      encoding="utf-8") as fh:
+                json.dump(payload, fh, ensure_ascii=False)
 
-        seen += len(jobs)
-        print(f"  page {page:>3}  offset {offset:>6}  +{len(jobs):>3}  running {seen}")
-        if total is not None and offset + len(jobs) >= total:
-            break
-        if offset + len(jobs) >= RESULT_CAP:
-            print(f"  hit the {RESULT_CAP} ceiling - stopping")
-            break
-        offset += len(jobs)
-        page += 1
-        time.sleep(DELAY_SECONDS)
+            seen += len(jobs)
+            print(f"  page {page:>3}  offset {offset:>6}  +{len(jobs):>3}  running {seen}")
+            if total is not None and offset + len(jobs) >= total:
+                break
+            if offset + len(jobs) >= RESULT_CAP:
+                print(f"  hit the {RESULT_CAP} ceiling - stopping")
+                break
+            offset += len(jobs)
+            page += 1
+            time.sleep(DELAY_SECONDS)
+    except Truncated as e:
+        # Never read a truncated capture as the whole board (load_index reads every page on
+        # disk). Fail LOUD so run_pull marks this source FAILED (not SKIPPED) and holds.
+        print(f"\n!! ABORT: {e}. Capture INCOMPLETE; not treated as the board. "
+              f"Re-run when the source recovers.")
+        log(t, "index_abort", detail=str(e), offset=offset, captured_before_abort=seen)
+        return 1
 
     print(f"\nindex complete: {seen} of {total} -> {p['index']}")
     log(t, "index", total=total, captured=seen, pages=page + 1)

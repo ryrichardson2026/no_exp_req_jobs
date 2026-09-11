@@ -49,6 +49,7 @@ RAW_ROOT = os.path.join(ROOT, "raw", "radancy_tb")
 # The adapter imports the contract. The contract never imports an adapter.
 sys.path.insert(0, ROOT)
 from normalize import model  # noqa: E402
+from adapters.paginate import fetch_paged, Truncated  # noqa: E402
 
 PLATFORM = "radancy_tb"
 PAGE_SIZE = 15          # observed, not configured server-side
@@ -320,30 +321,33 @@ def mode_index(tenant):
     os.makedirs(p["index"], exist_ok=True)
 
     seen, page, rows_all = 0, 1, []
-    while page <= MAX_PAGES:
-        url = page_url(tenant, page)
-        r = get(url)
-        if r.status_code != 200:
-            print(f"stopped at page {page}: status {r.status_code}")
-            log(tenant, "index_error", page=page, status=r.status_code)
-            break
+    try:
+        while page <= MAX_PAGES:
+            url = page_url(tenant, page)
+            r = fetch_paged(lambda: get(url), label=f"page {page}: ")
+            rows = extract_rows(r.text)
+            if not rows:
+                print(f"empty page at {page} - done")
+                break
 
-        rows = extract_rows(r.text)
-        if not rows:
-            print(f"empty page at {page} - done")
-            break
+            with open(os.path.join(p["index"], f"page_{page:04d}.html"), "w",
+                      encoding="utf-8") as fh:
+                fh.write(r.text)
 
-        with open(os.path.join(p["index"], f"page_{page:04d}.html"), "w",
-                  encoding="utf-8") as fh:
-            fh.write(r.text)
+            rows_all.extend(rows)
+            seen += len(rows)
+            scoped = sum(1 for x in rows if in_scope(x, tenant))
+            print(f"  page {page:>4}  +{len(rows):>3}  in-scope {scoped:>3}  running {seen}")
 
-        rows_all.extend(rows)
-        seen += len(rows)
-        scoped = sum(1 for x in rows if in_scope(x, tenant))
-        print(f"  page {page:>4}  +{len(rows):>3}  in-scope {scoped:>3}  running {seen}")
-
-        page += 1
-        time.sleep(DELAY_SECONDS)
+            page += 1
+            time.sleep(DELAY_SECONDS)
+    except Truncated as e:
+        # Never write a partial set as complete - fail LOUD so run_pull marks this source
+        # FAILED (not SKIPPED). Raised mid-loop, so the rows.jsonl write below is skipped.
+        print(f"\n!! ABORT: {e}. Partial capture DISCARDED (prior data kept); rows.jsonl "
+              f"NOT rewritten. Re-run when the source recovers.")
+        log(tenant, "index_abort", detail=str(e), captured_before_abort=seen)
+        return 1
 
     ids = {x["internal_id"] for x in rows_all}
     scoped_all = [x for x in rows_all if in_scope(x, tenant)]

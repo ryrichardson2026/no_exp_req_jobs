@@ -45,6 +45,7 @@ ROOT = os.path.dirname(HERE)
 # The adapter imports the contract. The contract never imports an adapter.
 sys.path.insert(0, ROOT)
 from normalize import model  # noqa: E402
+from adapters.paginate import fetch_paged, Truncated  # noqa: E402
 CONFIG_PATH = os.path.join(ROOT, "config", "tenants.json")
 RAW_ROOT = os.path.join(ROOT, "raw", "oracle_orc")
 
@@ -263,39 +264,43 @@ def mode_index(tenant):
     os.makedirs(p["index"], exist_ok=True)
 
     offset, page, seen, total = 0, 0, 0, None
-    while page < MAX_PAGES:
-        r = fetch_page(tenant, headers, offset)
-        if r.status_code != 200:
-            print(f"stopped at offset {offset}: status {r.status_code}")
-            log(tenant, "index_error", offset=offset, status=r.status_code)
-            break
+    try:
+        while page < MAX_PAGES:
+            r = fetch_paged(lambda: fetch_page(tenant, headers, offset), label=f"offset {offset}: ")
+            payload = r.json()
+            jobs = extract_jobs(payload)
+            if total is None:
+                total = extract_total(payload)
+                print(f"board total: {total}")
 
-        payload = r.json()
-        jobs = extract_jobs(payload)
-        if total is None:
-            total = extract_total(payload)
-            print(f"board total: {total}")
+            if not jobs:
+                print(f"empty page at offset {offset} - done")
+                break
 
-        if not jobs:
-            print(f"empty page at offset {offset} - done")
-            break
+            out = os.path.join(p["index"], f"page_{page:04d}.json")
+            with open(out, "w", encoding="utf-8") as fh:
+                json.dump(payload, fh, ensure_ascii=False)
 
-        out = os.path.join(p["index"], f"page_{page:04d}.json")
-        with open(out, "w", encoding="utf-8") as fh:
-            json.dump(payload, fh, ensure_ascii=False)
+            seen += len(jobs)
+            print(f"  page {page:>3}  offset {offset:>6}  +{len(jobs):>3}  running {seen}")
 
-        seen += len(jobs)
-        print(f"  page {page:>3}  offset {offset:>6}  +{len(jobs):>3}  running {seen}")
-
-        if total is not None and offset + len(jobs) >= total:
-            break
-        # Advance by records actually returned, not by PAGE_LIMIT. With in-finder
-        # pagination a full page is PAGE_LIMIT, but the last page is short (e.g. 34
-        # of a 2034 board), so stepping by len(jobs) keeps offset exact instead of
-        # overshooting on the final page.
-        offset += len(jobs)
-        page += 1
-        time.sleep(DELAY_SECONDS)
+            if total is not None and offset + len(jobs) >= total:
+                break
+            # Advance by records actually returned, not by PAGE_LIMIT. With in-finder
+            # pagination a full page is PAGE_LIMIT, but the last page is short (e.g. 34
+            # of a 2034 board), so stepping by len(jobs) keeps offset exact instead of
+            # overshooting on the final page.
+            offset += len(jobs)
+            page += 1
+            time.sleep(DELAY_SECONDS)
+    except Truncated as e:
+        # A truncated capture must never be read as the whole board (load_index reads every
+        # page on disk). Fail LOUD so run_pull marks this source FAILED (not SKIPPED) and holds;
+        # the partial pages stay inert because the tenant is failed, not consumed downstream.
+        print(f"\n!! ABORT: {e}. Capture INCOMPLETE; not treated as the board. "
+              f"Re-run when the source recovers.")
+        log(tenant, "index_abort", detail=str(e), offset=offset, captured_before_abort=seen)
+        return 1
 
     finder_extra = tenant.get("finder_extra") or {}
     if finder_extra:
