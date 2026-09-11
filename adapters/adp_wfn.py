@@ -136,6 +136,33 @@ def headers_from(tenant):
     return h
 
 
+def bootstrap_headers(tenant, hdrs):
+    """If the tenant declares a token_bootstrap, GET that PUBLIC endpoint, read
+    the named field, and inject it as a request header.
+
+    ADP WFN mints a session token (myJobsToken) from a public career-site call
+    (no login, no cookies); the staffing search/apply API returns HTTP 400
+    without it. This is the 'scoping arrives via header' unknown, now resolved:
+    the token is fetched fresh each run (it is session-scoped, so it is never
+    hardcoded), and the url + token_field + header name all come from config, so
+    this stays generic data, not code. Returns a mutated COPY of hdrs; raises
+    RuntimeError on a failed/empty bootstrap (a scope failure is never silently
+    swallowed into an unscoped request)."""
+    tb = tenant.get("token_bootstrap")
+    if not tb:
+        return hdrs
+    payload = get(tb["url"], {"User-Agent": UA, "Accept": "application/json"})
+    field = tb.get("token_field", "myJobsToken")
+    token = dig(payload, field) if isinstance(payload, dict) else None
+    if not token or not isinstance(token, str):
+        raise RuntimeError(
+            f"token_bootstrap {tb['url']} returned no '{field}' - cannot scope "
+            f"the request (got keys: {sorted(payload)[:12] if isinstance(payload, dict) else type(payload).__name__})")
+    out = dict(hdrs)
+    out[tb.get("header", "myJobsToken")] = token
+    return out
+
+
 def get(url, hdrs, retries=4, backoff=3):
     """Ported from pull_adp.py. Returns parsed JSON, or raises RuntimeError on a
     persistent failure or a non-JSON body (unauthorized/unscoped)."""
@@ -416,6 +443,15 @@ def mode_probe(tenant):
         print("header or cookie, this call may return the WRONG tenant or nothing.\n")
 
     try:
+        hdrs = bootstrap_headers(tenant, hdrs)
+    except RuntimeError as e:
+        print(f"FAIL token bootstrap: {e}")
+        return 1
+    if tenant.get("token_bootstrap"):
+        print(f"token bootstrap: {tenant['token_bootstrap']['url']} -> "
+              f"{tenant['token_bootstrap'].get('header','myJobsToken')} injected\n")
+
+    try:
         payload = get(url, hdrs)
     except RuntimeError as e:
         print(f"FAIL {e}")
@@ -470,6 +506,7 @@ def mode_inspect(tenant):
     length + first lines."""
     hdrs = headers_from(tenant)
     try:
+        hdrs = bootstrap_headers(tenant, hdrs)
         payload = get(list_url(tenant, 0), hdrs)
     except RuntimeError as e:
         print(f"FAIL {e}")
@@ -529,6 +566,12 @@ def mode_pull(tenant, max_pages=500):
         return 1
 
     hdrs = headers_from(tenant)
+    try:
+        hdrs = bootstrap_headers(tenant, hdrs)
+    except RuntimeError as e:
+        print(f"!! ABORT: token bootstrap failed: {e}. records.jsonl NOT rewritten.")
+        log(tenant, "pull_abort", detail=f"token bootstrap: {e}")
+        return 1
     rl = tenant.get("rate_limit", {})
     rps = rl.get("requests_per_second", 1)
     delay = 1.0 / rps if rps else 1.0

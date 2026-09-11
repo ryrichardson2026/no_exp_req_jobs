@@ -69,12 +69,21 @@ check("cintas apply pattern", cintas["endpoints"]["apply_pattern"].format(postin
 assert "startrow=0" in cintas_search, "startrow cursor must be in the search URL"
 
 # --- Gensco: adp_wfn list endpoint resolves through the builder ---
+# PROBE-CORRECTED 2026-09-11: the jobs live at apply-custom-filters (search-custom-filters
+# returns facet options, not reqs), and the call is scoped by a runtime-minted myJobsToken
+# header, not the URL. Assert the corrected endpoint + the token_bootstrap wiring.
 gensco = adp_wfn.load_tenant("gensco")
 gensco_list = adp_wfn.list_url(gensco, 0)
 check("gensco list endpoint base", gensco_list.split("?")[0],
-      "https://my.adp.com/myadp_prefix/mycareer/public/staffing/v1/job-requisitions/search-custom-filters")
+      "https://my.adp.com/myadp_prefix/mycareer/public/staffing/v1/job-requisitions/apply-custom-filters")
 check("gensco listing_page", gensco["endpoints"]["listing_page"],
       "https://myjobs.adp.com/genscocareers/cx/job-listing")
+tb = gensco.get("token_bootstrap") or {}
+check("gensco token_bootstrap url", tb.get("url"),
+      "https://myjobs.adp.com/public/staffing/v1/career-site/genscocareers")
+check("gensco token_bootstrap header", tb.get("header"), "myJobsToken")
+assert gensco["headers"].get("rolecode") == "manager", \
+    "gensco must send the captured rolecode header the staffing API requires"
 
 if fails:
     print("FAIL:")

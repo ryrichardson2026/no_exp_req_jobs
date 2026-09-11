@@ -42,8 +42,13 @@ TENANT = {
         "still_client_filter": True,
     },
     "endpoints": {
-        "list": "https://my.adp.com/x/mycareer/public/staffing/v1/job-requisitions/search-custom-filters",
+        "list": "https://my.adp.com/x/mycareer/public/staffing/v1/job-requisitions/apply-custom-filters",
         "listing_page": "https://myjobs.adp.com/genscocareers/cx/job-listing",
+    },
+    "token_bootstrap": {
+        "url": "https://myjobs.adp.com/public/staffing/v1/career-site/genscocareers",
+        "token_field": "myJobsToken",
+        "header": "myJobsToken",
     },
     "list_request": {
         "params": {
@@ -198,6 +203,60 @@ def test_location_state_resolves_and_ignores_city_false_positive():
     assert adp_wfn.location_state("Portland, OR, 97201") == "OR"   # state mid-string
     assert adp_wfn.location_state("Tacoma Branch") is None         # no standalone code
     assert adp_wfn.location_state("Orlando, FL") == "FL"           # 'Or' does not fire
+
+
+# ---------------------------------------------------------------- token bootstrap
+def _with_stub_get(payload):
+    """Swap adp_wfn.get for a stub that returns `payload`, restore after. Lets the
+    network-free tests drive bootstrap_headers without a real HTTP call."""
+    orig = adp_wfn.get
+    calls = []
+
+    def stub(url, hdrs, *a, **k):
+        calls.append((url, hdrs))
+        if isinstance(payload, Exception):
+            raise payload
+        return payload
+    adp_wfn.get = stub
+    return orig, calls
+
+
+def test_bootstrap_injects_token_from_config_field():
+    orig, calls = _with_stub_get({"myJobsToken": "TOK-368", "orgoid": "X"})
+    try:
+        out = adp_wfn.bootstrap_headers(TENANT, {"Accept": "application/json"})
+    finally:
+        adp_wfn.get = orig
+    assert out["myJobsToken"] == "TOK-368", out
+    assert out["Accept"] == "application/json"           # existing headers preserved
+    assert calls[0][0] == TENANT["token_bootstrap"]["url"]  # bootstrap URL fetched
+
+
+def test_bootstrap_is_a_noop_without_config():
+    """A tenant with no token_bootstrap returns the SAME headers, no fetch."""
+    orig, calls = _with_stub_get({"myJobsToken": "SHOULD-NOT-FETCH"})
+    try:
+        hdrs = {"Accept": "application/json"}
+        out = adp_wfn.bootstrap_headers({"key": "x"}, hdrs)
+    finally:
+        adp_wfn.get = orig
+    assert out == hdrs
+    assert calls == []                                   # no bootstrap = no network
+
+
+def test_bootstrap_raises_when_token_absent():
+    """An empty/mis-shaped bootstrap response is a scope failure, never a silent
+    unscoped request."""
+    orig, _ = _with_stub_get({"orgoid": "X"})            # no myJobsToken key
+    try:
+        raised = False
+        try:
+            adp_wfn.bootstrap_headers(TENANT, {})
+        except RuntimeError:
+            raised = True
+    finally:
+        adp_wfn.get = orig
+    assert raised, "missing token field must raise RuntimeError"
 
 
 # ---------------------------------------------------------------- runner

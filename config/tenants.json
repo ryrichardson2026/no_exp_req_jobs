@@ -1046,12 +1046,21 @@
       "verified": null,
       "geo_scope": {
         "exempt": true,
-        "reason": "small PNW-centric board (~dozens of reqs); a full-board pull is dozens of requests, not thousands",
+        "verified": "2026-09-11",
+        "reason": "small PNW-centric board (18 reqs total on 2026-09-11); a full-board pull is 1-2 requests, not thousands. No SERVER geo scope exists ($filter empty, header-scoped to the tenant, not the state), so a client-side WA filter runs on every returned page - exempt = server-scope requirement waived, client filter still enforced.",
+        "method": "Chrome-captured 2026-09-11: apply-custom-filters returns {count, jobRequisitions[18]} nationally; client-side state=WA filter selects the WA subset. 18 total confirmed against the live board's 'Job Search Results (18)'.",
         "still_client_filter": true
       },
       "endpoints": {
-        "list": "https://my.adp.com/myadp_prefix/mycareer/public/staffing/v1/job-requisitions/search-custom-filters",
+        "list": "https://my.adp.com/myadp_prefix/mycareer/public/staffing/v1/job-requisitions/apply-custom-filters",
+        "_list_note": "PROBE-CORRECTED 2026-09-11: was search-custom-filters (returns {filterList} = facet options, NOT jobs). apply-custom-filters returns {count, jobRequisitions[]} - the actual reqs. The live board fires BOTH (search for facets, apply for results); the pull only needs apply.",
         "listing_page": "https://myjobs.adp.com/genscocareers/cx/job-listing"
+      },
+      "token_bootstrap": {
+        "url": "https://myjobs.adp.com/public/staffing/v1/career-site/genscocareers",
+        "token_field": "myJobsToken",
+        "header": "myJobsToken",
+        "_note": "Chrome-captured 2026-09-11. PUBLIC GET (no login/cookies) that mints the session myJobsToken the staffing API requires; without it the list call 400s. The token is session-scoped (lives in the browser's sessionStorage, ~368 chars, opaque - NOT a JWT), so it is fetched fresh each run and NEVER hardcoded. The same response also carries orgoid=0JNZQJM0B0A00JZS, isiClientId=GENSCOINC, clientName 'Gensco Inc / Slakey Brothers, Inc' - confirming the endpoint is Gensco's."
       },
       "list_request": {
         "params": {
@@ -1079,7 +1088,10 @@
       },
       "headers": {
         "Referer": "https://myjobs.adp.com/genscocareers/cx/job-listing",
-        "note": "HEADERS NOT YET CAPTURED. Referer is a SCOPING GUESS only. ADP WFN scoping arrives via header/cookie, not the URL ($filter empty, nothing in the path names Gensco). If --probe returns non-Gensco titles or a non-JSON body, capture the real Request Headers (Cookie, Referer, Origin, any oauth/bearer token) from the live board's XHR in devtools and add them here as string keys - the adapter reads every string header from this block and skips 'note'."
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "en-US",
+        "rolecode": "manager",
+        "note": "HEADERS CAPTURED via Chrome 2026-09-11. The staffing API requires rolecode + myJobsToken; myJobsToken is injected at runtime by token_bootstrap (session-scoped, not stored here). rolecode='manager' is what the PUBLIC careers page sends (not an authenticated role - it is the client's default read role). Accept/Accept-Language match the live XHR. Referer is set for good measure; the token is what actually scopes the call. 'note' is skipped by headers_from."
       },
       "rate_limit": {
         "requests_per_second": 1,
