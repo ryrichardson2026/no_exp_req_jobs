@@ -28,3 +28,6 @@ __pycache__/
 
 .vercel
 .env*
+
+# Google Indexing API service-account key (never commit secrets)
+secrets/

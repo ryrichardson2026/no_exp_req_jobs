@@ -913,6 +913,16 @@ def _publish():
     info["published"], info["deploy_url"], info["publish_status"] = True, url, "PUBLISH COMPLETE"
     print(f"\ndeploy: {url or '(url not captured - check vercel output)'}")
     print("STATUS: PUBLISH COMPLETE")
+
+    # Notify Google of new/retired pages — ONLY after a successful publish, and strictly
+    # best-effort (never changes the publish result). new -> URL_UPDATED, retired -> URL_DELETED.
+    print("\n--- indexing: notify Google (new -> URL_UPDATED, retired -> URL_DELETED) ---")
+    try:
+        from analyze import indexing
+        info["indexing"] = indexing.submit_after_publish()
+    except Exception as e:
+        print(f"[indexing] skipped (non-fatal): {type(e).__name__}: {e}")
+
     return 0, info
 
 
