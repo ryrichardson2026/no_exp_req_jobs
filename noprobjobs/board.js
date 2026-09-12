@@ -781,7 +781,8 @@ class BoardApp extends React.Component {
         : h("button", { type: "button", onClick: this.togglePay, "aria-pressed": false, className: "hv-bd-accent", style: s("min-height:38px;display:flex;align-items:center;padding:0 13px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14.5px;font-weight:500;color:var(--ink);cursor:pointer;flex:none") }, h("span", { style: s("white-space:nowrap") }, "Shows pay")),
       d.shifts.length ? this.pill(true, d.shiftLabel, this.openSheet("shift"), sheet === "shift") : this.pill(false, "Shift", this.openSheet("shift"), sheet === "shift"),
       d.types.length ? this.pill(true, d.typeLabel, this.openSheet("type"), sheet === "type") : this.pill(false, "Employment type", this.openSheet("type"), sheet === "type"),
-      d.exps.length ? this.pill(true, d.expLabel, this.openSheet("exp"), sheet === "exp") : this.pill(false, "Experience", this.openSheet("exp"), sheet === "exp"),
+      // Experience moved OUT of the filter bar to the green "No experience required" band below
+      // (renderExpBand), matching mobile — no experience pill here.
       d.employers.length ? this.pill(true, d.employerLabel, this.openSheet("emp"), sheet === "emp") : this.pill(false, "Employer", this.openSheet("emp"), sheet === "emp"),
       d.anyFilter && h("button", { key: "clr", type: "button", onClick: this.clearAll, className: "hv-tx-accent", style: s("min-height:38px;padding:0 8px;background:transparent;border:0;font-size:14px;font-weight:600;color:var(--accent);cursor:pointer;flex:none") }, "Clear"),
       h("span", { style: s("flex:1") }),
@@ -822,6 +823,7 @@ class BoardApp extends React.Component {
     // detail pane's own measure is capped independently at 68ch (see [data-desc-html]).
     return h("div", { style: s("flex:1;min-height:0;width:100%;max-width:var(--rail,1120px);margin:0 auto;display:flex;flex-direction:column;position:relative") },
       this.renderFilterBarWide(d),
+      this.renderExpBand(d),          // same green "No experience required" toggle strip as mobile
       this.renderPopover(d),
       h("div", { key: "body", style: s("flex:1;min-height:0;display:flex;background:var(--surface-sunk)") },
         h("div", { ref: this.setDeskEl, "data-list-scroller": "true", style: s("width:436px;flex:none;overflow-y:auto;background:var(--surface-raised);border-right:1px solid var(--line)") },
