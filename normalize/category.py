@@ -48,7 +48,7 @@ CATEGORY_PATTERNS = {
     "Administrative": r"\b(admin|administrative|clerical|receptionist|data entry|office assistant|front desk|scheduler|scheduling coord\w*|bookkeeper|human resources|\bhr\b|payroll|patient financial|revenue cycle|patient service[s]? (representative|coordinator)|registrar|registration|health information|\bhim\b|medical records)\b",
     "Customer Service": r"\b(customer service|call center|call centre|csr|customer support|contact center|dispatcher)\b",
     "Sales": r"\b(sales|account executive|canvasser|telesales|inside sales|outside sales|business development)\b",
-    "Retail": r"\b(retail|cashier|store associate|sales associate|stocker|merchandiser|barista|shift lead|store manager|store mgr|asst store mgr|assistant store manager|dept leader|department leader|person in charge|\bpic\b|th person|rd person|nd person|team lead\w*|general merchandise|fuel center|service counter|home hardlines|front end|e-commerce|grocery|produce|meat|seafood|floral|apparel|garden ctr|dairy|starbucks|bakery|courtesy|bagger|checkout|night clerk|overnight clerk|freight clerk|section leader)\b",
+    "Retail": r"\b(retail|cashier|store associate|sales associate|stocker|merchandiser|barista|shift lead|store manager|store mgr|asst store mgr|assistant store manager|dept leader|department leader|person in charge|\bpic\b|th person|rd person|nd person|team lead\w*|general merchandise|fuel center|service counter|home hardlines|front end|e-commerce|grocery|produce|meat|seafood|floral|apparel|garden ctr|dairy|starbucks|bakery|courtesy|bagger|checkout|night clerk|overnight clerk|freight clerk|section leader|wholesale|branch coordinator)\b",
     # 'production associate'/operator/assembler fold into Warehouse (owner 2026-09-11):
     # Cintas plant-floor roles sit here UNTIL production earns its own category by volume.
     # Anchored to 'production associate' so a kitchen 'Food Production Worker' stays Food.
@@ -62,7 +62,7 @@ CATEGORY_PATTERNS = {
     # works with food and is in-store) - additive, so both lanes. Pure retail
     # (cashier, courtesy, bagger) stays Retail-only; 'grocery'/center-store aisle
     # stocking stays Retail (not food-handling).
-    "Food Services": r"\b(cook|baker|barista|bartender|chef|dishwasher|busser|server|waiter|waitress|catering|culinary|kitchen|cafeteria|concession|dietary|dining|nutrition|food service|foodservice|food worker|food prep|food transporter|banquet|deli|meat|seafood|produce|bakery|dairy|starbucks|order builder|general utility|food unit|\bfoh\b|\bfsw\b|food and beverage|meat cutter|meat wrapper|dietetic|diet clerk|steward)\b",
+    "Food Services": r"\b(cook|baker|barista|bartender|chef|dishwasher|busser|server|waiter|waitress|catering|culinary|kitchen|cafeteria|concession|dietary|dining|nutrition|food service|foodservice|food worker|food prep|food transporter|banquet|deli|meat|seafood|produce|bakery|dairy|starbucks|order builder|general utility|food unit|\bfoh\b|\bfsw\b|food and beverage|meat cutter|meat wrapper|dietetic|diet clerk|steward|runner)\b",
     # Tenth category (owner-approved 2026-09-11): Transportation/Automotive = delivery/
     # transport drivers + vehicle-repair shop roles, ONE category. Compound driver tokens
     # so a 'Security Officer ... Patrol Driver' is NOT swept in (stays Security only) -
