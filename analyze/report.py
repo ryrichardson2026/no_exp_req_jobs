@@ -156,6 +156,15 @@ PREREQUISITE_RX = re.compile(
     r"accredited program|training program|degree program|"
     r"certificate program|apprenticeship program", re.IGNORECASE)
 
+# A commercial driver's license (CDL) is an occupational LICENSE - weeks of training +
+# testing - so it fails the ~90-day/no-prerequisite rule and is NOT entry level. It slips
+# through two ways, both closed below: (1) the TITLE carries it ("CDL A ... Truck Driver")
+# and the posting may not restate it parseably - the licensed-occupation "title IS the
+# credential" rule (gate 1); (2) a "Commercial Driver License" clause CONTAINS the string
+# "Driver License", so the quick-list's driver's-license entry wrongly allowlists it
+# (gate 3). A regular (non-commercial) driver's license stays quick-obtainable.
+CDL_RX = re.compile(r"\bcdl\b|commercial driver", re.IGNORECASE)
+
 
 def _norm(s):
     return re.sub(r"\s+", " ", re.sub(r"[^\w\s]", " ", (s or "").lower())).strip()
@@ -223,6 +232,10 @@ def gate_exclusion(r):
     # implicit in the title.
     if LICENSED_OCCUPATION_RX.search(title):
         return False, "occupation-licensed"
+    # A CDL is an occupational license; a CDL-titled role carries it in the title, same
+    # "title IS the credential" rule as the licensed occupations above.
+    if CDL_RX.search(title):
+        return False, "occupation-licensed"
     # Career-path occupation (CNA, ...): excluded on POSITIONING (§3 job-now, not
     # career-path), not on obtainability. Same class as internships/apprenticeships.
     if CAREER_PATH_OCCUPATION_RX.search(title):
@@ -251,7 +264,9 @@ def gate_credential(r):
         for part in re.split(r",|/|&|\band\b", clause):
             low = part.lower()
             names_credential = any(cue in low for cue in X.CREDENTIAL_CUES)
-            if names_credential and not CREDENTIAL_QUICK_RX.search(part):
+            # A CDL is a hard barrier even though "Commercial Driver License" trips the
+            # driver's-license quick-list entry - CDL_RX overrides that allowlist.
+            if names_credential and (CDL_RX.search(part) or not CREDENTIAL_QUICK_RX.search(part)):
                 return False, "credential"
     return True, None
 
