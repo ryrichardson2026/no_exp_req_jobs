@@ -32,9 +32,9 @@ STATE = os.path.join(ROOT, "out", "runs", "indexing_state.json")
 SITE = (os.environ.get("SITE_URL") or "https://noprobjobs.com").rstrip("/")
 SCOPE = ["https://www.googleapis.com/auth/indexing"]
 ENDPOINT = "https://indexing.googleapis.com/v3/urlNotifications:publish"
-# Safety cap per run, under the Indexing API publish quota (documented default 200/day — confirm
-# the real value in Cloud Console -> APIs & Services -> Indexing API -> Quotas and adjust here).
-DAILY_CAP = 190
+# Per-run submission cap = the Indexing API publish quota, confirmed 200/day in Cloud Console
+# (APIs & Services -> Indexing API -> Quotas). Both URL_UPDATED and URL_DELETED draw from it.
+DAILY_CAP = 200
 
 
 def _env_val(name):
