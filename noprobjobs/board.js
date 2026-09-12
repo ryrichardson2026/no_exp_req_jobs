@@ -170,6 +170,12 @@ class BoardApp extends React.Component {
   applyLoc = (value) => () => { const v = value === undefined ? this.state.locDraft : value; this.setState({ loc: v, locDraft: v, sheet: null, openId: null, pg: 1 }); this.writeUrl({ loc: v, openId: null, page: 1 }); };
   clearLoc = () => { this.setState({ loc: "", locDraft: "", openId: null, pg: 1 }); this.writeUrl({ loc: "", openId: null, page: 1 }); };
   setRadius = (r) => () => { this.setState({ radius: r, pg: 1 }); this.writeUrl({ radius: r, page: 1 }); };
+  // Desktop inline location field: no Use button, no popover — leaving the field (blur) commits
+  // any pending draft, so the typed value reads as APPLIED the moment focus moves on. Enter still
+  // commits via onLocKeyStay. Guard on change so an untouched blur doesn't rewrite the URL.
+  applyLocBlur = () => { if (this.state.locDraft !== this.state.loc) this.applyLocStay(); };
+  setLocInput = (el) => { if (el) this._locInput = el; };
+  focusLocField = () => { if (this._locInput) { this._locInput.focus(); this._locInput.select(); } };
   setPage = (n) => () => {
     this.setState({ pg: n }, () => { if (this._desk) this._desk.scrollTop = 0; if (this._list) this._list.scrollTop = 0; });
     this.writeUrl({ page: n });
@@ -595,7 +601,9 @@ class BoardApp extends React.Component {
     if (exps.length) narrowing.push({ label: "Experience", fix: "Clear the experience filter.", open: this.openSheet("exp") });
     if (employers.length) narrowing.push({ label: "Employer", fix: "Clear the employer filter or add another employer.", open: this.openSheet("emp") });
     if (st.showsPay) narrowing.push({ label: "Shows pay", fix: "Turn off Shows pay — most employers don’t state pay.", open: null });
-    if (res.kind !== "all") narrowing.push({ label: "Location", fix: "Try a wider radius, or a different city.", open: this.openSheet("loc") });
+    // Desktop has no loc popover (the field is inline in the bar), so the empty-state fix focuses
+    // that field; mobile still routes to the full filter page via openSheet.
+    if (res.kind !== "all") narrowing.push({ label: "Location", fix: "Try a wider radius, or a different city.", open: st.wide ? this.focusLocField : this.openSheet("loc") });
     if (cats.length) narrowing.push({ label: "Work Type", fix: "Add another work type.", open: this.openSheet("cat") });
 
     // On a cold job page the list is a skeleton (recs still loading), so the open job isn't in
@@ -737,12 +745,16 @@ class BoardApp extends React.Component {
     // navigation beside the panel's one JobPosting, not the page's subject — so it carries
     // NO ItemList/ListItem markup (no itemScope, no itemProp name, no per-card listMeta).
     const cards = wide ? d.deskJobs : d.jobs;
+    const listItems = h("div", { key: d.animKey, role: "list", className: d.animClass }, cards.map((job, i) => h(JobCard, { key: job.id, job, dense: !wide, listMeta: this._jobPage ? null : { position: i + 1, url: job.href } })));
+    // Desktop: the H1 + ItemList itemScope live on the static list header / left column
+    // (renderDeskListHeader + renderWide), so here we render only the cards + pager.
+    if (wide) return h("div", null, listItems, d.pager);
     const listSchema = this._jobPage ? {} : { itemScope: true, itemType: "https://schema.org/ItemList" };
     const h1Attrs = { style: s("margin:0;padding:14px 16px 8px;font-family:var(--font-display);font-size:19px;line-height:1.15;font-weight:800;letter-spacing:-0.005em;color:var(--ink)") };
     if (!this._jobPage) h1Attrs.itemProp = "name";
     return h("div", listSchema,
       h("h1", h1Attrs, d.browseH1),
-      h("div", { key: d.animKey, role: "list", className: d.animClass }, cards.map((job, i) => h(JobCard, { key: job.id, job, dense: !wide, listMeta: this._jobPage ? null : { position: i + 1, url: job.href } }))),
+      listItems,
       d.pager
     );
   }
@@ -771,11 +783,35 @@ class BoardApp extends React.Component {
         style: s("min-height:34px;display:flex;align-items:center;gap:6px;padding:0 10px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14.5px;font-weight:500;color:var(--ink);cursor:pointer;flex:none") },
       h("span", { style: s("white-space:nowrap") }, label), raw(CHEV_MUTED));
   }
+  // Desktop Location — a persistent, always-editable inline field (NOT a dropdown/trigger pill).
+  // You type a city/state/ZIP straight into the bar; Enter or blur applies it. A leading red dot +
+  // navy border read as APPLIED; for a ZIP the 10/15/25 radius sits inline (default 15). Matches the
+  // mobile strip's always-visible "● 98178 · 15 mi" readout — one mental model across devices.
+  renderLocField(d){
+    const applied = d.locResolved;
+    const isZip = d.isZipDraft;
+    return h("div", { style: s("flex:none;display:flex;align-items:center;gap:7px;min-height:34px;padding:0 5px 0 9px;border:1px solid " + (applied ? "var(--ink)" : "var(--line)") + ";border-radius:3px;background:var(--surface-raised)") },
+      h("span", { "aria-hidden": "true", style: s("flex:none;width:7px;height:7px;border-radius:50%;" + (applied ? "background:var(--accent)" : "background:transparent;box-shadow:inset 0 0 0 1.5px var(--hair)")) }),
+      h("input", { type: "text", ref: this.setLocInput, value: this.state.locDraft, onChange: this.onLocDraft, onKeyDown: this.onLocKeyStay, onBlur: this.applyLocBlur,
+          placeholder: "City, state or ZIP", "aria-label": "Location — city, state or ZIP",
+          style: s("flex:none;width:" + (isZip ? "62px" : "148px") + ";box-sizing:border-box;min-height:30px;padding:0;border:0;background:transparent;font-family:inherit;font-size:14.5px;font-weight:" + (applied ? "700" : "500") + ";color:var(--ink);outline:none") }),
+      // Inline radius (ZIP only) — same 10/15/25 set as mobile, applied live; default 15.
+      isZip && h("span", { style: s("flex:none;display:flex;align-items:center;gap:2px;padding-left:6px;margin-left:1px;border-left:1px solid var(--line)") },
+        L.RADII.map((r, i) => { const cur = r === d.radius; return h("button", { key: i, type: "button", onClick: this.setRadius(r), "aria-pressed": cur, "aria-label": r + " miles",
+          style: s("min-height:28px;min-width:25px;padding:0 3px;border-radius:3px;font-size:12.5px;font-weight:" + (cur ? "700" : "500") + ";cursor:pointer;border:1px solid " + (cur ? "var(--ink)" : "transparent") + ";background:" + (cur ? "var(--ink)" : "transparent") + ";color:" + (cur ? "var(--accent-ink)" : "var(--ink-muted)")) }, r); }),
+        h("span", { style: s("font-size:12px;color:var(--ink-muted);padding:0 3px 0 1px") }, "mi")),
+      // Clear (only when applied) — keeps the field itself permanent.
+      applied && h("button", { type: "button", onClick: this.clearLoc, "aria-label": "Clear location", className: "hv-bg-sunk-tx-ink",
+        style: s("flex:none;width:22px;height:22px;margin-left:1px;display:grid;place-items:center;padding:0;background:transparent;border:0;border-radius:3px;cursor:pointer;color:var(--ink-muted);font-size:17px;line-height:1") }, "×")
+    );
+  }
   renderFilterBarWide(d){
     const sheet = this.state.sheet;
+    // Order matches mobile's strip: Location leads, then Work Type. Sort no longer lives here — it
+    // sits in the static list header (renderDeskListHeader), on the "…jobs in Washington" row.
     return h("div", { style: s("flex:none;display:flex;align-items:center;gap:7px;padding:8px 20px;border-bottom:1px solid var(--line);position:relative;z-index:5;flex-wrap:wrap") },
+      this.renderLocField(d),
       d.cats.length ? this.pill(true, d.catLabel, this.openSheet("cat"), sheet === "cat") : this.pill(false, "Work Type", this.openSheet("cat"), sheet === "cat"),
-      d.locResolved ? this.pill(true, d.locLabel, this.openSheet("loc"), sheet === "loc") : this.pill(false, "Location", this.openSheet("loc"), sheet === "loc"),
       this.state.showsPay
         ? h("button", { type: "button", onClick: this.togglePay, "aria-pressed": true, style: s("min-height:34px;display:flex;align-items:center;gap:6px;padding:0 10px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);font-size:14.5px;font-weight:700;color:var(--accent-ink);cursor:pointer;flex:none") }, raw(CHECK14), h("span", { style: s("white-space:nowrap") }, "Shows pay"))
         : h("button", { type: "button", onClick: this.togglePay, "aria-pressed": false, className: "hv-bd-accent", style: s("min-height:38px;display:flex;align-items:center;padding:0 13px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14.5px;font-weight:500;color:var(--ink);cursor:pointer;flex:none") }, h("span", { style: s("white-space:nowrap") }, "Shows pay")),
@@ -786,9 +822,24 @@ class BoardApp extends React.Component {
       d.employers.length ? this.pill(true, d.employerLabel, this.openSheet("emp"), sheet === "emp") : this.pill(false, "Employer", this.openSheet("emp"), sheet === "emp"),
       d.anyFilter && h("button", { key: "clr", type: "button", onClick: this.clearAll, className: "hv-tx-accent", style: s("min-height:38px;padding:0 8px;background:transparent;border:0;font-size:14px;font-weight:600;color:var(--accent);cursor:pointer;flex:none") }, "Clear"),
       h("span", { style: s("flex:1") }),
-      d.isList && h("span", { key: "rl", style: s("margin-left:auto;font-size:14px;font-weight:600;color:var(--ink)") }, d.resultLabel),
-      h("button", { type: "button", "data-filter-trigger": "true", onClick: this.openSheet("sort"), "aria-expanded": sheet === "sort", "aria-haspopup": "true", className: "hv-bd-accent", style: s("min-height:34px;display:flex;align-items:center;gap:6px;padding:0 10px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14.5px;font-weight:500;color:var(--ink);cursor:pointer;flex:none") },
-        raw(SORT_ICON), h("span", { style: s("white-space:nowrap") }, d.sortLabel))
+      d.isList && h("span", { key: "rl", style: s("margin-left:auto;font-size:14px;font-weight:600;color:var(--ink)") }, d.resultLabel)
+    );
+  }
+  // Static list header (desktop): the browse H1 on the left, Sort on the right — the row the
+  // user asked for, sitting below the green band and above the scrolling list. The H1 carries the
+  // ItemList itemProp name (the itemScope wraps this header + the cards, so schema stays intact).
+  renderDeskListHeader(d){
+    const sheet = this.state.sheet;
+    const h1Attrs = { style: s("margin:0;font-family:var(--font-display);font-size:19px;line-height:1.15;font-weight:800;letter-spacing:-0.005em;color:var(--ink)") };
+    if (!this._jobPage) h1Attrs.itemProp = "name";
+    return h("div", { style: s("flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 16px 9px;border-bottom:1px solid var(--line);background:var(--surface-raised);position:relative;z-index:4") },
+      h("h1", h1Attrs, d.browseH1),
+      h("div", { style: s("flex:none;position:relative") },
+        h("button", { type: "button", "data-filter-trigger": "true", onClick: this.openSheet("sort"), "aria-expanded": sheet === "sort", "aria-haspopup": "true", className: "hv-bd-accent",
+            style: s("min-height:34px;display:flex;align-items:center;gap:6px;padding:0 10px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14.5px;font-weight:500;color:var(--ink);cursor:pointer") },
+          raw(SORT_ICON), h("span", { style: s("white-space:nowrap") }, d.sortLabel)),
+        sheet === "sort" && h("div", { "data-filter-pop": "true", role: "dialog", "aria-label": "Sort", style: s("position:absolute;top:calc(100% + 6px);right:0;z-index:20;width:230px;background:var(--surface-raised);border:1px solid var(--ink);border-radius:3px;box-shadow:0 10px 30px rgba(10,58,117,0.18)") },
+          h(FilterPanel, this.filterProps(d, { isSort: true }))))
     );
   }
   // Sticky Apply/Clear footer for the Type-of-work menu (B1). Clear resets the pending
@@ -801,12 +852,11 @@ class BoardApp extends React.Component {
   }
   renderPopover(d){
     const sheet = this.state.sheet;
-    if (!sheet || sheet === "all") return null;
+    // Sort is rendered locally in the list header (renderDeskListHeader), not here; location is an
+    // inline bar field. So this popover only serves the left-hand filter pills, all left-aligned.
+    if (!sheet || sheet === "all" || sheet === "sort") return null;
     const isCat = sheet === "cat";
-    // Item 14: the menu aligns to its trigger. Sort sits at the RIGHT of the filter bar, so
-    // its menu is right-aligned (right edge meets the button's); the left-hand filter pills
-    // keep their left alignment. width 372 < the 1040 rail, so neither edge overflows.
-    const align = sheet === "sort" ? "right:28px" : "left:28px";
+    const align = "left:28px";
     return h("div", { "data-filter-pop": "true", role: "dialog", "aria-label": "Filters", style: s("position:absolute;top:50px;" + align + ";z-index:6;width:372px;background:var(--surface-raised);border:1px solid var(--ink);border-radius:3px;box-shadow:0 12px 32px rgba(10,58,117,0.16);max-height:520px;display:flex;flex-direction:column") },
       h("div", { style: s("flex:none;display:flex;justify-content:flex-end;padding:6px 6px 0") },
         h("button", { type: "button", onClick: this.closeSheet, "aria-label": "Close filter menu", className: "hv-bg-sunk-tx-ink", style: s("width:36px;height:36px;display:grid;place-items:center;background:transparent;border:0;border-radius:3px;cursor:pointer;color:var(--ink-muted)") }, raw(CLOSE))),
@@ -826,8 +876,13 @@ class BoardApp extends React.Component {
       this.renderExpBand(d),          // same green "No experience required" toggle strip as mobile
       this.renderPopover(d),
       h("div", { key: "body", style: s("flex:1;min-height:0;display:flex;background:var(--surface-sunk)") },
-        h("div", { ref: this.setDeskEl, "data-list-scroller": "true", style: s("width:436px;flex:none;overflow-y:auto;background:var(--surface-raised);border-right:1px solid var(--line)") },
-          this.listBody(d, true)),
+        // Left column: itemScope ItemList wrapping the STATIC header (H1 = itemProp name + Sort)
+        // and the scrolling card list below it — so the heading + Sort stay put while cards scroll.
+        h("div", Object.assign({ style: s("width:436px;flex:none;min-height:0;display:flex;flex-direction:column;background:var(--surface-raised);border-right:1px solid var(--line)") },
+            this._jobPage ? {} : { itemScope: true, itemType: "https://schema.org/ItemList" }),
+          d.isList && this.renderDeskListHeader(d),
+          h("div", { ref: this.setDeskEl, "data-list-scroller": "true", style: s("flex:1;min-height:0;overflow-y:auto") },
+            this.listBody(d, true))),
         h("div", { style: s("flex:1;min-width:0;position:relative;background:var(--surface)") },
           d.openRec
             ? h(JobPage, { page: d.page, categories: R.CATEGORIES, back: this.back, isMobilePage: false, isPanel: false, isPermanent: true })
