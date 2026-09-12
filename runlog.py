@@ -256,6 +256,21 @@ _TEMPLATE = r"""<!doctype html>
   .catbar>span{display:block;height:100%;background:var(--series);border-radius:6px;min-width:2px}
   .catnum{text-align:right;font-size:13px;white-space:nowrap}
   @media(max-width:560px){.catrow{grid-template-columns:110px 1fr 76px;gap:8px}}
+  .pullcard{padding:16px 18px}
+  .cmdrow{display:flex;align-items:center;gap:14px;justify-content:space-between}
+  .cmdlabel{font-size:13px;color:var(--ink2);margin-bottom:6px}
+  .cmdtext{display:inline-block;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:12.5px;background:var(--plane);border:1px solid var(--border);border-radius:7px;
+    padding:6px 9px;color:var(--ink);white-space:nowrap;overflow:auto;max-width:100%}
+  .cmdbtn{flex:none;cursor:pointer;font:inherit;font-size:12px;border:1px solid var(--border);
+    border-radius:7px;background:var(--surface);color:var(--ink2);padding:6px 12px}
+  .cmdbtn:hover{border-color:var(--axis);color:var(--ink)}
+  .cmdbtn.big{padding:9px 16px;font-size:13px;color:var(--ink)}
+  .cmdbtn.ok{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good-ink);border-color:transparent}
+  .pullgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:8px}
+  .pullco{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--plane);border:1px solid var(--border);border-radius:8px;padding:6px 8px 6px 12px}
+  .pullco-name{font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--border);
     border-radius:8px;padding:7px 10px;font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,.14);
     opacity:0;transition:opacity .08s;white-space:nowrap;color:var(--ink)}
@@ -344,6 +359,7 @@ function render(){
       ${tile("Live jobs", fmt(latest.live_jobs), latest.expired_jobs!=null?`${fmt(latest.expired_jobs)} expired (410)`:"")}
       ${tile("Baked", latest.bake_job_pages!=null?fmt(latest.bake_job_pages)+" pages":"–", bakeCov)}
     </div>
+    ${manualPullSection(latest)}
     ${catSection()}
     <section class="block">
       <h2>Applicable set over the last ${byTime.length} run${byTime.length>1?"s":""}</h2>
@@ -370,6 +386,57 @@ function render(){
 function tile(k,v,d){ return `<div class="tile"><div class="k">${k}</div><div class="v num">${v}</div><div class="d">${d||"&nbsp;"}</div></div>`; }
 function esc(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
 
+// Copy a command to the clipboard. This page opens from file://, which is NOT a secure
+// context, so navigator.clipboard is usually unavailable - fall back to a hidden textarea
+// + execCommand('copy'), which works under a user gesture on file://. Brief feedback.
+function copyCmd(cmd, btn){
+  const done = () => { const o=btn.textContent; btn.textContent="copied ✓"; btn.classList.add("ok");
+    setTimeout(()=>{ btn.textContent=o; btn.classList.remove("ok"); }, 1400); };
+  const fail = () => { const o=btn.textContent; btn.textContent="copy failed"; setTimeout(()=>btn.textContent=o,1400); };
+  function fallback(){
+    try {
+      const ta=document.createElement("textarea"); ta.value=cmd;
+      ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      const ok=document.execCommand("copy"); document.body.removeChild(ta);
+      ok?done():fail();
+    } catch(e){ fail(); }
+  }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(cmd).then(done, fallback);
+    } else { fallback(); }
+  } catch(e){ fallback(); }
+}
+
+// Manual-pull commands. A file:// page cannot launch a process, so each button COPIES the
+// exact command - paste it into PowerShell to run. Full pull triggers the real scheduled
+// task (loads .env.local + publishes on COMPLETE); per-company re-pulls one tenant (refresh
+// + report, no publish). Commands ride in data-cmd so quotes survive.
+function manualPullSection(latest){
+  const FULL = 'schtasks /run /tn "NoProbJobs Daily Pull"';
+  const tenants = (latest && latest.tenants) ? latest.tenants : [];
+  const perCo = tenants.map(t=>{
+    const cmd = 'python run_pull.py --tenant ' + t.tenant;
+    return `<div class="pullco"><span class="pullco-name">${esc(t.tenant)}</span>
+      <button class="cmdbtn" data-cmd="${esc(cmd)}" onclick="copyCmd(this.dataset.cmd,this)">copy</button></div>`;
+  }).join("");
+  return `<section class="block">
+    <h2>Manual pull <span class="subtle">· buttons COPY the command — paste in PowerShell to run</span></h2>
+    <div class="card pullcard">
+      <div class="cmdrow">
+        <div>
+          <div class="cmdlabel">Full pull + publish <span class="subtle">(runs the scheduled task now — loads .env.local, self-gates, deploys on COMPLETE)</span></div>
+          <code class="cmdtext">${esc(FULL)}</code>
+        </div>
+        <button class="cmdbtn big" data-cmd="${esc(FULL)}" onclick="copyCmd(this.dataset.cmd,this)">copy</button>
+      </div>
+      ${perCo ? `<div class="cmdlabel" style="margin-top:14px">Re-pull one company <span class="subtle">(refresh + report; add <code>--publish</code> to deploy)</span></div>
+      <div class="pullgrid">${perCo}</div>` : ""}
+    </div>
+  </section>`;
+}
+
 // Job-category breakdown of the CURRENT applicable set (CATS is a live snapshot of
 // out/applicable.jsonl, computed at render). Tags are additive so bar counts sum to
 // more than the total; the uncategorized count is the alert (jobs no functional
@@ -387,7 +454,7 @@ function catSection(){
     </div>`).join("");
   const u = CATS.uncategorized||0;
   const alert = u>0
-    ? `<div class="catalert"><span class="dot g-warning"></span><b>${fmt(u)}</b>&nbsp;uncategorized applicable job${u===1?"":"s"} <span class="subtle">(${pct(u)}%) — no functional category matched; add title patterns to normalize/category.py</span></div>`
+    ? `<div class="catalert"><span class="dot g-warning"></span><b>${fmt(u)}</b>&nbsp;uncategorized applicable job${u===1?"":"s"} <span class="subtle">(${pct(u)}%) — no functional category matched</span><button class="cmdbtn" style="margin-left:auto" data-cmd="python -m analyze.uncategorized" onclick="copyCmd(this.dataset.cmd,this)">copy review cmd</button></div>`
     : `<div class="catok"><span class="dot g-good"></span>every applicable job is categorized</div>`;
   return `<section class="block">
     <h2>Job categories <span class="subtle">· current applicable set (${fmt(CATS.total)} jobs · additive tags)</span></h2>
