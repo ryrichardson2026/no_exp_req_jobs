@@ -65,7 +65,7 @@ export function FilterPanel(p){
 
   if (p.divided) kids.push(sep("d1"));
   if (p.isCat) kids.push(h("div", { key: "cat", style: s("display:grid;gap:6px") },
-    h("div", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, "Type of work"),
+    h("div", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, "Work Type"),
     h("div", { style: s("display:grid;gap:2px") },
       (p.catAll ? [applyAllRow(p.catAllOn, p.catAll)] : []).concat((p.catOptions || []).map((c, i) => catRow(c, i))))
   ));

@@ -17,13 +17,13 @@ const React = window.React;
 const BP = "(min-width:768px)";
 const PRODUCT = "NoProbJobs.com";
 
-// Landing-only curated entry point: five type-of-work chips in a FIXED order (never sorted by
+// Landing-only curated entry point: six work-type chips in a FIXED order (never sorted by
 // volume — someone who learned where a chip sits must find it there next visit). The board menu
-// keeps all nine (R.CATEGORIES); the removed four still have live records, browse pages and
+// keeps all ten (R.CATEGORIES); the omitted categories still have live records, browse pages and
 // filters — this is a narrowed doorway, not a taxonomy change. Icons resolve from the labels via
 // catIconSvg (Retail→shopping-bag, Sales→tag, Food Services→chef-hat, Security→shield,
 // Warehouse→package), so keeping these labels keeps the icons correct.
-const LANDING_CATS = ["Retail", "Sales", "Food Services", "Security", "Warehouse"];
+const LANDING_CATS = ["Retail", "Sales", "Food Services", "Security", "Warehouse", "Transportation/Automotive"];
 
 // Change #2: the Washington lander is this same landing page served at /washington-jobs.
 // The ONLY content difference is the hero headline; everything else (job data, components,
@@ -146,7 +146,7 @@ class LandingApp extends React.Component {
   }
   _topCats(){
     if (this.state.recs === null) return [];
-    // The "browse by category" cards mirror the five chips (same set, same fixed order) —
+    // The "browse by category" cards mirror the six chips (same set, same fixed order) —
     // no volume sort, so a card sits where the visitor learned it. Counts stay (these cards
     // are the counts-bearing browse surface; the chips carry none).
     return LANDING_CATS.map((c) => {
@@ -217,7 +217,7 @@ class LandingApp extends React.Component {
   // completed search with a location seeds it there). The landing keeps the explicit
   // "Get job alerts" button.
   toggleCat = (c) => () => this.setState((st) => ({ cats: st.cats.indexOf(c) >= 0 ? st.cats.filter((v) => v !== c) : st.cats.concat([c]) }));
-  selectAllCats = () => this.setState((st) => ({ cats: st.cats.length === LANDING_CATS.length ? [] : LANDING_CATS.slice() }));   // "Apply all" = the five shown, not the full nine
+  selectAllCats = () => this.setState((st) => ({ cats: st.cats.length === LANDING_CATS.length ? [] : LANDING_CATS.slice() }));   // "Apply all" = the six shown, not the full ten
   onLocDraft = (e) => this.setState({ locDraft: e.target.value });
   onSubmitKey = (e) => { if (e.key === "Enter") { e.preventDefault(); this.submit(); } };
   setRadius = (r) => () => this.setState({ radius: r });
@@ -318,7 +318,7 @@ class LandingApp extends React.Component {
     }));
   }
   renderCatWide(){
-    return h("div", { role: "group", "aria-label": "Type of work", style: s("display:flex;flex-wrap:wrap;justify-content:center;gap:8px") },
+    return h("div", { role: "group", "aria-label": "Work Type", style: s("display:flex;flex-wrap:wrap;justify-content:center;gap:8px") },
       this.catOptions().map((c, i) => c.isOn
         ? h("button", { key: i, type: "button", onClick: c.pick, "aria-pressed": true, style: s("min-height:46px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);font-size:15px;font-weight:700;color:var(--surface);cursor:pointer;white-space:nowrap") }, raw(catIconSvg(c.label, 20, "currentColor")), h("span", null, c.label))
         : h("button", { key: i, type: "button", onClick: c.pick, "aria-pressed": false, className: "hv-bg-fact", style: s("min-height:46px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border:1px solid var(--ink);border-radius:3px;background:var(--surface-raised);font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;white-space:nowrap") }, raw(catIconSvg(c.label, 20)), h("span", null, c.label)))
@@ -334,10 +334,10 @@ class LandingApp extends React.Component {
         ? h("button", { type: "button", "data-filter-trigger": "true", onClick: this.openCat, "aria-expanded": this.state.catOpen, "aria-haspopup": "true", style: s("width:100%;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px;border:2px solid var(--ink);border-radius:3px;background:var(--fact);font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;text-align:left") },
             h("span", { style: s("overflow:hidden;text-overflow:ellipsis;white-space:nowrap") }, catLabel), raw(CHEV))
         : h("button", { type: "button", "data-filter-trigger": "true", onClick: this.openCat, "aria-expanded": this.state.catOpen, "aria-haspopup": "true", className: "hv-bg-fact", style: s("width:100%;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px;border:2px solid var(--ink);border-radius:3px;background:var(--surface-raised);font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;text-align:left") },
-            h("span", { style: s("white-space:nowrap") }, "Type of work"), raw(CHEV_MUTED)),
-      this.state.catOpen && h("div", { key: "pop", "data-filter-pop": "true", role: "dialog", "aria-label": "Type of work", style: s("position:absolute;top:54px;left:0;z-index:6;width:330px;max-width:100%;box-sizing:border-box;background:var(--surface-raised);border:2px solid var(--ink);border-radius:3px;box-shadow:0 10px 24px rgba(10,58,117,0.18);animation:sheetdown 160ms cubic-bezier(.22,.61,.36,1)") },
+            h("span", { style: s("white-space:nowrap") }, "Work Type"), raw(CHEV_MUTED)),
+      this.state.catOpen && h("div", { key: "pop", "data-filter-pop": "true", role: "dialog", "aria-label": "Work Type", style: s("position:absolute;top:54px;left:0;z-index:6;width:330px;max-width:100%;box-sizing:border-box;background:var(--surface-raised);border:2px solid var(--ink);border-radius:3px;box-shadow:0 10px 24px rgba(10,58,117,0.18);animation:sheetdown 160ms cubic-bezier(.22,.61,.36,1)") },
         h("div", { style: s("padding:8px 0") },
-          h("div", { style: s("padding:6px 14px 8px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink)") }, "Type of work"),
+          h("div", { style: s("padding:6px 14px 8px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink)") }, "Work Type"),
           h("button", { key: "all", type: "button", role: "checkbox", "aria-checked": allOn, onClick: this.selectAllCats, className: "hv-bg-sunk", style: s("width:100%;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 14px;border:0;background:transparent;font-size:15px;font-weight:700;color:var(--ink);text-align:left;cursor:pointer") },
             allOn ? h("span", { style: s("flex:none;width:18px;height:18px;border-radius:3px;background:var(--ink);display:grid;place-items:center") }, raw(ROW_CHECK)) : h("span", { style: s("flex:none;width:18px;height:18px;border-radius:3px;border:1px solid var(--ink);background:var(--surface-raised)") }),
             h("span", null, "Apply all")),
@@ -423,7 +423,7 @@ class LandingApp extends React.Component {
     const cards = this._topCats();
     const cols = this.state.wide ? "repeat(3,1fr)" : "1fr 1fr";
     return h("section", { style: s("display:grid;gap:var(--gap-block)") },
-      h("h2", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink)") }, "Browse by type of work"),
+      h("h2", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink)") }, "Browse by work type"),
       h("div", { style: s("display:grid;grid-template-columns:" + cols + ";grid-auto-rows:1fr;gap:12px") },
         cards.map((c, i) => h("div", { key: i, style: s("position:relative") },
           // stacked paper: a marigold sheet offset behind the white tile, both bordered.
@@ -434,7 +434,7 @@ class LandingApp extends React.Component {
             h("div", { style: s("display:grid;gap:2px") },
               h("span", { style: s("font-family:var(--font-display);font-weight:800;font-size:16px;line-height:1.2;color:var(--ink)") }, c.label),
               c.hasCount && h("span", { key: "n", style: s("font-size:13px;line-height:1.35;font-weight:700;color:var(--accent)") }, c.count)))))),
-      h("a", { href: this.boardHref(), style: s("justify-self:start;min-height:44px;display:inline-flex;align-items:center;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:0.03em;color:var(--accent)") }, "See all types of work")
+      h("a", { href: this.boardHref(), style: s("justify-self:start;min-height:44px;display:inline-flex;align-items:center;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:0.03em;color:var(--accent)") }, "See all work types")
     );
   }
 

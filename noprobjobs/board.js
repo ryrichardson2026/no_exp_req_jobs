@@ -41,6 +41,8 @@ function pageWindow(cur, total){
 // filter-bar chevrons (desktop pills)
 const CHEV = '<svg width="10" height="7" viewBox="0 0 10 7" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4"></path></svg>';
 const CHEV_MUTED = '<svg width="10" height="7" viewBox="0 0 10 7" fill="none" stroke="var(--ink-muted)" stroke-width="1.6" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4"></path></svg>';
+// Right chevron — drill-in rows (Employer / Employment type) in the mobile filter page.
+const CHEV_RIGHT = '<svg width="7" height="11" viewBox="0 0 7 11" fill="none" stroke="currentColor" stroke-width="1.8" style="flex:none" aria-hidden="true"><path d="M1.5 1.5 5.5 5.5l-4 4"></path></svg>';
 const CHECK14 = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" style="flex:none" aria-hidden="true"><path d="M3 8.4l3 3L13 4.6"></path></svg>';
 const SORT_ICON = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--ink-muted)" stroke-width="1.7" aria-hidden="true"><path d="M4.4 2.6v10.8"></path><path d="M1.8 10.8l2.6 2.6 2.6-2.6"></path><path d="M9.4 5.2h4.8"></path><path d="M9.4 9h3"></path></svg>';
 const SEARCH_ICON = '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6.8" cy="6.8" r="4.6"></circle><path d="M10.4 10.4l3.4 3.4"></path></svg>';
@@ -76,7 +78,9 @@ class BoardApp extends React.Component {
     this._initialJobId = this._openJob ? this._openJob.internal_id : null;
     this.state = { openId: this._initialJobId, recs: props.initialRecs || null, logoOk: {}, details: {}, stateCtx: null,
       cities: CITIES, zips: ZIPS, cityGeo: CITY_GEO, cats: [], catDraft: [], loc: "", locDraft: "", radius: 15,
-      showsPay: false, shifts: [], types: [], exps: [], employers: [], sheet: null, sort: "newest", pg: 1,
+      // Experience defaults to NONE_NEEDED only (owner-confirmed, board-wide incl. baked SEO): the
+      // site's whole promise is no-experience work. Absence of ?exp = this default; ?exp=all widens.
+      showsPay: false, shifts: [], types: [], exps: ["none"], employers: [], sheet: null, filterSub: null, sort: "newest", pg: 1,
       // Change #1: email-only capture — location/type-of-work fields and their state removed.
       alertsOpen: false, alertEmail: "", alertPhase: "form", alertError: "",
       wide: window.matchMedia(BP).matches };
@@ -124,14 +128,45 @@ class BoardApp extends React.Component {
   // Employer list is dynamic (from the live set), so "Apply all" is computed from recs, not a const.
   selectAllEmployers = () => { const slugs = [...new Set((this.state.recs || []).map((r) => R.employerSlug(r.company_name)).filter(Boolean))]; const n = this.state.employers.length === slugs.length ? [] : slugs; this.setState({ employers: n, openId: null, pg: 1 }); this.writeUrl({ employers: n, openId: null, page: 1 }); };
   togglePay = () => { const v = !this.state.showsPay; this.setState({ showsPay: v, openId: null, pg: 1 }); this.writeUrl({ showsPay: v, openId: null, page: 1 }); };
+  // Live select-all for the mobile Work Type list (the page applies filters live, unlike the
+  // desktop popover's draft+Apply). Toggles between all categories and none.
+  selectAllCatsLive = () => { const n = (this.state.cats || []).length === R.CATEGORIES.length ? [] : R.CATEGORIES.slice(); this.setState({ cats: n, openId: null, pg: 1 }); this.writeUrl({ cats: n, openId: null, page: 1 }); };
   clearAll = () => {
-    this.setState({ cats: [], catDraft: [], loc: "", locDraft: "", showsPay: false, shifts: [], types: [], exps: [], employers: [], openId: null, sheet: null, pg: 1 });
-    this.writeUrl({ cats: [], loc: "", showsPay: false, shifts: [], types: [], exps: [], employers: [], openId: null, page: 1 });
+    // Reset to the board's defaults — experience returns to NONE_NEEDED only (the baseline the
+    // green band states), not "all". Every other filter clears. (One Clear-all path; see B-report.)
+    this.setState({ cats: [], catDraft: [], loc: "", locDraft: "", showsPay: false, shifts: [], types: [], exps: ["none"], employers: [], openId: null, sheet: null, filterSub: null, pg: 1 });
+    this.writeUrl({ cats: [], loc: "", showsPay: false, shifts: [], types: [], exps: ["none"], employers: [], openId: null, page: 1 });
   };
-  openSheet = (which) => (e) => { this._trigger = e && e.currentTarget ? e.currentTarget : null; this.setState({ sheet: which, locDraft: this.state.loc, catDraft: (this.state.cats || []).slice() }); };
-  closeSheet = () => { const t = this._trigger; this.setState({ sheet: null }, () => { if (t && t.isConnected) t.focus(); this._trigger = null; }); };
+  openSheet = (which) => (e) => {
+    this._trigger = e && e.currentTarget ? e.currentTarget : null;
+    // Mobile has no per-section popovers — only the Sort menu and the full filter page. Route any
+    // section request (strip controls, and the empty-state "Change X" CTAs that share `narrowing`)
+    // into the full page: as a drill-in for Employer / Employment type, else scrolled to the section.
+    if (!this.state.wide && which !== "sort") {
+      const sub = (which === "emp" || which === "type") ? which : null;
+      this._filterScrollTo = sub || which === "all" ? null : which;
+      this.setState({ sheet: "all", filterSub: sub, locDraft: this.state.loc, catDraft: (this.state.cats || []).slice() });
+      return;
+    }
+    this.setState({ sheet: which, locDraft: this.state.loc, catDraft: (this.state.cats || []).slice() });
+  };
+  closeSheet = () => { const t = this._trigger; this.setState({ sheet: null, filterSub: null }, () => { if (t && t.isConnected) t.focus(); this._trigger = null; }); };
+  // Strip controls open the full mobile filter page (sheet "all"); `scrollTo` lands it on a
+  // section (Location is first, so it opens at top). Filters inside apply LIVE — the sticky
+  // "See N jobs" footer states the outcome and closing commits any pending location draft.
+  openFilterPage = (scrollTo) => this.openSheet(scrollTo || "all");
+  openSub = (which) => () => this.setState({ filterSub: which });   // drill-in (Employer / Employment type)
+  closeSub = () => this.setState({ filterSub: null });
+  setFilterScroller = (el) => { if (el) this._filterScroller = el; };
+  setSecRef = (key) => (el) => { this._secRef = this._secRef || {}; if (el) this._secRef[key] = el; };
   onLocDraft = (e) => this.setState({ locDraft: e.target.value });
   onLocKey = (e) => { if (e.key === "Enter") { e.preventDefault(); this.applyLoc()(); } };
+  // Filter-page location apply: commit the draft but KEEP the page open (unlike applyLoc, which
+  // closes its popover). Radius applies live via setRadius, which already leaves the page open.
+  applyLocStay = () => { const v = this.state.locDraft; this.setState({ loc: v, openId: null, pg: 1 }); this.writeUrl({ loc: v, openId: null, page: 1 }); };
+  onLocKeyStay = (e) => { if (e.key === "Enter") { e.preventDefault(); this.applyLocStay(); } };
+  // "See N jobs" — commit any pending location draft, then close the page.
+  applyAndClose = () => { if (this.state.locDraft !== this.state.loc) this.applyLocStay(); this.closeSheet(); };
   applyLoc = (value) => () => { const v = value === undefined ? this.state.locDraft : value; this.setState({ loc: v, locDraft: v, sheet: null, openId: null, pg: 1 }); this.writeUrl({ loc: v, openId: null, page: 1 }); };
   clearLoc = () => { this.setState({ loc: "", locDraft: "", openId: null, pg: 1 }); this.writeUrl({ loc: "", openId: null, page: 1 }); };
   setRadius = (r) => () => { this.setState({ radius: r, pg: 1 }); this.writeUrl({ radius: r, page: 1 }); };
@@ -182,7 +217,11 @@ class BoardApp extends React.Component {
     if (qcats.length && !out.cats) out.cats = qcats;
     out.shifts = listOf("shift", R.SHIFT_FACETS);
     out.types = listOf("type", R.TYPE_FACETS);
-    out.exps = listOf("exp", R.EXP_FACETS);
+    // exp default (board-wide): NO ?exp param -> ["none"] (no-experience only). An explicit
+    // ?exp=all (or any value that filters to no allowed facet) widens to everything. ?exp=none,
+    // ?exp=preferred etc. parse as before. This keeps the default URL clean (no param).
+    const expParam = p.get("exp");
+    out.exps = (expParam === null) ? ["none"] : listOf("exp", R.EXP_FACETS);
     out.employers = String(p.get("emp") || "").split(",").map((v) => v.trim()).filter(Boolean);   // dynamic set; validated by matching in derive
     out.showsPay = p.get("pay") === "1";
     const loc = p.get("location");
@@ -219,7 +258,11 @@ class BoardApp extends React.Component {
         if (pick("showsPay")) q.set("pay", "1");
         const shifts = pick("shifts") || []; if (shifts.length) q.set("shift", shifts.join(","));
         const types = pick("types") || []; if (types.length) q.set("type", types.join(","));
-        const exps = pick("exps") || []; if (exps.length) q.set("exp", exps.join(","));
+        // exp: omit the param for the default (["none"]) so the canonical URL stays clean;
+        // an empty set (widened to all) is written explicitly as ?exp=all.
+        const exps = pick("exps") || [];
+        const expDefault = exps.length === 1 && exps[0] === "none";
+        if (!expDefault) q.set("exp", exps.length ? exps.join(",") : "all");
         const employers = pick("employers") || []; if (employers.length) q.set("emp", employers.join(","));
         const sort = pick("sort"); if (sort && sort !== "newest") q.set("sort", sort);
         if (page > 1) q.set("page", String(page));
@@ -275,7 +318,7 @@ class BoardApp extends React.Component {
       const jobRef = u._jobRef; delete u._jobRef;
       let openId = null;
       if (jobRef) { const rec = (this.state.recs || []).find((r) => jobRef.internalId ? r.internal_id === jobRef.internalId : r.job_number === jobRef.jobNumber); openId = rec ? rec.internal_id : null; }
-      this.setState(Object.assign({ stateCtx: null, cats: [], shifts: [], types: [], exps: [], employers: [], loc: "", locDraft: "", showsPay: false, sort: "newest", pg: 1, sheet: null }, u, { openId }));
+      this.setState(Object.assign({ stateCtx: null, cats: [], shifts: [], types: [], exps: ["none"], employers: [], loc: "", locDraft: "", showsPay: false, sort: "newest", pg: 1, sheet: null, filterSub: null }, u, { openId }));
     };
     window.addEventListener("popstate", this._onPop);
     const urlState = this.readUrl();
@@ -326,6 +369,15 @@ class BoardApp extends React.Component {
     const wasSheet = prevState ? prevState.sheet : this._wasSheet;
     this._wasSheet = this.state.sheet;
     if (this.state.sheet && wasSheet !== this.state.sheet) this.focusIntoPanel();
+    // Mobile filter page: land on the section the strip control asked for (Work Type opens mid-page;
+    // Location is first, so it opens at top with no scroll). Deferred past focusIntoPanel's rAF.
+    if (this.state.sheet === "all" && wasSheet !== "all" && this._filterScrollTo) {
+      const key = this._filterScrollTo; this._filterScrollTo = null;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const el = this._secRef && this._secRef[key];
+        if (el && el.scrollIntoView) { try { el.scrollIntoView({ block: "start" }); } catch (e) {} }
+      }));
+    }
     if (wasOpen && !this.state.openId) {
       const restore = () => { const node = this._scrollNode || this._list; if (node) node.scrollTop = this._scroll || 0; };
       restore(); requestAnimationFrame(restore);
@@ -477,6 +529,7 @@ class BoardApp extends React.Component {
     const loading = recs === null;
     const all = recs || [];
     const cats = st.cats || [], shifts = st.shifts || [], types = st.types || [], exps = st.exps || [], employers = st.employers || [];
+    const expIsDefault = exps.length === 1 && exps[0] === "none";   // the no-experience-only baseline
     const res = L.resolveLocation(st.loc, st.cities, st.zips);
     const radius = st.radius;
     const inLoc = (r) => {
@@ -543,7 +596,7 @@ class BoardApp extends React.Component {
     if (employers.length) narrowing.push({ label: "Employer", fix: "Clear the employer filter or add another employer.", open: this.openSheet("emp") });
     if (st.showsPay) narrowing.push({ label: "Shows pay", fix: "Turn off Shows pay — most employers don’t state pay.", open: null });
     if (res.kind !== "all") narrowing.push({ label: "Location", fix: "Try a wider radius, or a different city.", open: this.openSheet("loc") });
-    if (cats.length) narrowing.push({ label: "Type of work", fix: "Add another type of work.", open: this.openSheet("cat") });
+    if (cats.length) narrowing.push({ label: "Work Type", fix: "Add another work type.", open: this.openSheet("cat") });
 
     // On a cold job page the list is a skeleton (recs still loading), so the open job isn't in
     // `all` yet — fall back to the seeded panel record so the panel paints immediately. Once
@@ -624,8 +677,15 @@ class BoardApp extends React.Component {
       typeLabel: types.length ? listOf(types) : null,
       expLabel: exps.length ? listOf(exps.map((e2) => R.EXP_FACET_LABEL[e2])) : null,
       employerLabel: employers.length ? listOf(employers.map((s2) => empSeen[s2] || s2)) : null,
-      anyFilter: !!(cats.length || res.kind !== "all" || st.showsPay || shifts.length || types.length || exps.length || employers.length),
+      // Experience defaults to NONE_NEEDED only, so ["none"] is NOT an active refinement — it's the
+      // baseline. anyFilter (Clear/Reset visibility) counts experience only when it differs.
+      anyFilter: !!(cats.length || res.kind !== "all" || st.showsPay || shifts.length || types.length || employers.length || !expIsDefault),
       extraCount: (shifts.length ? 1 : 0) + (types.length ? 1 : 0) + (exps.length ? 1 : 0) + (employers.length ? 1 : 0) + (st.showsPay ? 1 : 0),
+      // Mobile Filters badge — count of active groups NOT surfaced on their own control (location,
+      // experience, and Job type each have a dedicated strip control / band, so they're excluded).
+      filtersBadge: (shifts.length ? 1 : 0) + (types.length ? 1 : 0) + (employers.length ? 1 : 0) + (st.showsPay ? 1 : 0),
+      noExpOn: expIsDefault,   // green-band switch state: on = no-experience only (the default)
+      resultLabelShort: total === 1 ? "1 job" : total + " jobs",
       sortLabel: (R.SORTS.find((s2) => s2.id === st.sort) || R.SORTS[0]).label,
       sortOptions: R.SORTS.map((s2) => ({ label: s2.label, isCurrent: s2.id === st.sort, notCurrent: s2.id !== st.sort, pick: this.setSort(s2.id) })),
       radiusOptions: L.RADII.map((r) => ({ label: r + " mi", value: r, isOff: !isZipDraft, isOnCurrent: isZipDraft && r === radius, isOnOther: isZipDraft && r !== radius, pick: this.setRadius(r) })),
@@ -714,7 +774,7 @@ class BoardApp extends React.Component {
   renderFilterBarWide(d){
     const sheet = this.state.sheet;
     return h("div", { style: s("flex:none;display:flex;align-items:center;gap:7px;padding:8px 20px;border-bottom:1px solid var(--line);position:relative;z-index:5;flex-wrap:wrap") },
-      d.cats.length ? this.pill(true, d.catLabel, this.openSheet("cat"), sheet === "cat") : this.pill(false, "Type of work", this.openSheet("cat"), sheet === "cat"),
+      d.cats.length ? this.pill(true, d.catLabel, this.openSheet("cat"), sheet === "cat") : this.pill(false, "Work Type", this.openSheet("cat"), sheet === "cat"),
       d.locResolved ? this.pill(true, d.locLabel, this.openSheet("loc"), sheet === "loc") : this.pill(false, "Location", this.openSheet("loc"), sheet === "loc"),
       this.state.showsPay
         ? h("button", { type: "button", onClick: this.togglePay, "aria-pressed": true, style: s("min-height:34px;display:flex;align-items:center;gap:6px;padding:0 10px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);font-size:14.5px;font-weight:700;color:var(--accent-ink);cursor:pointer;flex:none") }, raw(CHECK14), h("span", { style: s("white-space:nowrap") }, "Shows pay"))
@@ -774,18 +834,151 @@ class BoardApp extends React.Component {
     );
   }
 
-  // Flagship filter — "no experience required", the product's whole promise. Now the LEAD
-  // pill in the mobile filter strip (no longer a dedicated row, for density); same pill
-  // vocabulary as the other filters, navy when on, no count. 44px touch target held.
-  renderNoExpPill(){
-    const on = this.state.exps.length === 1 && this.state.exps[0] === "none";
-    return on
-      ? h("button", { key: "noexp", type: "button", onClick: this.toggleNoExp, "aria-pressed": true,
-          style: s("min-height:44px;display:flex;align-items:center;gap:6px;padding:0 11px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);font-size:14px;font-weight:700;color:var(--accent-ink);cursor:pointer;flex:none") },
-          raw(CHECK14), h("span", { style: s("white-space:nowrap") }, "No experience"))
-      : h("button", { key: "noexp", type: "button", onClick: this.toggleNoExp, "aria-pressed": false, className: "hv-bd-accent",
-          style: s("min-height:44px;display:flex;align-items:center;padding:0 11px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;flex:none") },
-          h("span", { style: s("white-space:nowrap") }, "No experience"));
+  // ── mobile filter primitives ─────────────────────────────────────────────
+  // iOS-style pill switch — the one deliberately rounded control in a hard-cornered UI, because a
+  // switch has to read as a switch. `tone:"ok"` uses the palette's green (--ok, reserved for the
+  // experience claim); default is the brand red. The 44px hit box wraps a 26px-tall track.
+  switchEl(on, onClick, label, tone){
+    const track = tone === "ok" ? "var(--ok)" : "var(--accent)";
+    return h("button", { type: "button", role: "switch", "aria-checked": on, "aria-label": label, onClick,
+        style: s("flex:none;width:48px;height:44px;padding:0;display:grid;place-items:center;background:transparent;border:0;cursor:pointer") },
+      h("span", { "aria-hidden": "true", style: s("position:relative;display:block;width:44px;height:26px;border-radius:13px;transition:background 140ms ease;background:" + (on ? track : "var(--hair)")) },
+        h("span", { style: s("position:absolute;top:3px;left:" + (on ? "21px" : "3px") + ";width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(10,58,117,0.3);transition:left 140ms ease") })));
+  }
+  // On/off/unavailable option rendered as a tile (Work Type, Shift, Employment type). Navy fill
+  // when on; dashed + dimmed when the current result set has none of it.
+  tileOpt(o, i){
+    if (o.isUnavailable) return h("button", { key: i, type: "button", disabled: true, "aria-disabled": true,
+      style: s("min-height:44px;border-radius:3px;font-size:14px;font-weight:600;cursor:not-allowed;background:var(--surface-raised);border:1px dashed var(--line);color:var(--ink-muted);opacity:0.55;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px") }, o.label);
+    const on = o.isOn;
+    return h("button", { key: i, type: "button", onClick: o.pick, "aria-pressed": on,
+      style: s("min-height:44px;border-radius:3px;font-size:14px;font-weight:" + (on ? "700" : "600") + ";cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px;background:" + (on ? "var(--ink)" : "var(--surface-raised)") + ";border:1px solid " + (on ? "var(--ink)" : "var(--line)") + ";color:" + (on ? "var(--accent-ink)" : "var(--ink)")) }, o.label);
+  }
+  // Full-width checkbox row (Employer drill-in list). Whole row is the hit target.
+  checkRow(o, i, bold){
+    const on = o.isOn;
+    return h("button", { key: i, type: "button", role: "checkbox", "aria-checked": on, onClick: o.pick, className: "hv-bg-sunk",
+        style: s("width:100%;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:11px;padding:0 12px;background:transparent;border:0;font-size:15px;color:var(--ink);cursor:pointer;text-align:left") },
+      h("span", { "aria-hidden": "true", style: s("flex:none;width:20px;height:20px;display:grid;place-items:center;border-radius:3px;color:var(--accent-ink);border:1px solid " + (on ? "var(--ink)" : "var(--line)") + ";background:" + (on ? "var(--ink)" : "var(--surface)")) }, on ? raw(CHECK14) : null),
+      h("span", { style: s("flex:1;font-weight:" + (bold ? "700" : (on ? "700" : "500"))) }, o.label));
+  }
+  // Drill-in row (Employer / Employment type): label left, current value + › right.
+  drillRow(label, value, onClick){
+    return h("button", { type: "button", onClick,
+        style: s("width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 12px;min-height:52px;border:0;border-bottom:1px solid var(--line);background:transparent;cursor:pointer;text-align:left") },
+      h("span", { style: s("font-size:15px;font-weight:600;color:var(--ink)") }, label),
+      h("span", { style: s("display:flex;align-items:center;gap:6px;min-width:0;color:var(--ink-muted)") },
+        h("span", { style: s("overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px;font-size:14px") }, value), raw(CHEV_RIGHT)));
+  }
+  // Section shell — tight 10px padding, 13px/500 label + optional hint (the §4 density spec).
+  filterSec(key, label, hint, body){
+    return h("div", { key: key, ref: this.setSecRef(key), style: s("padding:10px 12px;border-bottom:1px solid var(--line)") },
+      h("div", { style: s("display:flex;align-items:baseline;gap:8px;margin-bottom:7px") },
+        h("div", { style: s("font-size:13px;font-weight:600;color:var(--ink)") }, label),
+        hint && h("span", { style: s("font-size:12px;font-weight:500;color:var(--ink-muted)") }, hint)),
+      body);
+  }
+
+  // ── mobile: strip (three controls) ───────────────────────────────────────
+  renderMobileStrip(d){
+    const locActive = d.locResolved;
+    const locText = locActive ? d.locLabel : (d.hasLoc ? d.locLabel : "Location");
+    return h("div", { className: "brd-fstrip", style: s("flex:none;display:flex;align-items:center;gap:6px;padding:5px 12px;border-bottom:1px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch") },
+      // Location — a button (not a raw input): tapping opens the filter page at the Location
+      // section, where the ZIP + radius live. Red dot signals a location is set; radius shown inline.
+      h("button", { type: "button", onClick: this.openFilterPage("loc"), "aria-label": "Location and radius", className: "hv-bd-accent",
+          style: s("flex:1 0 128px;min-width:116px;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 11px;border:1px solid " + (locActive ? "var(--ink)" : "var(--line)") + ";border-radius:3px;background:var(--surface-raised);cursor:pointer;text-align:left") },
+        locActive && h("span", { "aria-hidden": "true", style: s("flex:none;width:7px;height:7px;border-radius:50%;background:var(--accent)") }),
+        h("span", { style: s("flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:" + (locActive ? "700" : "500") + ";color:" + (locActive ? "var(--ink)" : "var(--ink-muted)")) }, locText)),
+      // Work Type — opens the filter page at the Work Type section (▾); navy when a type is chosen.
+      d.cats.length
+        ? h("button", { type: "button", onClick: this.openFilterPage("cat"), "aria-label": "Work Type", style: s("flex:none;min-height:44px;display:flex;align-items:center;gap:5px;padding:0 10px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);font-size:14px;font-weight:700;color:var(--accent-ink);cursor:pointer") }, h("span", { style: s("white-space:nowrap") }, d.catChipLabel), raw(CHEV))
+        : h("button", { type: "button", onClick: this.openFilterPage("cat"), "aria-label": "Work Type", className: "hv-bd-accent", style: s("flex:none;min-height:44px;display:flex;align-items:center;gap:5px;padding:0 10px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14px;font-weight:500;color:var(--ink);cursor:pointer") }, h("span", { style: s("white-space:nowrap") }, "Work Type"), raw(CHEV_MUTED)),
+      // Filters — opens the full page. Corner badge counts active groups not surfaced on their own
+      // control (location, experience and Work Type each have a dedicated control/band, so excluded).
+      d.filtersBadge
+        ? h("button", { type: "button", onClick: this.openFilterPage(null), "aria-label": "Filters, " + d.filtersBadge + " active", style: s("flex:none;position:relative;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 11px;border:1px solid var(--ink);border-radius:3px;background:var(--surface-raised);font-size:14px;font-weight:700;color:var(--ink);cursor:pointer") }, raw(FILTERS_ICON), h("span", null, "Filters"),
+            h("span", { style: s("position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;box-sizing:border-box;display:grid;place-items:center;padding:0 4px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:800;border:1.5px solid var(--surface)") }, d.filtersBadge))
+        : h("button", { type: "button", onClick: this.openFilterPage(null), "aria-label": "Filters", className: "hv-bd-accent", style: s("flex:none;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 11px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14px;font-weight:500;color:var(--ink);cursor:pointer") }, raw(FILTERS_ICON_MUTED), h("span", null, "Filters"))
+    );
+  }
+
+  // ── mobile: the green Experience band (on by default; one-tap reversible) ──
+  renderExpBand(d){
+    const on = d.noExpOn;
+    return h("div", { key: "expband", style: s("flex:none;display:flex;align-items:center;gap:8px;padding:0 8px 0 12px;min-height:38px;background:var(--ok-soft);border-bottom:1px solid var(--line)") },
+      this.switchEl(on, this.toggleNoExp, "No experience required", "ok"),
+      h("span", { style: s("flex:1;font-size:14px;font-weight:700;color:var(--ok-ink-text)") },
+        "No experience required",
+        h("span", { style: s("font-weight:500;opacity:0.85") }, " — " + (on ? "on" : "off"))));
+  }
+
+  // ── mobile: full-page filter (own header, own scroll, sticky footer) ──────
+  renderFilterPage(d){
+    const sub = this.state.filterSub;
+    const header = h("div", { style: s("flex:none;display:flex;align-items:center;gap:8px;padding:0 6px;min-height:48px;border-bottom:1px solid var(--line)") },
+      h("button", { type: "button", onClick: this.closeSheet, "aria-label": "Close filters", className: "hv-bg-sunk", style: s("flex:none;width:44px;height:44px;display:grid;place-items:center;background:transparent;border:0;border-radius:3px;cursor:pointer;color:var(--ink)") }, raw(CLOSE15)),
+      h("span", { style: s("flex:1;text-align:center;font-size:16px;font-weight:800;color:var(--ink)") }, "Filters"),
+      h("button", { type: "button", onClick: this.clearAll, style: s("flex:none;min-height:44px;padding:0 12px;background:transparent;border:0;font-size:15px;font-weight:700;color:var(--accent);cursor:pointer") }, "Reset"));
+
+    // Drill-in sub-views replace the section body (a back row + the option list); header/footer stay.
+    let body;
+    if (sub) {
+      const isEmp = sub === "emp";
+      body = h("div", { key: "sub", style: s("flex:1;min-height:0;display:flex;flex-direction:column") },
+        h("div", { style: s("flex:none;display:flex;align-items:center;padding:0 6px;min-height:48px;border-bottom:1px solid var(--line)") },
+          h("button", { type: "button", onClick: this.closeSub, "aria-label": "Back to filters", className: "hv-bg-sunk", style: s("min-height:44px;display:flex;align-items:center;gap:5px;padding:0 8px;background:transparent;border:0;border-radius:3px;cursor:pointer;color:var(--ink);font-size:15px;font-weight:700") }, raw(BACK_CHEV), h("span", null, isEmp ? "Employer" : "Employment type"))),
+        h("div", { style: s("flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch") },
+          isEmp
+            ? h("div", { style: s("padding:4px 0") }, [this.checkRow({ isOn: d.employerAllOn, label: "All employers", pick: this.selectAllEmployers }, "all", true)].concat((d.employerOptions || []).map((e2, i) => this.checkRow(e2, i))))
+            : h("div", { style: s("padding:10px 12px") }, h("div", { style: s("display:grid;grid-template-columns:1fr 1fr;gap:6px") }, (d.typeOptions || []).map((t, i) => this.tileOpt(t, i))))));
+    } else {
+      body = h("div", { key: "main", ref: this.setFilterScroller, style: s("flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch") },
+        // Location — ZIP input (navy-filled when it carries a value) + 10/15/25 three-up (default 15).
+        this.filterSec("loc", "Location", null, h("div", null,
+          h("input", { type: "text", value: this.state.locDraft, onChange: this.onLocDraft, onKeyDown: this.onLocKeyStay, placeholder: "City, state or ZIP", "aria-label": "City, state or ZIP",
+            style: s("box-sizing:border-box;width:100%;min-height:44px;padding:0 12px;border:1px solid var(--ink);border-radius:3px;font-size:16px;font-family:inherit;outline:none;" + (this.state.locDraft ? "background:var(--ink);color:#fff" : "background:var(--surface);color:var(--ink)")) }),
+          h("div", { style: s("display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:7px") },
+            (d.radiusOptions || []).map((r, i) => { const cur = r.value === d.radius; return h("button", { key: i, type: "button", onClick: r.pick, "aria-pressed": cur,
+              style: s("min-height:44px;border-radius:3px;font-size:14px;font-weight:" + (cur ? "700" : "600") + ";cursor:pointer;background:" + (cur ? "var(--ink)" : "var(--surface-raised)") + ";border:1px solid " + (cur ? "var(--ink)" : "var(--line)") + ";color:" + (cur ? "var(--accent-ink)" : "var(--ink)")) }, r.label); })),
+          d.radiusInactive && h("div", { style: s("margin-top:6px;font-size:12.5px;line-height:1.4;color:var(--ink-muted)") }, "Radius applies to a ZIP code. A city or state name filters to that area."),
+          (d.unmatched || d.noCityMatch) && h("div", { style: s("margin-top:7px;font-size:14px;line-height:1.45;color:var(--ink);text-wrap:pretty") }, d.unmatched ? d.unmatchedLine : d.noCityMatchLine))),
+        // Experience — no section heading; the row label ("No experience required only") names it.
+        // Same NONE_NEEDED-only switch as the board band, in sync.
+        h("div", { ref: this.setSecRef("exp"), style: s("display:flex;align-items:center;gap:8px;padding:0 8px 0 12px;min-height:52px;border-bottom:1px solid var(--line)") },
+          h("span", { style: s("flex:1;font-size:15px;font-weight:600;color:var(--ink)") }, "No experience required only"),
+          this.switchEl(d.noExpOn, this.toggleNoExp, "No experience required only", "ok")),
+        // Work Type — all categories as COMPACT small-text checkboxes in two columns (not full-width
+        // rows), so the ten fit in ~5 rows instead of consuming the page. Applied live.
+        this.filterSec("cat", "Work Type", null, h("div", null,
+          h("button", { type: "button", role: "checkbox", "aria-checked": d.cats.length === R.CATEGORIES.length, onClick: this.selectAllCatsLive, className: "hv-bg-sunk",
+              style: s("display:flex;align-items:center;gap:8px;min-height:34px;padding:0 5px;margin-bottom:3px;background:transparent;border:0;border-radius:3px;cursor:pointer;font-size:13px;font-weight:700;color:var(--ink)") },
+            h("span", { "aria-hidden": "true", style: s("flex:none;width:17px;height:17px;display:grid;place-items:center;border-radius:3px;color:var(--accent-ink);border:1px solid " + (d.cats.length === R.CATEGORIES.length ? "var(--ink)" : "var(--line)") + ";background:" + (d.cats.length === R.CATEGORIES.length ? "var(--ink)" : "var(--surface)")) }, d.cats.length === R.CATEGORIES.length ? raw(CHECK14) : null),
+            h("span", null, "All work types")),
+          h("div", { style: s("display:grid;grid-template-columns:1fr 1fr;gap:1px 8px") },
+            (d.catOptions || []).map((c, i) => h("button", { key: i, type: "button", role: "checkbox", "aria-checked": c.isOn, onClick: c.pick, className: "hv-bg-sunk",
+                style: s("display:flex;align-items:center;gap:7px;min-height:38px;padding:0 4px;background:transparent;border:0;border-radius:3px;cursor:pointer;text-align:left") },
+              h("span", { "aria-hidden": "true", style: s("flex:none;width:17px;height:17px;display:grid;place-items:center;border-radius:3px;color:var(--accent-ink);border:1px solid " + (c.isOn ? "var(--ink)" : "var(--line)") + ";background:" + (c.isOn ? "var(--ink)" : "var(--surface)")) }, c.isOn ? raw(CHECK14) : null),
+              h("span", { style: s("flex:1;font-size:13px;font-weight:" + (c.isOn ? "700" : "500") + ";line-height:1.15;color:var(--ink)") }, c.label)))))),
+        // Shift — two-up tiles.
+        this.filterSec("shift", "Shift", null, h("div", { style: s("display:grid;grid-template-columns:1fr 1fr;gap:6px") }, (d.shiftOptions || []).map((so, i) => this.tileOpt(so, i)))),
+        // Low-use groups drill in rather than expanding inline.
+        this.drillRow("Employer", d.employers.length ? d.employerLabel : "All", this.openSub("emp")),
+        this.drillRow("Employment type", d.types.length ? d.typeLabel : "All", this.openSub("type")),
+        // Shows pay only — a switch row.
+        h("div", { style: s("display:flex;align-items:center;gap:8px;padding:0 8px 0 12px;min-height:52px;border-bottom:1px solid var(--line)") },
+          h("span", { style: s("flex:1;font-size:15px;font-weight:600;color:var(--ink)") }, "Shows pay only"),
+          this.switchEl(this.state.showsPay, this.togglePay, "Shows pay only")));
+    }
+
+    // Sticky footer — the ONE "Clear all" in the interface + the outcome-stating primary button.
+    const footer = h("div", { style: s("flex:none;display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--line);background:var(--surface)") },
+      h("button", { type: "button", onClick: this.clearAll, style: s("flex:none;min-height:44px;padding:0 10px;background:transparent;border:0;font-size:15px;font-weight:700;color:var(--accent);cursor:pointer") }, "Clear all"),
+      h("button", { type: "button", onClick: this.applyAndClose, style: s("flex:1;min-height:48px;border-radius:3px;background:var(--accent);border:0;font-size:16px;font-weight:800;color:var(--accent-ink);cursor:pointer") }, "See " + d.total + (d.total === 1 ? " job" : " jobs")));
+
+    return h("div", { key: "fpage", "data-filter-drawer": "true", role: "dialog", "aria-modal": "true", "aria-label": "Filters",
+        style: s("position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;background:var(--surface);animation:sheetdown 200ms cubic-bezier(.22,.61,.36,1)") },
+      header, body, footer);
   }
 
   // ── mobile ────────────────────────────────────────────────────────────
@@ -796,65 +989,27 @@ class BoardApp extends React.Component {
     // rail — a "goes wide then centers" jump. Constrain it to the same rail so the outer width is
     // stable across the mobile→desktop handoff. On phones (<768px) the rule is off — full width.
     return h("div", { className: "brd-body-m", style: s("display:flex;flex-direction:column;height:100%;min-height:0;position:relative") },
-      // filter row — one horizontally scrollable strip. Order: City/ZIP (most-used on a job
-      // board, so first-visible) + flagship "No experience" pill + Type of work + Filters.
-      // The dedicated "No experience required" row is gone (density); label shortened to fit.
-      h("div", { className: "brd-fstrip", style: s("flex:none;display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch") },
-        h("div", { className: "fw-bd-accent", style: s("flex:1 0 150px;min-width:150px;display:flex;align-items:stretch;gap:2px;min-height:44px;padding:0 6px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised)") },
-          h("button", { type: "button", onClick: this.applyLoc(), "aria-label": "Search location", className: "hv-tx-accent", style: s("flex:none;width:36px;align-self:stretch;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;color:var(--ink-muted)") }, raw(SEARCH_ICON)),
-          h("input", { type: "text", value: this.state.locDraft, onChange: this.onLocDraft, onKeyDown: this.onLocKey, placeholder: "City or ZIP", "aria-label": "City, state or ZIP", style: s("flex:1;min-width:0;align-self:stretch;height:auto;border:0;outline:none;background:transparent;font-size:15px;color:var(--ink);padding:0") }),
-          d.hasLoc && h("button", { key: "clr", type: "button", onClick: this.clearLoc, "aria-label": "Clear location", className: "hv-tx-ink", style: s("flex:none;width:34px;align-self:stretch;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;color:var(--ink-muted)") }, raw(X_SMALL))),
-        this.renderNoExpPill(),
-        d.cats.length
-          ? h("button", { type: "button", onClick: this.openSheet("cat"), "aria-expanded": sheet === "cat", "aria-haspopup": "true", style: s("min-height:44px;display:flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);font-size:14px;font-weight:700;color:var(--accent-ink);cursor:pointer;flex:none") }, h("span", { style: s("white-space:nowrap") }, d.catChipLabel), raw(CHEV))
-          : h("button", { type: "button", onClick: this.openSheet("cat"), "aria-expanded": sheet === "cat", "aria-haspopup": "true", className: "hv-bd-accent", style: s("min-height:44px;display:flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;flex:none") }, h("span", { style: s("white-space:nowrap") }, "Type of work"), raw(CHEV_MUTED)),
-        d.extraCount
-          ? h("button", { type: "button", onClick: this.openSheet("all"), "aria-expanded": sheet === "all", "aria-haspopup": "true", "aria-label": "Filters", style: s("min-height:44px;display:flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);font-size:14px;font-weight:700;color:var(--accent-ink);cursor:pointer;flex:none") }, raw(FILTERS_ICON), h("span", null, "Filters"), h("span", { style: s("min-width:19px;height:19px;display:grid;place-items:center;padding:0 5px;border-radius:3px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:800") }, d.extraCount))
-          : h("button", { type: "button", onClick: this.openSheet("all"), "aria-expanded": sheet === "all", "aria-haspopup": "true", "aria-label": "Filters", className: "hv-bd-accent", style: s("min-height:44px;display:flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;flex:none") }, raw(FILTERS_ICON_MUTED), h("span", null, "Filters"))
-      ),
-      // Clear all — collapsed-state clear path, shown whenever any filter is active so
-      // categories (and the rest) can be cleared without opening a menu first (B4).
-      d.anyFilter && h("div", { key: "clrall", style: s("flex:none;display:flex;padding:2px 12px 6px") },
-        h("button", { type: "button", onClick: this.clearAll, className: "hv-bright", style: s("min-height:36px;padding:0 4px;background:transparent;border:0;font-size:13.5px;font-weight:600;color:var(--accent);cursor:pointer") }, "Clear all")),
-      // cat sheet
-      h("div", { style: s("position:relative;height:0;z-index:7") },
-        sheet === "cat" && h("div", { key: "cs" },
-          h("div", { onClick: this.closeSheet, style: s("position:absolute;top:0;left:0;right:0;height:1200px;z-index:1;background:transparent") }),
-          h("div", { "data-filter-sheet": "true", role: "dialog", "aria-label": "Type of work", style: s("position:absolute;top:2px;left:16px;z-index:2;width:250px;max-height:420px;display:flex;flex-direction:column;background:var(--surface-raised);border:1px solid var(--ink);border-radius:3px;box-shadow:0 10px 30px rgba(10,58,117,0.18);animation:sheetdown 160ms cubic-bezier(.22,.61,.36,1)") },
-            h("div", { style: s("flex:1;min-height:0;overflow-y:auto") }, h(FilterPanel, this.filterProps(d, { isCat: true, catOptions: d.catDraftOptions }))),
-            this.applyFooter()))),
-      d.locResolved && h("div", { key: "showing", style: s("flex:none;display:flex;align-items:center;gap:8px;padding:0 12px 8px;font-size:13px;color:var(--ink-muted)") }, h("span", null, "Showing " + d.locLabel)),
-      // result count + sort
-      h("div", { style: s("flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:3px 12px;border-bottom:1px solid var(--line)") },
-        d.isList && h("span", { key: "rl", style: s("font-size:14px;font-weight:600;color:var(--ink)") }, d.resultLabel),
+      // Chrome: strip (three controls) + green experience band + count/sort row.
+      this.renderMobileStrip(d),
+      this.renderExpBand(d),
+      h("div", { style: s("flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px;min-height:38px;border-bottom:1px solid var(--line)") },
+        d.isList && h("span", { key: "rl", style: s("font-size:14px;font-weight:700;color:var(--ink)") }, d.resultLabelShort),
         h("button", { type: "button", onClick: this.openSheet("sort"), "aria-expanded": sheet === "sort", "aria-haspopup": "true", className: "hv-tx-accent", style: s("margin-left:auto;min-height:44px;display:flex;align-items:center;gap:5px;padding:0 6px;background:transparent;border:0;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer") },
           raw(SORT_ICON), h("span", { style: s("white-space:nowrap") }, d.sortLabel), raw(CHEV_MUTED))),
-      // sort + drawer sheets
+      // Sort popover (sort stays in the count row, not the strip).
       h("div", { style: s("position:relative;height:0;z-index:6") },
         sheet === "sort" && h("div", { key: "ss" },
           h("div", { onClick: this.closeSheet, style: s("position:absolute;top:0;left:0;right:0;height:1200px;z-index:1;background:transparent") }),
           h("div", { "data-filter-sheet": "true", role: "dialog", "aria-label": "Sort", style: s("position:absolute;top:2px;right:16px;z-index:2;width:230px;background:var(--surface-raised);border:1px solid var(--ink);border-radius:3px;box-shadow:0 10px 30px rgba(10,58,117,0.18);animation:sheetdown 160ms cubic-bezier(.22,.61,.36,1)") },
-            h(FilterPanel, this.filterProps(d, { isSort: true })))),
-        sheet === "all" && h("div", { key: "dr" },
-          h("div", { onClick: this.closeSheet, style: s("position:absolute;top:0;left:0;right:0;height:1200px;z-index:5;background:rgba(10,58,117,0.34);animation:scrimin 180ms ease-out") }),
-          h("div", { "data-filter-drawer": "true", role: "dialog", "aria-modal": "true", "aria-label": "Filters", style: s("position:absolute;top:0;left:0;right:0;z-index:6;max-height:560px;display:flex;flex-direction:column;background:var(--surface);border-bottom:1px solid var(--line);border-radius:0 0 3px 3px;box-shadow:0 10px 28px rgba(10,58,117,0.16);animation:sheetdown 220ms cubic-bezier(.22,.61,.36,1)") },
-            h("div", { style: s("flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 8px 8px 16px;border-bottom:1px solid var(--line)") },
-              h("span", { style: s("font-size:16px;font-weight:800;color:var(--ink)") }, "Filters"),
-              h("div", { style: s("display:flex;align-items:center;gap:2px") },
-                d.anyFilter && h("button", { key: "ca", type: "button", onClick: this.clearAll, style: s("min-height:44px;padding:0 10px;background:transparent;border:0;font-size:14px;font-weight:600;color:var(--accent);cursor:pointer") }, "Clear all"),
-                h("button", { type: "button", onClick: this.closeSheet, "aria-label": "Close filters", className: "hv-bg-sunk", style: s("width:44px;height:44px;display:grid;place-items:center;background:transparent;border:0;border-radius:3px;cursor:pointer;color:var(--ink)") }, raw(CLOSE15)))),
-            h("div", { style: s("flex:1;min-height:0;overflow-y:auto") }, h(FilterPanel, this.filterProps(d, { isSort: true, isCat: true, isLoc: true, isPay: true, isShift: true, isType: true, isExp: true, isEmployer: true, divided: true }))),
-            h("div", { style: s("flex:none;padding:12px 16px;border-top:1px solid var(--line)") },
-              h("button", { type: "button", onClick: this.closeSheet, style: s("width:100%;min-height:48px;border-radius:3px;background:var(--accent);border:0;font-size:16px;font-weight:700;color:var(--accent-ink);cursor:pointer") }, "Show jobs"))))
-      ),
-      // Content region. Item 9: the open job overlays ONLY this region, so the filter bar +
-      // "No experience required" toggle above stay visible and tappable while reading a job.
-      // The list stays mounted underneath (scroll preserved); filters change it, ‹ back returns
-      // to it. (Previously a full-screen inset:0 overlay hid the whole filter bar on mobile.)
+            h(FilterPanel, this.filterProps(d, { isSort: true }))))),
+      // Content region. The open job overlays ONLY this region (the chrome above stays visible);
+      // the full-page filter (below) overlays the WHOLE body region, replacing the chrome.
       h("div", { style: s("flex:1;min-height:0;position:relative") },
         h("div", { ref: this.setListEl, "data-list-scroller": "true", style: s("position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch") }, this.listBody(d, false)),
         d.onPage && h("div", { key: "page", style: s("position:absolute;inset:0;z-index:1;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--surface)") },
-          h(JobPage, { page: d.page, categories: R.CATEGORIES, back: this.back, isMobilePage: true, isPanel: false })))
+          h(JobPage, { page: d.page, categories: R.CATEGORIES, back: this.back, isMobilePage: true, isPanel: false }))),
+      // Full-page filter — own header/scroll/sticky footer, covering strip+band+count+list.
+      sheet === "all" && this.renderFilterPage(d)
     );
   }
 
