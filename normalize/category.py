@@ -68,9 +68,10 @@ CATEGORY_PATTERNS = {
     # so a 'Security Officer ... Patrol Driver' is NOT swept in (stays Security only) -
     # all-tenant audited, zero Allied matches. Additive: a retail-automotive title (e.g.
     # a tire SALES associate) also hits Retail/Sales and carries both, by design.
-    # Healthcare-support roles were NOT given a category (owner: clinical stays a sector,
-    # aides stay applicable-but-uncategorized per the 2026-09-02 decision).
-    "Transportation/Automotive": r"\b(delivery driver|truck driver|cdl|courier|route driver|transfer driver|catering driver|food transporter|delivery associate|brake|tire|engine specialist|vanbody|automotive|diesel technician)\b",
+    # Bare 'transporter' (owner 2026-09-11) catches Patient/Medical/Food Transporter; 'truck
+    # sales' stays Sales (no bare 'truck'/'sales' token here). Healthcare-support roles were NOT
+    # given a category (owner: clinical stays a sector, aides applicable-but-uncategorized, 2026-09-02).
+    "Transportation/Automotive": r"\b(delivery driver|truck driver|cdl|courier|route driver|transfer driver|catering driver|transporter|delivery associate|brake|tire|engine specialist|vanbody|automotive|diesel technician)\b",
 }
 
 

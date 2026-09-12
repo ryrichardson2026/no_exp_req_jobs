@@ -151,7 +151,10 @@ class LandingApp extends React.Component {
     // are the counts-bearing browse surface; the chips carry none).
     return LANDING_CATS.map((c) => {
       const n = (this.state.recs || []).filter((r) => R.recordCats(r).indexOf(c) >= 0).length;
-      return { label: c, n: n, count: n + (n === 1 ? " job" : " jobs"), hasCount: n > 0,
+      // displayLabel shortens the long "Transportation/Automotive" to "Transportation" on the card
+      // only — the category VALUE (label) stays full for the icon lookup, href and record matching.
+      return { label: c, displayLabel: c === "Transportation/Automotive" ? "Transportation" : c,
+               n: n, count: n + (n === 1 ? " job" : " jobs"), hasCount: n > 0,
                href: this.boardHref({ category: c, loc: "" }) };
     });
   }
@@ -431,9 +434,13 @@ class LandingApp extends React.Component {
           h(Pressable, { tag: "a", href: c.href, className: "hv-bg-fact",
               styleFor: (pd) => s("position:relative;height:100%;box-sizing:border-box;display:grid;align-content:start;gap:7px;min-height:66px;padding:14px;background:var(--surface-raised);border:2px solid var(--ink);border-radius:3px;text-decoration:none;transition:transform 45ms ease-out;" + (pd ? "transform:translate(4px,4px)" : "")) },
             raw(catIconSvg(c.label, 24)),
+            // Reserve a fixed content height so every card is the SAME size regardless of content:
+            // the label always occupies a 2-line slot (clamped, so long names like
+            // "Transportation/Automotive" never push a card taller), and the count line is always
+            // present (blank when a category has no count) so its absence doesn't shrink the card.
             h("div", { style: s("display:grid;gap:2px") },
-              h("span", { style: s("font-family:var(--font-display);font-weight:800;font-size:16px;line-height:1.2;color:var(--ink)") }, c.label),
-              c.hasCount && h("span", { key: "n", style: s("font-size:13px;line-height:1.35;font-weight:700;color:var(--accent)") }, c.count)))))),
+              h("span", { style: s("font-family:var(--font-display);font-weight:800;font-size:16px;line-height:1.2;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px") }, c.displayLabel),
+              h("span", { key: "n", style: s("font-size:13px;line-height:1.35;font-weight:700;color:var(--accent);min-height:18px") }, c.hasCount ? c.count : "")))))),
       h("a", { href: this.boardHref(), style: s("justify-self:start;min-height:44px;display:inline-flex;align-items:center;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:0.03em;color:var(--accent)") }, "See all work types")
     );
   }
