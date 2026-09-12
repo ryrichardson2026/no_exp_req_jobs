@@ -171,6 +171,11 @@ async function assembleDeploy(live, expiredBack, browse){
     + locs.map((u) => "  <url><loc>" + base + u + "</loc></url>").join("\n") + "\n</urlset>\n";
   await writeFile(join(OUT, "sitemap.xml"), xml, "utf8");
 
+  // robots.txt — allow all + declare the sitemap. Written as a real file so Vercel serves it as
+  // text/plain (its default for .txt), NOT routed through the SPA. Was missing (404) before.
+  await writeFile(join(OUT, "robots.txt"),
+    "User-agent: *\nAllow: /\nSitemap: " + base + "/sitemap.xml\n", "utf8");
+
   // Unbaked browse routes (empty categories, jobless states) fall back to the SPA. Two
   // explicit rules — state root and sub-path with an unnamed (.*) wildcard — matching the
   // form proven in D1; a single "/:state/:rest*" did not match sub-paths on Vercel. Baked
@@ -179,7 +184,14 @@ async function assembleDeploy(live, expiredBack, browse){
   // destination is /board/ (NOT /board.html): with cleanUrls+trailingSlash, /board.html
   // 308-redirects to /board/, and a rewrite whose destination redirects fails to 404.
   const states = Object.values(STATE_SLUG).join("|");
+  const apex = base.replace(/^https?:\/\//, "");   // "noprobjobs.com"
   const vercel = { cleanUrls: true, trailingSlash: true,
+    // Canonicalize the host: www.* -> apex (https). (http -> https is automatic on Vercel.) So
+    // Search Console's host checks and the sitemap resolve to one canonical origin, never a 404.
+    redirects: [
+      { source: "/:path*", has: [{ type: "host", value: "www." + apex }],
+        destination: base + "/:path*", permanent: true },
+    ],
     rewrites: [
       { source: "/:state(" + states + ")", destination: "/board/" },
       { source: "/:state(" + states + ")/(.*)", destination: "/board/" },
