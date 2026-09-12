@@ -30,8 +30,15 @@ $lock  = Join-Path $LogDir '.pull.lock'
 
 function Log($msg) { $line = "[{0}] {1}" -f (Get-Date -Format 's'), $msg; $line | Tee-Object -FilePath $log -Append }
 
-# Single-instance guard: a pull runs ~15-20 min; never let two overlap.
-if (Test-Path $lock) { Log "SKIP - a run is already in progress ($lock)"; exit 0 }
+# Single-instance guard: a pull runs ~15-20 min; never let two overlap. A lock older than 3h is
+# stale (a prior run died hard without cleanup) - clear it so runs don't skip forever, rather than
+# blocking every future run.
+if (Test-Path $lock) {
+    $lockAgeH = ((Get-Date) - (Get-Item $lock).LastWriteTime).TotalHours
+    if ($lockAgeH -lt 3) { Log ("SKIP - a run is already in progress ($lock, age {0:N0}m)" -f ($lockAgeH*60)); exit 0 }
+    Log ("STALE LOCK ({0:N1}h old) - prior run died without cleanup; clearing it" -f $lockAgeH)
+    Remove-Item $lock -Force -ErrorAction SilentlyContinue
+}
 New-Item -ItemType File -Path $lock | Out-Null
 
 try {
@@ -58,9 +65,31 @@ try {
         exit 2
     }
 
+    # Newest dashboard record before the run — used to detect a hard crash/kill that leaves no record.
+    $runsGlob = Join-Path $Proj 'out\runs\run_*.json'
+    $before = (Get-ChildItem $runsGlob -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1).Name
+
     Log "START  python run_pull.py --all --publish"
+    # Windows PowerShell 5.1 gotcha: with $ErrorActionPreference='Stop', a NATIVE process that
+    # writes to stderr becomes a *terminating* NativeCommandError once its streams are merged with
+    # *>&1 - which silently killed the whole pull mid-run at the first adapter that logs progress to
+    # stderr (successfactors_rmk/cintas), before anything could be recorded. Drop to 'Continue' for
+    # the child so its stderr flows to the log as plain text; the exit code still gates publish.
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
     & $Python run_pull.py --all --publish *>&1 | Tee-Object -FilePath $log -Append
     $code = $LASTEXITCODE
+    $ErrorActionPreference = $prevEAP
+
+    # Backstop: if run_pull exited non-zero but wrote NO new dashboard record (a hard crash/kill
+    # before it could emit — e.g. the task's time limit fired), record the failure ourselves so the
+    # dashboard ALWAYS reflects the attempt. run_pull's own crash guard covers Python exceptions;
+    # this covers the cases where the process died before any Python handler could run.
+    $after = (Get-ChildItem $runsGlob -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1).Name
+    if ($code -ne 0 -and $after -eq $before) {
+        Log "BACKSTOP  exit $code with no dashboard record - emitting a FAILED record so the run is visible"
+        & $Python -m runlog --fail --reason "run_pull exited $code with no record (hard crash/kill before emit) - see logs\pull_$stamp.log" *>&1 | Tee-Object -FilePath $log -Append
+    }
 
     if ($code -eq 0) { $status = "COMPLETE - published to production" }
     else             { $status = "PARTIAL/FAIL (exit $code) - NOT published, prior build still serving" }

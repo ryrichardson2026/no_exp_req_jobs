@@ -178,6 +178,34 @@ def emit(record):
     return DASHBOARD, mirror_note
 
 
+def emit_failure(stamp=None, reason="", detail=None):
+    """Record a run that FAILED or crashed before it could emit its own record, so the dashboard
+    ALWAYS reflects an attempt (the green-path guarantee: pass, fail, or mid-run crash all show).
+    Called by run_pull's top-level crash handler, its preflight abort, and — as a hard-kill
+    backstop — by the ps1 wrapper via the CLI below. Never raises."""
+    try:
+        stamp = stamp or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        halts = [reason] if reason else ["run did not complete (crashed or was killed before recording)"]
+        if detail:
+            halts.append(detail)
+        record = {
+            "stamp": stamp, "ran_at": iso_from_stamp(stamp),
+            "status": "FAILED", "severity": "critical",
+            "published": False, "publish_status": reason or "crashed before completion",
+            "deploy_url": None,
+            "total_applicable": None, "baseline_applicable": None, "applicable_delta": None,
+            "movement_pct": None, "worst_employer": None, "worst_employer_pct": None,
+            "bake_job_pages": None, "bake_listing_views": None,
+            "bake_jobs_fetched": None, "bake_jobs_total": None, "bake_complete": None,
+            "live_jobs": None, "expired_jobs": None,
+            "git_head": None, "halts": halts, "tenants": [],
+        }
+        return emit(record)
+    except Exception as e:                       # a failure record must itself never sink anything
+        print(f"(emit_failure could not write a record - non-fatal: {type(e).__name__}: {e})")
+        return None, "emit_failure error"
+
+
 # The page is written against CSS custom-property "roles" (dataviz palette): status colors
 # are fixed (good/warning/critical), the trend line is the sequential-blue series, and both
 # light and dark are selected (dark is not an auto-flip). Single series -> no legend on the
@@ -558,3 +586,23 @@ window.addEventListener("resize",draw);
 </body>
 </html>
 """
+
+
+# --------------------------------------------------------------------------
+# CLI backstop: the ps1 wrapper calls `python -m runlog --fail --reason "..."` when run_pull
+# exits non-zero WITHOUT having recorded a run (a hard crash/kill before emit). Guarantees the
+# dashboard reflects the failed attempt even when run_pull itself could not.
+# --------------------------------------------------------------------------
+if __name__ == "__main__":
+    import argparse
+    import sys
+    ap = argparse.ArgumentParser(description="runlog backstop: record a failed run to the dashboard")
+    ap.add_argument("--fail", action="store_true", help="emit a FAILED run record + re-render the dashboard")
+    ap.add_argument("--stamp", default=None, help="run stamp (default: now)")
+    ap.add_argument("--reason", default="", help="why the run failed (shown on the dashboard)")
+    args = ap.parse_args()
+    if not args.fail:
+        ap.error("nothing to do (use --fail)")
+    dash, note = emit_failure(stamp=args.stamp, reason=args.reason) or (None, None)
+    print(f"failure record written: {dash}  (supabase: {note})")
+    sys.exit(0)

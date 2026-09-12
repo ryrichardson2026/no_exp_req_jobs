@@ -42,6 +42,9 @@ import re
 import shutil
 import subprocess
 import sys
+import traceback
+import urllib.error
+import urllib.request
 from collections import defaultdict
 from datetime import datetime, timezone
 
@@ -55,6 +58,16 @@ PRERENDER = os.path.join(ROOT, "prerender")
 DEPLOY_DIR = os.path.join(PRERENDER, "out")
 APPLICABLE = os.path.join(OUT, "applicable.jsonl")
 REPORT_TXT = os.path.join(OUT, "applicable_report.txt")
+
+# Preflight ("prep") green-path checks (see preflight()). The publishable key + REST base ping
+# Supabase read-only; CHROME is where the bake launches headless Chrome (mirrors prerender/build.mjs).
+SUPABASE_URL = (os.environ.get("SUPABASE_URL") or "https://eyatyzatcmjnmazmaghd.supabase.co").rstrip("/")
+SUPABASE_PUBLISHABLE_KEY = "sb_publishable_T49bDaIS8d7-AhQ8SsFU0g_ZA55yNQE"
+CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+
+# The stamp of the run in progress — set as early as possible so the top-level crash handler can
+# record a FAILED run under the SAME stamp if anything below throws before the record is emitted.
+_CURRENT_STAMP = None
 
 # Halt thresholds (spec steps 6 + 7). Fixed policy, not per-run.
 MIN_RECORD_FRACTION = 0.50      # a tenant under 50% of baseline records -> PARTIAL
@@ -521,6 +534,54 @@ def run_guard(units, results, stamp):
     return src
 
 
+def preflight(publish):
+    """Green-path "prep" check run before any pull: verify nothing structural blocks a run from
+    reaching completion (and, when --publish, from baking + deploying). Returns a list of
+    (key, message, is_critical). Cheap, fast, read-only. A critical issue aborts the run early
+    with a clear RECORDED reason, instead of failing deep in the pipeline where nothing is logged."""
+    issues = []
+
+    # 1) config parses — a broken pull.json/tenants.json would otherwise sys.exit inside resolve_units.
+    for name in ("pull.json", "tenants.json"):
+        try:
+            load_json(os.path.join(CONFIG_DIR, name))
+        except Exception as e:
+            issues.append((f"config/{name}", f"unreadable: {type(e).__name__}: {e}", True))
+
+    # 2) Supabase REST reachable — read-only connectivity ping. ANY HTTP response (even 4xx from
+    #    RLS/permissions on the probe path) proves the server + DNS + network are up, which is all
+    #    this check cares about; only a real connection failure (DNS/timeout/refused) is critical.
+    try:
+        req = urllib.request.Request(
+            SUPABASE_URL + "/rest/v1/", headers={"apikey": SUPABASE_PUBLISHABLE_KEY}, method="GET")
+        with urllib.request.urlopen(req, timeout=12) as r:
+            r.read(1)
+    except urllib.error.HTTPError:
+        pass                                    # got an HTTP status back -> reachable
+    except Exception as e:
+        issues.append(("supabase-net", f"Supabase REST unreachable ({type(e).__name__})", True))
+
+    # 3) publish toolchain + secret — only relevant when this run will publish.
+    if publish:
+        if not os.environ.get("SUPABASE_SERVICE_ROLE_KEY"):
+            issues.append(("supabase-key", "SUPABASE_SERVICE_ROLE_KEY not set (push would fail)", True))
+        for tool in ("node", "vercel"):
+            if not shutil.which(tool):
+                issues.append((tool, f"'{tool}' not on PATH (bake/deploy would fail)", True))
+        if not os.path.exists(CHROME):
+            issues.append(("chrome", f"Chrome not found at {CHROME} (bake would fail)", True))
+
+    # 4) disk headroom — a full bake writes ~1k HTML files. Warn, don't abort.
+    try:
+        free_mb = shutil.disk_usage(ROOT).free // (1024 * 1024)
+        if free_mb < 1024:
+            issues.append(("disk", f"low disk: {free_mb} MB free on the project drive", False))
+    except Exception:
+        pass
+
+    return issues
+
+
 def main(argv):
     ap = argparse.ArgumentParser(description="Recurring pull orchestrator (config-driven).")
     g = ap.add_mutually_exclusive_group(required=True)
@@ -560,14 +621,37 @@ def main(argv):
         update_baseline(table)
         return 0
 
-    units = resolve_units(a.tenant)
-    baseline = load_baseline()["tenants"]
+    # ---- main run path. Stamp FIRST (so any crash below still records under this stamp), then a
+    #      green-path preflight, then resolve + run. ----
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    global _CURRENT_STAMP
+    _CURRENT_STAMP = stamp
 
     print("=" * 78)
     print(f"RECURRING PULL   {stamp}   {'DRY-RUN' if a.dry_run else ('PUBLISH' if a.publish else 'no-publish')}")
-    print(f"tenants: {', '.join(u['tenant'] for u in units)}")
     print("=" * 78)
+
+    # preflight ("prep"): abort fast WITH a recorded reason on a structural problem, rather than
+    # crashing deep in the run where nothing reaches the dashboard.
+    print("\n--- preflight: green-path check ---")
+    pf = preflight(a.publish)
+    for key, msg, crit in pf:
+        print(f"    {'FAIL' if crit else 'warn'}  {key}: {msg}")
+    if not pf:
+        print("    ok  all checks passed")
+    critical = [x for x in pf if x[2]]
+    if critical:
+        reason = "preflight blocked the run - " + "; ".join(f"{k}: {m}" for k, m, _ in critical)
+        print(f"\n!! {reason}\n   Nothing pulled. Recording the failure to the dashboard.")
+        try:
+            runlog.emit_failure(stamp=stamp, reason=reason)
+        except Exception as e:
+            print(f"(dashboard record failed - non-fatal: {type(e).__name__}: {e})")
+        return 2
+
+    units = resolve_units(a.tenant)
+    baseline = load_baseline()["tenants"]
+    print(f"tenants: {', '.join(u['tenant'] for u in units)}")
 
     # Step 4: capture prior record counts BEFORE normalize overwrites them.
     prior_counts = {u["tenant"]: wc_l(normalized_path(u["platform"], u["tenant"])) for u in units}
@@ -851,4 +935,21 @@ def _lifecycle_counts():
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    # Top-level crash guard: ANY unhandled exception below the stamp (e.g. an adapter step that
+    # raises mid-loop) still records a FAILED run to the dashboard, so a mid-run crash is NEVER
+    # invisible. Normal/partial completions emit their own richer record via _finish().
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except SystemExit:
+        raise                                   # argparse / explicit sys.exit — already intentional
+    except BaseException as e:
+        tb = traceback.format_exc()
+        print(tb, flush=True)
+        last = tb.strip().splitlines()[-1] if tb.strip() else None
+        try:
+            runlog.emit_failure(stamp=_CURRENT_STAMP,
+                                reason=f"run_pull crashed: {type(e).__name__}: {e}",
+                                detail=last)
+        except Exception:
+            pass
+        sys.exit(1)
