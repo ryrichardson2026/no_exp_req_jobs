@@ -51,7 +51,6 @@ class LandingApp extends React.Component {
     this.state = {
       recs: props.initialRecs || null, cities: [], zips: {},
       cats: [], locDraft: "", radius: 15, catOpen: false,
-      fbOpen: false, fbName: "", fbEmail: "", fbText: "",
       // Change #1: email-only capture — location and type-of-work fields (and their state)
       // removed. Only alertEmail is collected now.
       alertOpen: false, alertEmail: "",
@@ -121,7 +120,6 @@ class LandingApp extends React.Component {
   onKeyDown = (e) => {
     if (e.key !== "Escape") return;
     if (this.state.alertOpen) { e.preventDefault(); this.closeAlerts(); return; }
-    if (this.state.fbOpen) { e.preventDefault(); this.setState({ fbOpen: false }); return; }
     if (this.state.catOpen) { e.preventDefault(); this.setState({ catOpen: false }); }
   };
 
@@ -166,7 +164,7 @@ class LandingApp extends React.Component {
   // its click through here).
   openAlerts = () => {
     track({ event: "job_alert_open", source_page: sourcePage() });
-    this.setState({ alertOpen: true, catOpen: false, fbOpen: false, alertPhase: "form", alertError: "" });
+    this.setState({ alertOpen: true, catOpen: false, alertPhase: "form", alertError: "" });
   };
   closeAlerts = () => { this.markAlertsDone(); clearTimeout(this._alertT); this.setState({ alertOpen: false }); };
   onAlertEmail = (e) => this.setState({ alertEmail: e.target.value });
@@ -182,17 +180,6 @@ class LandingApp extends React.Component {
     Promise.all([SB.captureAlert({ email, source: "landing" }), wait])
       .then(() => { track({ event: "email_capture_submit", source_page: sourcePage() }); this.markAlertsDone(); this.setState({ alertPhase: "done" }); })
       .catch(() => this.setState({ alertPhase: "form", alertError: "Couldn’t save that — please try again." }));
-  };
-
-  openFeedback = () => this.setState({ fbOpen: true, catOpen: false });
-  closeFeedback = () => this.setState({ fbOpen: false });
-  onFbName = (e) => this.setState({ fbName: e.target.value });
-  onFbEmail = (e) => this.setState({ fbEmail: e.target.value });
-  onFbText = (e) => this.setState({ fbText: e.target.value });
-  sendFeedback = () => {
-    this.setState({ fbOpen: false, fbName: "", fbEmail: "", fbText: "", toast: "Thanks — that’s logged." });
-    clearTimeout(this._t);
-    this._t = setTimeout(() => this.setState({ toast: "" }), 2600);
   };
 
   preflightLogos(recs){
@@ -491,31 +478,8 @@ class LandingApp extends React.Component {
   renderFooter(){
     return h("footer", { style: s("flex:none;background:var(--ink)") },
       h("div", { style: s("max-width:var(--rail,1120px);margin:0 auto;padding:12px 14px;display:grid;justify-items:center;gap:2px") },
-        h("button", { type: "button", onClick: this.openFeedback, "aria-haspopup": "dialog", "aria-expanded": this.state.fbOpen, className: "hv-bg-white10", style: s("min-height:36px;display:inline-flex;align-items:center;padding:0 16px;border:0;border-radius:3px;background:transparent;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--mark);cursor:pointer") }, "Tell us what’s missing"),
         h("div", { style: s("display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px") },
-          h("a", { href: RT.PRIVACY_URL, target: "_blank", rel: "noopener noreferrer", style: s("min-height:44px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Privacy"))
-      )
-    );
-  }
-
-  renderFeedback(){
-    if (!this.state.fbOpen) return null;
-    return h("div", { style: s("position:absolute;inset:0;z-index:8") },
-      h("div", { onClick: this.closeFeedback, style: s("position:absolute;inset:0;background:rgba(10,58,117,0.42);animation:scrimin 180ms ease-out") }),
-      h("div", { role: "dialog", "aria-modal": "true", "aria-label": "Tell us what’s missing", style: s("position:sticky;top:64px;z-index:1;width:390px;max-width:calc(100% - 32px);margin:0 auto;box-sizing:border-box;background:var(--surface);border:2px solid var(--ink);border-radius:3px;box-shadow:0 14px 30px rgba(10,58,117,0.22);display:grid;gap:12px;padding:16px;animation:sheetup 220ms cubic-bezier(.22,.61,.36,1)") },
-        h("div", { style: s("display:flex;align-items:flex-start;justify-content:space-between;gap:8px") },
-          h("div", { style: s("font-size:16px;font-weight:800;color:var(--ink)") }, "Tell us what’s missing"),
-          h("button", { type: "button", onClick: this.closeFeedback, "aria-label": "Close", className: "hv-bg-sunk-tx-ink", style: s("flex:none;width:44px;height:44px;margin:-10px -10px 0 0;display:grid;place-items:center;background:transparent;border:0;border-radius:8px;cursor:pointer;color:var(--ink-muted)") }, raw(CLOSE))),
-        h("label", { style: s("display:grid;gap:6px") },
-          h("span", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, "Name"),
-          h("input", { type: "text", value: this.state.fbName, onChange: this.onFbName, className: "fc-bd-accent", style: s("box-sizing:border-box;min-height:48px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:16px;color:var(--ink)") })),
-        h("label", { style: s("display:grid;gap:6px") },
-          h("span", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, "Email — optional"),
-          h("input", { type: "email", value: this.state.fbEmail, onChange: this.onFbEmail, className: "fc-bd-accent", style: s("box-sizing:border-box;min-height:48px;padding:0 12px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);font-size:16px;color:var(--ink)") })),
-        h("label", { style: s("display:grid;gap:6px") },
-          h("span", { style: s("font-size:13px;font-weight:700;letter-spacing:0.01em;color:var(--ink-muted)") }, "What would you change?"),
-          h("textarea", { value: this.state.fbText, onChange: this.onFbText, placeholder: "I wish I could filter by…", rows: 4, className: "fc-bd-accent", style: s("box-sizing:border-box;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-family:inherit;font-size:16px;line-height:1.5;color:var(--ink);resize:vertical") })),
-        h("button", { type: "button", onClick: this.sendFeedback, style: s("min-height:48px;border-radius:3px;background:var(--accent);border:0;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--accent-ink);cursor:pointer") }, "Send")
+          h("a", { href: RT.PRIVACY_URL, target: "_blank", rel: "noopener noreferrer", style: s("min-height:44px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Privacy Policy"))
       )
     );
   }
@@ -580,7 +544,6 @@ class LandingApp extends React.Component {
         this.renderClosing()
       ),
       this.renderFooter(),
-      this.renderFeedback(),
       this.renderAlerts(),
       this.state.toast && h("div", { key: "toast", role: "status", style: s("flex:none;padding:14px 20px;background:var(--ink);color:var(--accent-ink);font-size:15px;font-weight:500") }, this.state.toast)
     );

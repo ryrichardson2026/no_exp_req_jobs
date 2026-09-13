@@ -1113,7 +1113,7 @@ class BoardApp extends React.Component {
   renderFooter(){
     return h("footer", { style: s("flex:none;background:var(--ink);padding:8px 14px;display:flex;justify-content:center") },
       h("a", { href: RT.PRIVACY_URL, target: "_blank", rel: "noopener noreferrer",
-        style: s("min-height:32px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Privacy"));
+        style: s("min-height:32px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Privacy Policy"));
   }
 
   render(){
