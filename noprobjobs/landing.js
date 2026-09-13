@@ -386,9 +386,9 @@ class LandingApp extends React.Component {
     // "What you landed on" — the value props the visitor just experienced.
     const items = [
       ["100% free", "No sign-up or resume required to apply."],
-      ["Real employers, direct", "Every job comes from the company’s own careers page."],
+      ["Real employers, real jobs", "Every job comes from the company’s own careers page."],
       ["Requirements up front", "Spend less time searching and more time applying."],
-      ["Employer-stated pay", "Shown when the employer states it. Never estimated."],
+      ["Pay Transparency", "Shown when the employer states it. Never estimated."],
     ];
     if (this.state.wide) return h("section", { style: s("margin:0 -14px;padding:16px 14px;background:var(--ink);display:grid;gap:10px") },
       h("h2", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--mark)") }, "What you landed on"),
