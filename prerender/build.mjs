@@ -21,6 +21,7 @@ import puppeteer from "puppeteer-core";
 import { jobPostingLd, jobPostingScript } from "../noprobjobs/data/jobPosting.js";
 import { jobPath, browsePath, CAT_SLUG, STATE_SLUG, backTo } from "../noprobjobs/data/routes.js";
 import * as PM from "../noprobjobs/data/pageMeta.js";
+import * as R from "../noprobjobs/data/record.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SITE = join(HERE, "..", "noprobjobs");
@@ -70,6 +71,14 @@ function serve(cache){
       if (jm && cache.blobByNum[jm[1]]) {
         const blob = JSON.stringify({ job: cache.blobByNum[jm[1]], pulledAt: cache.pulledAt || null }).replace(/</g, "\\u003c");
         html = html.replace("</body>", '<script id="__npj_job" type="application/json">' + blob + "</script></body>");
+      } else if (!isLanding && cache && cache.jobsSeed && p.replace(/\/+$/, "") === "/jobs") {
+        // /jobs/ browse: the desktop board auto-opens the newest no-experience job (derive()'s
+        // pageRecs[0]) and, without a seeded detail, paints a loading skeleton then swaps in the
+        // description once jobs_detail resolves — a large layout shift (~0.12 CLS on desktop cold
+        // load). Inline that job's FULL detail so the panel renders its real description on the
+        // first frame (board.js seeds state.details from this blob), no skeleton, no swap.
+        const blob = JSON.stringify({ detail: cache.jobsSeed }).replace(/</g, "\\u003c");
+        html = html.replace("</body>", '<script id="__npj_jobs_seed" type="application/json">' + blob + "</script></body>");
       }
       res.writeHead(200, { "content-type": "text/html" });
       res.end(html);
@@ -349,6 +358,17 @@ async function main(){
     // description comes from the baked DOM, not this blob).
     const { description_html, description_text, qualifications_html, qualifications, ...slim } = r;
     cache.blobByNum[String(r.job_number)] = slim;
+  }
+
+  // Panel-seed for the /jobs/ browse route: the job the desktop board auto-opens on a cold load.
+  // Must match derive()'s pageRecs[0] EXACTLY — over jobs_list (the board's `all`), default
+  // filters leave only the no-experience gate active (exps=["none"]), sorted "newest". Take its
+  // FULL jobs_detail row (with description_html) so board.js can seed state.details and paint the
+  // real description on the first frame — see the __npj_jobs_seed injection in serve().
+  {
+    const seedRow = list.filter((r) => R.expFacet(r.experience_condition) === "none").slice().sort(R.newestFirst)[0];
+    const seedDetail = seedRow ? cache.byId[seedRow.internal_id] : null;
+    cache.jobsSeed = seedDetail || null;
   }
 
   // enumerate routes

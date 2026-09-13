@@ -76,7 +76,7 @@ class BoardApp extends React.Component {
     try { this._jobPage = RT.parsePath(window.location.pathname).kind === "job"; } catch (e) {}
     this._openJob = props.openJob || null;                        // seed record for the panel (no description_html)
     this._initialJobId = this._openJob ? this._openJob.internal_id : null;
-    this.state = { openId: this._initialJobId, recs: props.initialRecs || null, logoOk: {}, details: {}, stateCtx: null,
+    this.state = { openId: this._initialJobId, recs: props.initialRecs || null, logoOk: {}, details: props.initialDetails || {}, stateCtx: null,
       cities: CITIES, zips: ZIPS, cityGeo: CITY_GEO, cats: [], catDraft: [], loc: "", locDraft: "", radius: 15,
       // Experience defaults to NONE_NEEDED only (owner-confirmed, board-wide incl. baked SEO): the
       // site's whole promise is no-experience work. Absence of ?exp = this default; ?exp=all widens.
@@ -1150,6 +1150,18 @@ const readSeed = () => {
 };
 const seed = readSeed();
 
+// A cold /jobs/ browse load bakes the FULL detail of the job the desktop board auto-opens
+// (derive()'s pageRecs[0] — newest no-experience job) as id __npj_jobs_seed. Seeding
+// state.details with it lets the panel paint its real description on the first frame, instead of
+// a loading skeleton that swaps to the description once jobs_detail resolves — the swap is the
+// ~0.12 desktop cold-load layout shift. Present only on /jobs/ (build.mjs); elsewhere it's a
+// no-op (null). Keyed by internal_id, so it applies only if that job is the one that opens.
+const readJobsSeed = () => {
+  try { const el = document.getElementById("__npj_jobs_seed"); if (el) { const d = (JSON.parse(el.textContent) || {}).detail; if (d && d.internal_id) return { [d.internal_id]: d }; } } catch (e) {}
+  return null;
+};
+const jobsSeedDetails = readJobsSeed();
+
 // A /jobs/{slug} arrival is a JOB PAGE: seed the panel from the inlined record blob (id
 // __npj_job — the job's jobs_list row, no description_html) and paint immediately — chrome +
 // panel + list. Without a handed-over seed the list is a skeleton that hydrates from jobs_list
@@ -1161,7 +1173,7 @@ if (isJobRoute) {
   try { const el = document.getElementById("__npj_job"); if (el) openJob = (JSON.parse(el.textContent) || {}).job || null; } catch (e) {}
   mount(seed ? { openJob: openJob, initialRecs: seed } : { openJob: openJob });
 } else if (seed) {
-  mount({ initialRecs: seed });                                  // handed the list — mount with data, no fetch, no flash
+  mount({ initialRecs: seed, initialDetails: jobsSeedDetails || undefined });   // handed the list — mount with data, no fetch, no flash
 } else if (window.location.search.length > 1) {
   // A FILTERED arrival (any query — location/category/pay/sort/…) that the location-agnostic
   // baked page can't reflect. Mount a skeleton NOW and fetch jobs_list in componentDidMount,
@@ -1170,5 +1182,5 @@ if (isJobRoute) {
 } else {
   // Clean path (/washington/{cat}/ with no query): the baked list already matches the result,
   // so keep it on screen during the fetch (mount only once data is in hand) — no skeleton.
-  SB.listJobs().then((recs) => mount({ initialRecs: recs })).catch(() => mount(null));
+  SB.listJobs().then((recs) => mount({ initialRecs: recs, initialDetails: jobsSeedDetails || undefined })).catch(() => mount(null));
 }
