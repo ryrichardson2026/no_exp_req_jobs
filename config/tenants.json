@@ -1019,7 +1019,8 @@
       "state": "WA",
       "source_class": "direct-employer",
       "apply_class": "employer-direct",
-      "terms_reference": null,
+      "terms_reference": "https://careers.cintas.com/robots.txt",
+      "robots": "Checked 2026-09-12. careers.cintas.com/robots.txt is NOT a blanket disallow. Disallow list: /applybutton/, /talentcommunity/, /mobile/talentcommunity/, /emailsubscribe/, /email/image/, /services/, /preapply/, /error, /unsubscribe/, /reset/. The paths this adapter FETCHES (/search/ and /job/) are permitted. The only disallowed path we ever EMITTED (never fetched) was the /talentcommunity/apply handoff, now replaced by the /job/ detail href read from the index. Pull is robots-compliant. First tenant carrying an explicit robots Disallow list — recorded as a terms consideration; no stronger action taken (owner decision pending if any).",
       "labeled_fields": {
         "requisition_number": "Requisition Number",
         "job_category": "Job Category",

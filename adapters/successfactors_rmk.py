@@ -247,13 +247,57 @@ def parse_section(text, heading, stop_headings):
 def section_html_map(raw, headings):
     """Raw-HTML slice per heading: from the heading's first occurrence to the next
     heading's occurrence, in document order. Best-effort 'raw section HTML' for
-    description_html. Headings not present are skipped."""
+    description_html. Headings not present are skipped.
+
+    RETAINED as a fallback only. It slices on the heading TEXT via raw.find(), which
+    matches the FIRST occurrence — for words like "Benefits"/"Compensation" that is a
+    nav/menu link, not the section's <h2>, so the slice starts in page chrome and runs
+    to </body> (Cintas: ~80KB of junk per job, malformed leading tags that make
+    describe.js discard the body). extract_description_html() is the real path; this is
+    kept only for a tenant whose page lacks the RMK description container."""
     positions = sorted((raw.find(h), h) for h in headings if raw.find(h) != -1)
     out = {}
     for idx, (i, h) in enumerate(positions):
         end = positions[idx + 1][0] if idx + 1 < len(positions) else len(raw)
         out[h] = raw[i:end].strip()
     return out
+
+
+# The RMK job-description container. SuccessFactors RMK renders the employer's full
+# description into ONE element tagged data-careersite-propertyid="description" (also
+# itemprop="description"). Everything the board should show is inside it, in document
+# order, well-formed — no nav, no footer, no <h2>-vs-nav-link ambiguity. This is the
+# canonical source; per-heading slicing is not.
+DESC_CONTAINER = re.compile(
+    r'<(span|div)\b[^>]*\b(?:data-careersite-propertyid|itemprop)="description"[^>]*>',
+    re.I,
+)
+
+
+def _h2_to_h3(s):
+    """RMK section headers are <H2> ('Job Description', 'Skills/Qualifications'). The board's
+    describe.js allowlist is P/UL/OL/LI/B/STRONG/EM/I/BR/A/H3/H4 — H2 is NOT allowed, so it
+    would be unwrapped to plain text and the headers would read as body paragraphs. Remap H2
+    -> H3 (an allowed heading) so they render as headings. Nothing else is altered."""
+    return re.sub(r"<(/?)h2\b[^>]*>", lambda m: "<" + m.group(1) + "h3>", s, flags=re.I)
+
+
+def extract_description_html(raw):
+    """Inner HTML of the RMK description container, bounded by matching-tag DEPTH (so
+    nested spans/divs inside the description don't truncate it). Returns None when the
+    container is absent — the caller then falls back to section_html_map. Pure string op."""
+    m = DESC_CONTAINER.search(raw)
+    if not m:
+        return None
+    tag = m.group(1).lower()
+    start = m.end()
+    depth = 1
+    tok = re.compile(r"</?" + tag + r"\b", re.I)
+    for t in tok.finditer(raw, start):
+        depth += -1 if t.group()[1] == "/" else 1
+        if depth == 0:
+            return _h2_to_h3(raw[start:t.start()].strip())
+    return _h2_to_h3(raw[start:].strip())   # unbalanced source: take the rest, not nothing
 
 
 def split_location(loc):
@@ -337,6 +381,9 @@ def parse_job(t, raw):
             sec_html[key] = html_map[h]
     rec["sections_text"] = sec_text
     rec["sections_html"] = sec_html
+    # Canonical description HTML = the RMK description container (well-formed, no chrome).
+    # section_html_map above is retained only as the fallback when the container is absent.
+    rec["description_html_full"] = extract_description_html(raw)
     rec["visible_text"] = text
     return rec
 
@@ -368,8 +415,15 @@ def map_record(raw, t, now):
     sh = raw.get("sections_html") or {}
     text_parts = [st[k] for k in heads if st.get(k)]
     html_parts = [sh[k] for k in heads if sh.get(k)]
-    r["description_html"] = "\n\n".join(html_parts) or None
-    r["description_text"] = "\n\n".join(text_parts) or None
+    # Prefer the RMK description container (well-formed, complete, ~KB). Fall back to the
+    # per-heading join only when the container is absent (older raw / a tenant without it).
+    container = raw.get("description_html_full")
+    if container:
+        r["description_html"] = container
+        r["description_text"] = visible_text(container) or None
+    else:
+        r["description_html"] = "\n\n".join(html_parts) or None
+        r["description_text"] = "\n\n".join(text_parts) or None
 
     loc = raw.get("location_text")
     r["location_raw"] = loc
@@ -386,7 +440,13 @@ def map_record(raw, t, now):
     r["shift_raw"] = raw.get("shift")
     r["employment_type"] = raw.get("schedule")
 
-    r["apply_url"] = t["endpoints"]["apply_pattern"].format(posting_id=r["source_job_id"])
+    # apply_url is the /job/ detail-page href READ FROM THE INDEX (raw["source_url"]), NOT the
+    # constructed /talentcommunity/apply/{id} pattern. That RMK endpoint is the application
+    # handoff: it carries no description, redirects to the generic career site, and is
+    # Disallow:/talentcommunity/ in careers.cintas.com/robots.txt. The detail page carries the
+    # same posting id and the full posting, so it is the correct destination. Never construct
+    # this from a pattern — take the href the index actually rendered.
+    r["apply_url"] = raw.get("source_url")
     r["apply_class"] = t.get("apply_class", "ATS")
     r["source_class"] = t.get("source_class", "direct-employer")
 
@@ -573,7 +633,11 @@ def mode_pull(t):
                 "posting_id": l["posting_id"],
                 "slug": l["slug"],
                 "source_url": l["url"],
-                "apply_url": t["endpoints"]["apply_pattern"].format(posting_id=l["posting_id"]),
+                # apply target = the /job/ detail href from the index (same as source_url), NOT
+                # the constructed /talentcommunity/apply/{id} handoff (no description, redirects to
+                # the generic site, Disallow:/talentcommunity/ in robots.txt). map_record reads
+                # apply_url from source_url; kept here so the raw row is self-consistent.
+                "apply_url": l["url"],
                 "retrieved_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             })
             fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
