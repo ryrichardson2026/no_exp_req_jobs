@@ -720,19 +720,34 @@ def map_record(raw, tenant, retrieved_at):
 
     # ---- role ----
     r["title"] = raw.get("Title")
-    r["description_html"] = raw.get("ExternalDescriptionStr")
-    r["description_text"] = strip_html(raw.get("ExternalDescriptionStr"))
+    # Oracle splits the posting across up to three HTML fields, and WHICH are populated forks per
+    # tenant: Providence puts the whole posting in ExternalDescriptionStr (resp/qual empty), while
+    # Kroger and Sherwin split it — ExternalDescriptionStr is only the Job Description SUMMARY, the
+    # duties live in ExternalResponsibilitiesStr and the requirements in ExternalQualificationsStr.
+    # Reading only ExternalDescriptionStr dropped the BULK of every Kroger/Sherwin posting (a ~528-
+    # char summary while 7002 chars of responsibilities + 339 of qualifications sat unused).
+    # Concatenate all three in document order, labelling the two trailing sections; empties are
+    # skipped, so Providence collapses back to just the description.
+    _sections = [(None, raw.get("ExternalDescriptionStr")),
+                 ("Responsibilities", raw.get("ExternalResponsibilitiesStr")),
+                 ("Qualifications", raw.get("ExternalQualificationsStr"))]
+    _html, _text = [], []
+    for _label, _body in _sections:
+        _body = (_body or "").strip()
+        if not _body:
+            continue
+        if _label:
+            _html.append("<h3>" + _label + "</h3>")
+            _text.append(_label)
+        _html.append(_body)
+        _text.append(strip_html(_body))
+    r["description_html"] = "\n".join(_html) or None
+    r["description_text"] = "\n\n".join(_text) or None
 
-    # Measured: ExternalQualificationsStr is EMPTY on 100% of 851 records.
-    # It was previously recorded as a segmented qualifications block on the
-    # strength of the field NAME appearing in an inspect listing. It is not.
-    # Requirements live in the description body and must be segmented by the
-    # extractor. Populate only if a tenant actually fills it.
+    # qualifications: a separate contract field for the requirement extractor (it reads the <li>/<p>
+    # boundaries). Empty on Providence, populated on Kroger/Sherwin.
     qual = strip_html(raw.get("ExternalQualificationsStr"))
     r["qualifications"] = [qual] if qual else []
-    # Same field, kept UNstripped, so the extractor can read its <li>/<p> item
-    # boundaries. Empty on Providence, populated on 100% of Kroger - which is why
-    # section detection was 0% on Kroger until the extractor was given this input.
     r["qualifications_html"] = raw.get("ExternalQualificationsStr") or None
 
     # ---- place ----
