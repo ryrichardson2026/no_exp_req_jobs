@@ -156,6 +156,21 @@ def main(argv):
     #    pull-managed columns, so first_seen / killed / kill_* are physically never touched
     #    (PostgREST merge-duplicates was observed to RESET omitted columns to their defaults).
     rows = [_row(r, pull_ts, seed) for r in push_recs]
+    # Boundary guard mirroring the DB check `salary_stated_needs_period` (not salary_is_stated OR
+    # pay_period <> 'UNKNOWN'). A stated salary with no assertable period is a bare, unusable number
+    # (some oracle_orc rows: a training-program figure the adapter couldn't period-ize). The upsert
+    # RPC is one atomic batch, so a single such row 400s the WHOLE push (this is what held today's
+    # publish once the Kroger slack unblocked oracle_orc). Unstate it — drop the unusable number —
+    # so one bad row can't block the batch. Counted, never silent. model.validate() already flags it.
+    coerced = 0
+    for row in rows:
+        if row.get("salary_is_stated") and (row.get("pay_period") or "UNKNOWN") == "UNKNOWN":
+            row["salary_is_stated"] = False
+            row["salary_min"] = None
+            row["salary_max"] = None
+            coerced += 1
+    if coerced:
+        print(f"  coerced {coerced} row(s): salary_is_stated -> False (pay_period UNKNOWN; unusable bare number)")
     for i in range(0, len(rows), BATCH):
         _req("POST", "/rest/v1/rpc/upsert_jobs",
              body={"rows": rows[i:i + BATCH], "pull_ts": pull_ts})
