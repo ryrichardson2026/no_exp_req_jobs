@@ -35,6 +35,7 @@ Python stdlib only.
 
 import json
 import os
+import ssl
 import sys
 import time
 import urllib.request
@@ -104,7 +105,12 @@ def _req(method, path, body=None, prefer=None, soft_4xx=False):
             if soft_4xx and 400 <= e.code < 500:
                 return {"__http_error__": e.code, "detail": detail}
             raise SystemExit(f"{method} {path} -> HTTP {e.code}: {detail}")
-        except (urllib.error.URLError, TimeoutError) as e:
+        except (urllib.error.URLError, TimeoutError, ssl.SSLError, ConnectionError) as e:
+            # Transient transport failures — DNS/connect blips, timeouts, and TLS glitches like
+            # SSLV3_ALERT_BAD_RECORD_MAC (a corrupted record on the wire, seen once mid-push). Every
+            # write is an idempotent upsert / pulls insert, so re-sending is safe. ssl.SSLError and
+            # ConnectionError are NOT urllib.error.URLError subclasses, so they must be listed
+            # explicitly or a one-off TLS hiccup crashes the whole publish.
             if attempt < TRIES - 1:
                 time.sleep(1.5 * (attempt + 1)); continue
             raise SystemExit(f"{method} {path} -> network error after {TRIES} tries: {e}")
