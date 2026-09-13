@@ -161,6 +161,8 @@
       "terms_reference": null,
       "employer_domain": "kroger.com",
       "nlx_wa_jobs": 519,
+      "enumerate_total_slack": 4,
+      "enumerate_total_slack_note": "Oracle ORC TotalJobsCount reliably overcounts this tenant's WA-scoped board by EXACTLY 4: gap == 4 on every observed run (total floats 467..488, captured always total-4, and the crawl ends on an empty page = source exhausted, not a truncated fetch). Without this the completeness guard holds ALL of oracle_orc (providence/kroger/sherwin share the source_id) every run, leaving them perpetually stale. Calibrated to the measured gap and no larger, so a genuine page-seam skip lowers captured further (gap > 4) and is still caught. Re-measure if the gap ever changes.",
       "source_class": "direct-employer",
       "verified": "2026-08-31 - host and site confirmed from live job URLs on CX_2001. SSO redirect captured earlier carried agentid=OraFusionApp_11AG on eluq.login.us2.oraclecloud.com.",
       "finder_extra": {

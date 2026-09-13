@@ -473,18 +473,26 @@ def _latest_index_events(platform, tenant, n=6):
     return evs[-n:]
 
 
-def enumerate_complete(platform, tenant):
+def enumerate_complete(platform, tenant, slack=0):
     """(ok, reason). Layer (a) source-total if the adapter logs one; else layer (b) delta band.
-    No run_log or no prior reference -> ok (nothing to compare against, e.g. first run)."""
+    No run_log or no prior reference -> ok (nothing to compare against, e.g. first run).
+
+    `slack` is a per-tenant allowance for a MEASURED, CONSTANT source overcount where the API's
+    advertised total is reliably N higher than what pagination yields (Oracle ORC's
+    TotalJobsCount does this for Kroger: gap == exactly 4 on every run, total floating 467..488,
+    the crawl ending on an empty page = source exhausted). Calibrated to the observed gap and no
+    larger: a genuine page-seam skip lowers `captured` further, pushing the gap past `slack`, so
+    real truncation is still caught. slack=0 (the default) preserves the strict check everywhere
+    else."""
     evs = _latest_index_events(platform, tenant)
     if not evs:
         return True, "no run_log (uncheckable)"
     cur = evs[-1]
     total, captured = cur.get("total"), cur.get("captured")
     if total is not None and captured is not None:                 # layer (a): authoritative
-        if captured < total:
-            return False, f"truncated enumerate: captured {captured} < source total {total}"
-        return True, f"complete: captured {captured} >= total {total}"
+        if captured < total - slack:
+            return False, f"truncated enumerate: captured {captured} < source total {total}" + (f" - slack {slack}" if slack else "")
+        return True, f"complete: captured {captured} >= total {total}" + (f" - slack {slack}" if slack else "")
     metric = "in_scope" if cur.get("in_scope") is not None else "captured"   # layer (b)
     curv = cur.get(metric)
     prior = [e.get(metric) for e in evs[:-1] if e.get(metric) is not None]
@@ -502,13 +510,15 @@ def run_guard(units, results, stamp):
     for supabase_sink (which holds any non-ok source at its prior state). Returns the status dict."""
     src = {}          # source_id -> ok|skipped|failed
     reasons = {}
+    tcfg = load_json(os.path.join(CONFIG_DIR, "tenants.json"))   # per-tenant enumerate_total_slack
     for u in units:
         plat, tenant = u["platform"], u["tenant"]
         if results[tenant]["failed_mode"]:
             src[plat] = "failed"
             reasons.setdefault(plat, []).append(f"{tenant}: adapter mode '{results[tenant]['failed_mode']}' exited non-zero")
             continue
-        ok, why = enumerate_complete(plat, tenant)
+        slack = ((tcfg.get(plat) or {}).get(tenant) or {}).get("enumerate_total_slack", 0)
+        ok, why = enumerate_complete(plat, tenant, slack=slack)
         if not ok:
             if src.get(plat) != "failed":
                 src[plat] = "skipped"
