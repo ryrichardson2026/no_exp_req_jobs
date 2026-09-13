@@ -46,6 +46,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 from normalize import model            # noqa: E402  stdlib-only; slugify()
 APPLICABLE_PATH = os.path.join(ROOT, "out", "applicable.jsonl")
+QUARANTINE_PATH = os.path.join(ROOT, "out", "quarantine.jsonl")   # rows pulled from the publish for review
 
 SUPABASE_URL = (os.environ.get("SUPABASE_URL")
                 or "https://eyatyzatcmjnmazmaghd.supabase.co").rstrip("/")
@@ -74,7 +75,7 @@ PULL_COLUMNS = (
 )
 
 
-def _req(method, path, body=None, prefer=None):
+def _req(method, path, body=None, prefer=None, soft_4xx=False):
     if not SERVICE_KEY:
         sys.exit("SUPABASE_SERVICE_ROLE_KEY is not set in the environment. "
                  "Put it in a gitignored .env / the shell session; never in git or a "
@@ -98,6 +99,10 @@ def _req(method, path, body=None, prefer=None):
             detail = e.read().decode("utf-8", "replace")
             if 500 <= e.code < 600 and attempt < TRIES - 1:
                 time.sleep(1.5 * (attempt + 1)); continue
+            # soft_4xx: hand a client-error (e.g. a constraint 400) back to the caller instead of
+            # aborting — the resilient upsert uses this to isolate + quarantine a bad row.
+            if soft_4xx and 400 <= e.code < 500:
+                return {"__http_error__": e.code, "detail": detail}
             raise SystemExit(f"{method} {path} -> HTTP {e.code}: {detail}")
         except (urllib.error.URLError, TimeoutError) as e:
             if attempt < TRIES - 1:
@@ -118,6 +123,42 @@ def _row(rec, pull_ts, seed):
     if seed:
         row["first_seen"] = rec.get("first_seen")    # option A: preserve real history
     return row
+
+
+def _upsert_resilient(rows, pull_ts):
+    """Upsert in batches. upsert_jobs is ONE atomic RPC, so a single row that violates a DB
+    constraint 400s the whole batch — today 3 bad rows blocked 1000+ good jobs. On a 4xx, bisect
+    to isolate the offending row(s), SKIP them, and push everything else. 5xx/network still fail
+    hard (infra, not a bad row — _req retries then aborts). Returns (pushed, [(row, detail), ...])."""
+    rejected = []
+
+    def push(batch):
+        if not batch:
+            return 0
+        r = _req("POST", "/rest/v1/rpc/upsert_jobs",
+                 body={"rows": batch, "pull_ts": pull_ts}, soft_4xx=True)
+        if isinstance(r, dict) and r.get("__http_error__"):
+            if len(batch) == 1:
+                rejected.append((batch[0], r["detail"]))
+                return 0
+            mid = len(batch) // 2
+            return push(batch[:mid]) + push(batch[mid:])
+        return len(batch)
+
+    pushed = 0
+    for i in range(0, len(rows), BATCH):
+        pushed += push(rows[i:i + BATCH])
+    return pushed, rejected
+
+
+def _write_quarantine(entries, pull_ts):
+    """Persist rows pulled from the publish (pay suppressed, or upsert-rejected) so they are never
+    silently lost — a review queue. One JSON object per line at out/quarantine.jsonl, rewritten
+    each run (the live pull's current queue)."""
+    os.makedirs(os.path.dirname(QUARANTINE_PATH), exist_ok=True)
+    with open(QUARANTINE_PATH, "w", encoding="utf-8") as fh:
+        for e in entries:
+            fh.write(json.dumps({**e, "pull_ts": pull_ts}, ensure_ascii=False) + "\n")
 
 
 GUARD_STATUS = os.path.join(ROOT, "out", "guard_status.json")
@@ -156,24 +197,36 @@ def main(argv):
     #    pull-managed columns, so first_seen / killed / kill_* are physically never touched
     #    (PostgREST merge-duplicates was observed to RESET omitted columns to their defaults).
     rows = [_row(r, pull_ts, seed) for r in push_recs]
-    # Boundary guard mirroring the DB check `salary_stated_needs_period` (not salary_is_stated OR
-    # pay_period <> 'UNKNOWN'). A stated salary with no assertable period is a bare, unusable number
-    # (some oracle_orc rows: a training-program figure the adapter couldn't period-ize). The upsert
-    # RPC is one atomic batch, so a single such row 400s the WHOLE push (this is what held today's
-    # publish once the Kroger slack unblocked oracle_orc). Unstate it — drop the unusable number —
-    # so one bad row can't block the batch. Counted, never silent. model.validate() already flags it.
-    coerced = 0
+    quarantine = []
+
+    # (a) SUPPRESS-AND-FLAG: a stated salary with no assertable period is unusable (DB check
+    # salary_stated_needs_period). Unstate the pay so the JOB STILL PUBLISHES (without a bogus
+    # number), and quarantine it for review — the figure may be real, just not period-tagged.
     for row in rows:
         if row.get("salary_is_stated") and (row.get("pay_period") or "UNKNOWN") == "UNKNOWN":
+            quarantine.append({"source_job_id": row.get("source_job_id"), "company_name": row.get("company_name"),
+                               "title": row.get("title"), "salary_min": row.get("salary_min"),
+                               "salary_max": row.get("salary_max"), "pay_period": row.get("pay_period"),
+                               "reason": "salary stated but pay_period UNKNOWN",
+                               "action": "pay suppressed; job PUBLISHED; confirm the rate/period"})
             row["salary_is_stated"] = False
             row["salary_min"] = None
             row["salary_max"] = None
-            coerced += 1
-    if coerced:
-        print(f"  coerced {coerced} row(s): salary_is_stated -> False (pay_period UNKNOWN; unusable bare number)")
-    for i in range(0, len(rows), BATCH):
-        _req("POST", "/rest/v1/rpc/upsert_jobs",
-             body={"rows": rows[i:i + BATCH], "pull_ts": pull_ts})
+
+    # (b) RESILIENT UPSERT: upsert_jobs is one atomic batch, so a single row that still violates a
+    # DB constraint would 400 the whole push (today 3 bad rows blocked 1000+). Bisect-and-skip any
+    # rejected row so the good jobs publish; the skipped rows are quarantined, NOT published.
+    pushed, rejected = _upsert_resilient(rows, pull_ts)
+    for row, detail in rejected:
+        quarantine.append({"source_job_id": row.get("source_job_id"), "company_name": row.get("company_name"),
+                           "title": row.get("title"), "reason": detail,
+                           "action": "NOT published; quarantined for review"})
+
+    if quarantine:
+        _write_quarantine(quarantine, pull_ts)
+        print(f"  QUARANTINED {len(quarantine)} row(s) for review -> {QUARANTINE_PATH}")
+        for e in quarantine[:10]:
+            print(f"    - {e.get('company_name')}: {(e.get('title') or '')[:48]} — {e['action']}")
 
     # 3. maintain the absence counter (expiry grace = absent_pulls >= 2): reset seen -> 0,
     #    increment missed -> +1, scoped to guard-PASSED sources only. Held sources untouched.
@@ -185,10 +238,11 @@ def main(argv):
     # 4. close the pulls row
     _req("PATCH", "/rest/v1/pulls?id=eq." + str(pull_id),
          body={"finished_at": datetime.now(timezone.utc).isoformat(),
-               "record_count": len(rows)},
+               "record_count": pushed},
          prefer="return=minimal")
 
-    print(f"pull {pull_id} {'(SEED) ' if seed else ''}-> {len(rows)} rows upserted into jobs")
+    print(f"pull {pull_id} {'(SEED) ' if seed else ''}-> {pushed} rows upserted into jobs"
+          + (f" ({len(quarantine)} quarantined)" if quarantine else ""))
     print(f"  last_seen   {pull_ts}")
     print(f"  sources     {', '.join(push_sources)}")
     if held:
