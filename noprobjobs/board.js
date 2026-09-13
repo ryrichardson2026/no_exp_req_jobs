@@ -78,9 +78,11 @@ class BoardApp extends React.Component {
     this._initialJobId = this._openJob ? this._openJob.internal_id : null;
     this.state = { openId: this._initialJobId, recs: props.initialRecs || null, logoOk: {}, details: props.initialDetails || {}, stateCtx: null,
       cities: CITIES, zips: ZIPS, cityGeo: CITY_GEO, cats: [], catDraft: [], loc: "", locDraft: "", radius: 15,
-      // Experience defaults to NONE_NEEDED only (owner-confirmed, board-wide incl. baked SEO): the
-      // site's whole promise is no-experience work. Absence of ?exp = this default; ?exp=all widens.
-      showsPay: false, shifts: [], types: [], exps: ["none"], employers: [], sheet: null, filterSub: null, sort: "newest", pg: 1,
+      // Experience defaults to OFF (owner decision 2026-09): the board lands showing BOTH
+      // no-experience-required AND experience-preferred-not-required — the full board (experience-
+      // REQUIRED never reaches it, filtered upstream). Toggling the green band ON narrows to
+      // no-experience only. Absence of ?exp = this default (off); ?exp=none = the no-experience view.
+      showsPay: false, shifts: [], types: [], exps: [], employers: [], sheet: null, filterSub: null, sort: "newest", pg: 1,
       // Change #1: email-only capture — location/type-of-work fields and their state removed.
       alertsOpen: false, alertEmail: "", alertPhase: "form", alertError: "",
       wide: window.matchMedia(BP).matches };
@@ -134,8 +136,8 @@ class BoardApp extends React.Component {
   clearAll = () => {
     // Reset to the board's defaults — experience returns to NONE_NEEDED only (the baseline the
     // green band states), not "all". Every other filter clears. (One Clear-all path; see B-report.)
-    this.setState({ cats: [], catDraft: [], loc: "", locDraft: "", showsPay: false, shifts: [], types: [], exps: ["none"], employers: [], openId: null, sheet: null, filterSub: null, pg: 1 });
-    this.writeUrl({ cats: [], loc: "", showsPay: false, shifts: [], types: [], exps: ["none"], employers: [], openId: null, page: 1 });
+    this.setState({ cats: [], catDraft: [], loc: "", locDraft: "", showsPay: false, shifts: [], types: [], exps: [], employers: [], openId: null, sheet: null, filterSub: null, pg: 1 });
+    this.writeUrl({ cats: [], loc: "", showsPay: false, shifts: [], types: [], exps: [], employers: [], openId: null, page: 1 });
   };
   openSheet = (which) => (e) => {
     this._trigger = e && e.currentTarget ? e.currentTarget : null;
@@ -223,11 +225,11 @@ class BoardApp extends React.Component {
     if (qcats.length && !out.cats) out.cats = qcats;
     out.shifts = listOf("shift", R.SHIFT_FACETS);
     out.types = listOf("type", R.TYPE_FACETS);
-    // exp default (board-wide): NO ?exp param -> ["none"] (no-experience only). An explicit
-    // ?exp=all (or any value that filters to no allowed facet) widens to everything. ?exp=none,
-    // ?exp=preferred etc. parse as before. This keeps the default URL clean (no param).
+    // exp default (board-wide): NO ?exp param -> [] (OFF = no exp filter, shows none + preferred).
+    // ?exp=none -> the no-experience-only view; ?exp=preferred, ?exp=none,preferred parse as before;
+    // ?exp=all (legacy) filters to no allowed facet -> [] = same as the default. Default URL stays clean.
     const expParam = p.get("exp");
-    out.exps = (expParam === null) ? ["none"] : listOf("exp", R.EXP_FACETS);
+    out.exps = (expParam === null) ? [] : listOf("exp", R.EXP_FACETS);
     out.employers = String(p.get("emp") || "").split(",").map((v) => v.trim()).filter(Boolean);   // dynamic set; validated by matching in derive
     out.showsPay = p.get("pay") === "1";
     const loc = p.get("location");
@@ -264,11 +266,11 @@ class BoardApp extends React.Component {
         if (pick("showsPay")) q.set("pay", "1");
         const shifts = pick("shifts") || []; if (shifts.length) q.set("shift", shifts.join(","));
         const types = pick("types") || []; if (types.length) q.set("type", types.join(","));
-        // exp: omit the param for the default (["none"]) so the canonical URL stays clean;
-        // an empty set (widened to all) is written explicitly as ?exp=all.
+        // exp: the default is now OFF ([] = no exp filter), so omit the param for the empty set to
+        // keep the canonical URL clean; any narrowing (toggle on -> ["none"], or a drawer facet
+        // pick) is written explicitly, e.g. ?exp=none or ?exp=none,preferred.
         const exps = pick("exps") || [];
-        const expDefault = exps.length === 1 && exps[0] === "none";
-        if (!expDefault) q.set("exp", exps.length ? exps.join(",") : "all");
+        if (exps.length) q.set("exp", exps.join(","));
         const employers = pick("employers") || []; if (employers.length) q.set("emp", employers.join(","));
         const sort = pick("sort"); if (sort && sort !== "newest") q.set("sort", sort);
         if (page > 1) q.set("page", String(page));
@@ -324,7 +326,7 @@ class BoardApp extends React.Component {
       const jobRef = u._jobRef; delete u._jobRef;
       let openId = null;
       if (jobRef) { const rec = (this.state.recs || []).find((r) => jobRef.internalId ? r.internal_id === jobRef.internalId : r.job_number === jobRef.jobNumber); openId = rec ? rec.internal_id : null; }
-      this.setState(Object.assign({ stateCtx: null, cats: [], shifts: [], types: [], exps: ["none"], employers: [], loc: "", locDraft: "", showsPay: false, sort: "newest", pg: 1, sheet: null, filterSub: null }, u, { openId }));
+      this.setState(Object.assign({ stateCtx: null, cats: [], shifts: [], types: [], exps: [], employers: [], loc: "", locDraft: "", showsPay: false, sort: "newest", pg: 1, sheet: null, filterSub: null }, u, { openId }));
     };
     window.addEventListener("popstate", this._onPop);
     const urlState = this.readUrl();
@@ -535,7 +537,8 @@ class BoardApp extends React.Component {
     const loading = recs === null;
     const all = recs || [];
     const cats = st.cats || [], shifts = st.shifts || [], types = st.types || [], exps = st.exps || [], employers = st.employers || [];
-    const expIsDefault = exps.length === 1 && exps[0] === "none";   // the no-experience-only baseline
+    const noExpOn = exps.length === 1 && exps[0] === "none";        // green-band switch: on = no-experience only
+    const expIsDefault = exps.length === 0;                          // baseline (new default = toggle OFF: none + preferred)
     const res = L.resolveLocation(st.loc, st.cities, st.zips);
     const radius = st.radius;
     const inLoc = (r) => {
@@ -685,14 +688,14 @@ class BoardApp extends React.Component {
       typeLabel: types.length ? listOf(types) : null,
       expLabel: exps.length ? listOf(exps.map((e2) => R.EXP_FACET_LABEL[e2])) : null,
       employerLabel: employers.length ? listOf(employers.map((s2) => empSeen[s2] || s2)) : null,
-      // Experience defaults to NONE_NEEDED only, so ["none"] is NOT an active refinement — it's the
-      // baseline. anyFilter (Clear/Reset visibility) counts experience only when it differs.
+      // Experience defaults to OFF (exps empty), so an empty set is the baseline, NOT a refinement.
+      // anyFilter (Clear/Reset visibility) counts experience only when it narrows (exps non-empty).
       anyFilter: !!(cats.length || res.kind !== "all" || st.showsPay || shifts.length || types.length || employers.length || !expIsDefault),
       extraCount: (shifts.length ? 1 : 0) + (types.length ? 1 : 0) + (exps.length ? 1 : 0) + (employers.length ? 1 : 0) + (st.showsPay ? 1 : 0),
       // Mobile Filters badge — count of active groups NOT surfaced on their own control (location,
       // experience, and Job type each have a dedicated strip control / band, so they're excluded).
       filtersBadge: (shifts.length ? 1 : 0) + (types.length ? 1 : 0) + (employers.length ? 1 : 0) + (st.showsPay ? 1 : 0),
-      noExpOn: expIsDefault,   // green-band switch state: on = no-experience only (the default)
+      noExpOn: noExpOn,   // green-band switch state: on = no-experience only (default is now OFF)
       resultLabelShort: total === 1 ? "1 job" : total + " jobs",
       sortLabel: (R.SORTS.find((s2) => s2.id === st.sort) || R.SORTS[0]).label,
       sortOptions: R.SORTS.map((s2) => ({ label: s2.label, isCurrent: s2.id === st.sort, notCurrent: s2.id !== st.sort, pick: this.setSort(s2.id) })),
