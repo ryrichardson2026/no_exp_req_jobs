@@ -1106,13 +1106,25 @@ class BoardApp extends React.Component {
     );
   }
 
+  // Persistent job-alert bar — a navy strip pinned to the bottom of the 100vh board (flex:none,
+  // stays put through scroll), on the browse board AND job pages, desktop and mobile. The alert CTA
+  // was moved here from the header (alertsInHeader:false below), so the board has ONE alert entry
+  // point, always in reach. Same marigold .alert-cta styling and openAlerts wiring as the header.
+  renderAlertBar(){
+    return h("footer", { style: s("flex:none;background:var(--ink);padding:7px 12px;display:flex;justify-content:center") },
+      h("button", { type: "button", onClick: this.openAlerts, "aria-haspopup": "dialog", className: "alert-cta",
+        style: s("min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 18px;border:0;border-radius:3px;font-size:13px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;color:var(--mark-ink);background:var(--mark);cursor:pointer") },
+        "Get job alerts"));
+  }
+
   render(){
     const d = this.derive();
     // Every page is the board — including a cold /jobs/{slug} arrival (job panel seeded, list
     // skeleton). There is no headless job document.
     return h("div", { className: "board-scope", style: s("height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative;background:var(--surface)") },
-      h(Header, { productName: PRODUCT, onAlerts: this.openAlerts, wide: this.state.wide }),
+      h(Header, { productName: PRODUCT, onAlerts: this.openAlerts, wide: this.state.wide, alertsInHeader: false }),
       this.state.wide ? this.renderWide(d) : this.renderMobile(d),
+      this.renderAlertBar(),
       this.renderAlerts()
     );
   }

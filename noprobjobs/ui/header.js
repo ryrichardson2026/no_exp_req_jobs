@@ -4,7 +4,7 @@
    padding below that. */
 import { h, s } from "./h.js";
 
-export function Header({ productName = "NoProbJobs.com", onAlerts, wide = false }){
+export function Header({ productName = "NoProbJobs.com", onAlerts, wide = false, alertsInHeader = true }){
   return h("header", { style: s("flex:none;background:var(--ink)") },
     h("div", { style: s("max-width:var(--rail,1120px);margin:0 auto;min-height:" + (wide ? "56px" : "46px") + ";display:flex;align-items:center;justify-content:space-between;gap:" + (wide ? "16px" : "9px") + ";padding:" + (wide ? "8px 14px" : "4px 12px")) },
       // The brand lockup is a link to the root landing (/), from any page — NOT the current
@@ -26,7 +26,8 @@ export function Header({ productName = "NoProbJobs.com", onAlerts, wide = false 
       // Change #3: the job-alert CTA is marigold (the "this is us" mark colour), not white.
       // Label stays navy (--mark-ink === --ink): navy-on-marigold clears WCAG AA comfortably.
       // Hover/focus/active live in styles.css (.alert-cta) using existing tokens/filters only.
-      h("button", { type: "button", onClick: onAlerts, "aria-haspopup": "dialog", className: "alert-cta",
+      // alertsInHeader=false (the board) moves this CTA to a persistent bottom bar instead.
+      alertsInHeader && h("button", { type: "button", onClick: onAlerts, "aria-haspopup": "dialog", className: "alert-cta",
         style: s("flex:none;min-height:44px;display:inline-flex;align-items:center;padding:" + (wide ? "0 16px" : "0 10px") + ";border:0;border-radius:3px;font-size:" + (wide ? "13.5px" : "12.5px") + ";font-weight:700;letter-spacing:" + (wide ? "0.04em" : "0.02em") + ";text-transform:uppercase;color:var(--mark-ink);background:var(--mark);cursor:pointer") },
         "Get job alerts")
     )
