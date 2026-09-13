@@ -401,16 +401,23 @@ async function main(){
   await new Promise((r) => server.listen(PORT, r));
   const base = "http://localhost:" + PORT;
   routes.forEach((r) => { r.url = base + r.path; });
-  // protocolTimeout raised from the 180s default: under a 6-wide pool a page.evaluate can
-  // queue long enough to trip it on a few pages (flaky, load-dependent). 240s clears it.
-  const browser = await puppeteer.launch({ executablePath: CHROME, headless: "new", args: ["--no-sandbox"], protocolTimeout: 240000 });
+  // protocolTimeout raised well above the 180s default: under a 6-wide pool a page.evaluate can
+  // queue behind others long enough to trip it, and the page set has grown (oracle_orc unblocked),
+  // so 480s gives headroom. Any residual timeout is a heal-able flake — see the breaker below.
+  const browser = await puppeteer.launch({ executablePath: CHROME, headless: "new", args: ["--no-sandbox"], protocolTimeout: 480000 });
 
   // Circuit breaker: a failing build should die fast and loud, not grind through hundreds
   // of identical errors. Abort the moment 5 failures land in a row, or once >=10% of
   // attempted routes have failed (the percentage rule waits for a 10-route sample so a
   // lone blip can't nuke a healthy run) — whichever trips first.
   const MAX_CONSEC = 5, PCT = 0.10, PCT_FLOOR = 10;
-  const breaker = { attempted: 0, fails: 0, consec: 0, done: 0, aborted: false, reason: null, firstError: null, smokeFailed: false };
+  // Transient render flakes — Chrome protocol timeouts / dropped targets under the concurrent pool —
+  // are re-baked one-at-a-time by healFailures() and reliably clear. They must NOT trip the
+  // consecutive-failure breaker (a 5-flake cluster once aborted a COMPLETE build before heal ran).
+  // They still count toward the ≥10% PCT breaker, so a genuine flake STORM (e.g. dead Chrome)
+  // still aborts fast. A real render/inject error (not a flake) trips the consecutive breaker as before.
+  const isFlake = (e) => /timed out|protocoltimeout|Runtime\.callFunctionOn|Target closed|Session closed|socket hang up|ECONNRESET|Navigation timeout/i.test(e || "");
+  const breaker = { attempted: 0, fails: 0, flakes: 0, consec: 0, done: 0, aborted: false, reason: null, firstError: null, smokeFailed: false };
   const results = [];
   async function runRoutes(list){
     let next = 0;
@@ -423,13 +430,20 @@ async function main(){
         const res = await bake(page, list[i], cache);
         results.push(res); breaker.attempted++; breaker.done++;
         if (res.error) {
-          breaker.fails++; breaker.consec++;
+          breaker.fails++;
           if (!breaker.firstError) {                       // surface the first failure the instant it lands
             breaker.firstError = { path: res.path, error: res.error };
             process.stderr.write("  !! FIRST FAILURE (route " + breaker.attempted + ") " + res.path + ": " + res.error + "\n");
           }
-          if (breaker.consec >= MAX_CONSEC) { breaker.aborted = true; breaker.reason = MAX_CONSEC + " consecutive failures"; }
-          else if (breaker.attempted >= PCT_FLOOR && breaker.fails >= breaker.attempted * PCT) { breaker.aborted = true; breaker.reason = "≥" + (PCT * 100) + "% of attempted routes failed"; }
+          if (isFlake(res.error)) {
+            breaker.flakes++;                              // heal-able: does NOT advance the consecutive breaker
+          } else if (++breaker.consec >= MAX_CONSEC) {
+            breaker.aborted = true; breaker.reason = MAX_CONSEC + " consecutive failures";
+          }
+          // PCT breaker counts ALL failures (incl. flakes) so a genuine storm still aborts fast.
+          if (!breaker.aborted && breaker.attempted >= PCT_FLOOR && breaker.fails >= breaker.attempted * PCT) {
+            breaker.aborted = true; breaker.reason = "≥" + (PCT * 100) + "% of attempted routes failed";
+          }
         } else breaker.consec = 0;
         if (breaker.done % 25 === 0 || breaker.done === routes.length) {
           const el = ((Date.now() - t0) / 1000).toFixed(0);
@@ -473,7 +487,7 @@ async function main(){
       // Smoke FIRST: 8 job pages + every browse/landing route. A broken render/inject path
       // surfaces here in seconds — before the 895-page run, not as a 1.7-hour post-mortem.
       await runRoutes([...jobRoutes.slice(0, SMOKE), ...nonJob]);
-      breaker.smokeFailed = results.some((r) => r.error);
+      breaker.smokeFailed = results.some((r) => r.error && !isFlake(r.error));   // a flake in smoke is heal-able, not a broken path
       if (!breaker.smokeFailed && !breaker.aborted) await runRoutes(jobRoutes.slice(SMOKE));
     }
     if (!breaker.aborted && !breaker.smokeFailed) await healFailures();
