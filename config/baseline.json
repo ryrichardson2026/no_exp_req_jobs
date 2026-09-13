@@ -2,24 +2,24 @@
   "_comment": "QA baseline for run_pull.py halt checks (spec step 5 / Finding 41 - the unbuilt QA that should exist). Per-tenant records/applicable/density from the last ACCEPTED run. run_pull.py reads this to gate a pull: a tenant returning zero, under 50% of baseline records, or a density more than 15 points off baseline makes the run PARTIAL (no publish). It is updated ONLY on an accepted run and never automatically - run `python run_pull.py --update-baseline` after a COMPLETE run whose numbers and movement file you have inspected. Seeded 2026-09-09 from the operator-provided table; density is applicable/records * 100.",
   "tenants": {
     "multicare": {
-      "records": 1414,
+      "records": 1420,
       "applicable": 64,
       "density": 4.5
     },
     "providence": {
-      "records": 834,
+      "records": 846,
       "applicable": 50,
-      "density": 6.0
+      "density": 5.9
     },
     "kroger": {
-      "records": 473,
-      "applicable": 265,
-      "density": 56.0
+      "records": 477,
+      "applicable": 255,
+      "density": 53.5
     },
     "compass_group": {
-      "records": 317,
+      "records": 316,
       "applicable": 79,
-      "density": 24.9
+      "density": 25.0
     },
     "target": {
       "records": 230,
@@ -32,14 +32,34 @@
       "density": 97.0
     },
     "allied_security": {
-      "records": 122,
-      "applicable": 52,
-      "density": 42.6
+      "records": 112,
+      "applicable": 50,
+      "density": 44.6
     },
     "uhaul": {
       "records": 49,
       "applicable": 36,
       "density": 73.5
+    },
+    "cintas": {
+      "records": 58,
+      "applicable": 16,
+      "density": 27.6
+    },
+    "gensco": {
+      "records": 9,
+      "applicable": 7,
+      "density": 77.8
+    },
+    "sherwin_williams": {
+      "records": 43,
+      "applicable": 35,
+      "density": 81.4
+    },
+    "sysco": {
+      "records": 23,
+      "applicable": 5,
+      "density": 21.7
     }
   }
 }
