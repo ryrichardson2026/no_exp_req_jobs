@@ -172,10 +172,9 @@ class BoardApp extends React.Component {
   applyLoc = (value) => () => { const v = value === undefined ? this.state.locDraft : value; this.setState({ loc: v, locDraft: v, sheet: null, openId: null, pg: 1 }); this.writeUrl({ loc: v, openId: null, page: 1 }); };
   clearLoc = () => { this.setState({ loc: "", locDraft: "", openId: null, pg: 1 }); this.writeUrl({ loc: "", openId: null, page: 1 }); };
   setRadius = (r) => () => { this.setState({ radius: r, pg: 1 }); this.writeUrl({ radius: r, page: 1 }); };
-  // Desktop inline location field: no Use button, no popover — leaving the field (blur) commits
-  // any pending draft, so the typed value reads as APPLIED the moment focus moves on. Enter still
-  // commits via onLocKeyStay. Guard on change so an untouched blur doesn't rewrite the URL.
-  applyLocBlur = () => { if (this.state.locDraft !== this.state.loc) this.applyLocStay(); };
+  // Desktop inline location field: explicit commit only (parity with mobile's Apply). Enter commits
+  // via onLocKeyStay; the inline magnifier commits via applyLocStay. Blur does NOT commit and typing
+  // does not filter live — a typed value only applies once the user submits it.
   setLocInput = (el) => { if (el) this._locInput = el; };
   focusLocField = () => { if (this._locInput) { this._locInput.focus(); this._locInput.select(); } };
   setPage = (n) => () => {
@@ -793,9 +792,14 @@ class BoardApp extends React.Component {
   renderLocField(d){
     const applied = d.locResolved;
     const isZip = d.isZipDraft;
+    // Explicit commit: the magnifier shows whenever the draft is non-empty AND not yet the committed
+    // value — i.e. there is something to submit. Once committed (draft === applied loc) it gives way
+    // to the × clear, so the field never shows both at once. Empty field shows neither.
+    const draftRaw = String(this.state.locDraft || "").trim();
+    const pending = draftRaw !== "" && draftRaw !== String(this.state.loc || "").trim();
     return h("div", { style: s("flex:none;display:flex;align-items:center;gap:7px;min-height:34px;padding:0 5px 0 9px;border:1px solid " + (applied ? "var(--ink)" : "var(--line)") + ";border-radius:3px;background:var(--surface-raised)") },
       h("span", { "aria-hidden": "true", style: s("flex:none;width:7px;height:7px;border-radius:50%;" + (applied ? "background:var(--accent)" : "background:transparent;box-shadow:inset 0 0 0 1.5px var(--hair)")) }),
-      h("input", { type: "text", ref: this.setLocInput, value: this.state.locDraft, onChange: this.onLocDraft, onKeyDown: this.onLocKeyStay, onBlur: this.applyLocBlur,
+      h("input", { type: "text", ref: this.setLocInput, value: this.state.locDraft, onChange: this.onLocDraft, onKeyDown: this.onLocKeyStay,
           placeholder: "City, state or ZIP", "aria-label": "Location — city, state or ZIP",
           style: s("flex:none;width:" + (isZip ? "62px" : "148px") + ";box-sizing:border-box;min-height:30px;padding:0;border:0;background:transparent;font-family:inherit;font-size:14.5px;font-weight:" + (applied ? "700" : "500") + ";color:var(--ink);outline:none") }),
       // Inline radius (ZIP only) — same 10/15/25 set as mobile, applied live; default 15.
@@ -803,8 +807,11 @@ class BoardApp extends React.Component {
         L.RADII.map((r, i) => { const cur = r === d.radius; return h("button", { key: i, type: "button", onClick: this.setRadius(r), "aria-pressed": cur, "aria-label": r + " miles",
           style: s("min-height:28px;min-width:25px;padding:0 3px;border-radius:3px;font-size:12.5px;font-weight:" + (cur ? "700" : "500") + ";cursor:pointer;border:1px solid " + (cur ? "var(--ink)" : "transparent") + ";background:" + (cur ? "var(--ink)" : "transparent") + ";color:" + (cur ? "var(--accent-ink)" : "var(--ink-muted)")) }, r); }),
         h("span", { style: s("font-size:12px;color:var(--ink-muted);padding:0 3px 0 1px") }, "mi")),
-      // Clear (only when applied) — keeps the field itself permanent.
-      applied && h("button", { type: "button", onClick: this.clearLoc, "aria-label": "Clear location", className: "hv-bg-sunk-tx-ink",
+      // Submit (magnifier) — the explicit commit affordance; shown only while a draft is pending.
+      pending && h("button", { type: "button", onClick: this.applyLocStay, "aria-label": "Search this location", className: "hv-bg-sunk-tx-ink",
+        style: s("flex:none;width:26px;height:26px;margin-left:1px;display:grid;place-items:center;padding:0;background:transparent;border:0;border-radius:3px;cursor:pointer;color:var(--ink)") }, raw(SEARCH_ICON)),
+      // Clear (only when committed & unedited) — keeps the field itself permanent.
+      applied && !pending && h("button", { type: "button", onClick: this.clearLoc, "aria-label": "Clear location", className: "hv-bg-sunk-tx-ink",
         style: s("flex:none;width:22px;height:22px;margin-left:1px;display:grid;place-items:center;padding:0;background:transparent;border:0;border-radius:3px;cursor:pointer;color:var(--ink-muted);font-size:17px;line-height:1") }, "×")
     );
   }
