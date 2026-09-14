@@ -42,6 +42,22 @@ const WA_LANDER = "/washington-jobs/";
 const MIME = { ".html":"text/html",".js":"text/javascript",".mjs":"text/javascript",".css":"text/css",
   ".json":"application/json",".svg":"image/svg+xml",".png":"image/png",".ico":"image/x-icon",".woff2":"font/woff2",".map":"application/json" };
 
+// Scripts the SOURCE html declares (vendor React + the app entry). Anything ELSE present in the
+// DOM after the bake was injected at prerender time by GTM (gtm.js/gtag, Clarity, any future tag)
+// and must not ship baked — the inline GTM loader re-injects whatever's needed on the client.
+// Snapshotting the source's own <script src> set (rather than blocklisting one vendor domain)
+// generalizes to any tag. Inline scripts (the GTM loader, the __npj_* data blobs) have no src and
+// are always kept. Filled in main() before baking; see the strip in bake().
+let KEEP_SRCS = [];
+function sourceScriptSrcs(){
+  const srcs = new Set();
+  for (const f of ["index.html", "board.html"]) {
+    try { for (const m of readFileSync(join(SITE, f), "utf8").matchAll(/<script[^>]+\bsrc="([^"]+)"/g)) srcs.add(m[1]); }
+    catch { /* file absent -> contributes nothing */ }
+  }
+  return [...srcs];
+}
+
 const WAIT = {
   // Job page = board chrome + seeded panel + skeleton list. The panel's description renders as
   // TWO nested [data-desc-html] (jobPage wrapper + describe.js output) only once jobs_detail has
@@ -244,17 +260,20 @@ async function bake(page, route, cache){
           document.querySelectorAll('meta[itemprop="url"]').forEach((m) => { if (m.content && m.content.charAt(0) === "/") m.content = base + m.content; });
         }, meta.title, headHtml, SITE_URL);
       }
-      const html = await page.evaluate(() => {
-        // Drop the gtm.js/gtag script the GTM loader injected at render time; the static
-        // loader stays and re-injects once on the client, so GTM never fires twice.
-        document.querySelectorAll('script[src*="googletagmanager.com"]').forEach((el) => el.remove());
+      const html = await page.evaluate((keep) => {
+        // Strip every EXTERNAL script the source didn't declare — i.e. everything GTM injected
+        // during the prerender (gtm.js/gtag AND Clarity, and any future tag). The inline GTM
+        // loader (no src) survives and re-injects on the client, so GTM never double-fires and no
+        // vendor tag ships baked. Snapshot of the source's own scripts is passed in from Node.
+        const KEEP = new Set(keep);
+        document.querySelectorAll('script[src]').forEach((el) => { if (!KEEP.has(el.getAttribute('src'))) el.remove(); });
         // The non-blocking font link (rel=preload as=style onload→stylesheet) has its onload
         // fire DURING the bake, so it serializes as a render-blocking rel="stylesheet". Reset
         // it to rel="preload" so the baked HTML ships non-blocking; the client's onload
         // re-activates it. Without this the bake silently defeats the font de-block (item 6).
         document.querySelectorAll('link[as="style"][rel="stylesheet"]').forEach((el) => { el.rel = "preload"; });
         return "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-      });
+      }, KEEP_SRCS);
       // Landing pages ship their data INLINE so the client renders from it with no Supabase
       // query (drops the ~2.8s critical-path call and the freshCount/R.today() flash). The blob
       // is the same jobs_list the bake rendered from, so baked and hydrated DOM stay identical.
@@ -304,6 +323,13 @@ function attachCache(page, cache){
         return req.respond({ status: 200, headers: Object.assign({ "content-type": "application/json" }, CORS), body });
       }
       if (/google\.com\/s2\/favicons/.test(u)) return req.abort();
+      // Block GTM during the bake. If gtm.js executes, the container fires its tags (Clarity's
+      // Custom HTML, gtag, any future tag) and they get serialized into the static HTML — Clarity
+      // injects an INLINE bootstrap a src-only strip can't catch. Blocking here means no tag runs
+      // at prerender, so nothing third-party bakes in; the inline GTM loader still ships and
+      // re-injects everything once on the client. (The dead <script src=gtm.js> the loader appends
+      // before this abort is removed by the source-snapshot strip in bake().)
+      if (/googletagmanager\.com/.test(u)) return req.abort();
       return req.continue();
     });
   });
@@ -334,6 +360,8 @@ async function generateLogoIndex(){
 
 async function main(){
   const t0 = Date.now();
+  KEEP_SRCS = sourceScriptSrcs();
+  process.stderr.write("  bake keeps source scripts: [" + KEEP_SRCS.join(", ") + "]\n");
   const logoSlugs = await generateLogoIndex();
   process.stderr.write("  logo index: " + logoSlugs.length + " brand logo(s) [" + logoSlugs.join(", ") + "]\n");
   const LIMIT = process.env.LIMIT ? +process.env.LIMIT : 0;                 // LIMIT=N: bake first N jobs

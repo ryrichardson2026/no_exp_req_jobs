@@ -369,6 +369,13 @@ class BoardApp extends React.Component {
     // deterministically (WAIT.job gates on it, and jobs_list is withheld during a job-route bake).
     // At runtime BAKED_DESC is set, so ensureDetail skips this — no round trip.
     if (this._jobPage && this._initialJobId) this.ensureDetail(this._initialJobId);
+    this.syncDocTitle();
+  }
+  // C1: push the state-derived title (computed in derive(), stashed on _docTitle) to the tab. Skip
+  // on a standalone /jobs page — its baked <title> is the SEO title and must not be JS-overwritten.
+  syncDocTitle(){
+    if (this._jobPage || !this._docTitle) return;
+    try { if (document.title !== this._docTitle) document.title = this._docTitle; } catch (e) {}
   }
   componentDidUpdate(prevProps, prevState){
     const wasOpen = prevState ? prevState.openId : this._wasOpen;
@@ -393,6 +400,7 @@ class BoardApp extends React.Component {
     // description_html isn't in jobs_list, so fetch jobs_detail for whichever job is
     // effective now (derive() stashed its id). Cached + de-duped in ensureDetail.
     this.ensureDetail(this._effectiveId);
+    this.syncDocTitle();
   }
 
   ensureDetail(id){
@@ -669,6 +677,35 @@ class BoardApp extends React.Component {
     const sig = JSON.stringify([cats, st.loc, radius, st.showsPay, shifts, types, exps, employers, st.sort, pg]);
     if (this._sig === undefined) this._sig = sig;
     else if (sig !== this._sig) { this._sig = sig; this._animEpoch = (this._animEpoch || 0) + 1; this._animOn = true; }
+
+    // C1: document.title reflects the SPA state so tabs, bookmarks and shared links aren't all the
+    // generic board title. Precedence: open job wins, else active filters (category/location/no-exp),
+    // else the baked default. Applied in componentDidMount/Update, and ONLY on the board SPA — a
+    // standalone /jobs page keeps its baked SEO title. Copy formats are owner-approved.
+    const DEFAULT_TITLE = "Get Hired Now - No Experience Needed | NoProbJobs";
+    let docTitle = DEFAULT_TITLE;
+    if (onPage && page && page.title) {
+      const cityST = [L.cityName(openRec.city), openRec.state].filter(Boolean).join(" ");   // "Shelton WA"
+      const emp = page.company ? page.company + (cityST ? ", " + cityST : "") : "";
+      docTitle = page.title + (emp ? " | " + emp : "") + " | NoProbJobs";
+    } else {
+      const catPart = cats.length ? (cats.length === 1 ? cats[0] : cats[0] + " & more") : null;
+      let locPart = null, near = false;
+      if (res.kind === "zip") { locPart = res.zip; near = true; }
+      else if (res.kind === "state") locPart = res.state;
+      else if (res.kind === "city") {
+        const cs = (st.cities || []).find((c) => L.cityKey(c.city) === (res.cities && res.cities[0]));
+        locPart = res.display[0] + (cs && cs.state ? ", " + cs.state : "");
+      }
+      let base = null;
+      if (near) base = (catPart ? catPart + " jobs" : "Jobs") + " near " + locPart;
+      else if (catPart && locPart) base = catPart + " jobs in " + locPart;
+      else if (locPart) base = "Jobs in " + locPart;
+      else if (catPart) base = catPart + " jobs";
+      else if (exps.length === 1 && exps[0] === "none") base = "No-experience jobs";
+      if (base) docTitle = base + " | NoProbJobs";
+    }
+    this._docTitle = docTitle;
 
     return {
       loading, list, total, totalPages, pg, pageRecs, res, radius, isZipDraft,
