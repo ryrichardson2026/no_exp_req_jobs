@@ -15,6 +15,8 @@
 # Secrets: SUPABASE_SERVICE_ROLE_KEY must live in .env.local (loaded below, never printed).
 # The Vercel CLI must already be authenticated on this machine (vercel login, once).
 
+param([switch]$Force)  # -Force bypasses the per-day "already COMPLETE" guard below.
+
 $ErrorActionPreference = 'Stop'
 
 # --- adjust these two if the layout changes ---
@@ -27,8 +29,24 @@ New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 $stamp = Get-Date -Format 'yyyyMMdd_HHmmss'
 $log   = Join-Path $LogDir "pull_$stamp.log"
 $lock  = Join-Path $LogDir '.pull.lock'
+$statusFile = Join-Path $LogDir 'last_status.txt'
 
 function Log($msg) { $line = "[{0}] {1}" -f (Get-Date -Format 's'), $msg; $line | Tee-Object -FilePath $log -Append }
+
+# Per-day idempotency guard. The task fires from more than one trigger now - the 6am daily AND a
+# logon/unlock catch-up (see register_pull_task.ps1), because this is a Modern Standby (S0) laptop
+# where WakeToRun can't be trusted to wake it at 6am. Whichever trigger wins first does the day's
+# run; the others must no-op. A COMPLETE run for today already in last_status.txt means we're done.
+# (PARTIAL/FAIL is NOT treated as done - a catch-up trigger should get a fresh attempt.) Force a
+# run regardless with -Force, e.g. after fixing a source mid-day.
+if (-not $Force -and (Test-Path $statusFile)) {
+    $last = (Get-Content $statusFile -Raw).Trim()
+    $today = Get-Date -Format 'yyyyMMdd'
+    if ($last -match "^$today\_\d{6}\s+COMPLETE") {
+        Log "SKIP - today's pull already COMPLETE ($last); this trigger is a redundant catch-up"
+        exit 0
+    }
+}
 
 # Single-instance guard: a pull runs ~15-20 min; never let two overlap. A lock older than 3h is
 # stale (a prior run died hard without cleanup) - clear it so runs don't skip forever, rather than
@@ -61,7 +79,7 @@ try {
 
     if (-not $env:SUPABASE_SERVICE_ROLE_KEY) {
         Log "ABORT - SUPABASE_SERVICE_ROLE_KEY not set. Add it to .env.local. Nothing pulled or published."
-        Set-Content (Join-Path $LogDir 'last_status.txt') "$stamp ABORT no-key"
+        Set-Content $statusFile "$stamp ABORT no-key"
         exit 2
     }
 
@@ -94,7 +112,7 @@ try {
     if ($code -eq 0) { $status = "COMPLETE - published to production" }
     else             { $status = "PARTIAL/FAIL (exit $code) - NOT published, prior build still serving" }
     Log "END  $status"
-    Set-Content (Join-Path $LogDir 'last_status.txt') "$stamp $status"
+    Set-Content $statusFile "$stamp $status"
 
     # Keep 30 days of logs.
     Get-ChildItem $LogDir -Filter 'pull_*.log' -ErrorAction SilentlyContinue |
