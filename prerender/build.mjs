@@ -181,7 +181,7 @@ function middlewareSource(expiredBack, live){
 // Assemble a complete deployable static site in out/: baked pages + SPA assets + sitemap
 // (live URLs only) + vercel.json + the edge middleware. Idempotent, so a targeted rebake
 // still leaves out/ deployable. The baked landing owns out/index.html, so it is NOT copied.
-async function assembleDeploy(live, expiredBack, browse){
+async function assembleDeploy(live, expiredBack, browse, lastmod = {}){
   for (const f of ["board.html", "board.js", "landing.js", "styles.css", "404.html",
                    "favicon.ico", "icon-192.png", "apple-touch-icon.png", "og.png", "logo.png"]) await copyFile(join(SITE, f), join(OUT, f));
   for (const d of ["data", "ui", "vendor"]) await cp(join(SITE, d), join(OUT, d), { recursive: true });
@@ -192,8 +192,15 @@ async function assembleDeploy(live, expiredBack, browse){
 
   const base = SITE_URL;
   const locs = ["/", WA_LANDER, ...browse, ...live];               // change #2: lander in sitemap; expired/retired excluded
+  // <lastmod> (W3C YYYY-MM-DD) is the one optional tag Google actually uses (changefreq/priority
+  // are ignored). Values come from `lastmod` (built by the caller): a job's stated posted_at
+  // (stable — a job page's baked content doesn't change after posting), and the pull date for the
+  // list/landing/browse pages that genuinely change every pull. Omitted when we have no honest
+  // date, rather than fabricating "modified today" (which Google distrusts).
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    + locs.map((u) => "  <url><loc>" + base + u + "</loc></url>").join("\n") + "\n</urlset>\n";
+    + locs.map((u) => { const lm = lastmod[u];
+        return "  <url><loc>" + base + u + "</loc>" + (lm ? "<lastmod>" + lm + "</lastmod>" : "") + "</url>"; }).join("\n")
+    + "\n</urlset>\n";
   await writeFile(join(OUT, "sitemap.xml"), xml, "utf8");
 
   // robots.txt — allow all + declare the sitemap. Written as a real file so Vercel serves it as
@@ -542,7 +549,22 @@ async function main(){
     expiredBack[jobPath(r) + "/"] = { back: backTo(r.state, r.category).href,
       cat: (r.category && r.category[0]) || null, city: r.city || null };
   }
-  const deploy = await assembleDeploy(live, expiredBack, [...browsePaths]);
+
+  // <lastmod> per sitemap URL. Job pages: the job's stated posted_at (YYYY-MM-DD) when valid —
+  // stable, so an unchanged job doesn't churn its lastmod every pull; omitted when the employer
+  // stated no date (same rule the JobPosting datePosted uses — we never fabricate one). List/
+  // landing/browse pages actually change every pull, so they take the pull date.
+  const genDate = String((meta[0] && meta[0].pulled_at) || "").slice(0, 10);
+  const validDay = (d) => /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : "";
+  const lastmod = {};
+  for (const r of recs) if (!r.expired && !r.retired) {
+    const d = validDay(String(r.posted_at || "").slice(0, 10));
+    if (d) lastmod[jobPath(r) + "/"] = d;
+  }
+  const gd = validDay(genDate);
+  if (gd) { for (const u of ["/", WA_LANDER, ...browsePaths]) lastmod[u] = gd; }
+
+  const deploy = await assembleDeploy(live, expiredBack, [...browsePaths], lastmod);
 
   const secs = (Date.now() - t0) / 1000;
   const jobs = results.filter((r) => r.type === "job");
