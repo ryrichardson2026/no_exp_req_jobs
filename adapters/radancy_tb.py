@@ -331,6 +331,13 @@ def mode_index(tenant):
     p = paths(tenant)
     os.makedirs(p["index"], exist_ok=True)
 
+    # OnTrac has no empty page: beyond the real results it returns a sticky, repeating tail of
+    # already-seen ids on every page forever, so the empty-page stop below never fires (it would
+    # run to MAX_PAGES). stop_on_no_new_ids treats "a page that adds 0 new job ids" as the end.
+    # Off by default so Allied/Sysco - which DO reach a genuinely empty page - stay byte-identical.
+    # This is not a vendor total (invariant 3): it pages until the content stops changing.
+    stop_on_no_new = tenant.get("stop_on_no_new_ids")
+    seen_ids = set()
     seen, page, rows_all = 0, 1, []
     try:
         while page <= MAX_PAGES:
@@ -340,6 +347,12 @@ def mode_index(tenant):
             if not rows:
                 print(f"empty page at {page} - done")
                 break
+
+            new_ids = {x["internal_id"] for x in rows} - seen_ids
+            if stop_on_no_new and not new_ids:
+                print(f"page {page} added 0 new job ids (sticky tail) - done")
+                break
+            seen_ids |= new_ids
 
             with open(os.path.join(p["index"], f"page_{page:04d}.html"), "w",
                       encoding="utf-8") as fh:

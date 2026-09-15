@@ -836,6 +836,37 @@
         "experience_range_open_at_zero": true
       },
       "nlx_wa_jobs": null
+    },
+    "ontrac": {
+      "label": "OnTrac - Package Handlers (jobs.ontrac.com, TalentBrew org 47156)",
+      "careers_base": "https://jobs.ontrac.com",
+      "sitemap_url": "https://jobs.ontrac.com/sitemap",
+      "locate_hint": "washington",
+      "index_url": "https://jobs.ontrac.com/search-jobs?alp=6252001-5815135&alt=3",
+      "careers_url": "https://jobs.ontrac.com/search-jobs",
+      "org_id": "47156",
+      "employer_domain": "ontrac.com",
+      "source_class": "direct-employer",
+      "sector": "warehouse",
+      "state": "WA",
+      "location_filter": {
+        "match_any": [", WA"]
+      },
+      "source_job_id_from": "url_tail",
+      "stop_on_no_new_ids": true,
+      "_pagination_note": "OnTrac never returns an empty page - past the real WA results it repeats a sticky 4-row non-WA tail on every page. stop_on_no_new_ids halts the index when a page adds 0 new job ids (verified 2026-09-15: p1=19, p2=9, p3+=same 4 already-seen ids). Not a vendor total.",
+      "extraction": {
+        "_note": "Forked opener vocabulary, OnTrac only. DERIVED from this tenant's own 20-record WA capture (2026-09-15), nothing inherited. Requirements live under a custom colon heading 'The Must-Haves:' (measured 20/20 WA jobs); benefits precede it ('Unpacking the Benefits:') and duties follow ('Your Mission in Motion:'). JSON-LD carries no 'qualifications' key - body only, like Allied. baseSalary present but currency empty -> salary not stated. identifier is a useless '25' -> source_job_id from url_tail (Sysco precedent).",
+        "openers": [
+          {
+            "text": "the must-haves",
+            "role": "REQUIRED",
+            "match": "colon"
+          }
+        ]
+      },
+      "verified": "2026-09-15 - TalentBrew org 47156, Allied-style /search-jobs?alp=6252001-5815135&alt=3 index + &p=N paging confirmed by direct fetch; 20 WA jobs (Kent/Fife/Spokane/Everett/Vancouver), 4 non-WA (Atlanta-Remote/GA/MD/NJ corporate+linehaul) dropped by ', WA' filter; JobPosting JSON-LD detail confirmed (title/description/datePosted/jobLocation/url). SCOPE: index + detail JSON-LD fetched and measured. Openers derived from this capture, nothing inherited.",
+      "nlx_wa_jobs": null
     }
   },
   "jibe_api": {

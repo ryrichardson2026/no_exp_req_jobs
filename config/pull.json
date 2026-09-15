@@ -4,7 +4,7 @@
     { "platform": "oracle_orc",       "modes": ["index", "detail", "normalize"], "tenants": ["providence", "kroger", "sherwin_williams"] },
     { "platform": "workday",          "modes": ["index", "detail", "normalize"], "tenants": ["multicare", "uhaul"] },
     { "platform": "target",           "modes": ["discovery", "detail", "normalize"], "section": "workday", "tenants": ["target"] },
-    { "platform": "radancy_tb",       "modes": ["index", "detail", "normalize"], "tenants": ["allied_security", "sysco"] },
+    { "platform": "radancy_tb",       "modes": ["index", "detail", "normalize"], "tenants": ["allied_security", "sysco", "ontrac"] },
     { "platform": "successfactors_rmk", "modes": ["pull", "normalize"], "tenants": ["cintas"] },
     { "platform": "adp_wfn",          "modes": ["pull", "normalize"], "tenants": ["gensco"] },
     { "platform": "jibe_api",         "modes": ["index", "normalize"] },

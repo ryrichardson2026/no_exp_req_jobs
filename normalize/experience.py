@@ -82,6 +82,11 @@ END_HEADINGS = (
     # "paid training" in a perks list read as a waiver. Fence the whole list, not
     # the one token - same reasoning as the punctuation fold.
     "perks",
+    # OnTrac's duties section ("Your Mission in Motion:") follows its requirements
+    # ("The Must-Haves:"); left unfenced, a duty ("...verify credentials...") leaked
+    # into the requirements span and read as a required credential. Phrase is OnTrac
+    # marketing copy - no over-fence risk elsewhere.
+    "your mission in motion",
 )
 
 END_RX = re.compile(

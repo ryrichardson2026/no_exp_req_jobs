@@ -52,7 +52,7 @@ CATEGORY_PATTERNS = {
     # 'production associate'/operator/assembler fold into Warehouse (owner 2026-09-11):
     # Cintas plant-floor roles sit here UNTIL production earns its own category by volume.
     # Anchored to 'production associate' so a kitchen 'Food Production Worker' stays Food.
-    "Warehouse": r"\b(warehouse|forklift|picker|packer|material handler|order selector|loader|shipping|receiving|fulfillment|inbound|outbound|logistics|inventory|materials|supply chain|stocking|replenish|production associate|production operator|assembler|machine operator)\b",
+    "Warehouse": r"\b(warehouse|forklift|picker|packer|package handler|material handler|order selector|loader|shipping|receiving|fulfillment|inbound|outbound|logistics|inventory|materials|supply chain|stocking|replenish|production associate|production operator|assembler|machine operator)\b",
     "Construction": r"\b(construction|laborer|labourer|carpenter|roofer|framer|concrete|apprentice|demolition)\b",
     "Security": r"\b(security|guard|patrol|loss prevention|surveillance|unarmed|armed officer|assets? protection)\b",
     "Facilities": r"\b(janitor|custodian|cleaner|housekeep\w*|facilities|maintenance|groundskeep|porter|environmental service|\bevs\b|engineer|journeyman)\b",
