@@ -295,6 +295,13 @@ _TEMPLATE = r"""<!doctype html>
   .cmdbtn:hover{border-color:var(--axis);color:var(--ink)}
   .cmdbtn.big{padding:9px 16px;font-size:13px;color:var(--ink)}
   .cmdbtn.ok{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good-ink);border-color:transparent}
+  a.cmdbtn{text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  a.cmdbtn.launch{background:var(--series);color:#fff;border-color:transparent;font-weight:600}
+  a.cmdbtn.launch:hover{filter:brightness(1.06);color:#fff}
+  .launchhint{margin-top:12px;font-size:12.5px;color:var(--ink2);
+    background:color-mix(in srgb,var(--series) 8%,transparent);border:1px solid var(--border);
+    border-radius:8px;padding:9px 12px}
+  .launchhint code{font-family:ui-monospace,Consolas,monospace;font-size:12px}
   .pullgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:8px}
   .pullco{display:flex;align-items:center;justify-content:space-between;gap:10px;
     background:var(--plane);border:1px solid var(--border);border-radius:8px;padding:6px 8px 6px 12px}
@@ -437,10 +444,12 @@ function copyCmd(cmd, btn){
   } catch(e){ fallback(); }
 }
 
-// Manual-pull commands. A file:// page cannot launch a process, so each button COPIES the
-// exact command - paste it into PowerShell to run. Full pull triggers the real scheduled
-// task (loads .env.local + publishes on COMPLETE); per-company re-pulls one tenant (refresh
-// + report, no publish). Commands ride in data-cmd so quotes survive.
+// Manual-pull section. The "Run full pull now" button is a REAL one-click launch: it links to
+// the noprobjobspull:// custom URL protocol (registered once by ops\register_pull_protocol.ps1),
+// which runs the wrapper with -Force -> full pull + publish, self-gated. A file:// page can't
+// spawn a process directly, but it CAN hand off to a registered protocol handler. The copy button
+// stays as a fallback (paste the schtasks command in PowerShell). Per-company buttons copy a
+// single-tenant refresh command. Commands ride in data-cmd so quotes survive.
 function manualPullSection(latest){
   const FULL = 'schtasks /run /tn "NoProbJobs Daily Pull"';
   const tenants = (latest && latest.tenants) ? latest.tenants : [];
@@ -450,19 +459,37 @@ function manualPullSection(latest){
       <button class="cmdbtn" data-cmd="${esc(cmd)}" onclick="copyCmd(this.dataset.cmd,this)">copy</button></div>`;
   }).join("");
   return `<section class="block">
-    <h2>Manual pull <span class="subtle">· buttons COPY the command — paste in PowerShell to run</span></h2>
+    <h2>Manual pull <span class="subtle">· backstop for when the daily automation doesn't fire</span></h2>
     <div class="card pullcard">
       <div class="cmdrow">
         <div>
-          <div class="cmdlabel">Full pull + publish <span class="subtle">(runs the scheduled task now — loads .env.local, self-gates, deploys on COMPLETE)</span></div>
+          <div class="cmdlabel">Full pull + publish <span class="subtle">(one click — loads .env.local, self-gates, deploys on COMPLETE)</span></div>
           <code class="cmdtext">${esc(FULL)}</code>
         </div>
-        <button class="cmdbtn big" data-cmd="${esc(FULL)}" onclick="copyCmd(this.dataset.cmd,this)">copy</button>
+        <div style="display:flex;gap:8px;align-items:center;flex:none">
+          <a class="cmdbtn big launch" href="noprobjobspull://run" onclick="pullLaunched()">▶ Run full pull now</a>
+          <button class="cmdbtn" data-cmd="${esc(FULL)}" onclick="copyCmd(this.dataset.cmd,this)" title="copy the command to run it yourself in PowerShell">copy</button>
+        </div>
       </div>
+      <div id="launchhint" class="launchhint" style="display:none"></div>
       ${perCo ? `<div class="cmdlabel" style="margin-top:14px">Re-pull one company <span class="subtle">(refresh + report; add <code>--publish</code> to deploy)</span></div>
       <div class="pullgrid">${perCo}</div>` : ""}
     </div>
   </section>`;
+}
+
+// Shown after the launch link is clicked. If the protocol isn't registered yet the browser does
+// nothing, so the hint also tells you how to enable it. We can't detect the handler from a
+// file:// page, so the message covers both "it started" and "nothing happened".
+function pullLaunched(){
+  const h = document.getElementById("launchhint");
+  if(!h) return;
+  h.innerHTML = 'Pull requested. A PowerShell window should open and run for ~15–20 min, then this '
+    + 'dashboard updates — <b>refresh the page</b> to see the new run.<br>'
+    + 'Nothing opened? Enable the button once (no admin): run '
+    + '<code>powershell -ExecutionPolicy Bypass -File ops\\register_pull_protocol.ps1</code>, '
+    + 'then approve the browser\'s one-time "Open Windows PowerShell?" prompt.';
+  h.style.display = "block";
 }
 
 // Job-category breakdown of the CURRENT applicable set (CATS is a live snapshot of
