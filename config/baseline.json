@@ -65,6 +65,11 @@
       "records": 20,
       "applicable": 19,
       "density": 95.0
+    },
+    "tjx": {
+      "records": 119,
+      "applicable": 75,
+      "density": 63.0
     }
   }
 }

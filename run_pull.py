@@ -367,6 +367,7 @@ _ENUMERATE_ARTIFACT = {
     "oracle_orc": ("index", True), "workday": ("index", True),
     "radancy_tb": ("rows.jsonl", False), "target": ("discovery", True),
     "jibe_api": ("pages", True), "compass_api": ("pages", True),
+    "phenom": ("records.jsonl", False),
 }
 
 
@@ -399,6 +400,9 @@ def _live_detail_names(platform, tenant_key):
     if platform == "target":
         # discovery IS the live WA set; a superset of what detail holds, so it is purge-safe.
         return {f"{mod.safe_name(d.get('requisitionid'))}.json" for d in mod.load_discovery(t) if d.get("requisitionid")}, ".json"
+    if platform == "phenom":
+        # detail files are {job_id}.html for each in-scope index record (mode_detail's scheme).
+        return {f"{mod.job_id(j)}.html" for j in mod.load_records(t) if mod.in_scope(j, t) and mod.job_id(j)}, ".html"
     return None, None
 
 

@@ -1157,5 +1157,48 @@
         "backoff_seconds": 3
       }
     }
+  },
+  "phenom": {
+    "_platform_note": "Phenom People career sites. Read surface = POST /widgets (ddoKey=refineSearch) JSON search, paged by from/size to a genuinely empty page (totalHits is a diagnostic, never a stop); the index carries only a descriptionTeaser, so the full description is fetched per job from the Phenom job-detail page ({careers_base}/global/en/job/{jobSeqNo}), which embeds a JobPosting JSON-LD block. NEW platform 2026-09-15 (TJX): distinct fetch shape from every existing adapter (JSON POST search + JSON-LD detail). apply_url points at Workday but the READ surface is Phenom - the ATS is not the adapter boundary (Finding 42). --probe first for any new Phenom tenant.",
+    "tjx": {
+      "label": "TJX Companies - Retail Associates (jobs.tjx.com, Phenom TJCOGLOBAL)",
+      "careers_base": "https://jobs.tjx.com",
+      "widgets_url": "https://jobs.tjx.com/widgets",
+      "detail_url_tmpl": "https://jobs.tjx.com/global/en/job/{pid}",
+      "employer_domain": "tjx.com",
+      "source_class": "direct-employer",
+      "sector": "retail",
+      "state": "WA",
+      "page_size": 50,
+      "search_body": {
+        "lang": "en_global",
+        "deviceType": "desktop",
+        "country": "global",
+        "pageName": "search-results",
+        "subsearch": "",
+        "jobs": true,
+        "counts": true,
+        "keywords": "",
+        "global": true,
+        "sortBy": "Most relevant",
+        "locationData": {}
+      },
+      "selected_fields": {
+        "category": ["Retail Associates"],
+        "state": ["Washington"]
+      },
+      "location_filter": {
+        "field": "state",
+        "match_any": ["Washington"]
+      },
+      "extraction": {
+        "_note": "Forked opener vocabulary, TJX only. DERIVED from this tenant's own 117-description WA capture (2026-09-15), nothing inherited. Requirements live under a custom colon heading 'Who We're Looking For: You.' (measured 114/117; 3 use 'Who We Are Looking For' - both openers below). It follows the duties section ('Opportunity: Grow Your Career') and is followed by 'Benefits include:' (already in END_HEADINGS), so the span is fenced without a new terminator. Apostrophe is curly in the source; experience.py fold_punct normalizes it to ASCII at match time, so the straight-apostrophe opener fires. Requirements sit in the JobPosting JSON-LD description body (HTML-entity-encoded; the adapter html.unescapes it) - no segmented qualifications field.",
+        "openers": [
+          {"text": "who we're looking for", "role": "REQUIRED", "match": "colon"},
+          {"text": "who we are looking for", "role": "REQUIRED", "match": "colon"}
+        ]
+      },
+      "verified": "2026-09-15 - Phenom TJCOGLOBAL confirmed (cdn.phenompeople.com, content-us.phenompeople.com/api/TJCOGLOBAL). POST /widgets refineSearch with selected_fields{category:[Retail Associates],state:[Washington]} -> totalHits 118 (matches the site's own facet count). Pagination clean: from=100 ->18, from=120/200 ->0 (empty-page stop, no sticky tail). Detail page (bare pid, no slug needed -> 200) carries JobPosting JSON-LD with full description. SCOPE: index API + one detail page inspected; openers pending derivation from the full detail capture."
+    }
   }
 }

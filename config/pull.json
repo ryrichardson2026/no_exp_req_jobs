@@ -8,6 +8,7 @@
     { "platform": "successfactors_rmk", "modes": ["pull", "normalize"], "tenants": ["cintas"] },
     { "platform": "adp_wfn",          "modes": ["pull", "normalize"], "tenants": ["gensco"] },
     { "platform": "jibe_api",         "modes": ["index", "normalize"] },
-    { "platform": "compass_api",      "modes": ["index", "normalize"] }
+    { "platform": "compass_api",      "modes": ["index", "normalize"] },
+    { "platform": "phenom",           "modes": ["index", "detail", "normalize"], "tenants": ["tjx"] }
   ]
 }
