@@ -25,6 +25,16 @@ const PRODUCT = "NoProbJobs.com";
 // Warehouse→package), so keeping these labels keeps the icons correct.
 const LANDING_CATS = ["Retail", "Sales", "Food Services", "Security", "Warehouse", "Transportation/Automotive"];
 
+// Employers held OUT of the Recent jobs strip. Keyed on employer_domain, so one entry
+// covers every fascia a tenant posts under — kroger.com is both Fred Meyer and Quality
+// Food Centers. STRIP ONLY: a suppressed employer keeps its full weight everywhere else
+// on the site, and is one click from this page. Retail alone still carries 208 Kroger
+// records. The strip is a shop window; the board is the product.
+//
+// Suppressing costs a slot rather than promoting a runner-up from the same employer —
+// one job per employer is the rule, and a suppressed employer simply has none.
+const STRIP_SUPPRESS_EMPLOYERS = ["kroger.com"];
+
 // Change #2: the Washington lander is this same landing page served at /washington-jobs.
 // The ONLY content difference is the hero headline; everything else (job data, components,
 // CTAs) is identical. Detected from the path so the one bundle serves both routes, and the
@@ -456,6 +466,7 @@ class LandingApp extends React.Component {
       // its listing views are untouched.
       const list = (this.state.recs || [])
         .filter((r) => r.experience_condition === "NONE_NEEDED" && R.recordCats(r).length > 0)
+        .filter((r) => STRIP_SUPPRESS_EMPLOYERS.indexOf(r.employer_domain) < 0)
         .slice().sort(R.newestFirst);
       const want = this.state.wide ? 9 : 6;
       jobs = this.newestPerEmployer(list, want).map((r) => this.shape(r));
