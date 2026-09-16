@@ -24,6 +24,16 @@ $tDaily = New-ScheduledTaskTrigger -Daily -At $Time
 $tLogon = New-ScheduledTaskTrigger -AtLogOn
 $tLogon.Delay = 'PT10M'   # ISO-8601 duration: wait 10 min after logon before the catch-up run.
 
+# AUTO-RETRY on the catch-up trigger. On 2026-09-16 the logon+10m run exited 1 having done nothing
+# (a transient early failure right after logon), and with only a single fire it needed a manual
+# kick. Repeat the catch-up every 30 min for 3 h so a flaked attempt self-heals: the per-day
+# COMPLETE guard inside run_pull_daily.ps1 makes every repeat after the first success an instant
+# no-op, and MultipleInstances=IgnoreNew means a repeat that fires mid-pull is dropped. So the
+# repetition only ever does work when the prior attempt did NOT reach COMPLETE.
+$tLogon.Repetition = (New-ScheduledTaskTrigger -Once -At '00:00' `
+    -RepetitionInterval (New-TimeSpan -Minutes 30) `
+    -RepetitionDuration (New-TimeSpan -Hours 3)).Repetition
+
 # StartWhenAvailable: if the PC was fully OFF at 6 am, run the missed task at next boot (catch-up).
 # WakeToRun: best-effort wake if the PC is in real (S3) sleep — unreliable on this S0 machine, kept
 #            only because it's harmless; the logon trigger is the actual safety net.

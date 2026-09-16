@@ -33,33 +33,42 @@ $statusFile = Join-Path $LogDir 'last_status.txt'
 
 function Log($msg) { $line = "[{0}] {1}" -f (Get-Date -Format 's'), $msg; $line | Tee-Object -FilePath $log -Append }
 
-# Per-day idempotency guard. The task fires from more than one trigger now - the 6am daily AND a
-# logon/unlock catch-up (see register_pull_task.ps1), because this is a Modern Standby (S0) laptop
-# where WakeToRun can't be trusted to wake it at 6am. Whichever trigger wins first does the day's
-# run; the others must no-op. A COMPLETE run for today already in last_status.txt means we're done.
-# (PARTIAL/FAIL is NOT treated as done - a catch-up trigger should get a fresh attempt.) Force a
-# run regardless with -Force, e.g. after fixing a source mid-day.
-if (-not $Force -and (Test-Path $statusFile)) {
-    $last = (Get-Content $statusFile -Raw).Trim()
-    $today = Get-Date -Format 'yyyyMMdd'
-    if ($last -match "^$today\_\d{6}\s+COMPLETE") {
-        Log "SKIP - today's pull already COMPLETE ($last); this trigger is a redundant catch-up"
-        exit 0
-    }
-}
+# Emit a line IMMEDIATELY so a log file always exists for this attempt - even if we die before
+# START. The 2026-09-16 logon catch-up run exited 1 having written nothing at all: it died before
+# the first Log() call AND the TaskScheduler Operational log was disabled, so the failure was
+# completely invisible (no log, no run record, dashboard silently stale). This line + the outer
+# try/catch below guarantee every trigger leaves a trail and records its outcome.
+Log ("TRIGGER  run_pull_daily.ps1 invoked (Force={0}) pid={1} user={2}" -f $Force, $PID, $env:USERNAME)
 
-# Single-instance guard: a pull runs ~15-20 min; never let two overlap. A lock older than 3h is
-# stale (a prior run died hard without cleanup) - clear it so runs don't skip forever, rather than
-# blocking every future run.
-if (Test-Path $lock) {
-    $lockAgeH = ((Get-Date) - (Get-Item $lock).LastWriteTime).TotalHours
-    if ($lockAgeH -lt 3) { Log ("SKIP - a run is already in progress ($lock, age {0:N0}m)" -f ($lockAgeH*60)); exit 0 }
-    Log ("STALE LOCK ({0:N1}h old) - prior run died without cleanup; clearing it" -f $lockAgeH)
-    Remove-Item $lock -Force -ErrorAction SilentlyContinue
-}
-New-Item -ItemType File -Path $lock | Out-Null
-
+$weOwnLock = $false
 try {
+    # Per-day idempotency guard. The task fires from more than one trigger now - the 6am daily AND a
+    # logon/unlock catch-up (see register_pull_task.ps1), because this is a Modern Standby (S0) laptop
+    # where WakeToRun can't be trusted to wake it at 6am. Whichever trigger wins first does the day's
+    # run; the others must no-op. A COMPLETE run for today already in last_status.txt means we're done.
+    # (PARTIAL/FAIL is NOT treated as done - a catch-up trigger should get a fresh attempt.) Force a
+    # run regardless with -Force, e.g. after fixing a source mid-day.
+    if (-not $Force -and (Test-Path $statusFile)) {
+        $last = (Get-Content $statusFile -Raw).Trim()
+        $today = Get-Date -Format 'yyyyMMdd'
+        if ($last -match "^$today\_\d{6}\s+COMPLETE") {
+            Log "SKIP - today's pull already COMPLETE ($last); this trigger is a redundant catch-up"
+            exit 0
+        }
+    }
+
+    # Single-instance guard: a pull runs ~15-20 min; never let two overlap. A lock older than 3h is
+    # stale (a prior run died hard without cleanup) - clear it so runs don't skip forever, rather than
+    # blocking every future run.
+    if (Test-Path $lock) {
+        $lockAgeH = ((Get-Date) - (Get-Item $lock).LastWriteTime).TotalHours
+        if ($lockAgeH -lt 3) { Log ("SKIP - a run is already in progress ($lock, age {0:N0}m)" -f ($lockAgeH*60)); exit 0 }
+        Log ("STALE LOCK ({0:N1}h old) - prior run died without cleanup; clearing it" -f $lockAgeH)
+        Remove-Item $lock -Force -ErrorAction SilentlyContinue
+    }
+    New-Item -ItemType File -Path $lock | Out-Null
+    $weOwnLock = $true
+
     Set-Location $Proj
 
     # Node (build.mjs/retire.mjs) and vercel (deploy) must be resolvable under the Task
@@ -120,6 +129,21 @@ try {
 
     exit $code
 }
+catch {
+    # Any TERMINATING error before or around the pull (early startup, .env parse, Set-Location, a
+    # native NativeCommandError, etc.) lands here instead of vanishing as a bare exit 1. Record it to
+    # the log, the status file, AND the dashboard so the attempt is never invisible again.
+    $msg = $_.Exception.Message
+    Log ("FATAL  wrapper aborted before/around the pull: {0}`n{1}" -f $msg, $_.ScriptStackTrace)
+    Set-Content $statusFile "$stamp FATAL - $msg (see logs\pull_$stamp.log)"
+    try {
+        Set-Location $Proj -ErrorAction SilentlyContinue
+        & $Python -m runlog --fail --reason "run_pull_daily.ps1 fatal before/around pull: $msg - see logs\pull_$stamp.log" *>&1 | Tee-Object -FilePath $log -Append
+    } catch { Log "  (could not emit runlog failure record: $($_.Exception.Message))" }
+    exit 1
+}
 finally {
-    Remove-Item $lock -Force -ErrorAction SilentlyContinue
+    # Only remove the lock if THIS invocation created it — a SKIP because another run is in progress
+    # must not delete that run's lock.
+    if ($weOwnLock) { Remove-Item $lock -Force -ErrorAction SilentlyContinue }
 }
