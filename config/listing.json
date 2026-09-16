@@ -1,0 +1,7 @@
+{
+  "employer_cap": {
+    "key": "tenant",
+    "n": 3,
+    "scope": "page"
+  }
+}

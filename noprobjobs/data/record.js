@@ -102,6 +102,64 @@ export function payFirst(a, b){
 export const SORTS = [{ id: "newest", label: "Newest first" }, { id: "pay", label: "Highest pay first" }];
 export const COMPARATORS = { newest: newestFirst, pay: payFirst };
 
+/* Per-employer spread cap for listing views (presentation only — the ranking in
+   COMPARATORS is untouched). Reorders an already-ranked `list` so that, within each
+   page of `perPage`, no employer holds more than `cap.n` cards — UNTIL a page would
+   otherwise ship short, at which point over-cap cards are drained in rank order to
+   fill it. Nothing is ever dropped and the page is never padded, so the returned
+   array is a permutation of the input and `.length` is unchanged. Over-cap cards
+   become overflow that carries to the next page and is considered BEFORE that page's
+   fresh candidates (so strict recency still governs within each employer and within
+   the overflow). Per-page counts reset each page (cap.scope = "page").
+
+   Deterministic: counting only (never iterates a map for order), no randomness; the
+   input order — set by newestFirst, whose internal_id tiebreak is already stable —
+   is the only ordering source, so same input → same output every bake.
+
+   THE CAP IS SOFT: because the drain fills short pages, the effective max per page is
+   cap.n PLUS however many slots diversity could not fill (e.g. 6 employers, cap.n=3,
+   a 20-slot page → 18 capped + 2 drained). A dominant tenant showing slightly above
+   cap.n on a page is correct, not a bug.
+
+   cap = { key: "tenant" | "brand", n, scope }. key "tenant" groups by employer_domain
+   (Fred Meyer + QFC share kroger.com, so they cap jointly); "brand" groups by
+   employerSlug(company_name). An empty domain falls back to the brand slug so
+   unrelated domain-less employers are not lumped into one bucket. */
+export function spreadByEmployer(list, cap, perPage){
+  const n = cap && cap.n;
+  const per = perPage || 10;
+  if (!Array.isArray(list) || !n || n < 1 || list.length <= 1) return Array.isArray(list) ? list.slice() : list;
+  const byTenant = (cap.key || "tenant") === "tenant";
+  const keyOf = (r) => byTenant ? (r.employer_domain || employerSlug(r.company_name)) : employerSlug(r.company_name);
+
+  const out = [];
+  let overflow = [];              // over-cap cards carried forward, in rank order
+  let i = 0;                      // pointer into the fresh ranked candidates
+  while (i < list.length || overflow.length) {
+    const count = Object.create(null);   // employer → count on THIS page (resets per page)
+    let placed = 0;
+    const next = [];                     // overflow to carry to the NEXT page
+    // (A) carried overflow first — respect the cap, re-queue anything still over it
+    for (let k = 0; k < overflow.length; k++) {
+      const r = overflow[k], key = keyOf(r);
+      if (placed < per && (count[key] || 0) < n) { out.push(r); count[key] = (count[key] || 0) + 1; placed++; }
+      else next.push(r);
+    }
+    // (B) fresh ranked candidates — place under the cap, else divert to overflow
+    while (placed < per && i < list.length) {
+      const r = list[i++], key = keyOf(r);
+      if ((count[key] || 0) < n) { out.push(r); count[key] = (count[key] || 0) + 1; placed++; }
+      else next.push(r);
+    }
+    // (C) fresh exhausted but page still short → drain overflow in order, ignoring the
+    //     cap, to fill it. (B) only exits with placed<per once i has reached the end,
+    //     so this fires exactly when the ranked list is exhausted, never mid-run.
+    overflow = next;
+    while (placed < per && overflow.length) { out.push(overflow.shift()); placed++; }
+  }
+  return out;
+}
+
 /* Item 12: a posted date older than 30 days is NOT displayed — an evergreen req carrying a
    2019 posted_date (Dollar General's feed does exactly this: posted_date 2019 while the req
    is create/update-stamped this month) reads as a dead site otherwise. This suppresses only

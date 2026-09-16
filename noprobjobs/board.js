@@ -12,6 +12,7 @@ import { description } from "./data/describe.js";
 import * as R from "./data/record.js";
 import * as L from "./data/resolve.js";
 import * as SB from "./data/supabase.js";
+import { EMPLOYER_CAP } from "./data/cap.js";
 // Location data is STATIC (not a dynamic import) so resolveLocation works on the FIRST render.
 // When it was deferred, a URL like ?location=Seattle applied before cities loaded, so
 // resolveLocation("Seattle", [], …) returned "unmatched" → an empty-list flash until cities
@@ -565,7 +566,10 @@ class BoardApp extends React.Component {
     const inExp = (r) => !exps.length || exps.indexOf(R.expFacet(r.experience_condition)) >= 0;
     const inEmp = (r) => !employers.length || employers.indexOf(R.employerSlug(r.company_name)) >= 0;
 
-    const list = all.filter((r) => inCat(r) && inLoc(r) && inPay(r) && inShift(r) && inType(r) && inExp(r) && inEmp(r)).sort(R.COMPARATORS[st.sort] || R.newestFirst);
+    const ranked = all.filter((r) => inCat(r) && inLoc(r) && inPay(r) && inShift(r) && inType(r) && inExp(r) && inEmp(r)).sort(R.COMPARATORS[st.sort] || R.newestFirst);
+    // Presentation-only per-employer spread cap (item: grocery-fold fix). Reorders the ranked
+    // list so one tenant can't own the top of a page; drops nothing, so `total` is unchanged.
+    const list = R.spreadByEmployer(ranked, EMPLOYER_CAP, PER_PAGE);
     const total = list.length;
     const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
     const pg = Math.min(Math.max(1, st.pg || 1), totalPages);
@@ -669,7 +673,7 @@ class BoardApp extends React.Component {
     const realEmpty = !loading && total === 0;
     const locEmpty = realEmpty && locResolved;
     const genericEmpty = realEmpty && !locEmpty;
-    const elsewhereRecs = locEmpty ? all.filter((r) => inCat(r) && inPay(r) && inShift(r) && inType(r)).sort(R.COMPARATORS[st.sort] || R.newestFirst).slice(0, PER_PAGE) : [];
+    const elsewhereRecs = locEmpty ? R.spreadByEmployer(all.filter((r) => inCat(r) && inPay(r) && inShift(r) && inType(r)).sort(R.COMPARATORS[st.sort] || R.newestFirst), EMPLOYER_CAP, PER_PAGE).slice(0, PER_PAGE) : [];
     const elsewhereJobs = elsewhereRecs.map((r) => this.shape(r));
     const elsewhereHeading = cats.length ? "Jobs elsewhere in " + listOf(cats) : "Newest jobs";
 
