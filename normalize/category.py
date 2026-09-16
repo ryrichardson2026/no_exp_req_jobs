@@ -50,7 +50,10 @@ CATEGORY_PATTERNS = {
     "Administrative": r"\b(admin|administrative|clerical|receptionist|data entry|office assistant|front desk|scheduler|scheduling coord\w*|bookkeeper|human resources|\bhr\b|payroll|patient financial|revenue cycle|patient service[s]? (representative|coordinator)|registrar|registration|health information|\bhim\b|medical records)\b",
     "Customer Service": r"\b(customer service|call center|call centre|csr|customer support|contact center|dispatcher)\b",
     "Sales": r"\b(sales|account executive|canvasser|telesales|inside sales|outside sales|business development)\b",
-    "Retail": r"\b(retail|cashier|store associate|sales associate|stocker|merchandiser|barista|shift lead|store manager|store mgr|asst store mgr|assistant store manager|dept leader|department leader|person in charge|\bpic\b|th person|rd person|nd person|team lead\w*|general merchandise|fuel center|service counter|home hardlines|front end|e-commerce|grocery|produce|meat|seafood|floral|apparel|garden ctr|dairy|starbucks|bakery|courtesy|bagger|checkout|night clerk|overnight clerk|freight clerk|section leader|wholesale|branch coordinator)\b",
+    # 'merch\w* assoc\w*' catches Merchandise/Merchandising Associate incl. the TJX typos
+    # (Merchadise Assoc, Merchandise Associte); backroom/stockroom are the store back-of-house
+    # associate titles (HomeGoods/Marshalls/TJ Maxx/Sierra) that carried no category before.
+    "Retail": r"\b(retail|cashier|store associate|sales associate|stocker|merchandiser|merch\w* assoc\w*|backroom|stockroom|barista|shift lead|store manager|store mgr|asst store mgr|assistant store manager|dept leader|department leader|person in charge|\bpic\b|th person|rd person|nd person|team lead\w*|general merchandise|fuel center|service counter|home hardlines|front end|e-commerce|grocery|produce|meat|seafood|floral|apparel|garden ctr|dairy|starbucks|bakery|courtesy|bagger|checkout|night clerk|overnight clerk|freight clerk|section leader|wholesale|branch coordinator)\b",
     # 'production associate'/operator/assembler fold into Warehouse (owner 2026-09-11):
     # Cintas plant-floor roles sit here UNTIL production earns its own category by volume.
     # Anchored to 'production associate' so a kitchen 'Food Production Worker' stays Food.
