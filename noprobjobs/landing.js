@@ -59,13 +59,25 @@ class LandingApp extends React.Component {
     };
   }
 
-  static CAP_PER_EMPLOYER = 2;
-  capByEmployer(list, want){
+  /* One job per EMPLOYER, newest first — nine employers, nine jobs.
+
+     Keyed on employer_domain (the TENANT), not company_name. Fred Meyer and Quality
+     Food Centers are both kroger.com, and Compass runs eleven fascias off
+     compass-usa.com, so a company_name key lets one employer hold several slots under
+     different brand names — which is how the strip came to run four of its nine cards
+     as grocery-department roles. One per tenant makes that structurally impossible;
+     there is no exclusion list to maintain.
+
+     `list` arrives newest-first, so the first record seen for an employer IS that
+     employer's newest job. If fewer employers are live than there are slots the strip
+     ships shorter rather than giving anyone a second card. */
+  static PER_EMPLOYER = 1;
+  newestPerEmployer(list, want){
     const seen = {}, out = [];
     for (let i = 0; i < list.length && out.length < want; i++) {
-      const co = list[i].company_name || "";
-      if ((seen[co] || 0) >= LandingApp.CAP_PER_EMPLOYER) continue;
-      seen[co] = (seen[co] || 0) + 1;
+      const emp = list[i].employer_domain || list[i].company_name || "";
+      if ((seen[emp] || 0) >= LandingApp.PER_EMPLOYER) continue;
+      seen[emp] = (seen[emp] || 0) + 1;
       out.push(list[i]);
     }
     return out;
@@ -437,16 +449,16 @@ class LandingApp extends React.Component {
     let jobs = [];
     if (!loading) {
       // Item 7: the landing's promise is jobs that need no experience, so the recent section
-      // shows NONE_NEEDED records only — newest-first (unchanged two-tier order), capped at
-      // 2/employer. If fewer than `want` survive the cap, render fewer; never backfill with
+      // shows NONE_NEEDED records only — newest-first (unchanged two-tier order), now ONE
+      // per employer. If fewer than `want` survive, render fewer; never backfill with
       // PREFERRED (a short honest section beats a full one that mostly says "experience
-      // preferred"). This is a landing selection rule only — the board's default sort is
-      // untouched.
+      // preferred"). This is a landing selection rule only — the board's default sort and
+      // its listing views are untouched.
       const list = (this.state.recs || [])
         .filter((r) => r.experience_condition === "NONE_NEEDED" && R.recordCats(r).length > 0)
         .slice().sort(R.newestFirst);
       const want = this.state.wide ? 9 : 6;
-      jobs = this.capByEmployer(list, want).map((r) => this.shape(r));
+      jobs = this.newestPerEmployer(list, want).map((r) => this.shape(r));
     }
     return h("section", { style: s("display:grid;gap:var(--gap-block)") },
       h("h2", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink)") }, "Recent jobs"),
