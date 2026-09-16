@@ -1,0 +1,19 @@
+{
+  "_comment": "Per-tenant (employer_domain) first successful pull date — the day this pipeline onboarded the tenant. Records whose first_seen is on/before this date are onboarding BACKFILL and never count as 'new' (see normalize/model.py compute_is_new). Keyed on employer_domain, NOT source_id: tenants sharing a platform (oracle_orc: kroger+providence 08-31 vs sherwin 09-13; workday: multicare 08-31 vs uhaul 09-10; radancy_tb: allied 09-02 vs sysco 09-12 vs ontrac 09-15) onboarded on different days. Set ONCE at onboarding and never updated (append a line in the add-tenant SOP). Seeded 2026-09-16 from min(first_seen) per employer_domain. A tenant missing from this map falls back to min(first_seen), which drifts as its earliest backfill retires — prefer keeping this explicit.",
+  "first_pull": {
+    "kroger.com": "2026-08-31",
+    "providence.org": "2026-08-31",
+    "multicare.org": "2026-08-31",
+    "target.com": "2026-09-01",
+    "compass-usa.com": "2026-09-02",
+    "dollargeneral.com": "2026-09-02",
+    "aus.com": "2026-09-02",
+    "uhaul.com": "2026-09-10",
+    "cintas.com": "2026-09-12",
+    "gensco.com": "2026-09-12",
+    "sysco.com": "2026-09-12",
+    "sherwin-williams.com": "2026-09-13",
+    "tjx.com": "2026-09-15",
+    "ontrac.com": "2026-09-15"
+  }
+}

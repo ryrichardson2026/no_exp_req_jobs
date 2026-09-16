@@ -1,0 +1,8 @@
+{
+  "_comment": "Display WINDOWS for the 'new' badges. The RULE is NOT tunable and lives in code (normalize/model.effective_new_date): new-from-date = coalesce(posted_at, first_seen), excluding onboarding backfill, measured against the PULL DATE (never now()). Only the window lengths are parameters — every surface reads the same effective_new_date and differs only by how many days it allows. field/clock/exclude_first_pull are recorded here for documentation; they describe the fixed rule and are not switches.",
+  "field": "coalesce(posted_at, first_seen)",
+  "clock": "pull_date",
+  "exclude_first_pull": true,
+  "badge_window_days": 7,
+  "card_window_days": 5
+}

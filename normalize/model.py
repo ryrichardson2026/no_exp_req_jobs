@@ -19,6 +19,7 @@ it - and on at least one measured source the employer's own taxonomy is 100%
 filled, which makes it the more trustworthy of the two.
 """
 
+import datetime
 import hashlib
 import re
 import unicodedata
@@ -44,9 +45,12 @@ PAY_PERIOD = ("HOURLY", "DAILY", "WEEKLY", "MONTHLY", "ANNUAL", "UNKNOWN")
 # not the same on every source - see freshness_from_days.
 SOURCE_CLASS = ("direct-employer", "aggregator", "public-feed")
 
-# A posting is "new" by OUR first_seen, never by the employer's posted_at.
-# posted_at says how long the employer has been hiring; first_seen says when
-# this pipeline first saw it. Only the second is a fact about our inventory.
+# "New" is defined by effective_new_date = coalesce(posted_at, first_seen), minus
+# onboarding backfill (see effective_new_date() below). posted_at says how long the
+# employer has been hiring; first_seen when this pipeline first saw it — we prefer the
+# employer's own date and fall back to first_seen. The display WINDOWS live in
+# config/freshness.json (badge 7d, card 5d); this constant is only the default fallback
+# when that config is unavailable.
 NEW_WINDOW_DAYS = 7
 
 # `direct-contact` is proposed but NOT approved - it covers email, phone and
@@ -250,19 +254,68 @@ def slugify(title, maxlen=60):
     return s or "job"
 
 
-def compute_is_new(rec, now_days_fn=None):
-    """New to OUR inventory. Uses first_seen, never posted_at.
+def as_date(v):
+    """Best-effort parse of a date / datetime / ISO-ish string to a date, else None.
+    Handles 'YYYY-MM-DD', 'YYYY-M-D', full ISO timestamps and timestamptz."""
+    if v is None or v == "":
+        return None
+    if isinstance(v, datetime.datetime):
+        return v.date()
+    if isinstance(v, datetime.date):
+        return v
+    m = re.match(r"(\d{4})-(\d{1,2})-(\d{1,2})", str(v))
+    if not m:
+        return None
+    return datetime.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
 
-    A role the employer posted 90 days ago and we ingested yesterday is new to
-    every user who will ever see it. A role we have carried for a month is not,
-    however recently the employer re-dated it."""
-    fs = rec.get("first_seen")
-    if not fs:
+
+def effective_new_date(rec, first_pull_by_domain=None):
+    """THE definition of "new" — the single date a job counts as new FROM, or None if
+    it never does. Every surface (landing badge, per-card badge, DB is_new) reads THIS,
+    then applies its own display WINDOW against it and the pull date. No surface may
+    look at a raw posted_at/first_seen itself — that is the property that let four
+    definitions drift apart. The field, the backfill exclusion and the pull-date clock
+    are the rule; the window is the only thing a surface may vary.
+
+    Two mandatory components:
+
+    1. coalesce(posted_at, first_seen). Prefer the employer's own posting date; fall
+       back to first_seen only when there is none (load-bearing — many live records have
+       a null posted_at). A job the employer posted three weeks ago is not new to a
+       seeker just because we met it yesterday.
+
+    2. NOT onboarding backfill -> None. When a tenant is onboarded its whole live
+       backlog lands with a fresh first_seen that day; that is ingestion, not market
+       news, and never counts as new however recently posted. A record whose first_seen
+       date is on or before its tenant's first-pull date is backfill. Keyed on
+       employer_domain (the tenant), NOT source_id: tenants sharing a platform onboarded
+       on different days, so a per-source cutoff would count a later tenant's backlog as
+       new.
+
+    first_pull_by_domain: {employer_domain -> that tenant's first-pull date}. Pass the
+    explicit map from config/tenant_first_pull.json; for a domain absent from it, supply
+    min(first_seen) for that domain (the drift-prone fallback — min() moves later as a
+    tenant's earliest backfill retires). A domain with no entry gets no backfill
+    exclusion. Returns a datetime.date or None. Pure and deterministic."""
+    first_pull_by_domain = first_pull_by_domain or {}
+    fs = as_date(rec.get("first_seen"))
+    if fs is None:
+        return None
+    fp = as_date(first_pull_by_domain.get(rec.get("employer_domain")))
+    if fp is not None and fs <= fp:          # onboarding backfill — never new
+        return None
+    return as_date(rec.get("posted_at")) or fs   # coalesce(posted_at, first_seen)
+
+
+def is_new_within(eff_date, pull_date, window_days):
+    """Apply a display WINDOW to an effective_new_date. This is the ONLY thing a surface
+    varies: the landing badge passes badge_window_days, the card passes card_window_days,
+    both against the SAME eff_date and the SAME pull_date (never now() — the pages are
+    static, so freshness holds until the next bake regenerates it). eff_date None (not
+    new / backfill / no first_seen) -> False."""
+    if eff_date is None or pull_date is None:
         return False
-    days = now_days_fn(fs) if now_days_fn else None
-    if days is None:
-        return False
-    return 0 <= days <= NEW_WINDOW_DAYS
+    return 0 <= (pull_date - eff_date).days <= window_days
 
 
 def seen_key(rec):
