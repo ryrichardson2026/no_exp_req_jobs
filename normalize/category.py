@@ -36,10 +36,12 @@ own verbatim labels) and neither falls back to the other.
 
 import re
 
-# HEURISTIC title -> category map. Ten categories: the master-doc §4 nine plus
+# HEURISTIC title -> category map. Ten TITLE-MATCHED categories: the master-doc §4 nine plus
 # Transportation/Automotive (owner-approved 2026-09-11). Production folds into Warehouse
 # for now; Healthcare stays a SECTOR (aides applicable-but-uncategorized), both by owner
 # decision - an earlier 9->13 expansion was reverted, see the git log.
+# NOTE: the board has an 11th category, Grocery, that is NOT title-matched - it is assigned by
+# TENANT in normalize/enrich.py (config/tenant_category.json). It intentionally has no pattern here.
 CATEGORY_PATTERNS = {
     # Vocab extended 2026-09-02 from the audit of applicable-but-UNCLASSIFIED
     # titles (grocery-store dept format, Target inbound, healthcare-support admin,

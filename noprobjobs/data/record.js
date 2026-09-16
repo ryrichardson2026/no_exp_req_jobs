@@ -10,7 +10,11 @@ import { LOGOS } from "./logos.js";
    stays in the menu and stays enabled, including the thin ones: a near-empty category
    is a sourcing gap that fills as employers are added, not a broken state.
    Category is a FILTER INPUT ONLY — it is never printed on a card or a job page. */
-export const CATEGORIES = ["Administrative","Customer Service","Sales","Retail","Warehouse","Construction","Security","Facilities","Food Services","Transportation/Automotive"];
+// Grocery (11th, owner-approved 2026-09-16) sits next to Retail: it is assigned by TENANT
+// (employer_domain -> category, see config/tenant_category.json + normalize/enrich.py), NOT by a
+// title pattern, so it has no entry in normalize/category.py's CATEGORY_PATTERNS. Board-filter only;
+// deliberately absent from landing.js LANDING_CATS.
+export const CATEGORIES = ["Administrative","Customer Service","Sales","Retail","Grocery","Warehouse","Construction","Security","Facilities","Food Services","Transportation/Automotive"];
 export function recordCats(r){ return Array.isArray(r.category) ? r.category : (r.category ? [r.category] : []); }
 
 /* Presence filters. Facets group the employers' own raw values; the card and page

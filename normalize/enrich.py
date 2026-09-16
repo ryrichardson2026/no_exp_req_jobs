@@ -21,8 +21,11 @@ call), and writes back ONLY the derived fields:
 
 Every other field is preserved value-for-value: the record is mutated in place,
 existing keys keep their position and value, `credentials` (a new contract field)
-is appended. No adapter is imported, no tenant is branched on beyond loading that
-tenant's vocabulary from config - the same source-independence report.py holds.
+is appended. No adapter is imported. One DELIBERATE tenant branch exists: a
+tenant-assigned category (config/tenant_category.json, e.g. kroger.com -> Grocery),
+applied to `category` AFTER the title table. It keys off employer_domain (already on
+the record) - no adapter, no per-tenant vocabulary beyond that config map - so the
+source-independence report.py holds everywhere except this one config-driven relabel.
 
 Run:  python -m normalize.enrich          # all tenants, in place
       python -m normalize.enrich --check  # report fill, write nothing
@@ -43,6 +46,22 @@ from normalize.category import categorize  # noqa: E402  the shared title->categ
 OUT_GLOB = os.path.join(ROOT, "out", "*", "*", "normalized.jsonl")
 
 DERIVED = ("experience_condition", "evidence_clauses", "credentials")
+
+
+def _load_tenant_category():
+    """employer_domain -> single tenant-assigned category (e.g. {"kroger.com": "Grocery"}),
+    plus the exception set that survives the shift as a SECOND tag. Read once at import.
+    Assigned by TENANT, not title, so it never breaks when a source retitles its jobs."""
+    path = os.path.join(ROOT, "config", "tenant_category.json")
+    try:
+        with open(path, encoding="utf-8") as fh:
+            cfg = json.load(fh)
+    except FileNotFoundError:
+        return {}, ()
+    return cfg.get("map", {}), tuple(cfg.get("keep_categories", []))
+
+
+TENANT_CATEGORY, KEEP_CATEGORIES = _load_tenant_category()
 
 
 def tenant_of(path):
@@ -68,7 +87,16 @@ def enrich_records(recs, openers):
         # layer's "UNCLASSIFIED" sentinel - that value looks like a category and
         # would eventually be treated as one. Empty means no category, which is true.
         cats = categorize(r.get("title"))
-        r["category"] = [] if cats == ["UNCLASSIFIED"] else cats
+        cats = [] if cats == ["UNCLASSIFIED"] else cats
+        # Tenant-assigned category (config/tenant_category.json), e.g. kroger.com -> Grocery: a
+        # store's jobs ARE that store's category, regardless of department. Assigned by TENANT,
+        # not title. Single-tag by design; only a genuine Warehouse/Security tag (KEEP_CATEGORIES),
+        # detected by the title table above, survives the shift as a second category.
+        forced = TENANT_CATEGORY.get(r.get("employer_domain"))
+        if forced:
+            keep = [c for c in cats if c in KEEP_CATEGORIES]
+            cats = [forced] + keep
+        r["category"] = cats
         if xo["section_found"]:
             counts["section_found"] += 1
         for f in DERIVED:

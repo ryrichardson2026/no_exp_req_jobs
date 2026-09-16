@@ -1,0 +1,7 @@
+{
+  "_comment": "Tenant-assigned board categories. A record whose employer_domain is a key here is assigned that single category by TENANT, not by title text (normalize/enrich.py applies it after the title-based categorize()). This is robust to a source retitling its jobs, unlike a title pattern. The only categories that survive the shift as a SECOND tag are those in keep_categories (the genuine-Warehouse / genuine-Security exception), detected by the existing title-based category table. Owner-approved 2026-09-16: kroger.com (Fred Meyer + Quality Food Centers) -> Grocery.",
+  "map": {
+    "kroger.com": "Grocery"
+  },
+  "keep_categories": ["Warehouse", "Security"]
+}
