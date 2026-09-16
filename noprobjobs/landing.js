@@ -25,6 +25,15 @@ const PRODUCT = "NoProbJobs.com";
 // Warehouse→package), so keeping these labels keeps the icons correct.
 const LANDING_CATS = ["Retail", "Sales", "Food Services", "Security", "Warehouse", "Transportation/Automotive"];
 
+// Categories withheld from the landing's "Recent jobs" feed. Grocery is a board-only category
+// (Kroger — Fred Meyer + QFC, assigned by tenant): the landing surfaces the six work-type chips
+// above and must not float Kroger jobs into Recent. This IS the tenant suppression the 2026-09-16
+// Grocery shift intended — there is no separate exclude-tenants list, and since every Kroger record
+// carries Grocery, hiding the tag hides the tenant. Note this is NARROWER than "everything not in
+// LANDING_CATS": Administrative/Customer Service/Construction/Facilities are also omitted from the
+// chips yet STILL appear in Recent — only Grocery is deliberately withheld.
+const RECENT_HIDE_CATS = ["Grocery"];
+
 // Change #2: the Washington lander is this same landing page served at /washington-jobs.
 // The ONLY content difference is the hero headline; everything else (job data, components,
 // CTAs) is identical. Detected from the path so the one bundle serves both routes, and the
@@ -443,7 +452,8 @@ class LandingApp extends React.Component {
       // preferred"). This is a landing selection rule only — the board's default sort is
       // untouched.
       const list = (this.state.recs || [])
-        .filter((r) => r.experience_condition === "NONE_NEEDED" && R.recordCats(r).length > 0)
+        .filter((r) => r.experience_condition === "NONE_NEEDED" && R.recordCats(r).length > 0
+          && !R.recordCats(r).some((c) => RECENT_HIDE_CATS.indexOf(c) >= 0))
         .slice().sort(R.newestFirst);
       const want = this.state.wide ? 9 : 6;
       jobs = this.capByEmployer(list, want).map((r) => this.shape(r));
