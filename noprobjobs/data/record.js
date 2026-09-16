@@ -181,18 +181,11 @@ export function postedLabel(s){
   return "Posted " + n + " days ago";
 }
 
-/* The `New` badge predicate (mobile/dense card). True when posted_at is within the last
-   5 days of TODAY — the pull date, never the reader's clock, same basis as postedLabel so
-   the badge can't change meaning while the file sits. A record with no posted_at, or a
-   future/older date, gets NO badge: this is a positive ≤5-day signal, not a fallback, so the
-   row simply does not appear (Compass carries no posted_at and is never badged). first_seen
-   is NEVER consulted here — it stays a sort input and is rendered nowhere. */
-export function isNew(s){
-  const t = parseDate(s);
-  if (t === null) return false;
-  const n = Math.round((TODAY - t) / 86400000);
-  return n >= 0 && n <= 5;
-}
+/* The per-card `New` badge is NOT computed here anymore. Recency has exactly ONE definition
+   and ONE call site: normalize/model.effective_new_date (coalesce(posted_at, first_seen) minus
+   onboarding backfill), run at bake by analyze/freshness.py, merged onto each record as
+   `is_new`. Cards read r.is_new; no surface recomputes recency from a raw field — that parallel
+   recompute was one of the four definitions that used to disagree. See config/freshness.json. */
 
 export function logoUrl(domain){
   return "https://www.google.com/s2/favicons?sz=128&domain=" + domain;

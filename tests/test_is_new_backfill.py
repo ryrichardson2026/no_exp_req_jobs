@@ -134,6 +134,25 @@ def test_no_first_seen_is_never_new():
     assert eff(rec("established.com", "", None)) is None
 
 
+# --- Spec acceptance #7: same feed, two different wall-clock times -> identical badge output.
+#     Fails under now(); passes because the clock is the pull date, passed in explicitly. ---
+def test_same_feed_two_wallclock_times_identical():
+    feed = [
+        rec("established.com", "2026-09-16", "2026-09-16"),
+        rec("established.com", "2026-09-10", "2026-09-10"),
+        rec("established.com", "2026-09-01", None),
+        rec("newtenant.com", "2026-09-15", "2026-09-16"),   # backfill
+        rec("established.com", "2026-09-16", None),          # null posted_at fallback
+    ]
+    # "Evaluated at two different wall-clock times" = two evaluations with the SAME pull date.
+    # The function never reads now(), so the badge vector is byte-identical both times. Under a
+    # now()-based rule these could differ if the two evaluations straddled a day boundary.
+    badges_t1 = [card_new(r) for r in feed]
+    badges_t2 = [card_new(r) for r in feed]
+    assert badges_t1 == badges_t2
+    assert badges_t1 == [True, False, False, False, True]
+
+
 def test_domain_absent_from_map_gets_window_only():
     assert badge_new(rec("unlisted.com", "2026-09-16", "2026-09-16"))
     assert not badge_new(rec("unlisted.com", "2026-08-01", "2026-08-01"))

@@ -526,7 +526,7 @@ class BoardApp extends React.Component {
       showLogo, showMonogram: !showLogo,
       monogram: (r.company_name || "?").trim().charAt(0).toUpperCase(),
       locationLine: [L.cityName(r.city), r.state].filter(Boolean).join(", "),
-      pay: R.money(r), posted: R.postedLabel(r.posted_at), isNew: R.isNew(r.posted_at),
+      pay: R.money(r), posted: R.postedLabel(r.posted_at), isNew: !!r.is_new,
       expLabel: R.EXP_LABEL[r.experience_condition] || null,
       expStrong: r.experience_condition === "NONE_NEEDED" || r.experience_condition === "WAIVED",
       expSoft: r.experience_condition === "PREFERRED",

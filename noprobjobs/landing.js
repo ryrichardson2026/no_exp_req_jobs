@@ -80,16 +80,11 @@ class LandingApp extends React.Component {
     return out;
   }
 
-  static FRESH_WINDOW_DAYS = 7;
-  static FRESH_FLOOR = 5;
-  freshCount(recs){
-    const now = R.today().getTime();
-    const span = LandingApp.FRESH_WINDOW_DAYS * 86400000;
-    return recs.filter((r) => {
-      const t = R.parseDate(r.posted_at);
-      return t !== null && t <= now && now - t <= span;
-    }).length;
-  }
+  // The page-level "N new jobs added this week" strip was removed (2026-09-16): it was a
+  // page-level aggregate whose count needed a second recency definition, and an aggregate is a
+  // CLAIM about the site rather than a signal a person reads next to a job. Recency now lives
+  // only on the card (r.is_new, one definition, one call site — see analyze/freshness.py). If
+  // the strip ever returns it counts records where is_new is true, at bake, via the same rule.
 
   componentDidMount(){
     window.addEventListener("mousedown", this.onDocDown, true);
@@ -98,7 +93,7 @@ class LandingApp extends React.Component {
     this._onMql = () => this.setState({ wide: this._mql.matches });
     this._mql.addEventListener("change", this._onMql);
     // R.setToday is set in boot() (from the inline blob's pulledAt) before first render, so
-    // freshCount is deterministic — no async SB.pulledAt() race that made the banner flash.
+    // postedLabel ("Posted N days ago") is deterministic — no async SB.pulledAt() race.
     if (this.state.recs) {
       this.preflightLogos(this.state.recs);                 // seeded at mount — no refetch, no wipe
     } else {
@@ -530,17 +525,11 @@ class LandingApp extends React.Component {
     const ready = this.state.recs !== null;
     const res = ready ? L.resolveLocation(this.state.locDraft, this.state.cities, this.state.zips) : { kind: "all", cities: [] };
     const unmatched = res.kind === "unmatched" || res.kind === "unmatched-zip";
-    const fresh = ready ? this.freshCount(this.state.recs || []) : 0;
-    const hasFreshness = ready && fresh >= LandingApp.FRESH_FLOOR;
-    const freshnessLine = fresh + (fresh === 1 ? " new job added this week" : " new jobs added this week");
 
     return h("div", { className: "landing-scope", style: s("position:relative;display:flex;flex-direction:column;min-height:100%;background:var(--surface)") },
       h(Header, { productName: PRODUCT, onAlerts: this.openAlerts }),
       h("section", { style: s("flex:none;position:relative;background:var(--surface);border-bottom:2px solid var(--ink)") },
         h("div", { style: s("position:relative;container-type:inline-size;max-width:var(--rail,1120px);margin:0 auto;box-sizing:border-box;padding:0 14px 16px;display:grid;justify-items:stretch;gap:12px") },
-          hasFreshness && h("div", { key: "fp", style: s("margin:0 -14px;min-height:30px;display:flex;align-items:center;justify-content:center;gap:8px;padding:4px 14px;background:var(--accent)") },
-            h("span", { "aria-hidden": "true", style: s("width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none;animation:livedot 2.4s ease-in-out infinite") }),
-            h("span", { style: s("font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent-ink);text-align:center") }, freshnessLine)),
           this.renderHero(),
           this.renderSearchCard(res, unmatched)
         )

@@ -400,6 +400,14 @@ async function main(){
   // so live/expired pages just overwrite and nothing orphans.
   const recs = await fetchAll("/jobs_detail?select=*&order=job_number.asc");   // &order= = stable offset paging
   const list = await fetchAll("/jobs_list?select=*&order=job_number.asc");
+  // Merge the ONE recency computation (analyze/freshness.py -> out/freshness.json) onto every
+  // list record, OVERWRITING the view's is_new (now unread — the rule lives in one Python call
+  // site, never a raw-field recompute on a surface). The card reads r.is_new. Missing file =>
+  // no badges + a loud warning, never a silent wrong value.
+  const freshPath = join(HERE, "..", "out", "freshness.json");
+  if (!existsSync(freshPath)) console.warn("!! out/freshness.json missing — run `python -m analyze.freshness` before the bake; New badges will be OFF");
+  const freshMap = existsSync(freshPath) ? (JSON.parse(readFileSync(freshPath, "utf8")).is_new || {}) : {};
+  for (const r of list) r.is_new = !!freshMap[r.internal_id];
   const meta = await fetchAll("/site_meta?select=pulled_at");
   const jobsTotal = await countExact("/jobs_detail");   // authoritative — asserted against the fetch below
   const listTotal = await countExact("/jobs_list");

@@ -22,7 +22,8 @@ export function JobCard({ job, flush, listMeta, dense }){
   //           Employer · City, WA
   //           $pay   [experience chip]
   // Half the vertical space of the stacked default (below). Same information minus the
-  // redundant "Posted today" line, which becomes the marigold `New` badge (posted_at ≤5d).
+  // redundant "Posted today" line, which becomes the marigold `New` badge (job.is_new — the
+  // single recency rule, computed once at bake by analyze/freshness.py; never a raw-field test).
   // Desktop and the landing "Recent jobs" grid never pass dense, so they keep the default.
   if (dense) {
     const metaLine = [job.company, job.locationLine].filter(Boolean).join(" · ");

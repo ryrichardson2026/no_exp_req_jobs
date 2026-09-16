@@ -887,6 +887,10 @@ def _publish():
     # a non-zero exit is seen. A silent bake failure and a good bake used to log identically.
     steps = [
         ("push to Supabase", [sys.executable, "-m", "analyze.supabase_sink"], ROOT, False),
+        # The ONE recency computation -> out/freshness.json, which the bake merges onto each
+        # record as is_new (the per-card New badge). Must run BEFORE the bake; reads the local
+        # applicable.jsonl + config, no network.
+        ("freshness (new badges)", [sys.executable, "-m", "analyze.freshness"], ROOT, False),
         ("bake (prerender build)", ["node", "build.mjs"], PRERENDER, True),
         ("retire", ["node", "retire.mjs"], PRERENDER, True),
     ]
