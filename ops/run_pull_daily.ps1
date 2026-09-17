@@ -51,7 +51,7 @@ try {
     if (-not $Force -and (Test-Path $statusFile)) {
         $last = (Get-Content $statusFile -Raw).Trim()
         $today = Get-Date -Format 'yyyyMMdd'
-        if ($last -match "^$today\_\d{6}\s+COMPLETE") {
+        if ($last -match "^${today}_\d{6}\s+COMPLETE") {
             Log "SKIP - today's pull already COMPLETE ($last); this trigger is a redundant catch-up"
             exit 0
         }
