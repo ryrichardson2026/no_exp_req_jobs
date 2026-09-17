@@ -90,6 +90,18 @@
       "records": 931,
       "applicable": 305,
       "density": 32.8
+    },
+    "primeflight": {
+      "records": 33,
+      "applicable": 3,
+      "density": 9.1,
+      "_note": "WA+TX. Density category-gated: 11 of 16 entry-level roles (ramp/fuel/baggage/passenger-assist) are UNCATEGORIZED (no Aviation category yet); re-baseline after the aviation carve."
+    },
+    "menzies": {
+      "records": 76,
+      "applicable": 17,
+      "density": 22.4,
+      "_note": "WA+TX. Opener='what we are looking for:' (colon). Same aviation-category undercount as primeflight. G2 Secure Staff folded into this board."
     }
   }
 }
