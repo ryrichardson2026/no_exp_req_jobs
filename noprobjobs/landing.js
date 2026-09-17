@@ -34,6 +34,13 @@ const LANDING_CATS = ["Retail", "Sales", "Food Services", "Security", "Warehouse
 // chips yet STILL appear in Recent — only Grocery is deliberately withheld.
 const RECENT_HIDE_CATS = ["Grocery"];
 
+// Employers withheld from the landing "Recent jobs" feed — they stay on the board and category
+// pages, just don't float into Recent. Providence is a clinical/low-density tenant; its
+// NONE_NEEDED roles (patient transporter, etc.) shouldn't dominate the no-experience strip.
+// Matched by employer_domain (the tenant key), so all Providence brands — Providence, Swedish,
+// Providence Swedish all share providence.org — are covered by one entry.
+const RECENT_HIDE_EMPLOYERS = ["providence.org"];
+
 // Change #2: the Washington lander is this same landing page served at /washington-jobs.
 // The ONLY content difference is the hero headline; everything else (job data, components,
 // CTAs) is identical. Detected from the path so the one bundle serves both routes, and the
@@ -448,7 +455,8 @@ class LandingApp extends React.Component {
       // untouched.
       const list = (this.state.recs || [])
         .filter((r) => r.experience_condition === "NONE_NEEDED" && R.recordCats(r).length > 0
-          && !R.recordCats(r).some((c) => RECENT_HIDE_CATS.indexOf(c) >= 0))
+          && !R.recordCats(r).some((c) => RECENT_HIDE_CATS.indexOf(c) >= 0)
+          && RECENT_HIDE_EMPLOYERS.indexOf(r.employer_domain) < 0)
         .slice().sort(R.newestFirst);
       const want = this.state.wide ? 9 : 6;
       jobs = this.capByEmployer(list, want).map((r) => this.shape(r));
