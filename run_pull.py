@@ -370,6 +370,7 @@ _ENUMERATE_ARTIFACT = {
     "phenom": ("records.jsonl", False),
     "ultipro": ("index.jsonl", False),
     "appcast": ("index.jsonl", False),
+    "avature": ("index.jsonl", False),
 }
 
 
@@ -411,6 +412,9 @@ def _live_detail_names(platform, tenant_key):
     if platform == "appcast":
         # index.jsonl is ALREADY the in-scope set; detail files are {jobid}.json.
         return {f"{c['jobid']}.json" for c in mod.load_index(t) if c.get("jobid")}, ".json"
+    if platform == "avature":
+        # index.jsonl is ALREADY the in-scope set (server-side state facet); detail = {id}.json.
+        return {f"{c['id']}.json" for c in mod.load_index(t) if c.get("id")}, ".json"
     return None, None
 
 

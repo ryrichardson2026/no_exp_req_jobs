@@ -97,7 +97,8 @@
         "normalize"
       ],
       "tenants": [
-        "tjx"
+        "tjx",
+        "panera"
       ]
     },
     {
@@ -117,6 +118,17 @@
         "normalize"
       ],
       "section": "appcast"
+    },
+    {
+      "platform": "avature",
+      "modes": [
+        "index",
+        "detail",
+        "normalize"
+      ],
+      "tenants": [
+        "unifi"
+      ]
     }
   ]
 }

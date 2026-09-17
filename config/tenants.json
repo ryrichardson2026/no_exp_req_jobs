@@ -1463,6 +1463,55 @@
         ]
       },
       "verified": "2026-09-15 - Phenom TJCOGLOBAL confirmed (cdn.phenompeople.com, content-us.phenompeople.com/api/TJCOGLOBAL). POST /widgets refineSearch with selected_fields{category:[Retail Associates],state:[Washington]} -> totalHits 118 (matches the site's own facet count). Pagination clean: from=100 ->18, from=120/200 ->0 (empty-page stop, no sticky tail). Detail page (bare pid, no slug needed -> 200) carries JobPosting JSON-LD with full description. SCOPE: index API + one detail page inspected; openers pending derivation from the full detail capture."
+    },
+    "panera": {
+      "label": "Panera Bread (careers.panerabread.com, Phenom)",
+      "careers_base": "https://careers.panerabread.com",
+      "widgets_url": "https://careers.panerabread.com/widgets",
+      "detail_url_tmpl": "https://careers.panerabread.com/global/en/job/{pid}",
+      "employer_domain": "panerabread.com",
+      "source_class": "direct-employer",
+      "sector": "food_services",
+      "state": "WA",
+      "page_size": 50,
+      "search_body": {
+        "lang": "en_global",
+        "deviceType": "desktop",
+        "country": "global",
+        "pageName": "search-results",
+        "subsearch": "",
+        "jobs": true,
+        "counts": true,
+        "keywords": "",
+        "global": true,
+        "sortBy": "Most relevant",
+        "locationData": {}
+      },
+      "selected_fields": {
+        "state": [
+          "WA",
+          "Washington"
+        ]
+      },
+      "location_filter": {
+        "_note": "WA jobs are split across TWO state-field conventions: 'WA' (84) and 'Washington' (12) - verified in Chrome on the live State/Province facet 2026-09-17 (site showed 84 under WA, 12 under Washington). Scope BOTH or undercount 8x.",
+        "field": "state",
+        "match_any": [
+          "WA",
+          "Washington"
+        ]
+      },
+      "extraction": {
+        "_note": "DERIVED from Panera WA capture (12 recs 2026-09-17): requirements under 'This Opportunity Is for You If:' (colon, 19x). 'What's In It for You?'=benefits, 'Responsibilities'=duties (both excluded). Forked per-tenant like TJX.",
+        "openers": [
+          {
+            "text": "this opportunity is for you if",
+            "role": "REQUIRED",
+            "match": "colon"
+          }
+        ]
+      },
+      "verified": "2026-09-17 Phenom reuse VERIFIED end-to-end: widgets 200 + state:[Washington] scope=12 WA; detail JSON-LD 200 (pid=full jobSeqNo form); opener derived. Food Service."
     }
   },
   "appcast": {
@@ -1573,6 +1622,34 @@
             "text": "preferred qualifications",
             "role": "PREFERRED",
             "match": "bare"
+          }
+        ]
+      }
+    }
+  },
+  "avature": {
+    "_platform_note": "Avature native career portals. Read surface = server-rendered search (POST /careers/SearchJobs, State FACET field for clean scope) + JobDetail HTML pages (requirements in article__content__view__field). NOT geo-radius (the WHERE box bleeds across states/countries). State facet field id + option values are per-Avature-instance -> config. NEW platform 2026-09-17 (Unifi).",
+    "unifi": {
+      "label": "Unifi Aviation (Unifi Service)",
+      "careers_url": "https://careers.unifiservice.com/careers",
+      "search_url": "https://careers.unifiservice.com/careers/SearchJobs",
+      "detail_base": "https://careers.unifiservice.com/careers/",
+      "employer_domain": "unifiservice.com",
+      "source_class": "direct-employer",
+      "sector": "aviation_ground_services",
+      "state_field": "733",
+      "markets": {
+        "WA": "6307",
+        "TX": "6303"
+      },
+      "verified": "2026-09-17 Chrome+cold-Python validated. State FACET (field 733) WA=6307->14, TX=6303->47 (clean, matches site). Detail reliable with primed session+Referer+1.2s pace (6/6). Requirements under 'Qualifications:'. Aviation routes by function (no new category).",
+      "extraction": {
+        "_note": "DERIVED from Unifi detail: requirements under 'Qualifications:' (colon). 'Security License Requirements:' is a credential section (guard card sponsored -> quick-obtainable). Credentials are acquire-framed ('able to obtain credentials') -> credential-acquire-frame waiver applies.",
+        "openers": [
+          {
+            "text": "qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
           }
         ]
       }

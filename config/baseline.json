@@ -109,6 +109,18 @@
       "applicable": 1,
       "density": 14.3,
       "_note": "WA 3/TX 4 aviation, thin + experience-heavy (ramp/passenger/material handler REQUIRED). Client-side location_filter ', WA'/', TX' on locationsText (abbreviated). One pull serves both markets."
+    },
+    "unifi": {
+      "records": 60,
+      "applicable": 22,
+      "density": 36.7,
+      "_note": "WA 14/TX 46 aviation (Avature, state FACET field 733 WA=6307/TX=6303; NOT geo-radius). New avature adapter 2026-09-17. Requirements 'Qualifications:'; credentials acquire-framed. Routes by function."
+    },
+    "panera": {
+      "records": 96,
+      "applicable": 11,
+      "density": 11.5,
+      "_note": "WA only (Phenom, state facet split WA(84)+Washington(12)=96, Chrome-validated). Manager-heavy board (56/96 mgmt excluded); frontline cafe roles applicable. Opener 'This Opportunity Is for You If'. First Food Service saturation tenant."
     }
   }
 }

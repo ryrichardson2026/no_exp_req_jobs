@@ -51,7 +51,7 @@ CATEGORY_PATTERNS = {
     # Aviation ground roles are routed by JOB FUNCTION into existing buckets (owner
     # 2026-09-17: "the job type not the industry or vertical"). Aviation is a SECTOR,
     # not a category - no 11th bucket. Passenger/wheelchair assistance = customer-facing.
-    "Customer Service": r"\b(customer service|call center|call centre|csr|customer support|contact center|dispatcher|passenger service\w*|passenger assist\w*|wheelchair (agent|attendant|assist\w*)|gate agent|guest service|concierge)\b",
+    "Customer Service": r"\b(customer service|call center|call centre|csr|customer support|contact center|dispatcher|passenger service\w*|passenger assist\w*|wheelchair\w*|gate agent|dispatch agent|guest service|concierge)\b",
     "Sales": r"\b(sales|account executive|canvasser|telesales|inside sales|outside sales|business development)\b",
     # 'merch\w* assoc\w*' catches Merchandise/Merchandising Associate incl. the TJX typos
     # (Merchadise Assoc, Merchandise Associte); backroom/stockroom are the store back-of-house
@@ -60,17 +60,17 @@ CATEGORY_PATTERNS = {
     # 'production associate'/operator/assembler fold into Warehouse (owner 2026-09-11):
     # Cintas plant-floor roles sit here UNTIL production earns its own category by volume.
     # Anchored to 'production associate' so a kitchen 'Food Production Worker' stays Food.
-    "Warehouse": r"\b(warehouse|forklift|picker|packer|package handler|material handler|order selector|loader|shipping|receiving|fulfillment|inbound|outbound|logistics|inventory|materials|supply chain|stocking|replenish|production associate|production operator|assembler|machine operator|ramp agent|baggage handler|bag handler|cargo agent|cargo handler|air cargo)\b",
+    "Warehouse": r"\b(warehouse|forklift|picker|packer|package handler|material handler|order selector|loader|shipping|receiving|fulfillment|inbound|outbound|logistics|inventory|materials|supply chain|stocking|replenish|production associate|production operator|assembler|machine operator|ramp agent|baggage|bag handler|cargo agent|cargo handler|air cargo|equipment room)\b",
     "Construction": r"\b(construction|laborer|labourer|carpenter|roofer|framer|concrete|apprentice|demolition)\b",
     "Security": r"\b(security|guard|patrol|loss prevention|surveillance|unarmed|armed officer|assets? protection)\b",
-    "Facilities": r"\b(janitor|custodian|cleaner|housekeep\w*|facilities|maintenance|groundskeep|porter|environmental service|\bevs\b|engineer|journeyman|cabin service\w*|cabin agent)\b",
+    "Facilities": r"\b(janitor\w*|custodian|cleaner|housekeep\w*|facilities|maintenance|groundskeep|porter|environmental service|\bevs\b|engineer|journeyman|cabin service\w*|cabin agent)\b",
     # Ninth category. Patterns DERIVED from the captured corpus (Compass food-service
     # board + Providence dietary/nutrition titles), not guessed.
     # Grocery FOOD departments dual-tag Food Services AND Retail (a meat wrapper
     # works with food and is in-store) - additive, so both lanes. Pure retail
     # (cashier, courtesy, bagger) stays Retail-only; 'grocery'/center-store aisle
     # stocking stays Retail (not food-handling).
-    "Food Services": r"\b(cook|baker|barista|bartender|chef|dishwasher|busser|server|waiter|waitress|catering|culinary|kitchen|cafeteria|concession|dietary|dining|nutrition|food service|foodservice|food worker|food prep|food transporter|banquet|deli|meat|seafood|produce|bakery|dairy|starbucks|order builder|general utility|food unit|\bfoh\b|\bfsw\b|food and beverage|meat cutter|meat wrapper|dietetic|diet clerk|steward|runner)\b",
+    "Food Services": r"\b(cook|baker|barista|bartender|chef|dishwasher|busser|server|waiter|waitress|catering|culinary|kitchen|cafeteria|concession|dietary|dining|nutrition|food service|foodservice|food worker|food prep|food transporter|banquet|deli|meat|seafood|produce|bakery|dairy|starbucks|order builder|general utility|food unit|\bfoh\b|\bfsw\b|food and beverage|meat cutter|meat wrapper|dietetic|diet clerk|steward|runner|restaurant team member|crew member|line cook|prep cook)\b",
     # Tenth category (owner-approved 2026-09-11): Transportation/Automotive = delivery/
     # transport drivers + vehicle-repair shop roles, ONE category. Compound driver tokens
     # so a 'Security Officer ... Patrol Driver' is NOT swept in (stays Security only) -
