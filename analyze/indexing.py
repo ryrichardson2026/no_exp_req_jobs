@@ -72,11 +72,17 @@ def _load_state():
         return None
 
 
-def _save_state(live, deleted):
+def _save_state(live, deleted, submitted=None):
     os.makedirs(os.path.dirname(STATE), exist_ok=True)
+    d = {"live": sorted(live), "deleted": sorted(deleted),
+         "saved_at": datetime.now(timezone.utc).isoformat()}
+    if submitted is not None:
+        # Every URL ever POSTed to the Indexing API. Distinct from `live` (known-exists): the
+        # bootstrap seeds `live` without submitting, so `submitted` is what the backlog-fill
+        # dedupes against so each page is pinged once, never re-spammed.
+        d["submitted"] = sorted(submitted)
     with open(STATE, "w", encoding="utf-8") as fh:
-        json.dump({"live": sorted(live), "deleted": sorted(deleted),
-                   "saved_at": datetime.now(timezone.utc).isoformat()}, fh, indent=2)
+        json.dump(d, fh, indent=2)
 
 
 def submit_after_publish():
@@ -102,20 +108,23 @@ def _run():
     # Bootstrap: no prior state -> seed known-live, submit nothing (the sitemap already exposes
     # existing pages; we only ping Google for pages that become new AFTER this point).
     if state is None:
-        _save_state(cur_live, cur_retired)   # treat current retired as already-handled at seed time
+        # Seed known-live + retired, submit nothing THIS run. submitted={} so subsequent runs
+        # treat the whole live set as backlog and fill the daily quota until it's cleared.
+        _save_state(cur_live, cur_retired, submitted=set())
         print(f"[indexing] bootstrap: seeded {len(cur_live)} live + {len(cur_retired)} retired URLs, submitted 0")
         return {"ok": True, "bootstrap": True, "seeded_live": len(cur_live)}
 
     prev_live = set(state.get("live", []))
     prev_deleted = set(state.get("deleted", []))
+    submitted = set(state.get("submitted", []))      # every URL ever POSTed to the Indexing API
     new_pages = sorted(cur_live - prev_live)
     to_delete = sorted(cur_retired - prev_deleted)
 
-    if not new_pages and not to_delete:
-        # keep the known set current (drop pages that left live; prune deleted to still-retired)
-        _save_state(cur_live, prev_deleted & cur_retired)
-        print("[indexing] nothing to submit (0 new, 0 newly-retired)")
-        return {"ok": True, "updated": 0, "deleted": 0}
+    if not new_pages and not to_delete and cur_live <= submitted:
+        # nothing new/retired AND every live page already notified -> idle day, spend nothing.
+        _save_state(cur_live, prev_deleted & cur_retired, submitted & (cur_live | cur_retired))
+        print("[indexing] nothing to submit (0 new, 0 newly-retired, backlog cleared)")
+        return {"ok": True, "updated": 0, "deleted": 0, "backlog": 0}
 
     import requests
     token = _token(info)
@@ -128,8 +137,8 @@ def _run():
         return r.status_code, r.text
 
     budget = DAILY_CAP
-    submitted_new, submitted_del = [], []
-    upd_ok = upd_fail = del_ok = del_fail = 0
+    submitted_new, submitted_del, submitted_backlog = [], [], []
+    upd_ok = upd_fail = del_ok = del_fail = bl_ok = bl_fail = 0
 
     # Deletions first — a retired page should stop being served promptly.
     for url in to_delete:
@@ -140,6 +149,7 @@ def _run():
             del_ok += 1; submitted_del.append(url)
         else:
             del_fail += 1; print(f"[indexing] URL_DELETED {code}: {url}  {body[:120]}")
+    # Then genuinely NEW pages (this publish added them).
     for url in new_pages:
         if budget <= 0:
             break
@@ -149,21 +159,42 @@ def _run():
         else:
             upd_fail += 1; print(f"[indexing] URL_UPDATED {code}: {url}  {body[:120]}")
 
-    attempted = len(submitted_new) + len(submitted_del) + upd_fail + del_fail
-    deferred = (len(new_pages) + len(to_delete)) - attempted
-    # New known-live = still live AND (previously known OR just submitted). Un-submitted new pages
-    # (quota cap or a transient failure) stay OUT, so they retry next run. Deleted = prior+new,
-    # pruned to those still retired so the set can't grow without bound.
+    # BACKLOG FILL — spend the REST of the daily quota on live pages Google was never notified
+    # about (the bootstrap seeded `live` as known but submitted nothing; the sitemap alone was too
+    # slow to get a new domain crawled). Newest first by the trailing job number so fresh jobs are
+    # crawled first. Each page is submitted ONCE (recorded in `submitted`); once the backlog is
+    # cleared this loop is empty and daily volume is just new+retired — known URLs are never re-spammed.
+    def _jobnum(u):
+        m = re.search(r"-(\d+)/?$", u)
+        return int(m.group(1)) if m else 0
+    already = submitted | set(submitted_new)
+    backlog = sorted(cur_live - already, key=_jobnum, reverse=True)
+    backlog_total = len(backlog)
+    for url in backlog:
+        if budget <= 0:
+            break
+        code, body = publish(url, "URL_UPDATED"); budget -= 1
+        if code == 200:
+            bl_ok += 1; submitted_backlog.append(url)
+        else:
+            bl_fail += 1
+            if bl_fail <= 3:
+                print(f"[indexing] backlog {code}: {url}  {body[:120]}")
+
+    # New known-live = still live AND (previously known OR just submitted-new). `submitted` grows
+    # with everything POSTed, pruned to what is still live/retired so it can't grow unbounded.
     new_known_live = cur_live & (prev_live | set(submitted_new))
     new_deleted = (prev_deleted | set(submitted_del)) & cur_retired
-    _save_state(new_known_live, new_deleted)
+    new_submitted = (submitted | set(submitted_new) | set(submitted_backlog) | set(submitted_del)) \
+        & (cur_live | cur_retired)
+    _save_state(new_known_live, new_deleted, new_submitted)
 
-    msg = f"[indexing] URL_UPDATED ok={upd_ok} fail={upd_fail} | URL_DELETED ok={del_ok} fail={del_fail}"
-    if deferred > 0:
-        msg += f" | deferred={deferred} (per-run cap {DAILY_CAP}; retries next run)"
-    print(msg)
-    return {"ok": True, "updated": upd_ok, "deleted": del_ok,
-            "update_fail": upd_fail, "delete_fail": del_fail, "deferred": max(0, deferred)}
+    backlog_left = backlog_total - bl_ok
+    print(f"[indexing] new ok={upd_ok} fail={upd_fail} | retired ok={del_ok} fail={del_fail} | "
+          f"backlog ok={bl_ok} fail={bl_fail} (remaining {backlog_left}) | quota used {DAILY_CAP - budget}/{DAILY_CAP}")
+    return {"ok": True, "updated": upd_ok, "deleted": del_ok, "backlog": bl_ok,
+            "update_fail": upd_fail, "delete_fail": del_fail,
+            "backlog_remaining": backlog_left, "quota_used": DAILY_CAP - budget}
 
 
 if __name__ == "__main__":
