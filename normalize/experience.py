@@ -321,6 +321,27 @@ BACKGROUND_CUES = ("background check", "criminal history", "drug screen",
                    "drug test", "motor vehicle report", "mvr", "fingerprint")
 PHYSICAL_CUES = ("lift", "lbs", "pounds", "stand for", "bend")
 
+# Pay-transparency boilerplate ("compensation may vary based on ... education, and
+# experience") NAMES experience/education but states no REQUIREMENT — its subject is pay,
+# not eligibility. Untreated it types as an experience requirement and falsely marks the
+# whole posting REQUIRED (the requirements-span leak class). Matches a clause whose subject
+# is compensation and whose verb is vary/depend/based-on/commensurate; classify_line then
+# strips EXPERIENCE/EDUCATION typing from it (a pure disclaimer drops out entirely).
+COMP_DISCLAIMER_RX = re.compile(
+    r"\b(compensation|pay|salary|wages?|base pay|hourly rate|pay rate|pay range|"
+    r"starting (?:pay|rate|salary))\b"
+    r".{0,90}?\b(may vary|varies|will vary|vary|depend|based (?:on|upon)|"
+    r"determined by|commensurate|reflects?)\b", re.I)
+
+# A REAL experience-requirement signal. If a clause carries one, its EXPERIENCE typing must
+# survive even when a pay-disclaimer phrase shares the same (unsplit) clause - otherwise
+# "2 yrs experience required and pay commensurate with experience" would drop its requirement
+# and the posting could read applicable (a false positive - the worst failure mode). The guard
+# below only strips when NONE of these is present, so ambiguity fails SAFE (stays REQUIRED).
+EXP_REQ_SIGNAL = re.compile(
+    r"\b(required|require[sd]?|must\s+have|minimum|at\s+least|prior|previous|proven|"
+    r"\d+\+?\s*(?:years?|yrs?|months?))\b", re.I)
+
 # A completed trade apprenticeship is a multi-year runway even where no year count
 # appears - it is what separates the Painter (4y Journeyman) from the Engineer
 # (training will be on-the-job).
@@ -410,6 +431,17 @@ def classify_line(line, section_modality):
     if months is not None and (RECURRENCE.search(low) or
                                (BACKGROUND in types and EXPERIENCE not in types)):
         months = None
+
+    # Pay-disclaimer guard: a compensation clause that merely names experience/education
+    # ("compensation may vary based on ... experience") is not a requirement. Strip that
+    # typing - but ONLY when the clause is a PURE pay statement: no stated duration and no
+    # requirement signal. A clause that states a genuine requirement AND mentions pay keeps
+    # its typing, so it fails SAFE (stays REQUIRED) rather than dropping a real barrier.
+    if (EXPERIENCE in types or EDUCATION in types) and COMP_DISCLAIMER_RX.search(low) \
+            and months is None and not EXP_REQ_SIGNAL.search(low):
+        types = [t for t in types if t not in (EXPERIENCE, EDUCATION)]
+        if not types:
+            return None
 
     return {"clause": line[:300], "types": types, "modality": modality,
             "months": months,
