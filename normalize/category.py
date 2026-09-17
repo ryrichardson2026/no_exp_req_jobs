@@ -70,7 +70,7 @@ CATEGORY_PATTERNS = {
     # works with food and is in-store) - additive, so both lanes. Pure retail
     # (cashier, courtesy, bagger) stays Retail-only; 'grocery'/center-store aisle
     # stocking stays Retail (not food-handling).
-    "Food Services": r"\b(cook|baker|barista|bartender|chef|dishwasher|busser|server|waiter|waitress|catering|culinary|kitchen|cafeteria|concession|dietary|dining|nutrition|food service|foodservice|food worker|food prep|food transporter|banquet|deli|meat|seafood|produce|bakery|dairy|starbucks|order builder|general utility|food unit|\bfoh\b|\bfsw\b|food and beverage|meat cutter|meat wrapper|dietetic|diet clerk|steward|runner|restaurant team member|crew member|line cook|prep cook)\b",
+    "Food Services": r"\b(cook|baker|barista|bartender|chef|dishwasher|busser|server|waiter|waitress|catering|culinary|kitchen|cafeteria|concession|dietary|dining|nutrition|food service|foodservice|food worker|food prep|food transporter|banquet|deli|meat|seafood|produce|bakery|dairy|starbucks|order builder|general utility|food unit|\bfoh\b|\bfsw\b|food and beverage|meat cutter|meat wrapper|dietetic|diet clerk|steward|runner|restaurant team member|crew member|line cook|prep cook|broista)\b",
     # Tenth category (owner-approved 2026-09-11): Transportation/Automotive = delivery/
     # transport drivers + vehicle-repair shop roles, ONE category. Compound driver tokens
     # so a 'Security Officer ... Patrol Driver' is NOT swept in (stays Security only) -

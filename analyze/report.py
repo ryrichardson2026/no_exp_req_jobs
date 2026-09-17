@@ -144,6 +144,17 @@ CREDENTIAL_QUICK_RX = re.compile(
 # obtainable (not held) -> non-blocking (see gate_credential). HARD_CREDENTIAL_RX is the
 # fail-safe: long-lead licenses that stay a barrier even under that framing.
 ACQUIRE_FRAME_RX = re.compile(r"\b(?:eligib\w+|able|ability)\s+to\s+(?:acquire|obtain|get)\b", re.IGNORECASE)
+# EMPLOYER-PROVIDED framing: "we'll set you up with ... certifications", "we provide/offer/
+# sponsor/pay for training", "paid training", "provided by the company". The credential is
+# GIVEN by the employer, not required of the applicant - same non-blocking class as acquire-
+# frame (Dutch Bros Broista: "We'll set you up ... with training, certifications, and knowledge
+# tests" was read as a required cert and gated 108 of 110 no-experience roles). HARD_CREDENTIAL_RX
+# is still the fail-safe (nobody "provides" you a pre-req CDL/RN/degree to hold at apply time).
+EMPLOYER_PROVIDES_RX = re.compile(
+    r"\b(?:we(?:'|’)?ll|we\s+will|we|company|employer)\s+(?:set\s+you\s+up|provide|offer|"
+    r"sponsor|cover|pay\s+for|train)\b|\bpaid\s+training\b|"
+    r"\b(?:provided|sponsored|paid\s+for)\s+by\s+(?:us|the\s+company|the\s+employer)\b",
+    re.IGNORECASE)
 HARD_CREDENTIAL_RX = re.compile(
     r"\b(cdl|rn|lpn|cna|registered nurse|pharmac\w*|nurs\w*|therap\w*|paramedic|"
     r"journeyman|master electrician|\bpe\b|cpa|bar exam|arrt|sonograph\w*|"
@@ -264,7 +275,8 @@ def gate_credential(r):
         # names a HARD long-lead credential (CDL/RN/degree) - "able to obtain a CDL" is
         # still a barrier no matter the framing. Corpus scan: 216 acquire-framed TO_APPLY
         # clauses across 6 tenants, ZERO name a hard credential, so this drops no real gate.
-        if ACQUIRE_FRAME_RX.search(clause) and not HARD_CREDENTIAL_RX.search(clause):
+        if (ACQUIRE_FRAME_RX.search(clause) or EMPLOYER_PROVIDES_RX.search(clause)) \
+                and not HARD_CREDENTIAL_RX.search(clause):
             continue
         for part in re.split(r",|/|&|\band\b", clause):
             low = part.lower()

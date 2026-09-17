@@ -121,6 +121,12 @@
       "applicable": 11,
       "density": 11.5,
       "_note": "WA only (Phenom, state facet split WA(84)+Washington(12)=96, Chrome-validated). Manager-heavy board (56/96 mgmt excluded); frontline cafe roles applicable. Opener 'This Opportunity Is for You If'. First Food Service saturation tenant."
+    },
+    "dutchbros": {
+      "records": 280,
+      "applicable": 110,
+      "density": 39.3,
+      "_note": "WA 65 (~25 applicable) + TX 215, Chrome-reconciled state facet (Washington/Texas single-value). Coffee (Broista) - diverse anti-Starbucks pick. Density fixed 2->110 by employer-provided credential waiver ('we'll set you up with...certifications'). Broista->Food Services. WA published, TX suppressed."
     }
   }
 }

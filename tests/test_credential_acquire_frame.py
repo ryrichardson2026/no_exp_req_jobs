@@ -49,6 +49,24 @@ def test_held_hard_credential_unframed_still_blocks():
     assert not ok and why == "credential"
 
 
+def test_employer_provides_certifications_passes():
+    # Dutch Bros Broista: the employer PROVIDES the certs -> not an applicant requirement.
+    ok, why = gate_credential(_rec(
+        "We'll set you up for success with training, certifications, and knowledge tests"))
+    assert ok, f"employer-provided certs should not gate, got {why}"
+
+
+def test_paid_training_passes():
+    ok, _ = gate_credential(_rec("Paid training and certification provided"))
+    assert ok
+
+
+def test_failsafe_employer_helps_get_cdl_still_blocks():
+    # "We provide CDL training" still names a hard long-lead credential -> stays gated.
+    ok, why = gate_credential(_rec("We will provide CDL training and licensing"))
+    assert not ok and why == "credential"
+
+
 def test_no_credentials_passes():
     ok, _ = gate_credential(_rec())
     assert ok
