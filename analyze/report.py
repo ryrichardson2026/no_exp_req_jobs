@@ -140,6 +140,15 @@ CREDENTIAL_QUICK_RX = re.compile(
 # prerequisite/long-lead barrier (RN/LPN/CNA licences, ARRT, CDL, pharmacist,
 # therapist, CPA, ACLS/PALS held to apply, degree-based certs, ...).
 
+# A credential framed "eligibility/able/ability to acquire|obtain|get X" asserts X is
+# obtainable (not held) -> non-blocking (see gate_credential). HARD_CREDENTIAL_RX is the
+# fail-safe: long-lead licenses that stay a barrier even under that framing.
+ACQUIRE_FRAME_RX = re.compile(r"\b(?:eligib\w+|able|ability)\s+to\s+(?:acquire|obtain|get)\b", re.IGNORECASE)
+HARD_CREDENTIAL_RX = re.compile(
+    r"\b(cdl|rn|lpn|cna|registered nurse|pharmac\w*|nurs\w*|therap\w*|paramedic|"
+    r"journeyman|master electrician|\bpe\b|cpa|bar exam|arrt|sonograph\w*|"
+    r"associate degree|bachelor\w*|\bdegree\b)\b", re.IGNORECASE)
+
 # ---- gate 3b: prose prerequisite ------------------------------------------
 # The acceptable-jobs rule has TWO conditions: obtainable within ~90 days AND no
 # prerequisite. CREDENTIAL_QUICK_RX only reasons about NAMED credentials, so a
@@ -248,6 +257,15 @@ def gate_credential(r):
     # does not disqualify). "or" is deliberately NOT a split point - it is
     # either-acceptable, so a quick option in an "X or BLS" clause still passes.
     for clause in r.get("_cred_to_apply") or []:
+        # "Eligibility/able/ability to ACQUIRE/OBTAIN X" asserts, by its own wording,
+        # that X is obtainable (employer-sponsored, after selection) - airport FAA/TSA
+        # badging, a food-safety card. That satisfies the obtainable-within-90-days
+        # condition, so it does NOT gate. Fail-safe: the waiver is voided if the clause
+        # names a HARD long-lead credential (CDL/RN/degree) - "able to obtain a CDL" is
+        # still a barrier no matter the framing. Corpus scan: 216 acquire-framed TO_APPLY
+        # clauses across 6 tenants, ZERO name a hard credential, so this drops no real gate.
+        if ACQUIRE_FRAME_RX.search(clause) and not HARD_CREDENTIAL_RX.search(clause):
+            continue
         for part in re.split(r",|/|&|\band\b", clause):
             low = part.lower()
             names_credential = any(cue in low for cue in X.CREDENTIAL_CUES)

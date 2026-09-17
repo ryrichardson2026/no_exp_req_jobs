@@ -48,7 +48,10 @@ CATEGORY_PATTERNS = {
     # the housekeep* regex fix). Category is additive and ungated - it labels, it
     # does not gate - so these move no verdict.
     "Administrative": r"\b(admin|administrative|clerical|receptionist|data entry|office assistant|front desk|scheduler|scheduling coord\w*|bookkeeper|human resources|\bhr\b|payroll|patient financial|revenue cycle|patient service[s]? (representative|coordinator)|registrar|registration|health information|\bhim\b|medical records)\b",
-    "Customer Service": r"\b(customer service|call center|call centre|csr|customer support|contact center|dispatcher)\b",
+    # Aviation ground roles are routed by JOB FUNCTION into existing buckets (owner
+    # 2026-09-17: "the job type not the industry or vertical"). Aviation is a SECTOR,
+    # not a category - no 11th bucket. Passenger/wheelchair assistance = customer-facing.
+    "Customer Service": r"\b(customer service|call center|call centre|csr|customer support|contact center|dispatcher|passenger service\w*|passenger assist\w*|wheelchair (agent|attendant|assist\w*)|gate agent|guest service)\b",
     "Sales": r"\b(sales|account executive|canvasser|telesales|inside sales|outside sales|business development)\b",
     # 'merch\w* assoc\w*' catches Merchandise/Merchandising Associate incl. the TJX typos
     # (Merchadise Assoc, Merchandise Associte); backroom/stockroom are the store back-of-house
@@ -57,10 +60,10 @@ CATEGORY_PATTERNS = {
     # 'production associate'/operator/assembler fold into Warehouse (owner 2026-09-11):
     # Cintas plant-floor roles sit here UNTIL production earns its own category by volume.
     # Anchored to 'production associate' so a kitchen 'Food Production Worker' stays Food.
-    "Warehouse": r"\b(warehouse|forklift|picker|packer|package handler|material handler|order selector|loader|shipping|receiving|fulfillment|inbound|outbound|logistics|inventory|materials|supply chain|stocking|replenish|production associate|production operator|assembler|machine operator)\b",
+    "Warehouse": r"\b(warehouse|forklift|picker|packer|package handler|material handler|order selector|loader|shipping|receiving|fulfillment|inbound|outbound|logistics|inventory|materials|supply chain|stocking|replenish|production associate|production operator|assembler|machine operator|ramp agent|baggage handler|bag handler|cargo agent|cargo handler|air cargo)\b",
     "Construction": r"\b(construction|laborer|labourer|carpenter|roofer|framer|concrete|apprentice|demolition)\b",
     "Security": r"\b(security|guard|patrol|loss prevention|surveillance|unarmed|armed officer|assets? protection)\b",
-    "Facilities": r"\b(janitor|custodian|cleaner|housekeep\w*|facilities|maintenance|groundskeep|porter|environmental service|\bevs\b|engineer|journeyman)\b",
+    "Facilities": r"\b(janitor|custodian|cleaner|housekeep\w*|facilities|maintenance|groundskeep|porter|environmental service|\bevs\b|engineer|journeyman|cabin service\w*|cabin agent)\b",
     # Ninth category. Patterns DERIVED from the captured corpus (Compass food-service
     # board + Providence dietary/nutrition titles), not guessed.
     # Grocery FOOD departments dual-tag Food Services AND Retail (a meat wrapper
@@ -76,7 +79,9 @@ CATEGORY_PATTERNS = {
     # Bare 'transporter' (owner 2026-09-11) catches Patient/Medical/Food Transporter; 'truck
     # sales' stays Sales (no bare 'truck'/'sales' token here). Healthcare-support roles were NOT
     # given a category (owner: clinical stays a sector, aides applicable-but-uncategorized, 2026-09-02).
-    "Transportation/Automotive": r"\b(delivery driver|truck driver|cdl|courier|route driver|transfer driver|catering driver|transporter|delivery associate|brake|tire|engine specialist|vanbody|automotive|diesel technician)\b",
+    # Aircraft fueler/GSE/deicer = equipment & vehicle work -> here, not Warehouse (owner
+    # 2026-09-17). 'gse <role>' requires a following role word so bare 'GSE' can't over-match.
+    "Transportation/Automotive": r"\b(delivery driver|truck driver|cdl|courier|route driver|transfer driver|catering driver|transporter|delivery associate|brake|tire|engine specialist|vanbody|automotive|diesel technician|aircraft fueler|fueler|into.?plane|gse (mechanic|technician|operator|agent)|ground support equipment|de.?icer|deicing)\b",
 }
 
 
