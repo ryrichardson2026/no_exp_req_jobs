@@ -448,7 +448,34 @@ def classify_line(line, section_modality):
             "trade_ticket": any(t in low for t in TRADE_TICKET)}
 
 
-def derive_condition(reqs, found_required, zero_range_open=False):
+# ABSENCE-INFERENCE GUARD (owner 2026-09-17): when a requirements section IS present but no
+# requirement line classifies (a soft-skills-only section - "ability to learn quickly",
+# "flexible schedule availability"), the employer HAS stated its requirements and none is an
+# experience/education/credential barrier -> NONE_NEEDED, not NOT_STATED. GUARDED: inferred
+# ONLY when the section text names NO barrier language at all - if a barrier word is present the
+# parser may have MISSED a real requirement, so it stays NOT_STATED (the parser-miss safety net
+# is preserved). AGE is stripped first: age is a non-factor, never includes OR excludes (see the
+# age-never-a-screener decision). This is what lets clearly-entry-level frontline postings that
+# simply never mention experience (Shake Shack Team Member, Aramark dishwasher) reach applicable.
+_AGE_STRIP_RX = re.compile(
+    r"\b\d{1,2}\s*(?:years?|yrs?)\s*(?:or older|of age|and older)"
+    r"|\bmust be at least\s*\d{1,2}\s*(?:years?)?\b(?!\s*(?:of\s+)?experience)"
+    r"|\bminimum age\b", re.IGNORECASE)
+_INFER_BARRIER_RX = re.compile(
+    r"\bexperience\b|\bproven\b|\bprior\b|\bprevious\b|\bexpertise\b|\bproficien\w+\b|"
+    r"\d+\+?\s*(?:years?|yrs?)\b|\bdegree\b|\bdiploma\b|\bcertif\w+\b|\blicen[sc]e\w*\b|"
+    r"\bcredential\w*\b|\bbackground in\b|\bminimum of\b", re.IGNORECASE)
+
+
+def _clean_section_no_barrier(section_text):
+    """True when a present requirements section names NO experience/education/credential barrier
+    (age stripped first). The basis for the absence-inference NONE_NEEDED above."""
+    if not (section_text or "").strip():
+        return False
+    return not _INFER_BARRIER_RX.search(_AGE_STRIP_RX.sub(" ", section_text))
+
+
+def derive_condition(reqs, found_required, zero_range_open=False, section_text=""):
     """Absence counts only where a section was actually read. A populated required
     section with nothing blocking application - including one whose every item is
     AFTER_HIRE - is NONE_NEEDED, not NOT_STATED. After-hire items ARE content.
@@ -485,6 +512,10 @@ def derive_condition(reqs, found_required, zero_range_open=False):
     if apply_exp:
         return REQUIRED, apply_exp
     if not found_required or not reqs:
+        # Section present but nothing classified -> infer NONE_NEEDED only if it names no
+        # exp/edu/credential barrier (age stripped); else NOT_STATED (parser-miss safety net).
+        if found_required and _clean_section_no_barrier(section_text):
+            return NONE_NEEDED, []
         return NOT_STATED, []
     if pref_exp:
         return PREFERRED, pref_exp
@@ -502,7 +533,8 @@ def extract(html, text_fallback="", qualifications_html="", openers=None):
                 reqs.append(r)
 
     zero_range_open = bool(openers.get("zero_range_open")) if isinstance(openers, dict) else False
-    condition, evidence = derive_condition(reqs, found_required, zero_range_open)
+    section_text = " ".join(sections[TO_APPLY] + sections[PREFERRED_M])
+    condition, evidence = derive_condition(reqs, found_required, zero_range_open, section_text)
     to_apply = [r for r in reqs if r["modality"] == TO_APPLY]
     months = [r["months"] for r in to_apply
               if EXPERIENCE in r["types"] and r["months"]]

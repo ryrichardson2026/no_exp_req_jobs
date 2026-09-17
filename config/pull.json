@@ -130,6 +130,16 @@
       "tenants": [
         "unifi"
       ]
+    },
+    {
+      "platform": "paradox",
+      "modes": [
+        "index",
+        "normalize"
+      ],
+      "tenants": [
+        "shake_shack"
+      ]
     }
   ]
 }

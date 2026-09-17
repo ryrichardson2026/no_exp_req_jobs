@@ -127,6 +127,12 @@
       "applicable": 110,
       "density": 39.3,
       "_note": "WA 65 (~25 applicable) + TX 215, Chrome-reconciled state facet (Washington/Texas single-value). Coffee (Broista) - diverse anti-Starbucks pick. Density fixed 2->110 by employer-provided credential waiver ('we'll set you up with...certifications'). Broista->Food Services. WA published, TX suppressed."
+    },
+    "shake_shack": {
+      "records": 43,
+      "applicable": 26,
+      "density": 60.5,
+      "_note": "WA 10/TX 33 (Paradox, stateAbbr client-scope, Chrome-reconciled). Applicable via the absence-inference NONE_NEEDED (soft-skills-only Job Qualifications, no barrier language, age-neutral). First Paradox tenant; Chipotle/Inspire/Panda next on same adapter."
     }
   }
 }

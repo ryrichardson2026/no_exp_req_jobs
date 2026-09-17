@@ -371,6 +371,7 @@ _ENUMERATE_ARTIFACT = {
     "ultipro": ("index.jsonl", False),
     "appcast": ("index.jsonl", False),
     "avature": ("index.jsonl", False),
+    "paradox": ("records.jsonl", False),   # single-pass: records.jsonl carries descriptions inline
 }
 
 
