@@ -80,6 +80,11 @@
       "records": 15,
       "applicable": 9,
       "density": 60.0
+    },
+    "abm": {
+      "records": 445,
+      "applicable": 352,
+      "density": 79.1
     }
   }
 }

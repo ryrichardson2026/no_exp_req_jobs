@@ -411,6 +411,76 @@
           }
         ]
       }
+    },
+    "abm": {
+      "label": "ABM Industries (facility services)",
+      "host": "eiqg.fa.us2.oraclecloud.com",
+      "site_number": "CX_1001",
+      "language": "en",
+      "careers_url": "https://www.abm.com/careers/",
+      "terms_reference": null,
+      "employer_domain": "abm.com",
+      "nlx_wa_jobs": 69,
+      "source_class": "direct-employer",
+      "sector": "facilities",
+      "verified": "2026-09-17 onboarding: oracle_orc CX_1001, board 2219, 445 in-scope WA+TX. WA janitorial-heavy (Seattle/Spokane/Kirkland/Redmond...), TX Houston/Austin/San Antonio/DFW. Openers DERIVED from ABM's own ExternalQualificationsStr (--survey 445 recs): 199x janitorial 'experience a plus', 32x 'No experience required + OJT', skilled trades correctly experience-gated.",
+      "location_filter": {
+        "field": "PrimaryLocation",
+        "match_any": [
+          ", WA",
+          ", TX"
+        ]
+      },
+      "extraction": {
+        "_note": "DERIVED 2026-09-17 from ABM's own qualifications corpus. Requirements live in ExternalQualificationsStr (-> 'Qualifications' section). ABM delimits with 'Required:'/'Preferred:'/'Basic Qualifications:'/'Required Qualifications:' colon headings. Providence colon base + ABM bare Required/Preferred. Section opener only marks the block; line-level 'a plus'/'preferred'/'no experience required' set the verdict, so janitorial roles resolve applicable.",
+        "openers": [
+          {
+            "text": "required qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "basic qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum requirement",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum qualification",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required experience",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred qualification",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred experience",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred",
+            "role": "PREFERRED",
+            "match": "colon"
+          }
+        ]
+      }
     }
   },
   "workday": {
