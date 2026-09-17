@@ -70,6 +70,16 @@
       "records": 119,
       "applicable": 75,
       "density": 63.0
+    },
+    "wfs_tx": {
+      "records": 68,
+      "applicable": 20,
+      "density": 29.4
+    },
+    "wfs_wa": {
+      "records": 15,
+      "applicable": 9,
+      "density": 60.0
     }
   }
 }

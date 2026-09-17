@@ -368,6 +368,7 @@ _ENUMERATE_ARTIFACT = {
     "radancy_tb": ("rows.jsonl", False), "target": ("discovery", True),
     "jibe_api": ("pages", True), "compass_api": ("pages", True),
     "phenom": ("records.jsonl", False),
+    "ultipro": ("index.jsonl", False),
 }
 
 
@@ -403,6 +404,9 @@ def _live_detail_names(platform, tenant_key):
     if platform == "phenom":
         # detail files are {job_id}.html for each in-scope index record (mode_detail's scheme).
         return {f"{mod.job_id(j)}.html" for j in mod.load_records(t) if mod.in_scope(j, t) and mod.job_id(j)}, ".html"
+    if platform == "ultipro":
+        # index.jsonl is ALREADY the in-scope set; detail files are {opportunityId}.json.
+        return {f"{mod.opp_id(o)}.json" for o in mod.load_index(t) if mod.opp_id(o)}, ".json"
     return None, None
 
 

@@ -389,10 +389,26 @@
       "extraction": {
         "_note": "PROBE+CALIBRATED 2026-09-11: requirements live in the detail record's ExternalQualificationsStr (mapped to qualifications_html), NOT the description body, under 'Minimum Requirements:' + 'Preferred Qualifications:' (colon; ~2/42 render colon-less, so bare variants included). Experience sits in Preferred for most retail/store roles -> PREFERRED (applicable); roles that put a year of experience in the Minimum section -> REQUIRED (excluded). Live yield 38/42 applicable; split spot-checked correct (Field Store Associate -> PREFERRED, Branch Coordinator Lead / Sales Rep with Minimum-section experience -> REQUIRED). 1 straggler with no qual section stays NOT_STATED (fails safe). Forked vocabulary, no engine change.",
         "openers": [
-          {"text": "Minimum Requirements", "role": "REQUIRED", "match": "colon"},
-          {"text": "Preferred Qualifications", "role": "PREFERRED", "match": "colon"},
-          {"text": "Minimum Requirements", "role": "REQUIRED", "match": "bare"},
-          {"text": "Preferred Qualifications", "role": "PREFERRED", "match": "bare"}
+          {
+            "text": "Minimum Requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "Preferred Qualifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "Minimum Requirements",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "Preferred Qualifications",
+            "role": "PREFERRED",
+            "match": "bare"
+          }
         ]
       }
     }
@@ -850,7 +866,9 @@
       "sector": "warehouse",
       "state": "WA",
       "location_filter": {
-        "match_any": [", WA"]
+        "match_any": [
+          ", WA"
+        ]
       },
       "source_job_id_from": "url_tail",
       "stop_on_no_new_ids": true,
@@ -1075,8 +1093,126 @@
       "extraction": {
         "_note": "PROBE+CALIBRATED 2026-09-11: requirements sit under an own-line 'Skills/Qualifications' heading (matches section_headings.skills_qualifications). Experience bullets there make sales/HVAC/management roles REQUIRED (correctly excluded); production/warehouse roles carry only physical/soft-skill lines and resolve NONE_NEEDED. Live yield 27/60 applicable; the REQUIRED/NONE_NEEDED split was spot-checked correct (Sales Rep + Maintenance Tech -> REQUIRED, Production Associate + Loader -> NONE_NEEDED). Forked vocabulary, no engine change.",
         "openers": [
-          {"text": "Skills/Qualifications", "role": "REQUIRED", "match": "bare"},
-          {"text": "Preferred Skills", "role": "PREFERRED", "match": "colon"}
+          {
+            "text": "Skills/Qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "Preferred Skills",
+            "role": "PREFERRED",
+            "match": "colon"
+          }
+        ]
+      }
+    },
+    "wfs_tx": {
+      "label": "WFS Express (Worldwide Flight Services) - TX",
+      "host": "https://jobs.wfs.aero",
+      "endpoints": {
+        "search": "https://jobs.wfs.aero/search/",
+        "job_base": "https://jobs.wfs.aero/job/",
+        "apply_pattern": "https://jobs.wfs.aero/job/{slug}/{posting_id}/"
+      },
+      "page_size": 25,
+      "search_params": {
+        "q": "",
+        "locationsearch": "Texas",
+        "searchby": "location",
+        "sortColumn": "referencedate",
+        "sortDirection": "desc"
+      },
+      "geo_scope": {
+        "verified": "2026-09-16",
+        "method": "locationsearch=Texas&searchby=location; paged to empty; 68 distinct 'TX' postings (Austin/Dallas/Houston/Humble-IAH/Irving); no drift",
+        "national": "US board (page-to-empty; adapter count-parse prints a bogus year = diagnostic only, never a stop condition)",
+        "in_market": 68
+      },
+      "employer_name": "Worldwide Flight Services",
+      "company_name": "WFS Express",
+      "employer_domain": "wfs.aero",
+      "market": null,
+      "state": "TX",
+      "source_class": "direct-employer",
+      "apply_class": "employer-direct",
+      "terms_reference": "https://jobs.wfs.aero/robots.txt",
+      "robots": "Checked 2026-09-16. Same disallow list as Cintas; /search/ and /job/ permitted; /talentcommunity/ /applybutton/ /preapply/ disallowed. Adapter fetches /search/ + /job/ only; apply_url = /job/ href (never talentcommunity). Robots-compliant.",
+      "labeled_fields": {},
+      "section_headings": {
+        "responsibilities": "Responsibilities",
+        "minimum_requirements": "Minimum Requirements",
+        "preferred_skills": "Preferred Skills",
+        "physical_requirements": "Physical Requirements/Working Conditions"
+      },
+      "verified": "2026-09-16 onboarding probe: Case A (successfactors_rmk fetch shape matches; cursor advances, page1/page2 overlap 0). TX scope 68 paged-to-empty, all 'City, Texas, US'. Openers derived from WFS own descriptions (not copied). apply_url from /job/ source_url. Applicable/density pending first validation run.",
+      "extraction": {
+        "_note": "DERIVED 2026-09-16 from WFS's OWN descriptions (3/3 sampled TX jobs). WFS delimits requirements with an own-line 'Minimum Requirements' heading (vs Cintas 'Skills/Qualifications'); 'Preferred Skills' marks preferred. 'Physical Requirements/Working Conditions' deliberately NOT an opener (physical-demands leak class). Forked per tenant, no engine change.",
+        "openers": [
+          {
+            "text": "Minimum Requirements",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "Preferred Skills",
+            "role": "PREFERRED",
+            "match": "bare"
+          }
+        ]
+      }
+    },
+    "wfs_wa": {
+      "label": "WFS Express (Worldwide Flight Services) - WA",
+      "host": "https://jobs.wfs.aero",
+      "endpoints": {
+        "search": "https://jobs.wfs.aero/search/",
+        "job_base": "https://jobs.wfs.aero/job/",
+        "apply_pattern": "https://jobs.wfs.aero/job/{slug}/{posting_id}/"
+      },
+      "page_size": 25,
+      "search_params": {
+        "q": "",
+        "locationsearch": "Washington",
+        "searchby": "location",
+        "sortColumn": "referencedate",
+        "sortDirection": "desc"
+      },
+      "geo_scope": {
+        "verified": "2026-09-16",
+        "method": "locationsearch=Washington&searchby=location; paged to empty; 15 distinct 'WA' postings (Seattle/SeaTac); no drift",
+        "national": "US board (page-to-empty; adapter count-parse prints a bogus year = diagnostic only, never a stop condition)",
+        "in_market": 15
+      },
+      "employer_name": "Worldwide Flight Services",
+      "company_name": "WFS Express",
+      "employer_domain": "wfs.aero",
+      "market": null,
+      "state": "WA",
+      "source_class": "direct-employer",
+      "apply_class": "employer-direct",
+      "terms_reference": "https://jobs.wfs.aero/robots.txt",
+      "robots": "Checked 2026-09-16. Same disallow list as Cintas; /search/ and /job/ permitted; /talentcommunity/ /applybutton/ /preapply/ disallowed. Adapter fetches /search/ + /job/ only; apply_url = /job/ href (never talentcommunity). Robots-compliant.",
+      "labeled_fields": {},
+      "section_headings": {
+        "responsibilities": "Responsibilities",
+        "minimum_requirements": "Minimum Requirements",
+        "preferred_skills": "Preferred Skills",
+        "physical_requirements": "Physical Requirements/Working Conditions"
+      },
+      "verified": "2026-09-16 onboarding: WA scope 15 paged-to-empty, all Seattle/SeaTac. Thin (<20) - owner accepted. Same fetch shape + openers as wfs_tx (same employer board, state-scoped).",
+      "extraction": {
+        "_note": "DERIVED 2026-09-16 from WFS's OWN descriptions (3/3 sampled TX jobs). WFS delimits requirements with an own-line 'Minimum Requirements' heading (vs Cintas 'Skills/Qualifications'); 'Preferred Skills' marks preferred. 'Physical Requirements/Working Conditions' deliberately NOT an opener (physical-demands leak class). Forked per tenant, no engine change.",
+        "openers": [
+          {
+            "text": "Minimum Requirements",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "Preferred Skills",
+            "role": "PREFERRED",
+            "match": "bare"
+          }
         ]
       }
     }
@@ -1140,8 +1276,16 @@
       "extraction": {
         "_note": "PROBE+CALIBRATED 2026-09-11: requirements sit under an own-line, colon-less '<Role> Requirements' heading in jobDescription (e.g. 'Warehouse Team Member Requirements'), which lists HS diploma / age / physical and states NO experience -> NONE_NEEDED. Driver variants that add 'Previous driving experience required' resolve REQUIRED (correctly excluded). Only two heading variants exist across the board, matched as exact bare headings (a new title would fail safe to NOT_STATED, never a false positive). Live yield 7/9 applicable; split spot-checked correct. Forked vocabulary, no engine change.",
         "openers": [
-          {"text": "Warehouse Team Member Requirements", "role": "REQUIRED", "match": "bare"},
-          {"text": "Warehouse/Delivery Driver Team Member Requirements", "role": "REQUIRED", "match": "bare"}
+          {
+            "text": "Warehouse Team Member Requirements",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "Warehouse/Delivery Driver Team Member Requirements",
+            "role": "REQUIRED",
+            "match": "bare"
+          }
         ]
       },
       "headers": {
@@ -1184,18 +1328,32 @@
         "locationData": {}
       },
       "selected_fields": {
-        "category": ["Retail Associates"],
-        "state": ["Washington"]
+        "category": [
+          "Retail Associates"
+        ],
+        "state": [
+          "Washington"
+        ]
       },
       "location_filter": {
         "field": "state",
-        "match_any": ["Washington"]
+        "match_any": [
+          "Washington"
+        ]
       },
       "extraction": {
         "_note": "Forked opener vocabulary, TJX only. DERIVED from this tenant's own 117-description WA capture (2026-09-15), nothing inherited. Requirements live under a custom colon heading 'Who We're Looking For: You.' (measured 114/117; 3 use 'Who We Are Looking For' - both openers below). It follows the duties section ('Opportunity: Grow Your Career') and is followed by 'Benefits include:' (already in END_HEADINGS), so the span is fenced without a new terminator. Apostrophe is curly in the source; experience.py fold_punct normalizes it to ASCII at match time, so the straight-apostrophe opener fires. Requirements sit in the JobPosting JSON-LD description body (HTML-entity-encoded; the adapter html.unescapes it) - no segmented qualifications field.",
         "openers": [
-          {"text": "who we're looking for", "role": "REQUIRED", "match": "colon"},
-          {"text": "who we are looking for", "role": "REQUIRED", "match": "colon"}
+          {
+            "text": "who we're looking for",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "who we are looking for",
+            "role": "REQUIRED",
+            "match": "colon"
+          }
         ]
       },
       "verified": "2026-09-15 - Phenom TJCOGLOBAL confirmed (cdn.phenompeople.com, content-us.phenompeople.com/api/TJCOGLOBAL). POST /widgets refineSearch with selected_fields{category:[Retail Associates],state:[Washington]} -> totalHits 118 (matches the site's own facet count). Pagination clean: from=100 ->18, from=120/200 ->0 (empty-page stop, no sticky tail). Detail page (bare pid, no slug needed -> 200) carries JobPosting JSON-LD with full description. SCOPE: index API + one detail page inspected; openers pending derivation from the full detail capture."
