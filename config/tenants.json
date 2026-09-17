@@ -957,7 +957,9 @@
         ],
         "experience_range_open_at_zero": true
       },
-      "nlx_wa_jobs": null
+      "nlx_wa_jobs": null,
+      "company_name": "Sysco",
+      "_company_note": "All Sysco OpCos (US0055 Sysco Seattle, US1643 Greco/Cheese Man, US0102 Spokane, US3069 Sygma) normalize to one brand 'Sysco' via config override (radancy_tb prefers config company_name). 2026-09-17."
     },
     "ontrac": {
       "label": "OnTrac - Package Handlers (jobs.ontrac.com, TalentBrew org 47156)",

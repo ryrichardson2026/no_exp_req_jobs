@@ -411,6 +411,26 @@ def _state_code(st):
     return US_STATE_TO_CODE.get(st.lower())
 
 
+_EMP_TYPE = {"FULL_TIME": "Full-time", "PART_TIME": "Part-time", "CONTRACTOR": "Contract",
+             "TEMPORARY": "Temporary", "INTERN": "Internship", "PER_DIEM": "Per diem"}
+
+
+def _emp_type(v):
+    """JobPosting employmentType is a JSON array (["PART_TIME"]) - normalize to a clean label
+    so the card never renders the raw array. Accepts list, JSON-string-of-list, or plain string."""
+    if isinstance(v, str) and v.startswith("["):
+        try:
+            v = json.loads(v)
+        except ValueError:
+            pass
+    if isinstance(v, list):
+        v = v[0] if v else None
+    if not v:
+        return None
+    key = str(v).strip().upper().replace("-", "_").replace(" ", "_")
+    return _EMP_TYPE.get(key, str(v).strip().title())
+
+
 def map_record(job, ld, t, retrieved_at):
     """Phenom index record (job) + detail JobPosting JSON-LD (ld) -> normalized contract."""
     r = model.new_record()
@@ -445,7 +465,7 @@ def map_record(job, ld, t, retrieved_at):
     r["lat"] = job.get("latitude")
     r["lng"] = job.get("longitude")
 
-    r["employment_type"] = ld.get("employmentType") or job.get("type")
+    r["employment_type"] = _emp_type(ld.get("employmentType") or job.get("type"))
     r["shift_raw"] = None
     r["posted_at"] = (ld.get("datePosted") or job.get("postedDate") or job.get("dateCreated") or "")[:10] or None
     r["freshness_state"] = "UNKNOWN"

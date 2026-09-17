@@ -650,8 +650,12 @@ def map_record(ld, t, retrieved_at, html=None):
         r["source_job_id"] = tail or None
     else:
         r["source_job_id"] = str(ld.get("identifier") or "") or None
+    # Config company_name WINS when set: the source hiringOrganization can be a raw internal
+    # OpCo record (Sysco: "US0055 Sysco Seattle, Inc.", "US1643 Greco The Cheese Man (Bellissimo
+    # Distribution, LLC)") - all one employer. A config override normalizes them to one clean brand.
     org = ld.get("hiringOrganization")
-    r["company_name"] = (org.get("name") if isinstance(org, dict) else None) \
+    r["company_name"] = t.get("company_name") \
+        or (org.get("name") if isinstance(org, dict) else None) \
         or t.get("label")
     r["employer_domain"] = t.get("employer_domain")
     r["title"] = ld.get("title")
