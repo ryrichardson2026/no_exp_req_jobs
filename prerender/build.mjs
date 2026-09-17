@@ -33,6 +33,15 @@ const KEY = "sb_publishable_T49bDaIS8d7-AhQ8SsFU0g_ZA55yNQE";
 const PORT = 8795;
 const CONC = 6;                                     // concurrent Chrome pages
 const SITE_URL = (process.env.SITE_URL || "https://noprobjobs.com").replace(/\/$/, "");   // canonical + OG + sitemap base
+
+// States that are CAPTURED in the DB (jobs_list/jobs_detail) but NOT yet surfaced on the site —
+// no launched board/landing for them. Their jobs are suppressed from EVERYTHING the site
+// publishes: the landing "Recent jobs" feed, the board list, browse routes, the sitemap, and the
+// Indexing API — so an unlaunched market can't contaminate a launched one's feed. Coverage below
+// is still asserted against the FULL fetch, so this never masks a truncated pull. Remove a state
+// the moment its surface goes live. (TX onboarded on the pull side 2026-09-17; WA is the only
+// launched surface, so TX is held here until a TX landing/board ships.)
+const SUPPRESSED_STATES = new Set(["TX"]);
 const MOBILE = { width: 412, height: 915, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
 // Change #2: the Washington lander — a landing-page clone (served from index.html, so it runs
 // landing.js) that differs only in its headline. Baked as its own route; excluded from the
@@ -398,8 +407,12 @@ async function main(){
   // (skipped below), and its stale expired page stays on disk until retire.mjs deletes it;
   // that is the retire step's real work. Paths are stable (slug + job_number are write-once),
   // so live/expired pages just overwrite and nothing orphans.
-  const recs = await fetchAll("/jobs_detail?select=*&order=job_number.asc");   // &order= = stable offset paging
-  const list = await fetchAll("/jobs_list?select=*&order=job_number.asc");
+  // Full fetch first — coverage (see the manifest below) is asserted against these lengths, so it
+  // verifies the DB PULL, not the published subset. Then suppress unlaunched states from the site.
+  const recsFetched = await fetchAll("/jobs_detail?select=*&order=job_number.asc");   // &order= = stable offset paging
+  const listFetched = await fetchAll("/jobs_list?select=*&order=job_number.asc");
+  const recs = recsFetched.filter((r) => !SUPPRESSED_STATES.has(r.state));
+  const list = listFetched.filter((r) => !SUPPRESSED_STATES.has(r.state));
   // Merge the ONE recency computation (analyze/freshness.py -> out/freshness.json) onto every
   // list record, OVERWRITING the view's is_new (now unread — the rule lives in one Python call
   // site, never a raw-field recompute on a surface). The card reads r.is_new. Missing file =>
@@ -614,9 +627,10 @@ async function main(){
     // Coverage: rows fetched vs the DB's authoritative count. A truncated fetch (row cap) shows
     // here and fails the bake, instead of silently shipping a partial site. jobs_fetched should
     // equal manifest_live+manifest_expired+retired on a healthy run.
-    jobs_fetched: recs.length, jobs_total: jobsTotal,
-    list_fetched: list.length, list_total: listTotal,
-    coverage_complete: (jobsTotal == null || recs.length >= jobsTotal) && (listTotal == null || list.length >= listTotal),
+    jobs_fetched: recsFetched.length, jobs_total: jobsTotal, jobs_published: recs.length,
+    list_fetched: listFetched.length, list_total: listTotal, list_published: list.length,
+    suppressed_states: [...SUPPRESSED_STATES], suppressed_count: recsFetched.length - recs.length,
+    coverage_complete: (jobsTotal == null || recsFetched.length >= jobsTotal) && (listTotal == null || listFetched.length >= listTotal),
     sitemap_urls: deploy.sitemap_urls,
     browse_pages_ok: results.filter((r) => r.type === "browse" && !r.error).length,
     landing_ok: results.filter((r) => r.type === "landing" && !r.error).length,
