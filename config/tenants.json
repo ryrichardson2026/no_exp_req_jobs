@@ -1705,5 +1705,37 @@
         ]
       }
     }
+  },
+  "paradox": {
+    "_platform_note": "Paradox/Olivia careers boards (cdn.olivia.paradox.ai widget). Read surface = POST {careers_host}/api/get-jobs (JSON, descriptions INLINE, no detail fetch). Scope client-side on locations[].stateAbbr (NOT the geo-radius). Session+Referer+Origin required (cold 403). Serves Shake Shack/Chipotle/Inspire/Panda - same shape, per-brand host. NEW platform 2026-09-17.",
+    "shake_shack": {
+      "label": "Shake Shack",
+      "careers_host": "https://careers.shakeshack.com",
+      "api_path": "/api/get-jobs",
+      "company_name": "Shake Shack",
+      "employer_domain": "shakeshack.com",
+      "source_class": "direct-employer",
+      "sector": "food_services",
+      "markets": [
+        "WA",
+        "TX"
+      ],
+      "verified": "2026-09-17 Chrome+cold-Python: totalJob 586 company-owned; stateAbbr scope WA=10/TX=33 (client-side; site geo-radius bleeds). Descriptions inline. Opener 'Job Qualifications'. First Paradox tenant; adapter serves Chipotle/Inspire/Panda next.",
+      "extraction": {
+        "_note": "DERIVED from Shake Shack Paradox descriptions: requirements under 'Job Qualifications'. 'Job Responsibilities'=duties, 'Perks'/'About Us'=END_HEADINGS fence it. Hourly-rate line handled by pay-disclaimer guard.",
+        "openers": [
+          {
+            "text": "job qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          }
+        ]
+      }
+    }
   }
 }
