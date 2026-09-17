@@ -1,0 +1,98 @@
+{
+  "_comment": "Single source of truth for tenant-sourcing decisions. The discovery agent (discovery/*) and, where relevant, /add-tenant read THIS file at run time. NO sourcing rule is hardcoded in code. Change a rule here, re-run discovery, and a disposition changes with no code edit (that is the acceptance test). The reason this exists at all: a rule copied into two places drifts (see the four definitions of 'new'). When a decision like 'no more grocery' is made, it is one line here and every consumer picks it up. Field contract for the segment/footprint/size vocabularies is documented in discovery/classify.py; the disposition machinery reads exclusions -> deprioritized -> segments -> thresholds/gates -> carve_outs.",
+
+  "_schema_version": 1,
+
+  "exclusions": [
+    { "name": "Amazon", "reason": "six-of-six visible cards on grid pulls" },
+    { "name": "McGee Air Services", "reason": "owner no-go 2026-09-16 (SmartRecruiters read surface). Excluded by NAME, not a platform ban - SmartRecruiters is not blocked for future candidates." },
+    { "class": "staffing_agency", "reason": "sales target list, not a sourcing list" },
+    { "class": "aggregator", "reason": "not an origin feed" },
+    { "class": "ad_network", "reason": "programmatic hop, not a source" },
+    { "class": "grocery", "reason": "standing decision, Kroger stays, no new grocery" },
+    { "class": "merchandising_firm", "reason": "evergreen non-action roles; SAS Retail, Acosta, Club Demonstration Services" },
+    { "class": "survey_gig", "reason": "scam-adjacent, wrong audience" }
+  ],
+
+  "deprioritized": [
+    { "segment": "healthcare", "status": "hold", "note": "sector modifier not a sourcing vertical; licensed-occupation gate kills density" },
+    { "segment": "childcare", "status": "hold", "note": "pinned alongside healthcare; potential own category, undecided" },
+    { "segment": "construction", "status": "hold", "note": "off the category menu until a solid feed exists" },
+    { "segment": "government_classified", "status": "exclude", "note": "formal minimum qualifications system-wide" }
+  ],
+
+  "segments": {
+    "_note": "Stage 1 axis 1. A candidate whose segment is in 'frontline' proceeds; one in 'non_frontline' is ruled out before any network call (a tech company cannot supply no-experience frontline roles regardless of size). A segment in neither list and not covered by deprioritized/exclusions is UNKNOWN -> needs_review, never estimated.",
+    "frontline": [
+      "aviation_ground_services",
+      "logistics_warehouse",
+      "retail",
+      "food_service",
+      "facilities_janitorial",
+      "security",
+      "transportation",
+      "automotive",
+      "customer_service",
+      "hospitality",
+      "manufacturing_production",
+      "grocery"
+    ],
+    "non_frontline": [
+      "software_tech",
+      "professional_services",
+      "finance_insurance",
+      "biotech_pharma_rnd",
+      "media_agency",
+      "education_academic"
+    ]
+  },
+
+  "footprint": {
+    "_note": "Stage 1 axis 2, HEAVIEST prioritization weight. Market is a config parameter, so a national employer's adapter serves every future market from one build. national outranks regional outranks local. tier_weight is the base tier a footprint earns before size/unknown adjustments.",
+    "tier_weight": {
+      "national": 1,
+      "regional": 2,
+      "local": 3
+    }
+  },
+
+  "size": {
+    "_note": "Stage 1 axis 3, volume proxy, ONLY matters inside a correct segment. A large in-market presence can hold a tier; small drops one within tier. enterprise/large hold, mid neutral, small demotes.",
+    "band_effect": {
+      "enterprise": 0,
+      "large": 0,
+      "mid": 0,
+      "small": 1
+    }
+  },
+
+  "thresholds": {
+    "min_in_market_volume": 20,
+    "min_estimated_applicable": 10
+  },
+
+  "gates": {
+    "_note": "Role-level requirement gate, applied when sampling descriptions in Stage 2. A role hitting any 'fail' clause fails the gate; a role hitting any 'pass' clause passes. Carve-outs below override title-based reflexes. IMPORTANT: this gate scores ROLES, not the candidate. A low sampled-applicable count is needs_review, never a reject (density never rejects at Stage 2).",
+    "fail": [
+      "stated years-of-experience minimum",
+      "degree requirement",
+      "licence or certification the candidate must already hold",
+      "required language fluency",
+      "formal classified minimum qualifications"
+    ],
+    "pass": [
+      "no experience stated",
+      "explicitly none required",
+      "zero-inclusive range",
+      "will train or paid training",
+      "preferred rather than required"
+    ]
+  },
+
+  "carve_outs": [
+    { "rule": "management and sales training programs are not excluded", "basis": "title does not decide inclusion, the requirement gate does" },
+    { "rule": "internships and long-runway apprenticeships remain excluded" },
+    { "rule": "CDL stays in via the quick-cert exception" },
+    { "rule": "badging and background checks are the employer's screen, not an exclusion" }
+  ]
+}
