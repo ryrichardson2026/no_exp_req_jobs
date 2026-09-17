@@ -1428,5 +1428,45 @@
       },
       "verified": "2026-09-15 - Phenom TJCOGLOBAL confirmed (cdn.phenompeople.com, content-us.phenompeople.com/api/TJCOGLOBAL). POST /widgets refineSearch with selected_fields{category:[Retail Associates],state:[Washington]} -> totalHits 118 (matches the site's own facet count). Pagination clean: from=100 ->18, from=120/200 ->0 (empty-page stop, no sticky tail). Detail page (bare pid, no slug needed -> 200) carries JobPosting JSON-LD with full description. SCOPE: index API + one detail page inspected; openers pending derivation from the full detail capture."
     }
+  },
+  "appcast": {
+    "aramark": {
+      "label": "Aramark (food service + facilities)",
+      "host": "careers.aramark.com",
+      "company_name": "Aramark",
+      "employer_domain": "aramark.com",
+      "source_class": "direct-employer",
+      "sector": "food_service",
+      "search_radius": 50,
+      "scope_params": {
+        "searchlocations": [
+          "Washington",
+          "Texas"
+        ]
+      },
+      "location_filter": {
+        "state_codes": [
+          "WA",
+          "TX"
+        ]
+      },
+      "terms_reference": "https://careers.aramark.com/robots.txt",
+      "verified": "2026-09-17 onboarding: Appcast WP careers site (calc-results/?searchlocation={State}&mypage=N server-side state scope; /job/{slug}/{loc}/{id}/ detail, Desc__copy container). WA=46, 59% applicable. Openers = 'Qualifications'. Paradox only apply.",
+      "extraction": {
+        "_note": "DERIVED 2026-09-17: detail Desc__copy h2 sections; requirements under 'Qualifications'.",
+        "openers": [
+          {
+            "text": "qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "bare"
+          }
+        ]
+      }
+    }
   }
 }

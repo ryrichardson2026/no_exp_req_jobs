@@ -369,6 +369,7 @@ _ENUMERATE_ARTIFACT = {
     "jibe_api": ("pages", True), "compass_api": ("pages", True),
     "phenom": ("records.jsonl", False),
     "ultipro": ("index.jsonl", False),
+    "appcast": ("index.jsonl", False),
 }
 
 
@@ -407,6 +408,9 @@ def _live_detail_names(platform, tenant_key):
     if platform == "ultipro":
         # index.jsonl is ALREADY the in-scope set; detail files are {opportunityId}.json.
         return {f"{mod.opp_id(o)}.json" for o in mod.load_index(t) if mod.opp_id(o)}, ".json"
+    if platform == "appcast":
+        # index.jsonl is ALREADY the in-scope set; detail files are {jobid}.json.
+        return {f"{c['jobid']}.json" for c in mod.load_index(t) if c.get("jobid")}, ".json"
     return None, None
 
 

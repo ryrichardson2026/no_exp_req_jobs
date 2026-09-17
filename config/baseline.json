@@ -85,6 +85,11 @@
       "records": 445,
       "applicable": 352,
       "density": 79.1
+    },
+    "aramark": {
+      "records": 931,
+      "applicable": 305,
+      "density": 32.8
     }
   }
 }
