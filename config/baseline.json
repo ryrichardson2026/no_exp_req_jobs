@@ -103,6 +103,12 @@
       "applicable": 17,
       "density": 22.4,
       "_note": "WA+TX aviation. Opener='what we are looking for:'. G2 Secure Staff folded into this board. Aviation routes by function, no new category."
+    },
+    "allianceground": {
+      "records": 7,
+      "applicable": 1,
+      "density": 14.3,
+      "_note": "WA 3/TX 4 aviation, thin + experience-heavy (ramp/passenger/material handler REQUIRED). Client-side location_filter ', WA'/', TX' on locationsText (abbreviated). One pull serves both markets."
     }
   }
 }

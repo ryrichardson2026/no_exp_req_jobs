@@ -777,6 +777,42 @@
           }
         ]
       }
+    },
+    "allianceground": {
+      "label": "Alliance Ground International (AGI)",
+      "host": "allianceground.wd1.myworkdayjobs.com",
+      "tenant": "allianceground",
+      "site": "AGI_Careers",
+      "language": "en-US",
+      "url_style": "myworkdayjobs",
+      "careers_url": "https://allianceground.wd1.myworkdayjobs.com/en-US/AGI_Careers",
+      "employer_domain": "allianceground.com",
+      "source_class": "direct-employer",
+      "sector": "aviation_ground_services",
+      "verified": "2026-09-17 aviation max-out. Workday tenant allianceground/AGI_Careers, board 134 (CA-heavy). WA=3 Seattle, TX=4 Coppell/Dallas/Lubbock (depth-scoped, rows clean). Both thin (<20). Aviation routes by function (no new category).",
+      "location_filter": {
+        "_note": "client-side over full board (Workday facets include-only -> undercount trap, see uhaul). Token format VERIFY on first --inspect: probe claims abbreviated 'City, ST'.",
+        "field": "locationsText",
+        "match_any": [
+          ", WA",
+          ", TX"
+        ]
+      },
+      "extraction": {
+        "_note": "DERIVED from AGI Workday detail: requirements under 'Qualifications:' (colon, 6/7). 'Job Responsibilities' = duties (excluded); skill sub-headings (Computer/Time management) sit inside Qualifications.",
+        "openers": [
+          {
+            "text": "qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "knowledge, skills, and abilities",
+            "role": "REQUIRED",
+            "match": "colon"
+          }
+        ]
+      }
     }
   },
   "radancy_tb": {

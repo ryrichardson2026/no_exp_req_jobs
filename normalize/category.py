@@ -51,7 +51,7 @@ CATEGORY_PATTERNS = {
     # Aviation ground roles are routed by JOB FUNCTION into existing buckets (owner
     # 2026-09-17: "the job type not the industry or vertical"). Aviation is a SECTOR,
     # not a category - no 11th bucket. Passenger/wheelchair assistance = customer-facing.
-    "Customer Service": r"\b(customer service|call center|call centre|csr|customer support|contact center|dispatcher|passenger service\w*|passenger assist\w*|wheelchair (agent|attendant|assist\w*)|gate agent|guest service)\b",
+    "Customer Service": r"\b(customer service|call center|call centre|csr|customer support|contact center|dispatcher|passenger service\w*|passenger assist\w*|wheelchair (agent|attendant|assist\w*)|gate agent|guest service|concierge)\b",
     "Sales": r"\b(sales|account executive|canvasser|telesales|inside sales|outside sales|business development)\b",
     # 'merch\w* assoc\w*' catches Merchandise/Merchandising Associate incl. the TJX typos
     # (Merchadise Assoc, Merchandise Associte); backroom/stockroom are the store back-of-house
