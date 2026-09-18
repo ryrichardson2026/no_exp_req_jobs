@@ -138,7 +138,11 @@
         "normalize"
       ],
       "tenants": [
-        "shake_shack"
+        "shake_shack",
+        "sonic",
+        "arbys",
+        "buffalo_wild_wings",
+        "jimmy_johns"
       ]
     }
   ]

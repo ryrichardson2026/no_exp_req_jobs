@@ -1736,6 +1736,111 @@
           }
         ]
       }
+    },
+    "buffalo_wild_wings": {
+      "label": "Buffalo Wild Wings",
+      "careers_host": "https://careers.buffalowildwings.com",
+      "api_path": "/api/get-jobs",
+      "company_name": "Buffalo Wild Wings",
+      "employer_domain": "buffalowildwings.com",
+      "source_class": "direct-employer",
+      "sector": "food_services",
+      "markets": [
+        "WA",
+        "TX"
+      ],
+      "verified": "2026-09-17 Paradox filter[state] server-side scope (WA 31/TX 178). Inspire portfolio brand.",
+      "extraction": {
+        "_note": "DERIVED from buffalo_wild_wings Paradox descriptions 2026-09-17.",
+        "openers": [
+          {
+            "text": "qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          }
+        ]
+      }
+    },
+    "arbys": {
+      "label": "Arby's",
+      "careers_host": "https://careers.arbys.com",
+      "api_path": "/api/get-jobs",
+      "company_name": "Arby's",
+      "employer_domain": "arbys.com",
+      "source_class": "direct-employer",
+      "sector": "food_services",
+      "markets": [
+        "WA",
+        "TX"
+      ],
+      "verified": "2026-09-17 Paradox filter[state] server-side scope (WA 80/TX 188). Inspire portfolio brand.",
+      "extraction": {
+        "_note": "DERIVED from arbys Paradox descriptions 2026-09-17.",
+        "openers": [
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          }
+        ]
+      }
+    },
+    "jimmy_johns": {
+      "label": "Jimmy John's",
+      "careers_host": "https://careers.jimmyjohns.com",
+      "api_path": "/api/get-jobs",
+      "company_name": "Jimmy John's",
+      "employer_domain": "jimmyjohns.com",
+      "source_class": "direct-employer",
+      "sector": "food_services",
+      "markets": [
+        "WA",
+        "TX"
+      ],
+      "verified": "2026-09-17 Paradox filter[state] server-side scope (WA 87/TX 129). Inspire portfolio brand.",
+      "extraction": {
+        "_note": "DERIVED from jimmy_johns Paradox descriptions 2026-09-17.",
+        "openers": [
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          }
+        ]
+      }
+    },
+    "sonic": {
+      "label": "Sonic Drive-In",
+      "careers_host": "https://careers.sonicdrivein.com",
+      "api_path": "/api/get-jobs",
+      "company_name": "Sonic Drive-In",
+      "employer_domain": "sonicdrivein.com",
+      "source_class": "direct-employer",
+      "sector": "food_services",
+      "markets": [
+        "WA"
+      ],
+      "verified": "2026-09-17 Paradox filter[state] server-side scope (WA 69; TX 5093 SKIPPED (>5k, owner call)). Inspire portfolio brand.",
+      "extraction": {
+        "_note": "DERIVED from sonic Paradox descriptions 2026-09-17.",
+        "openers": [
+          {
+            "text": "qualifications and job requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          }
+        ]
+      }
     }
   }
 }

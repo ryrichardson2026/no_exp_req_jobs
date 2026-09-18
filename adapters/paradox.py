@@ -37,6 +37,7 @@ import os
 import re
 import sys
 import time
+import urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -113,10 +114,19 @@ def _headers(t):
             "Content-Type": "application/json", "Accept": "application/json"}
 
 
-def fetch_page(t, n):
+# abbr -> full state name for the server-side facet (filter[state][0]=Washington). Only our
+# scope markets are needed; extend if a new market is added.
+STATE_FULLNAME = {"WA": "Washington", "TX": "Texas"}
+
+
+def fetch_page(t, n, state_full=None):
+    """One page. When state_full is given, scope SERVER-SIDE via the Paradox state facet
+    (filter[state][0]=<FullName>) - clean, no giant client-side scan, no geo bleed."""
     host = t["careers_host"].rstrip("/")
     path = t.get("api_path", "/api/get-jobs")
     url = f"{host}{path}?radius=15&page_number={n}&enable_kilometers=false"
+    if state_full:
+        url += "&" + urllib.parse.quote("filter[state][0]") + "=" + urllib.parse.quote(state_full)
     return _session(t).post(url, json={}, timeout=TIMEOUT, headers=_headers(t))
 
 
@@ -170,55 +180,60 @@ def total_jobs(payload):
 def mode_probe(t):
     print(f"tenant : {t['key']}  ({t.get('label','')})")
     print(f"host   : {t['careers_host']}   markets : {sorted(_markets(t))}")
-    r = fetch_page(t, 1)
-    print(f"\nstatus : {r.status_code}")
-    if r.status_code != 200:
-        print(r.text[:300]); return 1
-    j = r.json()
-    jobs = j.get("jobs", [])
-    print(f"page size (measured) : {len(jobs)}   totalJob (DIAGNOSTIC) : {total_jobs(j)}")
-    scoped = [x for x in jobs if in_scope_location(x, t)]
-    print(f"in scope on page 1   : {len(scoped)}/{len(jobs)}")
-    if jobs:
-        x = jobs[0]
-        loc = (x.get("locations") or [{}])[0]
-        print(f"\nfirst record: {x.get('requisitionID')}  {(x.get('title') or '')[:60]}")
-        print(f"  loc={loc.get('city')},{loc.get('stateAbbr')}  desc_chars={len(x.get('description') or '')}")
-    print("\nProbe OK.")
-    log(t, "probe", status=r.status_code, total=total_jobs(j))
-    return 0
+    ok = True
+    for mkt in sorted(_markets(t)):
+        full = STATE_FULLNAME.get(mkt.upper(), mkt)
+        r = fetch_page(t, 1, full)
+        if r.status_code != 200:
+            print(f"  {mkt}: status {r.status_code} FAIL"); ok = False; continue
+        j = r.json()
+        jobs = j.get("jobs", [])
+        loc = (jobs[0].get("locations") or [{}])[0] if jobs else {}
+        print(f"  {mkt} (filter[state]={full}): totalJob {total_jobs(j)}  page1 {len(jobs)}  "
+              f"first={jobs[0].get('title','')[:40] if jobs else '-'} @ {loc.get('city')},{loc.get('stateAbbr')}")
+    print("\nProbe OK." if ok else "\nProbe FAILED.")
+    log(t, "probe", ok=ok)
+    return 0 if ok else 1
 
 
 def _walk(t):
-    """Page to an empty page; keep in-scope jobs, slimmed to the fields we map."""
+    """One SERVER-SIDE-scoped pass PER market (filter[state][0]=<FullName>): page that state to
+    empty. No giant national scan, no geo bleed. Jobs deduped across markets (a multi-state
+    posting is kept once, tagged with the first market that returned it)."""
     kept, seen = [], set()
-    total = None
-    for page in range(1, MAX_PAGES + 1):
-        r = fetch_paged(lambda: fetch_page(t, page), label=f"page {page}: ")
-        j = r.json()
-        total = total_jobs(j) or total
-        jobs = j.get("jobs", [])
-        if not jobs:
-            break
-        for x in jobs:
-            uid = x.get("uniqueID") or x.get("requisitionID")
-            if uid in seen:
-                continue
-            seen.add(uid)
-            loc = in_scope_location(x, t)
-            if loc:
+    grand_total = 0
+    for mkt in sorted(_markets(t)):
+        full = STATE_FULLNAME.get(mkt.upper(), mkt)
+        mkt_total = None
+        for page in range(1, MAX_PAGES + 1):
+            def _f(pg=page, st=full):
+                return fetch_page(t, pg, st)
+            r = fetch_paged(_f, label=f"{mkt} p{page}: ")
+            j = r.json()
+            mkt_total = total_jobs(j) or mkt_total
+            jobs = j.get("jobs", [])
+            if not jobs:
+                break
+            for x in jobs:
+                uid = x.get("uniqueID") or x.get("requisitionID")
+                if uid in seen:
+                    continue
+                seen.add(uid)
+                # server already scoped to this state; pick the location matching the market,
+                # else fall back to the first location.
+                loc = in_scope_location(x, t) or (x.get("locations") or [{}])[0]
                 kept.append({"uniqueID": uid, "requisitionID": x.get("requisitionID"),
                              "title": x.get("title"), "description": x.get("description"),
                              "employmentType": x.get("employmentType"),
                              "originalURL": x.get("originalURL"), "companyName": x.get("companyName"),
                              "location": loc,
                              "postedAt": _posted_date(x)})
-        if page % 10 == 0:
-            print(f"  page {page}: seen {len(seen)}, in-scope {len(kept)} (total {total})")
-        if total and len(seen) >= total:
-            break
-        time.sleep(DELAY_SECONDS)
-    return kept, total
+            if len(jobs) < PAGE_SIZE:
+                break
+            time.sleep(DELAY_SECONDS)
+        print(f"  {mkt}: {mkt_total} on the board -> cumulative kept {len(kept)}")
+        grand_total += (mkt_total or 0)
+    return kept, grand_total
 
 
 def mode_index(t):
