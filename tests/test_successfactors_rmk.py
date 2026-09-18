@@ -159,7 +159,9 @@ def test_normalize_produces_valid_contract_record():
     assert rec["source_category"] == "Production"
     assert rec["city"] == "Cincinnati"
     assert rec["state"] == "OH"
-    assert rec["apply_url"] == f"{HOST}/talentcommunity/apply/1421663700/?locale=en_US"
+    # apply_url is the /job/ detail-page href read from the index (source_url), NOT the
+    # /talentcommunity/apply pattern (that endpoint is robots-disallowed + carries no description).
+    assert rec["apply_url"] == f"{HOST}/job/Cincinnati-Warehouse-Associate-OH-45262/1421663700/"
     assert rec["description_text"] and "lift up to 50 lbs" in rec["description_text"]
     # the requisition number is NOT smuggled in as an unknown field
     assert "requisition_number" not in rec

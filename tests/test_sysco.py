@@ -85,8 +85,11 @@ def test_posted_at_parses_to_2026_08_25():
 
 
 def test_company_name():
+    # All Sysco OpCos (US0055 Sysco Seattle, US1643 Greco/Cheese Man, Sygma, ...) normalize to
+    # one brand "Sysco" via the config company_name override (radancy_tb prefers config). The raw
+    # hiringOrganization OpCo record is NOT surfaced. Owner-requested 2026-09-17.
     rec, _, _ = _record()
-    assert rec["company_name"] == "US0055 Sysco Seattle, Inc.", rec["company_name"]
+    assert rec["company_name"] == "Sysco", rec["company_name"]
 
 
 def test_city_and_state():

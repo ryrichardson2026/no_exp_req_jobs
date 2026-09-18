@@ -85,10 +85,17 @@ check("gensco token_bootstrap header", tb.get("header"), "myJobsToken")
 assert gensco["headers"].get("rolecode") == "manager", \
     "gensco must send the captured rolecode header the staffing API requires"
 
-if fails:
-    print("FAIL:")
-    for f in fails:
-        print("  " + f)
-    sys.exit(1)
-print("OK: workday both host styles (uhaul myworkdayjobs + synthetic myworkdaysite), sysco radancy &p pagination, sherwin/cintas/gensco endpoints all resolve to spec")
-sys.exit(0)
+def test_tenant_push_endpoints():
+    """Pytest entry: the checks run at import (populating `fails`); assert none failed."""
+    assert not fails, "endpoint mismatches:\n" + "\n".join(fails)
+
+
+if __name__ == "__main__":
+    # Standalone use (python tests/test_tenant_push_endpoints.py): plain asserts + exit code.
+    if fails:
+        print("FAIL:")
+        for f in fails:
+            print("  " + f)
+        sys.exit(1)
+    print("OK: workday both host styles (uhaul myworkdayjobs + synthetic myworkdaysite), sysco radancy &p pagination, sherwin/cintas/gensco endpoints all resolve to spec")
+    sys.exit(0)
