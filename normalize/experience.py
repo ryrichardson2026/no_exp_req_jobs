@@ -558,6 +558,61 @@ def derive_condition(reqs, found_required, zero_range_open=False, section_text="
     return NONE_NEEDED, to_apply or reqs
 
 
+# ---------------------------------------------------------------------------
+# HEADINGLESS FULL-BODY FALLBACK - per-tenant opt-in (extraction.absent_barrier_is_none_needed)
+#
+# Some employers write NO requirements heading at all: a duties paragraph, pay, a minimum age
+# and physical demands, nothing else (Spencer's / Spirit Halloween). sectionize finds no
+# section, so the normal path can only return NOT_STATED - burying genuinely no-experience
+# frontline roles. The absence-inference lever above cannot help: it fires only when a section
+# WAS found (found_required) but named no barrier; here there is no section.
+#
+# The honest fix, and ONLY for a MANUALLY-VERIFIED employer whose template lists experience
+# INLINE when a role needs it (proven: every Spirit/Spencer's manager states "2-5 years
+# experience", so absence is a real signal, not a parser miss): scan the WHOLE body for a HARD
+# inline requirement. If one is present the posting is gated (-> REQUIRED, e.g. District Sales
+# Manager); if the body names none, the absence is real -> NONE_NEEDED. classify_line's existing
+# guards travel with the scan (service-experience / pay-disclaimer / after-hire), and age never
+# participates (no age line types as a requirement). Opt-in, so every non-flagged tenant is
+# byte-identical - the lever's blast radius is exactly the config that asked for it.
+# ---------------------------------------------------------------------------
+
+_HARD_DEGREE_RX = re.compile(r"\b(bachelor|master|doctor\w*|associate'?s?\s+degree)\b", re.I)
+
+
+def _is_hard_barrier(r):
+    """A full-body clause that UNAMBIGUOUSLY gates application. Deliberately strict about
+    experience (a duration or an explicit require/must-have/minimum signal) so bare 'experience'
+    - which outside a section is usually pay boilerplate ('dependent upon ... experience') or a
+    duty - never counts. A college DEGREE (not HS diploma/GED) or a to-apply CREDENTIAL also
+    gates. Fails SAFE: when in doubt it flags a barrier (excludes), never invents a clean absence."""
+    low = r["clause"].lower()
+    t = r["types"]
+    if EXPERIENCE in t and (r["months"] is not None or EXP_REQ_SIGNAL.search(low)):
+        return True
+    if EDUCATION in t and _HARD_DEGREE_RX.search(low) and "high school" not in low:
+        return True
+    if CREDENTIAL in t and r["modality"] == TO_APPLY:
+        return True
+    return False
+
+
+def _full_body_reqs(html, text_fallback, qualifications_html):
+    """Every classify_line requirement across the WHOLE description body (no section fencing).
+    Used only by the opt-in headingless fallback."""
+    text = html_to_text(html) if (html or "").strip() else (text_fallback or "")
+    if (qualifications_html or "").strip():
+        qtext = html_to_text(qualifications_html)
+        text = f"{text}\n{qtext}" if text else qtext
+    text = fold_punct(text)
+    out = []
+    for c in _clauses(text):
+        r = classify_line(c, TO_APPLY)
+        if r:
+            out.append(r)
+    return out
+
+
 def extract(html, text_fallback="", qualifications_html="", openers=None):
     sections, found_required = sectionize(html, text_fallback, qualifications_html, openers)
     reqs = []
@@ -571,6 +626,24 @@ def extract(html, text_fallback="", qualifications_html="", openers=None):
     zero_range_open = bool(openers.get("zero_range_open")) if isinstance(openers, dict) else False
     section_text = " ".join(sections[TO_APPLY] + sections[PREFERRED_M])
     condition, evidence = derive_condition(reqs, found_required, zero_range_open, section_text)
+
+    # Headingless full-body fallback (opt-in). Fires ONLY when the normal path found no section
+    # AND returned NOT_STATED, so it can never override a real section read. A HARD inline
+    # requirement -> REQUIRED (with that clause as evidence); a body naming none -> NONE_NEEDED,
+    # with a synthetic audit clause recording the inference. See the block above _is_hard_barrier.
+    if (condition == NOT_STATED and not found_required
+            and isinstance(openers, dict) and openers.get("absent_barrier_none_needed")):
+        fb_reqs = _full_body_reqs(html, text_fallback, qualifications_html)
+        hard = [r for r in fb_reqs if r["modality"] == TO_APPLY and _is_hard_barrier(r)]
+        if hard:
+            condition, evidence, reqs = REQUIRED, hard, fb_reqs
+        else:
+            condition = NONE_NEEDED
+            evidence = [{"clause": "no experience, education or credential requirement stated "
+                                   "in the full description (verified headingless template)",
+                         "types": [], "modality": TO_APPLY, "months": None}]
+            reqs = fb_reqs
+
     to_apply = [r for r in reqs if r["modality"] == TO_APPLY]
     months = [r["months"] for r in to_apply
               if EXPERIENCE in r["types"] and r["months"]]
@@ -612,6 +685,9 @@ def load_openers(tenant):
             # Per-tenant opt-in: open zero-inclusive experience ranges (0 - N years).
             # Off unless the config sets it, so the lever is scoped to this tenant.
             m["zero_range_open"] = bool(ext.get("experience_range_open_at_zero"))
+            # Per-tenant opt-in: headingless full-body fallback (see extract). Off unless the
+            # config sets it, so a manually-verified employer is the only one it touches.
+            m["absent_barrier_none_needed"] = bool(ext.get("absent_barrier_is_none_needed"))
             return m
     sys.exit(f"tenant '{tenant}' not found in {CONFIG_PATH}")
 

@@ -150,6 +150,16 @@
       "records": 122,
       "applicable": 72,
       "density": 59.0
+    },
+    "spencers": {
+      "records": 56,
+      "applicable": 13,
+      "density": 23.2
+    },
+    "spirithalloween": {
+      "records": 165,
+      "applicable": 49,
+      "density": 29.7
     }
   }
 }

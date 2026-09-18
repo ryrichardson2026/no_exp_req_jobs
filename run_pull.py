@@ -761,15 +761,30 @@ def main(argv):
         for t, r in results.items():
             if r["failed_mode"]:
                 halts.append(f"{t}: adapter mode '{r['failed_mode']}' exited non-zero")
+    # Per-tenant "seasonal/dormant" exemption. A tenant that config-flags allow_zero_records
+    # (config/tenants.json) is a verified seasonal board that is legitimately empty out of season
+    # (Spirit Christmas: 0 in WA until ~Oct-Dec). Its zero does NOT halt the whole publish - it
+    # still rides the pull, so its jobs surface (as "entered") the moment the season opens. This is
+    # the loud activation the operator asked for in place of a background monitor. Config-driven,
+    # no tenant branching; every non-flagged tenant keeps the hard zero-records halt.
+    tcfg_halt = load_json(os.path.join(CONFIG_DIR, "tenants.json"))
+    def _allow_zero(u):
+        return bool(((tcfg_halt.get(u["platform"]) or {}).get(u["tenant"]) or {}).get("allow_zero_records"))
     for u in units:
         t = u["tenant"]
         row = table.get(t)
         base = baseline.get(t)
         if row is None:
-            halts.append(f"{t}: no rows in consolidated report (zero records?)")
+            if not _allow_zero(u):
+                halts.append(f"{t}: no rows in consolidated report (zero records?)")
             continue
+        if _allow_zero(u) and row["records"] > 0:
+            print(f"    *** SEASONAL TENANT ACTIVATED: {t} now has {row['records']} records "
+                  f"({row.get('applicable', '?')} applicable) — a dormant board opened. "
+                  f"Inspect and set a config/baseline.json row. ***")
         if row["records"] == 0:
-            halts.append(f"{t}: zero records")
+            if not _allow_zero(u):
+                halts.append(f"{t}: zero records")
         elif base and row["records"] < MIN_RECORD_FRACTION * base["records"]:
             halts.append(f"{t}: {row['records']} records < 50% of baseline {base['records']}")
         if base and abs(row["density"] - base["density"]) > MAX_DENSITY_MOVE:

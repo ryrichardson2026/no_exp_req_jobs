@@ -140,11 +140,14 @@ def main():
                     fh.write(json.dumps(r, ensure_ascii=False) + "\n")
             os.replace(tmp, path)
 
+        # A seasonal/dormant tenant (allow_zero_records) can legitimately have 0 records
+        # out of season - guard the percentage divisions so it prints 0.0% instead of crashing.
+        pct = (lambda c: c / n * 100 if n else 0.0)
         print(f"\n{tenant}  ({n} records)  {path}")
         print(f"  section found        {counts['section_found']:>5}/{n}  "
-              f"{counts['section_found']/n*100:5.1f}%")
+              f"{pct(counts['section_found']):5.1f}%")
         for f in DERIVED:
-            print(f"  {f:<20} {counts[f]:>5}/{n}  {counts[f]/n*100:5.1f}%")
+            print(f"  {f:<20} {counts[f]:>5}/{n}  {pct(counts[f]):5.1f}%")
 
     total = sum(n for n, _ in grand.values())
     print("\n" + "-" * 78)

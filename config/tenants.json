@@ -1618,6 +1618,142 @@
         ]
       },
       "verified": "2026-09-17 Chrome+adapter reconciled: state facet Washington=65/Texas=215=280 (single-value, no dual-split). Phenom widgets 200, detail JSON-LD OK. Opener 'Who You Are:'. Coffee - diverse anti-Starbucks pick. WA published, TX suppressed."
+    },
+    "spencers": {
+      "label": "Spencer's",
+      "careers_base": "https://www.spencersandspiritjobs.com",
+      "widgets_url": "https://www.spencersandspiritjobs.com/widgets",
+      "detail_url_tmpl": "https://www.spencersandspiritjobs.com/us/en/job/{pid}",
+      "employer_domain": "spencersonline.com",
+      "source_class": "direct-employer",
+      "sector": "retail",
+      "state": "WA",
+      "page_size": 50,
+      "search_body": {
+        "lang": "en_us",
+        "deviceType": "desktop",
+        "country": "us",
+        "pageName": "search-results",
+        "subsearch": "",
+        "jobs": true,
+        "counts": true,
+        "keywords": "",
+        "global": false,
+        "sortBy": "Most relevant",
+        "locationData": {}
+      },
+      "selected_fields": {
+        "category": [
+          "Spencer's Stores"
+        ],
+        "state": [
+          "WA"
+        ]
+      },
+      "location_filter": {
+        "_note": "State field is a 2-letter CODE ('WA', NOT 'Washington' - Chrome-validated 2026-09-18: state:['Washington']->0, state:['WA']->59). Single convention, no dual-split (unlike Panera).",
+        "field": "state",
+        "match_any": [
+          "WA"
+        ]
+      },
+      "extraction": {
+        "_note": "NO requirements heading in this employer's template (verified 2026-09-18: all 56 WA descriptions read; only 'Benefits include:' and 'Brand:' colon-headings exist). So openers are empty and the HEADINGLESS FULL-BODY FALLBACK is opted in instead. Verified premise: this employer lists experience INLINE when a role needs it - every manager states '2-5 years experience' and the full-body scan flags all 43 managers REQUIRED - so the Sales Associates' true absence -> NONE_NEEDED is honest, not a parser miss. Managers stay excluded by title too. Age never participates.",
+        "openers": [],
+        "absent_barrier_is_none_needed": true
+      },
+      "verified": "DRAFT 2026-09-18 (GATEs 1-3, Chrome+extractor) - Phenom People confirmed. Brand scoped server-side by category facet like TJX: category:['Spencer's Stores']+state:['WA'] -> 59 (13 Sales Associate applicable, 43 managers REQUIRED/title-excluded). Detail /us/en/job/{jobSeqNo} -> 200 JobPosting JSON-LD. Year-round. Uses headingless full-body fallback (owner-approved 2026-09-18). LIVE: baseline 56/13/23.2, in --all (pull.json)."
+    },
+    "spirithalloween": {
+      "label": "Spirit Halloween",
+      "careers_base": "https://www.spencersandspiritjobs.com",
+      "widgets_url": "https://www.spencersandspiritjobs.com/widgets",
+      "detail_url_tmpl": "https://www.spencersandspiritjobs.com/us/en/job/{pid}",
+      "employer_domain": "spirithalloween.com",
+      "source_class": "direct-employer",
+      "sector": "retail",
+      "state": "WA",
+      "page_size": 50,
+      "search_body": {
+        "lang": "en_us",
+        "deviceType": "desktop",
+        "country": "us",
+        "pageName": "search-results",
+        "subsearch": "",
+        "jobs": true,
+        "counts": true,
+        "keywords": "",
+        "global": false,
+        "sortBy": "Most relevant",
+        "locationData": {}
+      },
+      "selected_fields": {
+        "category": [
+          "Spirit Halloween Stores"
+        ],
+        "state": [
+          "WA"
+        ]
+      },
+      "location_filter": {
+        "_note": "State field is a 2-letter CODE ('WA'). Chrome-validated 2026-09-18: category:['Spirit Halloween Stores']+state:['WA'] -> 165, 100% pure.",
+        "field": "state",
+        "match_any": [
+          "WA"
+        ]
+      },
+      "extraction": {
+        "_note": "Same headingless template as spencers (one company). NO requirements heading (verified 2026-09-18: all 165 WA descriptions; only 'Benefits include:'/'Brand:'). Headingless full-body fallback opted in: full-body scan flags all 116 managers REQUIRED (DSM catches '2-5 years experience') and leaves 49 Sales Associate -> NONE_NEEDED (true, verified absence). Age never participates.",
+        "openers": [],
+        "absent_barrier_is_none_needed": true
+      },
+      "verified": "DRAFT 2026-09-18 (GATEs 1-3, Chrome+extractor) - Phenom. SEASONAL (Halloween pop-up; all 165 WA type=Seasonal, peaks Aug-Oct, collapses off-season). category:['Spirit Halloween Stores']+state:['WA'] -> 165 (49 Sales Associate applicable, 116 managers REQUIRED/title-excluded). Detail JSON-LD OK. Headingless full-body fallback (owner-approved 2026-09-18). LIVE: baseline 165/49/29.7, in --all (pull.json)."
+    },
+    "spiritchristmas": {
+      "label": "Spirit Christmas",
+      "careers_base": "https://www.spencersandspiritjobs.com",
+      "widgets_url": "https://www.spencersandspiritjobs.com/widgets",
+      "detail_url_tmpl": "https://www.spencersandspiritjobs.com/us/en/job/{pid}",
+      "employer_domain": "spiritchristmas.com",
+      "source_class": "direct-employer",
+      "sector": "retail",
+      "state": "WA",
+      "page_size": 50,
+      "allow_zero_records": true,
+      "search_body": {
+        "lang": "en_us",
+        "deviceType": "desktop",
+        "country": "us",
+        "pageName": "search-results",
+        "subsearch": "",
+        "jobs": true,
+        "counts": true,
+        "keywords": "",
+        "global": false,
+        "sortBy": "Most relevant",
+        "locationData": {}
+      },
+      "selected_fields": {
+        "category": [
+          "Spirit Christmas Stores"
+        ],
+        "state": [
+          "WA"
+        ]
+      },
+      "location_filter": {
+        "_note": "State field is a 2-letter CODE ('WA'). Chrome-validated 2026-09-18: category:['Spirit Christmas Stores']+state:['WA'] -> 0 (national 134). SEASONAL/DORMANT - Christmas pop-up; WA jobs expected near year-end. Title 'Sales Associate - Spirit' shares the Halloween suffix, so the CATEGORY facet is the only brand separator.",
+        "field": "state",
+        "match_any": [
+          "WA"
+        ]
+      },
+      "extraction": {
+        "_note": "Same headingless template as spencers/spirithalloween (one company). Headingless full-body fallback opted in: managers -> REQUIRED, Sales Associate -> NONE_NEEDED. Age never participates.",
+        "openers": [],
+        "absent_barrier_is_none_needed": true
+      },
+      "verified": "DRAFT 2026-09-18 - Phenom, SEASONAL/DORMANT (WA=0 now, national 134; Christmas pop-up jobs appear ~Oct-Dec). allow_zero_records=true so its empty WA scope does NOT halt the daily publish (run_pull.py zero-records exemption); run_pull prints a loud activation line + surfaces jobs as 'entered' when WA opens. No baseline row by design (set one when it activates). Shares template + fallback with spencers/spirithalloween. LIVE in --all (pull.json), dormant (WA=0); no baseline until it activates."
     }
   },
   "appcast": {
