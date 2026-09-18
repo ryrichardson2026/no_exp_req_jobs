@@ -2,30 +2,29 @@
   "_comment": "QA baseline for run_pull.py halt checks (spec step 5 / Finding 41 - the unbuilt QA that should exist). Per-tenant records/applicable/density from the last ACCEPTED run. run_pull.py reads this to gate a pull: a tenant returning zero, under 50% of baseline records, or a density more than 15 points off baseline makes the run PARTIAL (no publish). It is updated ONLY on an accepted run and never automatically - run `python run_pull.py --update-baseline` after a COMPLETE run whose numbers and movement file you have inspected. Seeded 2026-09-09 from the operator-provided table; density is applicable/records * 100.",
   "tenants": {
     "multicare": {
-      "records": 1420,
-      "applicable": 64,
-      "density": 4.5
+      "records": 114,
+      "applicable": 26,
+      "density": 22.8
     },
     "providence": {
-      "records": 846,
-      "applicable": 50,
-      "density": 5.9
+      "records": 819,
+      "applicable": 52,
+      "density": 6.3
     },
     "kroger": {
-      "records": 471,
-      "applicable": 289,
-      "density": 61.4,
-      "_note": "WA. All 471 Kroger-family (Fred Meyer/QFC/Jewelers, kroger.com) -> Grocery by tenant. +32 from the service-experience guard (guest/customer 'experience' no longer false-REQUIRED)."
+      "records": 466,
+      "applicable": 287,
+      "density": 61.6
     },
     "compass_group": {
-      "records": 316,
-      "applicable": 79,
-      "density": 25.0
+      "records": 319,
+      "applicable": 85,
+      "density": 26.6
     },
     "target": {
-      "records": 230,
-      "applicable": 219,
-      "density": 95.2
+      "records": 233,
+      "applicable": 222,
+      "density": 95.3
     },
     "dollar_general": {
       "records": 202,
@@ -33,34 +32,34 @@
       "density": 97.0
     },
     "allied_security": {
-      "records": 112,
-      "applicable": 50,
-      "density": 44.6
+      "records": 104,
+      "applicable": 47,
+      "density": 45.2
     },
     "uhaul": {
-      "records": 49,
-      "applicable": 36,
-      "density": 73.5
+      "records": 50,
+      "applicable": 37,
+      "density": 74.0
     },
     "cintas": {
-      "records": 58,
+      "records": 63,
       "applicable": 16,
-      "density": 27.6
+      "density": 25.4
     },
     "gensco": {
-      "records": 9,
-      "applicable": 7,
-      "density": 77.8
+      "records": 7,
+      "applicable": 6,
+      "density": 85.7
     },
     "sherwin_williams": {
-      "records": 43,
-      "applicable": 35,
-      "density": 81.4
+      "records": 45,
+      "applicable": 36,
+      "density": 80.0
     },
     "sysco": {
-      "records": 23,
+      "records": 25,
       "applicable": 5,
-      "density": 21.7
+      "density": 20.0
     },
     "ontrac": {
       "records": 20,
@@ -68,9 +67,9 @@
       "density": 95.0
     },
     "tjx": {
-      "records": 119,
-      "applicable": 75,
-      "density": 63.0
+      "records": 121,
+      "applicable": 76,
+      "density": 62.8
     },
     "wfs_tx": {
       "records": 68,
@@ -78,92 +77,79 @@
       "density": 29.4
     },
     "wfs_wa": {
-      "records": 15,
+      "records": 14,
       "applicable": 9,
-      "density": 60.0
+      "density": 64.3
     },
     "abm": {
       "records": 445,
-      "applicable": 352,
-      "density": 79.1
+      "applicable": 349,
+      "density": 78.4
     },
     "aramark": {
-      "records": 931,
-      "applicable": 320,
-      "density": 34.4,
-      "_note": "WA+TX. +15 from credential acquire-frame fix (food-safety 'able to obtain' cards are obtainable)."
+      "records": 955,
+      "applicable": 342,
+      "density": 35.8
     },
     "primeflight": {
-      "records": 33,
-      "applicable": 16,
-      "density": 48.5,
-      "_note": "WA+TX aviation. Recovered from 3->16 by the credential acquire-frame fix (ramp/fuel/baggage clearances are after-hire, not held). Aviation roles route to Warehouse/Transport/Facilities/CustomerSvc by function."
+      "records": 34,
+      "applicable": 17,
+      "density": 50.0
     },
     "menzies": {
-      "records": 76,
-      "applicable": 17,
-      "density": 22.4,
-      "_note": "WA+TX aviation. Opener='what we are looking for:'. G2 Secure Staff folded into this board. Aviation routes by function, no new category."
+      "records": 75,
+      "applicable": 18,
+      "density": 24.0
     },
     "allianceground": {
       "records": 7,
       "applicable": 1,
-      "density": 14.3,
-      "_note": "WA 3/TX 4 aviation, thin + experience-heavy (ramp/passenger/material handler REQUIRED). Client-side location_filter ', WA'/', TX' on locationsText (abbreviated). One pull serves both markets."
+      "density": 14.3
     },
     "unifi": {
-      "records": 60,
-      "applicable": 22,
-      "density": 36.7,
-      "_note": "WA 14/TX 46 aviation (Avature, state FACET field 733 WA=6307/TX=6303; NOT geo-radius). New avature adapter 2026-09-17. Requirements 'Qualifications:'; credentials acquire-framed. Routes by function."
+      "records": 59,
+      "applicable": 23,
+      "density": 39.0
     },
     "panera": {
       "records": 96,
       "applicable": 11,
-      "density": 11.5,
-      "_note": "WA only (Phenom, state facet split WA(84)+Washington(12)=96, Chrome-validated). Manager-heavy board (56/96 mgmt excluded); frontline cafe roles applicable. Opener 'This Opportunity Is for You If'. First Food Service saturation tenant."
+      "density": 11.5
     },
     "dutchbros": {
       "records": 280,
       "applicable": 110,
-      "density": 39.3,
-      "_note": "WA 65 (~25 applicable) + TX 215, Chrome-reconciled state facet (Washington/Texas single-value). Coffee (Broista) - diverse anti-Starbucks pick. Density fixed 2->110 by employer-provided credential waiver ('we'll set you up with...certifications'). Broista->Food Services. WA published, TX suppressed."
+      "density": 39.3
     },
     "shake_shack": {
-      "records": 43,
-      "applicable": 26,
-      "density": 60.5,
-      "_note": "WA 10/TX 33 (Paradox, stateAbbr client-scope, Chrome-reconciled). Applicable via the absence-inference NONE_NEEDED (soft-skills-only Job Qualifications, no barrier language, age-neutral). First Paradox tenant; Chipotle/Inspire/Panda next on same adapter."
+      "records": 41,
+      "applicable": 24,
+      "density": 58.5
     },
     "sonic": {
       "records": 69,
-      "applicable": 15,
-      "density": 21.7,
-      "_note": "WA 69 (TX 5093 SKIPPED >5k, owner). Opener 'Qualifications and Job Requirements:'. Paradox."
+      "applicable": 14,
+      "density": 20.3
     },
     "arbys": {
       "records": 268,
       "applicable": 96,
-      "density": 35.8,
-      "_note": "WA 80/TX 188. 'Job Description' prose opener + 'Requirements:'. Crew/Team Member applicable. Paradox."
+      "density": 35.8
     },
     "buffalo_wild_wings": {
-      "records": 209,
+      "records": 210,
       "applicable": 19,
-      "density": 9.1,
-      "_note": "WA 31 (~16 applicable: Cashier/HoH Cook/Team Member). Openers: 'What We're Looking For'/'we have the wings' tagline. Bartenders/servers REQUIRED (real experience). Recovered 3->19 via service-experience guard. Paradox."
+      "density": 9.0
     },
     "jimmy_johns": {
       "records": 216,
       "applicable": 34,
-      "density": 15.7,
-      "_note": "WA 87/TX 129. Enumerated role-prefixed openers ('Team Member/Delivery Driver Requirements' bold + 'Requirements:' colon). Recovered 9->34; ~146 still NOT_STATED (Summary/KSA-only templates). Paradox."
+      "density": 15.7
     },
     "chipotle": {
       "records": 122,
       "applicable": 72,
-      "density": 59.0,
-      "_note": "WA 122 (TalentBrew org 282, query-form alp=WA&alt=3; stop_on_no_new_ids for the sticky tail). Crew Members applicable via 'WHAT YOU'LL BRING TO THE TABLE' opener + who-we-are fence + age-years barrier fix. TX pending (radancy_tb single-market)."
+      "density": 59.0
     }
   }
 }
