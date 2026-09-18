@@ -497,7 +497,12 @@
       "nlx_wa_jobs": 1342,
       "source_class": "direct-employer",
       "verified": "2026-09-01 - tenant, site and hostname pattern confirmed from a live requisition URL: multicare.wd1.myworkdayjobs.com/en-US/multicare/details/Security-Officer_JR78035. POST verified on this tenant via DevTools capture; session cookies plus x-calypso-csrf-token are required, and Cloudflare sits in front. Standard myworkdayjobs hostname, NOT the myworkdaysite variant.",
-      "applied_facets": {},
+      "applied_facets": {
+        "jobFamilyGroup": [
+          "c7853882436f101a8636782665320000",
+          "c7853882436f101a86366fba324f0000"
+        ]
+      },
       "curated_categories": [
         {
           "name": "Food and Nutrition Services",
@@ -678,7 +683,8 @@
             "match": "prefix"
           }
         ]
-      }
+      },
+      "applied_facets_note": "Owner-scoped 2026-09-17: Other System Support Services (85) + Facility Operations (29) = 114 (vs 1322 whole). MultiCare is a hospital; these two families hold the no-experience frontline (facilities/EVS/food/support). INCLUDE-ONLY caveat accepted: applicable roles in other families (Nursing Support/Allied Health - mostly CNA/MA/Technologist, already gate-excluded) are dropped. Facet ids are per-tenant; re-read from the CXS facets block if the board is rebuilt. Tenant is WA-only so no location facet needed."
     },
     "uhaul": {
       "label": "U-Haul (U-Haul International / AMERCO)",
