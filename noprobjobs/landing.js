@@ -67,9 +67,10 @@ class LandingApp extends React.Component {
     this.state = {
       recs: props.initialRecs || null, cities: [], zips: {},
       cats: [], locDraft: "", radius: 15, catOpen: false,
-      // Change #1: email-only capture — location and type-of-work fields (and their state)
-      // removed. Only alertEmail is collected now.
-      alertOpen: false, alertEmail: "",
+      // Alert capture: email + a required ZIP/city + an optional multi-select of work types
+      // (same categories as the job board's Work Type filter). alertCatOpen = the job-type
+      // dropdown; alertCats is separate from the search card's `cats` above.
+      alertOpen: false, alertEmail: "", alertZip: "", alertCats: [], alertCatOpen: false,
       alertPhase: "form", alertError: "", toast: "", logoOk: {},
       wide: window.matchMedia(BP).matches,
     };
@@ -178,20 +179,33 @@ class LandingApp extends React.Component {
   // its click through here).
   openAlerts = () => {
     track({ event: "job_alert_open", source_page: sourcePage() });
-    this.setState({ alertOpen: true, catOpen: false, alertPhase: "form", alertError: "" });
+    this.setState({ alertOpen: true, catOpen: false, alertPhase: "form", alertError: "", alertCatOpen: false });
   };
-  closeAlerts = () => { this.markAlertsDone(); clearTimeout(this._alertT); this.setState({ alertOpen: false }); };
+  closeAlerts = () => { this.markAlertsDone(); clearTimeout(this._alertT); this.setState({ alertOpen: false, alertCatOpen: false }); };
   onAlertEmail = (e) => this.setState({ alertEmail: e.target.value });
+  onAlertZip = (e) => this.setState({ alertZip: e.target.value });
+  toggleAlertCatOpen = () => this.setState({ alertCatOpen: !this.state.alertCatOpen });
+  toggleAlertCat = (c) => () => {
+    const cur = this.state.alertCats || [];
+    const next = cur.indexOf(c) >= 0 ? cur.filter((x) => x !== c) : cur.concat([c]);
+    this.setState({ alertCats: next });
+  };
+  selectAllAlertCats = () => {
+    const all = (this.state.alertCats || []).length === R.CATEGORIES.length;
+    this.setState({ alertCats: all ? [] : R.CATEGORIES.slice() });
+  };
   onAlertKey = (e) => { if (e.key === "Enter") { e.preventDefault(); this.sendAlerts(); } };
   sendAlerts = () => {
     const email = (this.state.alertEmail || "").trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { this.setState({ alertPhase: "form", alertError: "Enter a valid email address." }); return; }
-    this.setState({ alertPhase: "creating", alertError: "" });
+    const location = (this.state.alertZip || "").trim();
+    if (!location) { this.setState({ alertPhase: "form", alertError: "Enter a ZIP code or city." }); return; }
+    const categories = this.state.alertCats || [];   // optional refinement (job types)
+    this.setState({ alertPhase: "creating", alertError: "", alertCatOpen: false });
     const wait = new Promise((r) => { this._alertT = setTimeout(r, 2500); });   // deliberate 2.5s "Creating alert" loader
-    // capture_alert is a fixed 4-arg RPC (no defaults), so the wire payload keeps the
-    // now-empty p_categories/p_location (supabase.js defaults them to []/null) — the FORM
-    // stopped collecting them, the columns and function signature are untouched (change #1).
-    Promise.all([SB.captureAlert({ email, source: "landing" }), wait])
+    // capture_alert is a fixed 4-arg RPC: the form now collects the location (required) and
+    // work-type categories (optional); the columns and function signature are untouched.
+    Promise.all([SB.captureAlert({ email, source: "landing", location, categories }), wait])
       .then(() => { track({ event: "email_capture_submit", source_page: sourcePage() }); this.markAlertsDone(); this.setState({ alertPhase: "done" }); })
       .catch(() => this.setState({ alertPhase: "form", alertError: "Couldn’t save that — please try again." }));
   };
@@ -511,6 +525,31 @@ class LandingApp extends React.Component {
     );
   }
 
+  // Job-type multi-select for the alert form — all board categories (R.CATEGORIES), same checkbox
+  // format as the job board's Work Type filter, packaged as a dropdown. Optional: none = all types.
+  alertCatSelect(inputStyle){
+    const picked = this.state.alertCats || [];
+    const open = this.state.alertCatOpen;
+    const allOn = picked.length === R.CATEGORIES.length;
+    const summary = picked.length ? (picked.length > 2 ? picked.slice(0, 2).join(", ") + " +" + (picked.length - 2) : picked.join(", ")) : "All job types";
+    const checkbox = (on) => on
+      ? h("span", { "aria-hidden": "true", style: s("flex:none;width:18px;height:18px;border-radius:3px;background:var(--ink);display:grid;place-items:center") }, raw(ROW_CHECK))
+      : h("span", { "aria-hidden": "true", style: s("flex:none;width:18px;height:18px;border-radius:3px;border:1px solid var(--ink);background:var(--surface-raised)") });
+    return h("div", { style: s("position:relative") },
+      h("button", { type: "button", onClick: this.toggleAlertCatOpen, "aria-expanded": open, "aria-haspopup": "true", className: "fc-bd-accent",
+          style: s(inputStyle + ";display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;text-align:left" + (picked.length ? ";font-weight:700" : ";color:var(--ink-muted)")) },
+        h("span", { style: s("overflow:hidden;text-overflow:ellipsis;white-space:nowrap") }, summary), raw(open ? CHEV : CHEV_MUTED)),
+      open && h("div", { role: "group", "aria-label": "Job type", style: s("margin-top:6px;border:1px solid var(--line);border-radius:3px;background:var(--surface-raised);max-height:210px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px") },
+        h("button", { type: "button", role: "checkbox", "aria-checked": allOn, onClick: this.selectAllAlertCats, className: "hv-bg-sunk",
+            style: s("width:100%;box-sizing:border-box;display:flex;align-items:center;gap:8px;min-height:36px;padding:0 6px;background:transparent;border:0;border-radius:3px;cursor:pointer;font-size:14px;font-weight:700;color:var(--ink);text-align:left") },
+          checkbox(allOn), h("span", null, "All job types")),
+        h("div", { style: s("display:grid;grid-template-columns:1fr 1fr;gap:1px 8px") },
+          R.CATEGORIES.map((c, i) => { const on = picked.indexOf(c) >= 0; return h("button", { key: i, type: "button", role: "checkbox", "aria-checked": on, onClick: this.toggleAlertCat(c), className: "hv-bg-sunk",
+              style: s("display:flex;align-items:center;gap:7px;min-height:38px;padding:0 5px;background:transparent;border:0;border-radius:3px;cursor:pointer;text-align:left") },
+            checkbox(on),
+            h("span", { style: s("flex:1;font-size:13px;font-weight:" + (on ? "700" : "500") + ";line-height:1.15;color:var(--ink)") }, c)); }))));
+  }
+
   renderAlerts(){
     if (!this.state.alertOpen) return null;
     const phase = this.state.alertPhase;
@@ -529,6 +568,8 @@ class LandingApp extends React.Component {
       : h("div", { key: "fm", style: s("display:grid;gap:12px") },
           h("div", { style: s("font-size:15px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty") }, "Get alerted when no-experience needed jobs get posted."),
           field("Email", h("input", { type: "email", value: this.state.alertEmail, onChange: this.onAlertEmail, onKeyDown: this.onAlertKey, placeholder: "you@example.com", className: "fc-bd-accent", style: s(inputStyle) })),
+          field("ZIP code or city", h("input", { type: "text", value: this.state.alertZip, onChange: this.onAlertZip, onKeyDown: this.onAlertKey, placeholder: "e.g. 98101 or Seattle", "aria-label": "ZIP code or city", className: "fc-bd-accent", style: s(inputStyle) })),
+          field("Job type", this.alertCatSelect(inputStyle)),
           this.state.alertError && h("div", { key: "er", role: "alert", style: s("font-size:14px;font-weight:600;color:var(--accent)") }, this.state.alertError),
           h("button", { key: "go", type: "button", onClick: this.sendAlerts, style: s("min-height:48px;border-radius:3px;background:var(--accent);border:0;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--accent-ink);cursor:pointer") }, "Create alert"));
 

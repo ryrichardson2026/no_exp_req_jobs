@@ -55,6 +55,9 @@ export function pulledAt(){
    on a bad email or network error so the modal can show a retry rather than silently drop
    the one number that matters. */
 export function captureAlert({ email, categories, location, source }){
+  // Best-effort mirror to the Make automation. Fire-and-forget: Supabase is the source of truth,
+  // so a Make outage must never fail the signup — hence no await and a swallowed .catch.
+  notifyMake({ email, categories: categories || [], location: location || null, source: source || null });
   return fetch(REST + "/rpc/capture_alert", {
     method: "POST",
     headers: Object.assign({ "content-type": "application/json" }, HEADERS),
@@ -63,4 +66,21 @@ export function captureAlert({ email, categories, location, source }){
     if (!res.ok) return res.text().then((t) => { throw new Error(t || ("capture_alert " + res.status)); });
     return true;
   });
+}
+
+/* Make.com HTTP custom webhook — the alert-capture automation. Mirrors every signup so Make can
+   drive downstream flows (email lists, notifications). Fire-and-forget by design; see captureAlert. */
+const MAKE_HOOK = "https://hook.us2.make.com/o30dw0i6emep7uaurcg6lf2i5kdkg6o3";
+export function notifyMake(payload){
+  try {
+    // application/json so Make's custom webhook parses the body into separate fields (captured_at,
+    // email, categories, location, source) instead of one `value` string. This triggers a CORS
+    // preflight, which the Make hook answers (Access-Control-Allow-Origin: *), so the POST delivers.
+    fetch(MAKE_HOOK, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(Object.assign({ captured_at: new Date().toISOString() }, payload)),
+      keepalive: true,   // let it complete even if the page navigates right after submit
+    }).catch(() => {});
+  } catch (e) { /* never let telemetry break capture */ }
 }
