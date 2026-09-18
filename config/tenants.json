@@ -1798,7 +1798,7 @@
       ],
       "verified": "2026-09-17 Paradox filter[state] server-side scope (WA 31/TX 178). Inspire portfolio brand.",
       "extraction": {
-        "_note": "Owner 2026-09-17: requirements under 'What We're Looking For' (franchise template). Keep 'Qualifications:' fallback.",
+        "_note": "BWW templates vary: 'What We're Looking For' (cashier/cook), 'Qualifications:', and a tagline heading 'YOU HAVE THE TALENT' (Team Member - requirements woven in incl. 'previous restaurant experience is a plus, but not required'). Bartenders genuinely REQUIRED.",
         "openers": [
           {
             "text": "what we're looking for",
@@ -1814,6 +1814,16 @@
             "text": "qualifications",
             "role": "REQUIRED",
             "match": "colon"
+          },
+          {
+            "text": "we have the wings",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "we have the wings",
+            "role": "REQUIRED",
+            "match": "prefix"
           }
         ]
       }

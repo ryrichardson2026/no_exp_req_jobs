@@ -92,6 +92,10 @@ END_HEADINGS = (
     # leaked in and read as a required EXPERIENCE. Same about-us/marketing class already fenced
     # ("about us"/"about the team") - a company-intro heading, never a requirements heading.
     "who we are",
+    # QSR/franchise postings (Paradox) close with a "Company Introduction" marketing block
+    # ("With more than 1,300 locations ... outstanding guest experiences") that leaked into the
+    # requirements span. A company-intro heading, never a requirements heading.
+    "company introduction",
 )
 
 END_RX = re.compile(
@@ -347,6 +351,22 @@ EXP_REQ_SIGNAL = re.compile(
     r"\b(required|require[sd]?|must\s+have|minimum|at\s+least|prior|previous|proven|"
     r"\d+\+?\s*(?:years?|yrs?|months?))\b", re.I)
 
+# SERVICE-experience is NOT work experience. Hospitality/retail postings constantly say "create
+# a great guest experience", "deliver an outstanding customer experience" - the word 'experience'
+# there is the SERVICE being delivered, not work history. Untreated, the 'experience' cue types
+# these soft-skill/marketing lines as a work-experience REQUIREMENT and falsely marks the whole
+# posting REQUIRED (BWW Heart-of-House Cook, every QSR). Strip EXPERIENCE typing when the only
+# 'experience' is service-qualified AND the line carries no real work-history signal (fail-safe:
+# a duration or a WORK_EXP qualifier like prior/kitchen/restaurant keeps the typing -> REQUIRED).
+SERVICE_EXPERIENCE_RX = re.compile(
+    r"\b(guest|customer|client|dining|member|patient|shopping|user|in-?store|brand|fan|"
+    r"consumer|hospitality|memorable|exceptional|great|positive|outstanding|5-?star|"
+    r"five-?star|overall)\s+experiences?\b", re.I)
+WORK_EXP_RX = re.compile(
+    r"\b(work(?:ing)?|kitchen|restaurant|industry|food|culinary|cook\w*|bartend\w*|serv\w*|"
+    r"management|manager\w*|supervis\w*|leadership|retail|sales|warehouse|prior|previous|"
+    r"proven|minimum|at\s+least|years?\s+of|yrs?\s+of|\d+\+?\s*(?:years?|yrs?|months?))\b", re.I)
+
 # A completed trade apprenticeship is a multi-year runway even where no year count
 # appears - it is what separates the Painter (4y Journeyman) from the Engineer
 # (training will be on-the-job).
@@ -445,6 +465,14 @@ def classify_line(line, section_modality):
     if (EXPERIENCE in types or EDUCATION in types) and COMP_DISCLAIMER_RX.search(low) \
             and months is None and not EXP_REQ_SIGNAL.search(low):
         types = [t for t in types if t not in (EXPERIENCE, EDUCATION)]
+        if not types:
+            return None
+
+    # Service-experience guard: "great guest experience" is the service delivered, not work
+    # history. Strip EXPERIENCE typing when service-qualified and no real work-history signal.
+    if EXPERIENCE in types and months is None and SERVICE_EXPERIENCE_RX.search(low) \
+            and not WORK_EXP_RX.search(low):
+        types = [t for t in types if t != EXPERIENCE]
         if not types:
             return None
 

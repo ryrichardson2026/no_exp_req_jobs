@@ -12,9 +12,10 @@
       "density": 5.9
     },
     "kroger": {
-      "records": 477,
-      "applicable": 255,
-      "density": 53.5
+      "records": 471,
+      "applicable": 289,
+      "density": 61.4,
+      "_note": "WA. All 471 Kroger-family (Fred Meyer/QFC/Jewelers, kroger.com) -> Grocery by tenant. +32 from the service-experience guard (guest/customer 'experience' no longer false-REQUIRED)."
     },
     "compass_group": {
       "records": 316,
@@ -142,15 +143,15 @@
     },
     "arbys": {
       "records": 268,
-      "applicable": 95,
-      "density": 35.4,
-      "_note": "WA 80/TX 188. Opener 'Job Description' (Team/Crew Member requirements are woven into JD prose; absence-inference -> NONE_NEEDED) + 'Requirements:' (managers REQUIRED). Owner: Crew/Team Member are the applicable targets. Recovered 7->95. Paradox."
+      "applicable": 96,
+      "density": 35.8,
+      "_note": "WA 80/TX 188. 'Job Description' prose opener + 'Requirements:'. Crew/Team Member applicable. Paradox."
     },
     "buffalo_wild_wings": {
       "records": 209,
-      "applicable": 3,
-      "density": 1.4,
-      "_note": "WA 31/TX 178. Opener 'What We're Looking For'/'Qualifications:'. HONEST low: BWW is experience-heavy (bartenders 'X months experience required' -> REQUIRED); cashiers 'preferred not required' -> PREFERRED/applicable. 166 template-variant NOT_STATED remain. Paradox."
+      "applicable": 19,
+      "density": 9.1,
+      "_note": "WA 31 (~16 applicable: Cashier/HoH Cook/Team Member). Openers: 'What We're Looking For'/'we have the wings' tagline. Bartenders/servers REQUIRED (real experience). Recovered 3->19 via service-experience guard. Paradox."
     },
     "jimmy_johns": {
       "records": 216,
