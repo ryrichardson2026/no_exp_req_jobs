@@ -31,3 +31,6 @@ __pycache__/
 
 # Google Indexing API service-account key (never commit secrets)
 secrets/
+
+# incremental-bake manifest (local, per-machine)
+prerender/.bake-manifest.json

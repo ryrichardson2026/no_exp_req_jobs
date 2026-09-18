@@ -15,6 +15,7 @@
 import { createServer } from "node:http";
 import { readFile, writeFile, mkdir, stat, rm, cp, copyFile, readdir } from "node:fs/promises";
 import { existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { extname, join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import puppeteer from "puppeteer-core";
@@ -27,6 +28,34 @@ import * as R from "../noprobjobs/data/record.js";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SITE = join(HERE, "..", "noprobjobs");
 const OUT = join(HERE, "out");
+// Incremental bake: a job page's HTML is a pure function of its record + is_new + JSON-LD + the
+// shared template. We hash those, and skip re-rendering (in headless Chrome) any job page whose
+// hash AND the template version match the last successful bake and whose file still exists. Browse
+// + landing routes aggregate the whole set (only ~16, cheap) so they ALWAYS render. Manifest lives
+// in prerender/ (NOT out/, so it isn't deployed) and persists across runs. BAKE_FULL=1 forces a
+// full rebake (ignore the manifest). Missing/corrupt manifest or a changed template => full rebake
+// (fail-safe = current behavior). Cost then scales with churn, not total inventory.
+const MANIFEST_PATH = join(HERE, ".bake-manifest.json");
+const BAKE_FULL = process.env.BAKE_FULL === "1" || process.env.BAKE_FULL === "true";
+const sha1 = (s) => createHash("sha1").update(s).digest("hex");
+// Template version = a hash of EVERY file that affects a rendered page: build.mjs itself + all
+// js/mjs/html/css under noprobjobs/ (board.js, landing.js, data/*, ui/*, styles.css, the HTML
+// shells, vendor React). Any change here invalidates every per-page hash -> a full rebake, so a
+// template edit can never ship a stale mix of old + new pages. Computed AFTER logos.js/cap.js are
+// regenerated so a logo/config change is included.
+async function computeTemplateVersion(){
+  const h = createHash("sha1");
+  h.update(readFileSync(join(HERE, "build.mjs")));
+  const walk = async (dir) => {
+    for (const ent of (await readdir(dir, { withFileTypes: true })).sort((a, b) => (a.name < b.name ? -1 : 1))) {
+      const p = join(dir, ent.name);
+      if (ent.isDirectory()) await walk(p);
+      else if (/\.(js|mjs|html|css)$/.test(ent.name)) { h.update(ent.name); h.update(await readFile(p)); }
+    }
+  };
+  await walk(SITE);
+  return h.digest("hex");
+}
 const COUNTRY = JSON.parse(readFileSync(join(HERE, "..", "config", "source_country.json"), "utf8"));
 const CHROME = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const REST = "https://eyatyzatcmjnmazmaghd.supabase.co/rest/v1";
@@ -475,6 +504,29 @@ async function main(){
   await new Promise((r) => server.listen(PORT, r));
   const base = "http://localhost:" + PORT;
   routes.forEach((r) => { r.url = base + r.path; });
+
+  // ---- Incremental bake: decide which job pages can be reused from the last bake ----
+  // Defined here (not inside the render try) so the manifest write + stale sweep after the
+  // try/finally can still see them. Only job pages are hashed/skipped; browse + landing always render.
+  const jobRoutes = routes.filter((r) => r.type === "job");
+  const nonJob = routes.filter((r) => r.type !== "job");
+  const jobByPath = {}; for (const r of jobRoutes) jobByPath[r.path] = r;
+  const templateVer = await computeTemplateVersion();
+  let prevManifest = { templateVersion: null, pages: {} };
+  if (!BAKE_FULL && existsSync(MANIFEST_PATH)) { try { prevManifest = JSON.parse(readFileSync(MANIFEST_PATH, "utf8")); } catch (e) { /* corrupt -> full rebake */ } }
+  const templateMatch = !BAKE_FULL && prevManifest.templateVersion === templateVer;
+  const isNewByNum = {}; for (const r of list) isNewByNum[String(r.job_number)] = !!r.is_new;
+  const diskFile = (rp) => join(OUT, rp.replace(/\/$/, ""), "index.html");
+  for (const r of jobRoutes) {
+    r._hash = sha1(JSON.stringify({ d: cache.byNum[String(r.num)] || null, n: isNewByNum[String(r.num)] || false, ld: r.ld || null }));
+    // Skip only on a normal full run (never on ONLY/LIMIT partials); needs matching template,
+    // matching content hash, AND the file actually present on disk.
+    r._skip = fullRun && templateMatch && prevManifest.pages[r.path] === r._hash && existsSync(diskFile(r.path));
+  }
+  const toBake = jobRoutes.filter((r) => !r._skip);
+  const reused = jobRoutes.length - toBake.length;
+  if (fullRun) process.stderr.write("  incremental: " + reused + " job page(s) reused, " + toBake.length + " to bake"
+    + (BAKE_FULL ? " (BAKE_FULL forced)" : templateMatch ? "" : " — template changed, full rebake") + "\n");
   // protocolTimeout raised well above the 180s default: under a 6-wide pool a page.evaluate can
   // queue behind others long enough to trip it, and the page set has grown (oracle_orc unblocked),
   // so 480s gives headroom. Any residual timeout is a heal-able flake — see the breaker below.
@@ -550,8 +602,6 @@ async function main(){
   }
 
   try {
-    const jobRoutes = routes.filter((r) => r.type === "job");
-    const nonJob = routes.filter((r) => r.type !== "job");
     if (ONLY) {
       const set = new Set(ONLY.map(String));
       await runRoutes(jobRoutes.filter((r) => set.has(String(r.num))));   // targeted rebake; no smoke/breaker gymnastics
@@ -559,15 +609,40 @@ async function main(){
       await runRoutes([...jobRoutes.slice(0, LIMIT), ...nonJob]);
     } else {
       // Smoke FIRST: 8 job pages + every browse/landing route. A broken render/inject path
-      // surfaces here in seconds — before the 895-page run, not as a 1.7-hour post-mortem.
-      await runRoutes([...jobRoutes.slice(0, SMOKE), ...nonJob]);
+      // surfaces here in seconds — before the full run, not as a post-mortem. Smoke draws from
+      // toBake (the not-reused set); if everything's reused, smoke is just the nonJob routes.
+      await runRoutes([...toBake.slice(0, SMOKE), ...nonJob]);
       breaker.smokeFailed = results.some((r) => r.error && !isFlake(r.error));   // a flake in smoke is heal-able, not a broken path
-      if (!breaker.smokeFailed && !breaker.aborted) await runRoutes(jobRoutes.slice(SMOKE));
+      if (!breaker.smokeFailed && !breaker.aborted) await runRoutes(toBake.slice(SMOKE));
     }
     if (!breaker.aborted && !breaker.smokeFailed) await healFailures();
   } finally {
     await browser.close();
     server.close();
+  }
+
+  // ---- Incremental-bake manifest + stale-page sweep (full runs only, on a clean bake) ----
+  // Only persist/sweep when the run wasn't aborted and smoke passed — never record or prune off a
+  // broken build. On a clean full run: (1) write the manifest = reused hashes + freshly-baked
+  // hashes (failed pages omitted, so they re-render next time); (2) delete on-disk /jobs/{slug}/
+  // dirs that aren't in the current PUBLISHED job set — this is how a suppressed employer / a
+  // geo-leak / a removed job stops resolving at its direct URL WITHOUT a manual `rm -rf out`.
+  let staleSwept = 0;
+  if (fullRun && !breaker.aborted && !breaker.smokeFailed) {
+    const newPages = {};
+    for (const r of jobRoutes) if (r._skip) newPages[r.path] = r._hash;
+    for (const res of results) if (res.type === "job" && !res.error && jobByPath[res.path]) newPages[res.path] = jobByPath[res.path]._hash;
+    await writeFile(MANIFEST_PATH, JSON.stringify({ templateVersion: templateVer, pages: newPages }), "utf8");
+
+    const liveSet = new Set(jobRoutes.map((r) => r.path));
+    const jobsDir = join(OUT, "jobs");
+    if (existsSync(jobsDir)) {
+      for (const ent of await readdir(jobsDir, { withFileTypes: true })) {
+        if (!ent.isDirectory()) continue;
+        if (!liveSet.has("/jobs/" + ent.name + "/")) { await rm(join(jobsDir, ent.name), { recursive: true, force: true }); staleSwept++; }
+      }
+    }
+    if (staleSwept) process.stderr.write("  swept " + staleSwept + " stale job page(s) not in the published set\n");
   }
 
   // Lifecycle manifest — derived from the DB every run (independent of which pages were
@@ -618,6 +693,8 @@ async function main(){
     routes_planned: routes.length,
     attempted: breaker.attempted,
     job_pages_ok: jobs.filter((r) => !r.error).length,
+    job_pages_reused: reused,                                    // skipped by the incremental manifest
+    job_pages_swept: staleSwept,                                 // stale pages deleted (suppressed/removed)
     job_pages_with_jsonld: jobs.filter((r) => r.ld).length,
     expired_no_jsonld: expiredCount,
     manifest_live: live.length,
@@ -660,8 +737,12 @@ async function main(){
       + (truncated ? " — FETCH TRUNCATED: saw " + summary.jobs_fetched + " of " + summary.jobs_total
           + " jobs (" + summary.list_fetched + " of " + summary.list_total + " live) — PostgREST row cap? fetchAll must paginate" : ""));
   } else {
-    console.log("BAKE COMPLETE: " + summary.job_pages_ok + " job pages, "
-      + listingViews + " listing views");
+    // Keep "<N> job pages, <M> listing views" verbatim — run_pull.py parses it. The incremental
+    // breakdown follows in parentheses.
+    console.log("BAKE COMPLETE: " + (summary.job_pages_ok + summary.job_pages_reused) + " job pages, "
+      + listingViews + " listing views"
+      + " (" + summary.job_pages_ok + " baked, " + summary.job_pages_reused + " reused"
+      + (summary.job_pages_swept ? ", " + summary.job_pages_swept + " swept" : "") + ")");
   }
 }
 
