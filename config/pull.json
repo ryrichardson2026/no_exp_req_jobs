@@ -9,7 +9,6 @@
         "normalize"
       ],
       "tenants": [
-        "providence",
         "kroger",
         "sherwin_williams",
         "abm"

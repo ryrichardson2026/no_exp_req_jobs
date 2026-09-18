@@ -1,7 +1,15 @@
 {
-  "_comment": "Tenant-assigned board categories. A record whose employer_domain is a key here is assigned that single category by TENANT, not by title text (normalize/enrich.py applies it after the title-based categorize()). This is robust to a source retitling its jobs, unlike a title pattern. The only categories that survive the shift as a SECOND tag are those in keep_categories (the genuine-Warehouse / genuine-Security exception), detected by the existing title-based category table. Owner-approved 2026-09-16: kroger.com (Fred Meyer + Quality Food Centers) -> Grocery.",
+  "_comment": "Tenant-assigned board categories. A record whose employer_domain is a key here is assigned that single category by TENANT, not by title text (normalize/enrich.py applies it after the title-based categorize()). This is robust to a source retitling its jobs, unlike a title pattern. The only categories that survive the shift as a SECOND tag are those in keep_categories (the genuine-Warehouse / genuine-Security exception), detected by the existing title-based category table. Owner-approved 2026-09-16: kroger.com (Fred Meyer + Quality Food Centers) -> Grocery. Owner-approved 2026-09-17: the eight pure-QSR/restaurant brands -> Food Services, so bare 'Team Member'/'Crew Member' titles categorize by tenant (all their jobs ARE food-service work). NOT applied to Aramark/ABM/Compass - those are mixed facility+food contractors that must stay title-matched.",
   "map": {
-    "kroger.com": "Grocery"
+    "kroger.com": "Grocery",
+    "arbys.com": "Food Services",
+    "buffalowildwings.com": "Food Services",
+    "jimmyjohns.com": "Food Services",
+    "shakeshack.com": "Food Services",
+    "panerabread.com": "Food Services",
+    "sonicdrivein.com": "Food Services",
+    "dutchbros.com": "Food Services",
+    "chipotle.com": "Food Services"
   },
   "keep_categories": ["Warehouse", "Security"]
 }

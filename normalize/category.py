@@ -63,7 +63,7 @@ CATEGORY_PATTERNS = {
     "Warehouse": r"\b(warehouse|forklift|picker|packer|package handler|material handler|order selector|loader|shipping|receiving|fulfillment|inbound|outbound|logistics|inventory|materials|supply chain|stocking|replenish|production associate|production operator|assembler|machine operator|ramp agent|baggage|bag handler|cargo agent|cargo handler|air cargo|equipment room)\b",
     "Construction": r"\b(construction|laborer|labourer|carpenter|roofer|framer|concrete|apprentice|demolition)\b",
     "Security": r"\b(security|guard|patrol|loss prevention|surveillance|unarmed|armed officer|assets? protection)\b",
-    "Facilities": r"\b(janitor\w*|custodian|cleaner|housekeep\w*|facilities|maintenance|groundskeep|porter|environmental service|\bevs\b|engineer|journeyman|cabin service\w*|cabin agent)\b",
+    "Facilities": r"\b(janitor\w*|custodian|cleaner|cleaning|floor tech\w*|floor care|housekeep\w*|facilities|maintenance|groundskeep|porter|environmental services?|\bevs\b|engineer|journeyman|cabin service\w*|cabin agent)\b",
     # Ninth category. Patterns DERIVED from the captured corpus (Compass food-service
     # board + Providence dietary/nutrition titles), not guessed.
     # Grocery FOOD departments dual-tag Food Services AND Retail (a meat wrapper
@@ -81,7 +81,7 @@ CATEGORY_PATTERNS = {
     # given a category (owner: clinical stays a sector, aides applicable-but-uncategorized, 2026-09-02).
     # Aircraft fueler/GSE/deicer = equipment & vehicle work -> here, not Warehouse (owner
     # 2026-09-17). 'gse <role>' requires a following role word so bare 'GSE' can't over-match.
-    "Transportation/Automotive": r"\b(delivery driver|truck driver|cdl|courier|route driver|transfer driver|catering driver|transporter|delivery associate|brake|tire|engine specialist|vanbody|automotive|diesel technician|aircraft fueler|fueler|into.?plane|gse (mechanic|technician|operator|agent)|ground support equipment|de.?icer|deicing)\b",
+    "Transportation/Automotive": r"\b(delivery driver|truck driver|cdl|courier|route driver|transfer driver|catering driver|transporter|delivery associate|brake|tire|engine specialist|vanbody|automotive|diesel technician|aircraft fueler|fueler|into.?plane|gse (mechanic|technician|operator|agent)|ground support equipment|de.?icer|deicing|valet|parking)\b",
 }
 
 

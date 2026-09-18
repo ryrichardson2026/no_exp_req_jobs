@@ -775,12 +775,22 @@ def mode_normalize(t):
             seen_state = json.load(fh)
     known_before = len(seen_state)
 
-    mapped, invalid, warns, no_ld = [], [], [], 0
+    # Opt-in state scope (config scope_states, e.g. ["WA"]). The query-form geo search
+    # server-scopes well for most tenants, but Chipotle's board leaked a handful of out-of-state
+    # rows (Granada-Hills-CA/San-Antonio-TX/Fort-Collins-CO seen 2026-09-17). The JSON-LD state
+    # parses reliably, so drop a record whose state is SET and outside scope. A record with an
+    # UNPARSED state (None) is kept — the same tolerance the bake applies — so a parse gap never
+    # silently drops an in-scope job. Absent scope_states, this is a no-op (Allied/Sysco unchanged).
+    scope = t.get("scope_states")
+    mapped, invalid, warns, no_ld, dropped_scope = [], [], [], 0, 0
     for fn, ld, html in details:
         if ld is None:
             no_ld += 1
             continue
         rec, w = map_record(ld, t, retrieved, html)
+        if scope and rec.get("state") and rec["state"] not in scope:
+            dropped_scope += 1
+            continue
         model.apply_seen_state(rec, seen_state, now)
         rec["is_new"] = True if known_before == 0 else rec["first_seen"] == now
         problems = model.validate(rec)
@@ -796,7 +806,7 @@ def mode_normalize(t):
             fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
     print(f"{len(details)} detail -> {len(mapped)} normalized "
-          f"({no_ld} had no JSON-LD) -> {out_path}")
+          f"({no_ld} had no JSON-LD, {dropped_scope} out-of-scope state dropped) -> {out_path}")
     print(f"\nFILL RATE\n")
     for f, n, pct in model.fill_report(mapped):
         print(f"  {n:>5}  {pct:>5.1f}%  {f}")

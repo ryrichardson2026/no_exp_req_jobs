@@ -1013,6 +1013,8 @@
       "terms_reference": null,
       "employer_domain": "chipotle.com",
       "state": "WA",
+      "scope_states": ["WA"],
+      "_scope_states_note": "The alp=WA geonames search server-scopes well but leaked a few out-of-state rows (Granada-Hills-CA/San-Antonio-TX/Fort-Collins-CO, 2026-09-17). mode_normalize drops a record whose PARSED state is set and outside this list; a None state is tolerated (kept). Belt-and-suspenders to the bake's launched-state allowlist.",
       "source_class": "direct-employer",
       "sector": "food_services",
       "source_job_id_from": "url_tail",

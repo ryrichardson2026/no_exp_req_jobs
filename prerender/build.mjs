@@ -34,14 +34,25 @@ const PORT = 8795;
 const CONC = 6;                                     // concurrent Chrome pages
 const SITE_URL = (process.env.SITE_URL || "https://noprobjobs.com").replace(/\/$/, "");   // canonical + OG + sitemap base
 
-// States that are CAPTURED in the DB (jobs_list/jobs_detail) but NOT yet surfaced on the site —
-// no launched board/landing for them. Their jobs are suppressed from EVERYTHING the site
-// publishes: the landing "Recent jobs" feed, the board list, browse routes, the sitemap, and the
-// Indexing API — so an unlaunched market can't contaminate a launched one's feed. Coverage below
-// is still asserted against the FULL fetch, so this never masks a truncated pull. Remove a state
-// the moment its surface goes live. (TX onboarded on the pull side 2026-09-17; WA is the only
-// launched surface, so TX is held here until a TX landing/board ships.)
-const SUPPRESSED_STATES = new Set(["TX"]);
+// The site publishes ONLY its LAUNCHED states — an allowlist, not a denylist. A denylist
+// ("suppress TX") is fragile: an adapter geo-scope leak (a Chipotle Granada-Hills-CA job that
+// slipped the WA search, seen 2026-09-17) sails straight through because CA isn't on the list.
+// The allowlist inverts that — anything not launched is dropped, so a future leak of ANY state
+// can never publish. `null` state is TOLERATED (published): those are legit in-scope WA records
+// whose state field failed to parse (6 Gensco warehouse + 1 MultiCare, all real WA jobs) — a
+// denylist kept them, so the allowlist must too, or it would silently drop 7 good jobs. TX is
+// captured in the DB but NOT launched, so it stays out until a TX board/landing ships (add "TX"
+// here that day). Coverage is still asserted against the FULL fetch, so this never masks a
+// truncated pull.
+const LAUNCHED_STATES = new Set(["WA"]);
+const stateOK = (s) => s == null || LAUNCHED_STATES.has(s);
+// Employers suppressed from EVERYTHING the site publishes (same reach as the launched-state
+// filter: board list, landing Recent feed, browse routes, sitemap, Indexing API). Keyed by
+// employer_domain. Owner executive decision 2026-09-17: Providence is a healthcare-heavy tenant
+// whose roles skew clinical/borderline and dominate the "newest" feed — off-market for a general
+// no-experience board. Also removed from the pull (config/pull.json) so it stops refreshing; this
+// filter suppresses the still-captured rows immediately (they retire on their own once stale).
+const SUPPRESSED_EMPLOYERS = new Set(["providence.org"]);
 const MOBILE = { width: 412, height: 915, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
 // Change #2: the Washington lander — a landing-page clone (served from index.html, so it runs
 // landing.js) that differs only in its headline. Baked as its own route; excluded from the
@@ -411,8 +422,9 @@ async function main(){
   // verifies the DB PULL, not the published subset. Then suppress unlaunched states from the site.
   const recsFetched = await fetchAll("/jobs_detail?select=*&order=job_number.asc");   // &order= = stable offset paging
   const listFetched = await fetchAll("/jobs_list?select=*&order=job_number.asc");
-  const recs = recsFetched.filter((r) => !SUPPRESSED_STATES.has(r.state));
-  const list = listFetched.filter((r) => !SUPPRESSED_STATES.has(r.state));
+  const keep = (r) => stateOK(r.state) && !SUPPRESSED_EMPLOYERS.has(r.employer_domain);
+  const recs = recsFetched.filter(keep);
+  const list = listFetched.filter(keep);
   // Merge the ONE recency computation (analyze/freshness.py -> out/freshness.json) onto every
   // list record, OVERWRITING the view's is_new (now unread — the rule lives in one Python call
   // site, never a raw-field recompute on a surface). The card reads r.is_new. Missing file =>
@@ -629,7 +641,7 @@ async function main(){
     // equal manifest_live+manifest_expired+retired on a healthy run.
     jobs_fetched: recsFetched.length, jobs_total: jobsTotal, jobs_published: recs.length,
     list_fetched: listFetched.length, list_total: listTotal, list_published: list.length,
-    suppressed_states: [...SUPPRESSED_STATES], suppressed_count: recsFetched.length - recs.length,
+    launched_states: [...LAUNCHED_STATES], suppressed_employers: [...SUPPRESSED_EMPLOYERS], suppressed_count: recsFetched.length - recs.length,
     coverage_complete: (jobsTotal == null || recsFetched.length >= jobsTotal) && (listTotal == null || listFetched.length >= listTotal),
     sitemap_urls: deploy.sitemap_urls,
     browse_pages_ok: results.filter((r) => r.type === "browse" && !r.error).length,
