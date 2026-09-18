@@ -4,6 +4,8 @@
    the wire. Replaces data/jobs.js: the board and landing no longer ship the whole
    record set. jobs_list omits description_html (~0.9MB for the full set vs the old
    6.6MB), and each job's description is fetched on open from jobs_detail. */
+import { isPublished } from "./published.js";
+
 const REST = "https://eyatyzatcmjnmazmaghd.supabase.co/rest/v1";
 const KEY = "sb_publishable_T49bDaIS8d7-AhQ8SsFU0g_ZA55yNQE";
 const HEADERS = { apikey: KEY, Authorization: "Bearer " + KEY };
@@ -31,8 +33,11 @@ function getAll(path){
   return step(0);
 }
 
-/* The applicable list, no description_html. Paged (getAll) so it never caps at 1000. */
-export function listJobs(){ return getAll("/jobs_list?select=*&order=job_number.asc"); }
+/* The applicable list, no description_html. Paged (getAll) so it never caps at 1000.
+   Filtered to the PUBLISHED set (isPublished) — jobs_list holds the WHOLE captured set
+   incl. unlaunched states + suppressed employers, so without this a hard refresh showed
+   the raw 2,243 while a soft click showed the filtered baked seed. Both must agree. */
+export function listJobs(){ return getAll("/jobs_list?select=*&order=job_number.asc").then((rows) => rows.filter(isPublished)); }
 
 /* One job's full detail (adds description_html), fetched when a job opens. */
 export function jobDetail(internalId){
