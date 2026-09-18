@@ -56,21 +56,27 @@ CATEGORY_PATTERNS = {
     # 'merch\w* assoc\w*' catches Merchandise/Merchandising Associate incl. the TJX typos
     # (Merchadise Assoc, Merchandise Associte); backroom/stockroom are the store back-of-house
     # associate titles (HomeGoods/Marshalls/TJ Maxx/Sierra) that carried no category before.
-    "Retail": r"\b(retail|cashier|store associate|sales associate|stocker|merchandiser|merch\w* assoc\w*|backroom|stockroom|barista|shift lead|store manager|store mgr|asst store mgr|assistant store manager|dept leader|department leader|person in charge|\bpic\b|th person|rd person|nd person|team lead\w*|general merchandise|fuel center|service counter|home hardlines|front end|e-commerce|grocery|produce|meat|seafood|floral|apparel|garden ctr|dairy|starbucks|bakery|courtesy|bagger|checkout|night clerk|overnight clerk|freight clerk|section leader|wholesale|branch coordinator)\b",
+    "Retail": r"\b(retail|cashier|store associate|sales associate|stocker|merchandiser|merch\w* assoc\w*|backroom|stockroom|barista|shift lead|store manager|store mgr|asst store mgr|assistant store manager|dept leader|department leader|person in charge|\bpic\b|th person|rd person|nd person|team lead\w*|general merchandise|fuel center|service counter|home hardlines|front end|e-commerce|grocery|produce|meat|seafood|floral|apparel|garden ctr|dairy|starbucks|bakery|courtesy|bagger|checkout|night clerk|overnight clerk|freight clerk|section leader|wholesale|branch coordinator|dressing room|seasonal associate)\b",
     # 'production associate'/operator/assembler fold into Warehouse (owner 2026-09-11):
     # Cintas plant-floor roles sit here UNTIL production earns its own category by volume.
     # Anchored to 'production associate' so a kitchen 'Food Production Worker' stays Food.
-    "Warehouse": r"\b(warehouse|forklift|picker|packer|package handler|material handler|order selector|loader|shipping|receiving|fulfillment|inbound|outbound|logistics|inventory|materials|supply chain|stocking|replenish|production associate|production operator|assembler|machine operator|ramp agent|baggage|bag handler|cargo agent|cargo handler|air cargo|equipment room)\b",
+    "Warehouse": r"\b(warehouse|forklift|picker|packer|package handler|material handler|order selector|loader|shipping|receiving|fulfillment|inbound|outbound|logistics|inventory|materials|supply chain|stocking|replenish|production associate|production operator|assembler|machine operator|ramp agent|ramp service agent|baggage|bag handler|cargo agent|cargo handler|air cargo|equipment room)\b",
     "Construction": r"\b(construction|laborer|labourer|carpenter|roofer|framer|concrete|apprentice|demolition)\b",
     "Security": r"\b(security|guard|patrol|loss prevention|surveillance|unarmed|armed officer|assets? protection)\b",
-    "Facilities": r"\b(janitor\w*|custodian|cleaner|cleaning|floor tech\w*|floor care|housekeep\w*|facilities|maintenance|groundskeep|porter|environmental services?|\bevs\b|engineer|journeyman|cabin service\w*|cabin agent)\b",
+    # Pass 2026-09-18 (uncategorized-applicable audit, all-tenant movement-checked, 55 moves,
+    # zero wrong cross-employer): custodial (not just custodian), groundskeep\w* (the bare
+    # 'groundskeep' lost 'Groundskeeper' to the trailing word boundary), landscap\w*, laundry,
+    # 'linen tech\w*' (NOT bare 'linen' — that mis-tagged Cintas 'Garment/Linen' PRODUCTION as
+    # facilities: product noun, not laundry work), sanitation, recycl\w*, aircraft appearance
+    # (WFS cabin cleaning). All Aramark/ABM/WFS frontline facilities titles the table missed.
+    "Facilities": r"\b(janitor\w*|custodian|custodial|cleaner|cleaning|floor tech\w*|floor care|housekeep\w*|facilities|maintenance|groundskeep\w*|landscap\w*|porter|laundry|linen tech\w*|sanitation|recycl\w*|environmental services?|\bevs\b|engineer|journeyman|cabin service\w*|cabin agent|aircraft appearance)\b",
     # Ninth category. Patterns DERIVED from the captured corpus (Compass food-service
     # board + Providence dietary/nutrition titles), not guessed.
     # Grocery FOOD departments dual-tag Food Services AND Retail (a meat wrapper
     # works with food and is in-store) - additive, so both lanes. Pure retail
     # (cashier, courtesy, bagger) stays Retail-only; 'grocery'/center-store aisle
     # stocking stays Retail (not food-handling).
-    "Food Services": r"\b(cook|baker|barista|bartender|chef|dishwasher|busser|server|waiter|waitress|catering|culinary|kitchen|cafeteria|concession|dietary|dining|nutrition|food service|foodservice|food worker|food prep|food transporter|banquet|deli|meat|seafood|produce|bakery|dairy|starbucks|order builder|general utility|food unit|\bfoh\b|\bfsw\b|food and beverage|meat cutter|meat wrapper|dietetic|diet clerk|steward|runner|restaurant team member|crew member|line cook|prep cook|broista)\b",
+    "Food Services": r"\b(cook|baker|barista|bartender|chef|dishwasher|busser|server|waiter|waitress|catering|culinary|kitchen|cafeteria|concession|dietary|dining|nutrition|food service|foodservice|food worker|food prep|food transporter|banquet|deli|meat|seafood|produce|bakery|dairy|starbucks|order builder|general utility|food unit|\bfoh\b|\bfsw\b|food and beverage|meat cutter|meat wrapper|dietetic|diet clerk|steward|runner|restaurant team member|crew member|line cook|prep cook|broista|hostess|bar.?back|beverage (station|cart)|commissary|pantry)\b",
     # Tenth category (owner-approved 2026-09-11): Transportation/Automotive = delivery/
     # transport drivers + vehicle-repair shop roles, ONE category. Compound driver tokens
     # so a 'Security Officer ... Patrol Driver' is NOT swept in (stays Security only) -
@@ -81,7 +87,10 @@ CATEGORY_PATTERNS = {
     # given a category (owner: clinical stays a sector, aides applicable-but-uncategorized, 2026-09-02).
     # Aircraft fueler/GSE/deicer = equipment & vehicle work -> here, not Warehouse (owner
     # 2026-09-17). 'gse <role>' requires a following role word so bare 'GSE' can't over-match.
-    "Transportation/Automotive": r"\b(delivery driver|truck driver|cdl|courier|route driver|transfer driver|catering driver|transporter|delivery associate|brake|tire|engine specialist|vanbody|automotive|diesel technician|aircraft fueler|fueler|into.?plane|gse (mechanic|technician|operator|agent)|ground support equipment|de.?icer|deicing|valet|parking)\b",
+    # 'driver i+\b' (2026-09-18) catches Aramark 'Driver I/II/III' transport grades WITHOUT
+    # reintroducing bare 'driver' (which would sweep 'Patrol Driver' back into Transportation):
+    # the i+\b tail requires the literal grade suffix, so 'Driver Instructor' etc. never match.
+    "Transportation/Automotive": r"\b(delivery driver|truck driver|cdl|courier|route driver|transfer driver|catering driver|transporter|delivery associate|driver i+\b|brake|tire|engine specialist|vanbody|automotive|diesel technician|aircraft fueler|fueler|into.?plane|gse (mechanic|technician|operator|agent)|ground support equipment|de.?icer|deicing|valet|parking)\b",
 }
 
 

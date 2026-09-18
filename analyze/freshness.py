@@ -65,17 +65,23 @@ def main():
 
     first_pull = _load_first_pull(records)
 
+    # is_new = the window-bounded badge boolean. eff_new_date = the underlying effective date
+    # ITSELF (ISO or null), emitted so a surface can SORT by recency without a second date
+    # computation (the landing "recent" section reads this; the card still reads is_new). Same
+    # one rule, one call site — the surface reads the baked value, never a raw posted_at/first_seen.
     flags = {}
+    eff_dates = {}
     for r in records:
         iid = r.get("internal_id")
         if not iid:
             continue
         eff = model.effective_new_date(r, first_pull)
         flags[iid] = model.is_new_within(eff, pull_date, card_window)
+        eff_dates[iid] = eff.isoformat() if eff else None
 
     n_new = sum(1 for v in flags.values() if v)
     payload = {"pull_date": pull_date.isoformat(), "card_window_days": card_window,
-               "is_new": flags}
+               "is_new": flags, "eff_new_date": eff_dates}
     with open(OUT, "w", encoding="utf-8") as fh:
         json.dump(payload, fh)
 

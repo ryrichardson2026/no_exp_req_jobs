@@ -1,5 +1,5 @@
 {
-  "_comment": "Per-tenant (employer_domain) first successful pull date — the day this pipeline onboarded the tenant. Records whose first_seen is on/before this date are onboarding BACKFILL and never count as 'new' (see normalize/model.py compute_is_new). Keyed on employer_domain, NOT source_id: tenants sharing a platform (oracle_orc: kroger+providence 08-31 vs sherwin 09-13; workday: multicare 08-31 vs uhaul 09-10; radancy_tb: allied 09-02 vs sysco 09-12 vs ontrac 09-15) onboarded on different days. Set ONCE at onboarding and never updated (append a line in the add-tenant SOP). Seeded 2026-09-16 from min(first_seen) per employer_domain. A tenant missing from this map falls back to min(first_seen), which drifts as its earliest backfill retires — prefer keeping this explicit.",
+  "_comment": "Per-tenant (employer_domain) first successful pull date — the day this pipeline onboarded the tenant. Records whose first_seen is on/before this date are onboarding BACKFILL and never count as 'new' (see normalize/model.py effective_new_date). Keyed on employer_domain, NOT source_id: tenants sharing a platform onboarded on different days. Set ONCE at onboarding and never updated (append a line in the add-tenant SOP). Seeded 2026-09-16 from min(first_seen) per employer_domain. A tenant missing from this map falls back to min(first_seen), which drifts as its earliest backfill retires — prefer keeping this explicit. 2026-09-18 pass: (1) pinned the 15 tenants that were still on the fallback (Paradox/appcast/avature/ultipro/phenom-aviation wave, all first-pulled 09-17 except wfs.aero 09-16) to their observed min(first_seen), verified against seen_state + run_log (offset from Notion's 09-16 onboard = the first recurring --all pull ran 09-17, not a reset). (2) corrected cintas/uhaul/sysco/gensco/sherwin, whose seeded values sat ONE DAY LATER than the observed first-pull stamp and were over-suppressing genuine day-after-onboarding arrivals as backfill, down to the observed min.",
   "first_pull": {
     "kroger.com": "2026-08-31",
     "providence.org": "2026-08-31",
@@ -8,12 +8,27 @@
     "compass-usa.com": "2026-09-02",
     "dollargeneral.com": "2026-09-02",
     "aus.com": "2026-09-02",
-    "uhaul.com": "2026-09-10",
-    "cintas.com": "2026-09-12",
-    "gensco.com": "2026-09-12",
-    "sysco.com": "2026-09-12",
-    "sherwin-williams.com": "2026-09-13",
+    "uhaul.com": "2026-09-09",
+    "cintas.com": "2026-09-11",
+    "gensco.com": "2026-09-11",
+    "sysco.com": "2026-09-11",
+    "sherwin-williams.com": "2026-09-11",
     "tjx.com": "2026-09-15",
-    "ontrac.com": "2026-09-15"
+    "ontrac.com": "2026-09-15",
+    "wfs.aero": "2026-09-16",
+    "aramark.com": "2026-09-17",
+    "abm.com": "2026-09-17",
+    "dutchbros.com": "2026-09-17",
+    "arbys.com": "2026-09-17",
+    "jimmyjohns.com": "2026-09-17",
+    "buffalowildwings.com": "2026-09-17",
+    "chipotle.com": "2026-09-17",
+    "panerabread.com": "2026-09-17",
+    "menziesaviation.com": "2026-09-17",
+    "sonicdrivein.com": "2026-09-17",
+    "unifiservice.com": "2026-09-17",
+    "shakeshack.com": "2026-09-17",
+    "primeflight.com": "2026-09-17",
+    "allianceground.com": "2026-09-17"
   }
 }

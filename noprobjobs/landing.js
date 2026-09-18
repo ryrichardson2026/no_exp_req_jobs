@@ -451,16 +451,27 @@ class LandingApp extends React.Component {
     let jobs = [];
     if (!loading) {
       // Item 7: the landing's promise is jobs that need no experience, so the recent section
-      // shows NONE_NEEDED records only — newest-first (unchanged two-tier order), capped at
-      // 2/employer. If fewer than `want` survive the cap, render fewer; never backfill with
-      // PREFERRED (a short honest section beats a full one that mostly says "experience
-      // preferred"). This is a landing selection rule only — the board's default sort is
-      // untouched.
+      // shows NONE_NEEDED records only, capped at 1/employer. If fewer than `want` survive the
+      // cap, render fewer; never backfill with PREFERRED (a short honest section beats a full
+      // one that mostly says "experience preferred"). This is a landing selection rule only —
+      // the board's default sort is untouched.
+      //
+      // Ordered by r.eff_new_date (2026-09-18): the ONE baked recency date = coalesce(posted_at,
+      // first_seen) minus onboarding backfill (analyze/freshness.py, the same rule the New badge
+      // uses — no date math on the client, nothing to drift). Records with no eff date (backfill
+      // / no first_seen) are EXCLUDED: a job with no known recency is not "recent", and this drops
+      // the onboarding backlogs that the old R.newestFirst two-tier key stranded — it sorted every
+      // posted_at job (Tier 1) above every undated one (Tier 2), so a freshly-posted job from an
+      // undated tenant lost to a weeks-old dated job. ISO dates compare lexicographically, so the
+      // string compare is chronological; internal_id breaks ties for a stable render.
       const list = (this.state.recs || [])
         .filter((r) => r.experience_condition === "NONE_NEEDED" && R.recordCats(r).length > 0
           && !R.recordCats(r).some((c) => RECENT_HIDE_CATS.indexOf(c) >= 0)
-          && RECENT_HIDE_EMPLOYERS.indexOf(r.employer_domain) < 0)
-        .slice().sort(R.newestFirst);
+          && RECENT_HIDE_EMPLOYERS.indexOf(r.employer_domain) < 0
+          && r.eff_new_date)
+        .slice().sort((a, b) => (a.eff_new_date !== b.eff_new_date
+          ? (a.eff_new_date < b.eff_new_date ? 1 : -1)
+          : String(a.internal_id).localeCompare(String(b.internal_id))));
       const want = this.state.wide ? 9 : 6;
       jobs = this.capByEmployer(list, want).map((r) => this.shape(r));
     }
