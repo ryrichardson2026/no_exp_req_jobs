@@ -75,7 +75,10 @@ class LandingApp extends React.Component {
     };
   }
 
-  static CAP_PER_EMPLOYER = 2;
+  // 1/employer (was 2): with the aviation + food-service tenants live, the Recent feed now has
+  // enough distinct brands to show a DIVERSE spread (6-9 different employers/depts) instead of
+  // "2 Target, 2 Security, 2 U-Haul". Maximizes brand/department variety on the landing.
+  static CAP_PER_EMPLOYER = 1;
   capByEmployer(list, want){
     const seen = {}, out = [];
     for (let i = 0; i < list.length && out.length < want; i++) {
