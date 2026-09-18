@@ -133,6 +133,30 @@
       "applicable": 26,
       "density": 60.5,
       "_note": "WA 10/TX 33 (Paradox, stateAbbr client-scope, Chrome-reconciled). Applicable via the absence-inference NONE_NEEDED (soft-skills-only Job Qualifications, no barrier language, age-neutral). First Paradox tenant; Chipotle/Inspire/Panda next on same adapter."
+    },
+    "sonic": {
+      "records": 69,
+      "applicable": 15,
+      "density": 21.7,
+      "_note": "WA 69 (TX 5093 SKIPPED >5k, owner). Opener 'Qualifications and Job Requirements:'. Paradox."
+    },
+    "arbys": {
+      "records": 268,
+      "applicable": 7,
+      "density": 2.6,
+      "_note": "WA 80/TX 188. Opener 'Requirements:'. Density UNDERCOUNTED - franchise-template variance; opener refinement pending. Paradox."
+    },
+    "buffalo_wild_wings": {
+      "records": 209,
+      "applicable": 3,
+      "density": 1.4,
+      "_note": "WA 31/TX 178. Opener 'Qualifications:'. Density UNDERCOUNTED - postings vary/lack the heading; opener refinement pending. Paradox."
+    },
+    "jimmy_johns": {
+      "records": 216,
+      "applicable": 9,
+      "density": 4.2,
+      "_note": "WA 87/TX 129. Density UNDERCOUNTED - role-prefixed headings ('Delivery Driver Requirements') unmatchable by current opener modes (STOPPAGE, review). Paradox."
     }
   }
 }
