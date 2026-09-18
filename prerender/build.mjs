@@ -31,7 +31,7 @@ const CHROME = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const REST = "https://eyatyzatcmjnmazmaghd.supabase.co/rest/v1";
 const KEY = "sb_publishable_T49bDaIS8d7-AhQ8SsFU0g_ZA55yNQE";
 const PORT = 8795;
-const CONC = 6;                                     // concurrent Chrome pages
+const CONC = Number(process.env.BAKE_CONC) || 6;    // concurrent Chrome pages (BAKE_CONC lowers it on machines where 6 crashes Chrome mid-bake)
 const SITE_URL = (process.env.SITE_URL || "https://noprobjobs.com").replace(/\/$/, "");   // canonical + OG + sitemap base
 
 // The site publishes ONLY its LAUNCHED states — an allowlist, not a denylist. A denylist
