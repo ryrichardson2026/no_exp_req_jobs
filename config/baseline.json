@@ -142,21 +142,27 @@
     },
     "arbys": {
       "records": 268,
-      "applicable": 7,
-      "density": 2.6,
-      "_note": "WA 80/TX 188. Opener 'Requirements:'. Density UNDERCOUNTED - franchise-template variance; opener refinement pending. Paradox."
+      "applicable": 95,
+      "density": 35.4,
+      "_note": "WA 80/TX 188. Opener 'Job Description' (Team/Crew Member requirements are woven into JD prose; absence-inference -> NONE_NEEDED) + 'Requirements:' (managers REQUIRED). Owner: Crew/Team Member are the applicable targets. Recovered 7->95. Paradox."
     },
     "buffalo_wild_wings": {
       "records": 209,
       "applicable": 3,
       "density": 1.4,
-      "_note": "WA 31/TX 178. Opener 'Qualifications:'. Density UNDERCOUNTED - postings vary/lack the heading; opener refinement pending. Paradox."
+      "_note": "WA 31/TX 178. Opener 'What We're Looking For'/'Qualifications:'. HONEST low: BWW is experience-heavy (bartenders 'X months experience required' -> REQUIRED); cashiers 'preferred not required' -> PREFERRED/applicable. 166 template-variant NOT_STATED remain. Paradox."
     },
     "jimmy_johns": {
       "records": 216,
-      "applicable": 9,
-      "density": 4.2,
-      "_note": "WA 87/TX 129. Density UNDERCOUNTED - role-prefixed headings ('Delivery Driver Requirements') unmatchable by current opener modes (STOPPAGE, review). Paradox."
+      "applicable": 34,
+      "density": 15.7,
+      "_note": "WA 87/TX 129. Enumerated role-prefixed openers ('Team Member/Delivery Driver Requirements' bold + 'Requirements:' colon). Recovered 9->34; ~146 still NOT_STATED (Summary/KSA-only templates). Paradox."
+    },
+    "chipotle": {
+      "records": 122,
+      "applicable": 72,
+      "density": 59.0,
+      "_note": "WA 122 (TalentBrew org 282, query-form alp=WA&alt=3; stop_on_no_new_ids for the sticky tail). Crew Members applicable via 'WHAT YOU'LL BRING TO THE TABLE' opener + who-we-are fence + age-years barrier fix. TX pending (radancy_tb single-market)."
     }
   }
 }

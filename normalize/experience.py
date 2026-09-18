@@ -87,6 +87,11 @@ END_HEADINGS = (
     # into the requirements span and read as a required credential. Phrase is OnTrac
     # marketing copy - no over-fence risk elsewhere.
     "your mission in motion",
+    # Chipotle's "WHO WE ARE" company blurb follows the requirements ("WHAT YOU'LL BRING TO THE
+    # TABLE"); unfenced, its marketing ("passionate about providing a great guest experience")
+    # leaked in and read as a required EXPERIENCE. Same about-us/marketing class already fenced
+    # ("about us"/"about the team") - a company-intro heading, never a requirements heading.
+    "who we are",
 )
 
 END_RX = re.compile(
@@ -463,7 +468,10 @@ _AGE_STRIP_RX = re.compile(
     r"|\bminimum age\b", re.IGNORECASE)
 _INFER_BARRIER_RX = re.compile(
     r"\bexperience\b|\bproven\b|\bprior\b|\bprevious\b|\bexpertise\b|\bproficien\w+\b|"
-    r"\d+\+?\s*(?:years?|yrs?)\b|\bdegree\b|\bdiploma\b|\bcertif\w+\b|\blicen[sc]e\w*\b|"
+    # a year-count is an EXPERIENCE barrier UNLESS it's an AGE phrase ("16 years old / or older /
+    # of age") - age is a non-factor (age-never-a-screener), so it must not block the inference.
+    r"\d+\+?\s*(?:years?|yrs?)\b(?!\s*(?:old|or older|and older|of age))|"
+    r"\bdegree\b|\bdiploma\b|\bcertif\w+\b|\blicen[sc]e\w*\b|"
     r"\bcredential\w*\b|\bbackground in\b|\bminimum of\b", re.IGNORECASE)
 
 

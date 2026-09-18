@@ -993,6 +993,53 @@
       },
       "verified": "2026-09-15 - TalentBrew org 47156, Allied-style /search-jobs?alp=6252001-5815135&alt=3 index + &p=N paging confirmed by direct fetch; 20 WA jobs (Kent/Fife/Spokane/Everett/Vancouver), 4 non-WA (Atlanta-Remote/GA/MD/NJ corporate+linehaul) dropped by ', WA' filter; JobPosting JSON-LD detail confirmed (title/description/datePosted/jobLocation/url). SCOPE: index + detail JSON-LD fetched and measured. Openers derived from this capture, nothing inherited.",
       "nlx_wa_jobs": null
+    },
+    "chipotle": {
+      "label": "Chipotle Mexican Grill (jobs.chipotle.com, TalentBrew org 282)",
+      "employer_name": "Chipotle Mexican Grill",
+      "company_name": "Chipotle Mexican Grill",
+      "host": "https://jobs.chipotle.com",
+      "careers_base": "https://jobs.chipotle.com",
+      "careers_url": "https://jobs.chipotle.com/search-jobs",
+      "locate_hint": "washington",
+      "org_id": "282",
+      "site_id": "59309",
+      "terms_reference": null,
+      "employer_domain": "chipotle.com",
+      "state": "WA",
+      "source_class": "direct-employer",
+      "sector": "food_services",
+      "source_job_id_from": "url_tail",
+      "index_url": "https://jobs.chipotle.com/search-jobs?alp=6252001-5815135&alt=3",
+      "_index_url_note": "Query-param form (alp=WA geonames&alt=3) server-scopes to WA + paginates &p=N (path/radius form does NOT scope - Sysco precedent). WA verified 119 (2026-09-17).",
+      "geo_scope": {
+        "verified": "2026-09-17",
+        "markets": {
+          "WA": {
+            "display": "Washington, US",
+            "facet_type": 3,
+            "geo_path": "6252001-5815135",
+            "index_url": "https://jobs.chipotle.com/search-jobs?alp=6252001-5815135&alt=3",
+            "in_market": 119
+          }
+        }
+      },
+      "location_filter": {
+        "field": null,
+        "match_any": []
+      },
+      "extraction": {
+        "_note": "DERIVED 2026-09-17: requirements under 'WHAT YOU'LL BRING TO THE TABLE' (all-caps, colon-less heading -> bare; curly apostrophe folded at match). 'WHAT'S IN IT FOR YOU'=benefits, 'THE OPPORTUNITY'=intro.",
+        "openers": [
+          {
+            "text": "what you'll bring to the table",
+            "role": "REQUIRED",
+            "match": "bare"
+          }
+        ]
+      },
+      "stop_on_no_new_ids": true,
+      "_stop_note": "Chipotle query-form returns a sticky repeating 3-id tail past the WA results (like OnTrac) - empty-page stop never fires. stop_on_no_new_ids ends the walk when a page adds 0 new ids."
     }
   },
   "jibe_api": {
@@ -1751,8 +1798,18 @@
       ],
       "verified": "2026-09-17 Paradox filter[state] server-side scope (WA 31/TX 178). Inspire portfolio brand.",
       "extraction": {
-        "_note": "DERIVED from buffalo_wild_wings Paradox descriptions 2026-09-17.",
+        "_note": "Owner 2026-09-17: requirements under 'What We're Looking For' (franchise template). Keep 'Qualifications:' fallback.",
         "openers": [
+          {
+            "text": "what we're looking for",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "what we're looking for",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
           {
             "text": "qualifications",
             "role": "REQUIRED",
@@ -1775,12 +1832,22 @@
       ],
       "verified": "2026-09-17 Paradox filter[state] server-side scope (WA 80/TX 188). Inspire portfolio brand.",
       "extraction": {
-        "_note": "DERIVED from arbys Paradox descriptions 2026-09-17.",
+        "_note": "Arby's Team/Crew Member requirements are woven into the 'Job Description' prose (no discrete requirements heading; only 'Physical Requirements'). Open on 'Job Description' so absence-inference reads soft-traits-only -> NONE_NEEDED; 'Requirements:' still catches director/manager roles as REQUIRED (precedence). Owner: only Crew/Team Member are the applicable targets.",
         "openers": [
+          {
+            "text": "job description",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
           {
             "text": "requirements",
             "role": "REQUIRED",
             "match": "colon"
+          },
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "bare"
           }
         ]
       }
@@ -1799,17 +1866,42 @@
       ],
       "verified": "2026-09-17 Paradox filter[state] server-side scope (WA 87/TX 129). Inspire portfolio brand.",
       "extraction": {
-        "_note": "DERIVED from jimmy_johns Paradox descriptions 2026-09-17.",
+        "_note": "JJ mixes 'Requirements:' (colon) with role-prefixed bold headings ('Team Member Requirements', 'Delivery Driver Requirements' - no colon). Enumerate the role headings as full bare openers; content is age/work-auth/bring-bike (no barrier) -> absence-inference NONE_NEEDED.",
         "openers": [
           {
             "text": "requirements",
             "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "additional requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "team member requirements",
+            "role": "REQUIRED",
             "match": "bare"
           },
           {
-            "text": "requirements",
+            "text": "delivery driver requirements",
             "role": "REQUIRED",
-            "match": "colon"
+            "match": "bare"
+          },
+          {
+            "text": "in-shop requirements",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "assistant manager requirements",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "general manager requirements",
+            "role": "REQUIRED",
+            "match": "bare"
           }
         ]
       }
