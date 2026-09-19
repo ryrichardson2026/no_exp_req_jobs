@@ -61,7 +61,11 @@ CATEGORY_PATTERNS = {
     # Cintas plant-floor roles sit here UNTIL production earns its own category by volume.
     # Anchored to 'production associate' so a kitchen 'Food Production Worker' stays Food.
     "Warehouse": r"\b(warehouse|forklift|picker|packer|package handler|material handler|order selector|loader|shipping|receiving|fulfillment|inbound|outbound|logistics|inventory|materials|supply chain|stocking|replenish|production associate|production operator|assembler|machine operator|ramp agent|ramp service agent|baggage|bag handler|cargo agent|cargo handler|air cargo|equipment room)\b",
-    "Construction": r"\b(construction|laborer|labourer|carpenter|roofer|framer|concrete|apprentice|demolition)\b",
+    # 'apprentice' removed 2026-09-18: bare token mis-tagged non-trade apprentices as Construction
+    # (Providence "Medical Assistant Apprentice" -> Construction). Real construction apprentices
+    # still match via the trade tokens below; a bare "Apprentice" is not identifiably construction.
+    # Movement-audited: 0 live records relied on the token for their category.
+    "Construction": r"\b(construction|laborer|labourer|carpenter|roofer|framer|concrete|demolition)\b",
     "Security": r"\b(security|guard|patrol|loss prevention|surveillance|unarmed|armed officer|assets? protection)\b",
     # Pass 2026-09-18 (uncategorized-applicable audit, all-tenant movement-checked, 55 moves,
     # zero wrong cross-employer): custodial (not just custodian), groundskeep\w* (the bare
