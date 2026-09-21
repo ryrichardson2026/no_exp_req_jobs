@@ -284,6 +284,7 @@ class LandingApp extends React.Component {
       monogram: (r.company_name || "?").trim().charAt(0).toUpperCase(),
       locationLine: [L.cityName(r.city), r.state].filter(Boolean).join(", "),
       pay: R.money(r), posted: R.postedLabel(r.posted_at),
+      isNew: !!r.is_new,                      // the "New" badge — same baked rule as the board (r.is_new, freshness.py); JobCard reads camelCase job.isNew
       expLabel: R.EXP_LABEL[r.experience_condition] || null,
       expStrong: r.experience_condition === "NONE_NEEDED" || r.experience_condition === "WAIVED",
       expSoft: r.experience_condition === "PREFERRED",
