@@ -139,6 +139,22 @@ function serve(cache){
   });
 }
 
+// A transient PostgREST/DB blip (5xx) or rate-limit (429) on ANY single page otherwise aborts the
+// WHOLE bake — one jobs_detail 500 killed a publish 2026-09-21. Retry those with linear backoff; a
+// real 4xx (or exhausted tries) still returns/throws so a genuine error fails loud, never silent.
+async function fetchRetry(url, opts, tries = 4){
+  let resp, err;
+  for (let i = 0; i < tries; i++){
+    try {
+      resp = await fetch(url, opts);
+      if (resp.ok || (resp.status !== 429 && resp.status < 500)) return resp;  // ok, or a real non-retryable 4xx
+    } catch (e) { err = e; resp = null; }                                      // network error — retryable
+    if (i < tries - 1) await new Promise((res) => setTimeout(res, 500 * (i + 1)));
+  }
+  if (resp) return resp;   // exhausted on 5xx/429 — hand back the last response; caller throws on !ok
+  throw err;               // exhausted on network errors — rethrow the last one
+}
+
 async function fetchAll(path){
   // PostgREST caps result rows at db-max-rows (1000 here) regardless of ?limit=, so a single
   // fetch SILENTLY truncates once a view exceeds 1000 rows (jobs_detail hit 1086 after U-Haul
@@ -151,7 +167,7 @@ async function fetchAll(path){
   const sep = base.includes("?") ? "&" : "?";
   const out = [];
   for (let from = 0; ; from += PAGE) {
-    const r = await fetch(REST + base + sep + "offset=" + from + "&limit=" + PAGE, { headers: { apikey: KEY, Authorization: "Bearer " + KEY } });
+    const r = await fetchRetry(REST + base + sep + "offset=" + from + "&limit=" + PAGE, { headers: { apikey: KEY, Authorization: "Bearer " + KEY } });
     if (!r.ok) throw new Error(path + " -> " + r.status);
     const batch = await r.json();
     out.push(...batch);
@@ -164,7 +180,7 @@ async function fetchAll(path){
 // the true total in Content-Range (".../N") even with limit=1, so it catches a truncated
 // fetchAll that would otherwise pass silently (the 1000-cap that shipped 1000 of 1086 jobs).
 async function countExact(view){
-  const r = await fetch(REST + view + "?select=job_number&limit=1", { headers: { apikey: KEY, Authorization: "Bearer " + KEY, Prefer: "count=exact" } });
+  const r = await fetchRetry(REST + view + "?select=job_number&limit=1", { headers: { apikey: KEY, Authorization: "Bearer " + KEY, Prefer: "count=exact" } });
   if (!r.ok && r.status !== 206) throw new Error(view + " count -> " + r.status);
   const total = parseInt(((r.headers.get("content-range") || "").split("/")[1] || ""), 10);
   return Number.isFinite(total) ? total : null;
