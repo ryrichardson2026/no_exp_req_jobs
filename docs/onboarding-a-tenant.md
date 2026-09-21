@@ -39,8 +39,17 @@ expensive to unwind (silent undercounts, zombie listings, deleted live jobs).
 
 Rule for the boundary: **one platform key = one fetch shape.** If the call shape differs from
 an existing adapter — even another employer on the same underlying ATS (Allied and Dollar
-General are both iCIMS but have unrelated read surfaces) — it is Case B and gets its own key.
+General were both iCIMS but had unrelated read surfaces) — it is Case B and gets its own key.
 `--probe` first; if the shape differs, it is a new platform.
+
+**Read surfaces churn — re-onboarding is a real event.** An employer can migrate its careers
+site off one ATS onto another; when it does, the old adapter's endpoint 404s (or returns an
+empty board) and the tenant HALTS the pull until it's re-onboarded on the new surface. Dollar
+General did exactly this 2026-09-21 (Jibe → Oracle `oracle_orc`): `--probe` the new host, then
+treat it as a fresh Case-A onboarding (host/site + **openers derived from a real new capture**,
+never ported from the dead surface). While the new surface has no jobs yet, suppress the tenant
+(underscore-prefix its key to skip the pull, add its `employer_domain` to `SUPPRESSED_EMPLOYERS`
+in `noprobjobs/data/published.js`) rather than leave a halting dead endpoint in the run.
 
 ---
 
@@ -134,6 +143,14 @@ python run_pull.py --tenant <newkey>             # full pull → normalize → e
 - **Licensed-occupation / credential gates** may make a clinical or security employer return
   near-zero applicable for a *config* reason (a missing credential on the allowlist), not a
   finding about the employer. Check the gate-attribution before concluding the employer is dry.
+- **Validate a source's date field before mapping it to `posted_at`.** `posted_at` is a
+  timestamptz column; a non-date value (a vendor's own requisition id, a marketing label) makes
+  Postgres 22007-reject the ENTIRE upsert row in `analyze.supabase_sink`, silently dropping the
+  job — the tenant's applicable count at report far exceeds its published/DB row count. The
+  Paradox `postedAt` field carried exactly this (`JR13558-1` on Shake Shack) and dropped 100% of
+  the tenant for its whole life until fixed. Adapters must emit a real ISO date or `None`, never
+  a raw passthrough. **Where it surfaces:** `out/quarantine.jsonl` — "NOT published" rows are a
+  real drop (investigate); "pay suppressed; job PUBLISHED" rows are benign.
 
 ---
 

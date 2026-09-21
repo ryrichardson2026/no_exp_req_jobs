@@ -284,6 +284,36 @@ def _emp_type(v):
             "TEMPORARY": "Temporary", "INTERN": "Internship"}.get(key, str(v).strip().title())
 
 
+_ISO_RX = re.compile(r"^(\d{4})-(\d{2})-(\d{2})")
+_MDY_RX = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{2}|\d{4})$")
+
+
+def _iso_date(v):
+    """Return YYYY-MM-DD, or None when the value is not a real date.
+
+    The Paradox `postedAt` field is NOT reliably a date across this platform's
+    tenants: a genuine date (ISO or M/D/YY) on Arby's/Jimmy John's/Sonic, a Workday
+    requisition id ('JR13558-1') on Shake Shack, a marketing label ('BWW Extern') on
+    BWW. An unparseable value written to the timestamptz `posted_at` column makes
+    Postgres 22007-reject the ENTIRE upsert row, silently dropping the job (Shake Shack:
+    0 rows ever reached the DB). So anything that isn't a real date must become None
+    (posted_at is legitimately nullable - the pipeline omits datePosted when absent),
+    never a raw passthrough."""
+    if not v:
+        return None
+    s = str(v).strip()
+    m = _ISO_RX.match(s)
+    if m:
+        return f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
+    m = _MDY_RX.match(s)
+    if m:
+        mo, da, yr = int(m.group(1)), int(m.group(2)), m.group(3)
+        if 1 <= mo <= 12 and 1 <= da <= 31:
+            yr = ("20" + yr) if len(yr) == 2 else yr
+            return f"{yr}-{mo:02d}-{da:02d}"
+    return None
+
+
 def map_record(rec, t, retrieved_at):
     r = model.new_record()
     warnings = []
@@ -308,7 +338,7 @@ def map_record(rec, t, retrieved_at):
 
     r["employment_type"] = _emp_type(rec.get("employmentType"))
     r["shift_raw"] = None
-    r["posted_at"] = (rec.get("postedAt") or "")[:10] or None
+    r["posted_at"] = _iso_date(rec.get("postedAt"))
     r["freshness_state"] = "UNKNOWN"
 
     r["apply_url"] = rec.get("originalURL")

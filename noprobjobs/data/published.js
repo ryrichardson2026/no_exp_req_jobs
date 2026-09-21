@@ -15,7 +15,7 @@
 export const LAUNCHED_STATES = new Set(["WA"]);
 
 // Whole employers pulled from the published surface, keyed by employer_domain.
-export const SUPPRESSED_EMPLOYERS = new Set(["providence.org"]);
+export const SUPPRESSED_EMPLOYERS = new Set(["providence.org", "dollargeneral.com"]);
 
 /* A record is published iff its state is launched (null tolerated — those are legit
    in-scope WA records whose state field failed to parse) AND its employer isn't
