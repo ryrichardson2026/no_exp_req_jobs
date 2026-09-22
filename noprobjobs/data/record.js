@@ -253,7 +253,11 @@ export function cardTitle(t){
 
 export function shiftLabel(s){
   const v = String(s).trim();
-  return /^variable$/i.test(v) ? "Shift varies" : v + " shift";
+  if (/^variable$/i.test(v)) return "Shift varies";
+  // shift_raw is free employer text; some tenants (Cintas/successfactors_rmk) publish a value
+  // that already carries the word ("1st Shift"). Appending " shift" then reads "1st Shift shift".
+  // Suffix only when the value doesn't already end in the word (case-insensitive; v is trimmed).
+  return /\bshift$/i.test(v) ? v : v + " shift";
 }
 
 export function verbatim(r){
