@@ -147,6 +147,14 @@
         "buffalo_wild_wings",
         "jimmy_johns"
       ]
+    },
+    {
+      "platform": "governmentjobs",
+      "modes": [
+        "index",
+        "detail",
+        "normalize"
+      ]
     }
   ]
 }
