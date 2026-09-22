@@ -78,7 +78,7 @@ class BoardApp extends React.Component {
     this._openJob = props.openJob || null;                        // seed record for the panel (no description_html)
     this._initialJobId = this._openJob ? this._openJob.internal_id : null;
     this.state = { openId: this._initialJobId, recs: props.initialRecs || null, logoOk: {}, details: props.initialDetails || {}, stateCtx: null,
-      cities: CITIES, zips: ZIPS, cityGeo: CITY_GEO, cats: [], catDraft: [], loc: "", locDraft: "", radius: 15,
+      cities: CITIES, zips: ZIPS, cityGeo: CITY_GEO, cats: [], catDraft: [], loc: "", locDraft: "", radius: 10,
       // Experience defaults to OFF (owner decision 2026-09): the board lands showing BOTH
       // no-experience-required AND experience-preferred-not-required — the full board (experience-
       // REQUIRED never reaches it, filtered upstream). Toggling the green band ON narrows to
@@ -683,7 +683,7 @@ class BoardApp extends React.Component {
       : first ? "No jobs match " + first.label.toLowerCase() + "."
       : "No jobs right now.";
     const emptyFix = unmatched ? L.UNMATCHED_FIX
-      : res.kind === "zip" && radius < 25 && first && first.label === "Location" ? "Widen the radius to 25 miles, or try a nearby city."
+      : res.kind === "zip" && radius < L.RADII[L.RADII.length - 1] && first && first.label === "Location" ? "Widen the radius to " + L.RADII[L.RADII.length - 1] + " miles, or try a nearby city."
       : first ? first.fix : "Check back later.";
 
     const locEmptyName = res.kind === "zip" ? res.zip : res.kind === "state" ? res.state : res.kind === "city" ? res.display[0] : st.loc;
@@ -845,7 +845,7 @@ class BoardApp extends React.Component {
   }
   // Desktop Location — a persistent, always-editable inline field (NOT a dropdown/trigger pill).
   // You type a city/state/ZIP straight into the bar; Enter or blur applies it. A leading red dot +
-  // navy border read as APPLIED; for a ZIP the 10/15/25 radius sits inline (default 15). Matches the
+  // navy border read as APPLIED; for a ZIP the 5/10/15 radius sits inline (default 10). Matches the
   // mobile strip's always-visible "● 98178 · 15 mi" readout — one mental model across devices.
   renderLocField(d){
     const applied = d.locResolved;
@@ -860,7 +860,7 @@ class BoardApp extends React.Component {
       h("input", { type: "text", ref: this.setLocInput, value: this.state.locDraft, onChange: this.onLocDraft, onKeyDown: this.onLocKeyStay,
           placeholder: "City, state or ZIP", "aria-label": "Location — city, state or ZIP",
           style: s("flex:none;width:" + (isZip ? "62px" : "148px") + ";box-sizing:border-box;min-height:30px;padding:0;border:0;background:transparent;font-family:inherit;font-size:14.5px;font-weight:" + (applied ? "700" : "500") + ";color:var(--ink);outline:none") }),
-      // Inline radius (ZIP only) — same 10/15/25 set as mobile, applied live; default 15.
+      // Inline radius (ZIP only) — same 5/10/15 set as mobile, applied live; default 10.
       isZip && h("span", { style: s("flex:none;display:flex;align-items:center;gap:2px;padding-left:6px;margin-left:1px;border-left:1px solid var(--line)") },
         L.RADII.map((r, i) => { const cur = r === d.radius; return h("button", { key: i, type: "button", onClick: this.setRadius(r), "aria-pressed": cur, "aria-label": r + " miles",
           style: s("min-height:28px;min-width:25px;padding:0 3px;border-radius:3px;font-size:12.5px;font-weight:" + (cur ? "700" : "500") + ";cursor:pointer;border:1px solid " + (cur ? "var(--ink)" : "transparent") + ";background:" + (cur ? "var(--ink)" : "transparent") + ";color:" + (cur ? "var(--accent-ink)" : "var(--ink-muted)")) }, r); }),
@@ -1059,7 +1059,7 @@ class BoardApp extends React.Component {
             : h("div", { style: s("padding:10px 12px") }, h("div", { style: s("display:grid;grid-template-columns:1fr 1fr;gap:6px") }, (d.typeOptions || []).map((t, i) => this.tileOpt(t, i))))));
     } else {
       body = h("div", { key: "main", ref: this.setFilterScroller, style: s("flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch") },
-        // Location — ZIP input (navy-filled when it carries a value) + 10/15/25 three-up (default 15).
+        // Location — ZIP input (navy-filled when it carries a value) + 5/10/15 three-up (default 10).
         this.filterSec("loc", "Location", null, h("div", null,
           h("input", { type: "text", value: this.state.locDraft, onChange: this.onLocDraft, onKeyDown: this.onLocKeyStay, placeholder: "City, state or ZIP", "aria-label": "City, state or ZIP",
             style: s("box-sizing:border-box;width:100%;min-height:44px;padding:0 12px;border:1px solid var(--ink);border-radius:3px;font-size:16px;font-family:inherit;outline:none;" + (this.state.locDraft ? "background:var(--ink);color:#fff" : "background:var(--surface);color:var(--ink)")) }),

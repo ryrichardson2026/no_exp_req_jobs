@@ -66,7 +66,7 @@ class LandingApp extends React.Component {
     super(props);
     this.state = {
       recs: props.initialRecs || null, cities: [], zips: {},
-      cats: [], locDraft: "", radius: 15, catOpen: false,
+      cats: [], locDraft: "", radius: 10, catOpen: false,
       // Alert capture: email + a required ZIP/city + an optional multi-select of work types
       // (same categories as the job board's Work Type filter). alertCatOpen = the job-type
       // dropdown; alertCats is separate from the search card's `cats` above.

@@ -5,7 +5,7 @@
    table loaded is unmatched — never guessed to the nearest city. No per-job
    distance is ever produced. */
 
-export const RADII = [10, 15, 25];          // closed set, default 15
+export const RADII = [5, 10, 15];           // closed set, default 10 (tightened: 10mi in a metro ≈ a whole city)
 
 /* Employers publish city names in different cases (Dollar General ships ABERDEEN,
    BENTON CITY…). Matching goes through one key so a filter can't hide a job whose
