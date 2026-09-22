@@ -76,7 +76,11 @@ export function JobCard({ job, flush, listMeta, dense }){
         job.showLogo && h("span", { key: "lg", style: s("display:flex;flex:none") }, job.logoImg),
         job.showMonogram && h("span", { key: "mo", "aria-hidden": "true",
           style: s("width:20px;height:20px;display:grid;place-items:center;border-radius:3px;background:var(--fact);color:var(--fact-ink);font-size:12px;font-weight:800;flex:none") }, job.monogram),
-        h("span", { style: s("font-size:13px;font-weight:500;color:var(--ink-muted)") }, job.company)
+        h("span", { style: s("font-size:13px;font-weight:500;color:var(--ink-muted)") }, job.company),
+        // "New" badge (same marigold pill + single recency rule as the dense variant above; the
+        // default layout — desktop board list, browse pages, landing "Recent jobs" grid — omitted
+        // it, so job.isNew wired by shape() never showed here). Right-aligned in the header row.
+        job.isNew && h("span", { key: "new", style: s("flex:none;margin-left:auto;display:inline-flex;align-items:center;padding:1px 6px;border-radius:3px;background:var(--mark);color:var(--mark-ink);font-size:11px;font-weight:800;letter-spacing:0.03em;text-transform:uppercase") }, "New")
       ),
       h("h2", { style: s("margin:0;font-family:var(--font-display);font-size:20px;line-height:1.2;font-weight:700;letter-spacing:-0.005em;color:var(--ink);text-wrap:pretty") }, job.cardTitle),
       h("div", { style: s("font-size:15px;line-height:1.35;color:var(--ink-muted)") }, job.locationLine),
