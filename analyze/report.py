@@ -102,13 +102,21 @@ TRAINING_PROGRAM_RX = re.compile(
 # Movement audit: 73 titles reattribute to occupation-licensed, 8 leave applicable,
 # zero non-pharmacy titles move.
 LICENSED_OCCUPATION_RX = re.compile(
-    r"\b(registered nurse|\brn\b|\blpn\b|\blvn\b|nurse practitioner|"
+    r"\b(registered nurse|\brn\b|\blpn\b|\blvn\b|nurse practitioner|licensed practical nurse|"
     r"physician|physician assistant|pharmacist|pharmacy|"
     r"physical therapist|occupational therapist|speech language pathologist|"
     r"respiratory (?:care )?(?:practitioner|therapist)|radiation therapist|"
     r"recreational therapist|massage therapist|therapy assistant|"
     r"technologist|audiologist|dosimetrist|sonographer|polysomnographer|"
-    r"medical laboratory scientist|medical technologist|dietitian)\b",
+    r"medical laboratory scientist|medical technologist|dietitian|"
+    # 2026-09-22: spelled-out + non-hospital licensed occupations surfaced by the WA
+    # government boards (the abbreviations above missed "Licensed Practical Nurse 4",
+    # and dentist/psychologist/counselor/SUDP were absent). All are title=credential.
+    # Deliberately NOT 'dental' (Dental Assistant is entry-level and stays applicable),
+    # NOT 'social service specialist' (entry) - only the licensed 'social worker'.
+    r"dentist|dental hygienist|veterinarian|optometrist|podiatrist|chiropractor|"
+    r"psychologist|social worker|mental health counselor|"
+    r"substance use disorder professional|chemical dependency professional)\b",
     re.IGNORECASE)
 
 # Career-path occupations. Excluded under the POSITIONING rule (master doc §3:
@@ -136,7 +144,16 @@ CAREER_PATH_OCCUPATION_RX = re.compile(
 # Verified 2026-09-22: 7 board titles match, all degreed (Staff/Sr/Project/Tax); 0 entry.
 # "controller" is deliberately NOT here - "Air Logistics Controller" (aviation ops) is
 # a false friend; the financial Controller is left to a future management-gate call.
-PROFESSIONAL_OCCUPATION_RX = re.compile(r"\baccountant\b", re.IGNORECASE)
+# 2026-09-22: added the unambiguous degreed professions the WA government boards leaked as
+# false-applicable (Deputy Prosecuting Attorney, Staff Hydrogeologist read no-experience
+# because their barrier is the degree/bar, not stated experience). Kept to titles with NO
+# entry-level variant: 'attorney'/'prosecutor'/'public defender'/'hydrogeologist'/'geologist'/
+# 'architect'/'actuary'. Deliberately NOT 'engineer'/'analyst'/'inspector'/'technician'/
+# 'specialist'/'operator' - each has a genuine entry-level variant (Engineering Aide, Machine
+# Operator), so those stay gated on requirements, not title.
+PROFESSIONAL_OCCUPATION_RX = re.compile(
+    r"\b(accountant|attorney|prosecutor|public defender|hydrogeologist|geologist|"
+    r"architect|actuary)\b", re.IGNORECASE)
 
 # ---- gate 3: credential obtainability ---------------------------------------
 # Obtainable within ~90 days, no prerequisite -> passes.
