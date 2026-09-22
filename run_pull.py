@@ -366,6 +366,7 @@ def update_baseline(new_rows):
 _ENUMERATE_ARTIFACT = {
     "oracle_orc": ("index", True), "workday": ("index", True),
     "radancy_tb": ("rows.jsonl", False), "target": ("discovery", True),
+    "governmentjobs": ("rows.jsonl", False),   # index writes index/ + rows.jsonl; reconcile reads rows.jsonl
     "jibe_api": ("pages", True), "compass_api": ("pages", True),
     "phenom": ("records.jsonl", False),
     "ultipro": ("index.jsonl", False),
@@ -400,6 +401,9 @@ def _live_detail_names(platform, tenant_key):
     if platform == "workday":
         return {f"{mod.safe_name(mod.req_id(j))}.json" for j in mod.load_index(t) if mod.in_scope(j, t) and mod.req_id(j)}, ".json"
     if platform == "radancy_tb":
+        return {f"{r['internal_id']}.html" for r in mod.load_rows(t) if mod.in_scope(r, t) and r.get("internal_id")}, ".html"
+    if platform == "governmentjobs":
+        # rows.jsonl is TODAY's board (cleared each pull); detail files are {internal_id}.html.
         return {f"{r['internal_id']}.html" for r in mod.load_rows(t) if mod.in_scope(r, t) and r.get("internal_id")}, ".html"
     if platform == "target":
         # discovery IS the live WA set; a superset of what detail holds, so it is purge-safe.

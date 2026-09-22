@@ -2089,5 +2089,447 @@
         ]
       }
     }
+  },
+  "governmentjobs": {
+    "kingcounty": {
+      "label": "King County",
+      "agency": "kingcounty",
+      "careers_url": "https://www.governmentjobs.com/careers/kingcounty",
+      "company_name": "King County",
+      "employer_domain": "kingcounty.gov",
+      "source_class": "direct-employer",
+      "sector": "government",
+      "scope_states": [
+        "WA"
+      ],
+      "verified": "2026-09-22 - NEOGOV/GovernmentJobs.com. AJAX index GET /careers/home/index?agency=kingcounty&page=N (X-Requested-With header), 10/page, stops on a real empty page (not the vendor total). Detail /careers/kingcounty/jobs/{id}/{slug} JSON-LD JobPosting (no identifier/url -> id from {id}.html filename, url from row href; description entity-encoded -> html.unescape + isolate_headings). All-WA; scope_states=[WA].",
+      "extraction": {
+        "_note": "Derived 2026-09-22 from this platform's OWN captures (748 descriptions across 5 WA agencies), NOT copied. Shared NEOGOV template: county/city lead with 'Minimum Qualifications', the state board with 'Required Qualifications'; Desired/Preferred = PREFERRED. Match modes colon+bare+prefix because NEOGOV often glues the bold heading to the prior sentence with no colon on its own line; 'qualifications to apply' handles the 'Minimum Qualifications TO APPLY:' infix variant. Adapter also block-breaks glued headings (isolate_headings). ~58% carry a findable section; the rest are prose-only.",
+        "openers": [
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "prefix"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "prefix"
+          },
+          {
+            "text": "qualifications to apply",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "bare"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "prefix"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "bare"
+          }
+        ]
+      }
+    },
+    "seattle": {
+      "label": "City of Seattle",
+      "agency": "seattle",
+      "careers_url": "https://www.governmentjobs.com/careers/seattle",
+      "company_name": "City of Seattle",
+      "employer_domain": "seattle.gov",
+      "source_class": "direct-employer",
+      "sector": "government",
+      "scope_states": [
+        "WA"
+      ],
+      "verified": "2026-09-22 - NEOGOV/GovernmentJobs.com. AJAX index GET /careers/home/index?agency=seattle&page=N (X-Requested-With header), 10/page, stops on a real empty page (not the vendor total). Detail /careers/seattle/jobs/{id}/{slug} JSON-LD JobPosting (no identifier/url -> id from {id}.html filename, url from row href; description entity-encoded -> html.unescape + isolate_headings). All-WA; scope_states=[WA].",
+      "extraction": {
+        "_note": "Derived 2026-09-22 from this platform's OWN captures (748 descriptions across 5 WA agencies), NOT copied. Shared NEOGOV template: county/city lead with 'Minimum Qualifications', the state board with 'Required Qualifications'; Desired/Preferred = PREFERRED. Match modes colon+bare+prefix because NEOGOV often glues the bold heading to the prior sentence with no colon on its own line; 'qualifications to apply' handles the 'Minimum Qualifications TO APPLY:' infix variant. Adapter also block-breaks glued headings (isolate_headings). ~58% carry a findable section; the rest are prose-only.",
+        "openers": [
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "prefix"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "prefix"
+          },
+          {
+            "text": "qualifications to apply",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "bare"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "prefix"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "bare"
+          }
+        ]
+      }
+    },
+    "piercecountywa": {
+      "label": "Pierce County WA",
+      "agency": "piercecountywa",
+      "careers_url": "https://www.governmentjobs.com/careers/piercecountywa",
+      "company_name": "Pierce County",
+      "employer_domain": "piercecountywa.gov",
+      "source_class": "direct-employer",
+      "sector": "government",
+      "scope_states": [
+        "WA"
+      ],
+      "verified": "2026-09-22 - NEOGOV/GovernmentJobs.com. AJAX index GET /careers/home/index?agency=piercecountywa&page=N (X-Requested-With header), 10/page, stops on a real empty page (not the vendor total). Detail /careers/piercecountywa/jobs/{id}/{slug} JSON-LD JobPosting (no identifier/url -> id from {id}.html filename, url from row href; description entity-encoded -> html.unescape + isolate_headings). All-WA; scope_states=[WA].",
+      "extraction": {
+        "_note": "Derived 2026-09-22 from this platform's OWN captures (748 descriptions across 5 WA agencies), NOT copied. Shared NEOGOV template: county/city lead with 'Minimum Qualifications', the state board with 'Required Qualifications'; Desired/Preferred = PREFERRED. Match modes colon+bare+prefix because NEOGOV often glues the bold heading to the prior sentence with no colon on its own line; 'qualifications to apply' handles the 'Minimum Qualifications TO APPLY:' infix variant. Adapter also block-breaks glued headings (isolate_headings). ~58% carry a findable section; the rest are prose-only.",
+        "openers": [
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "prefix"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "prefix"
+          },
+          {
+            "text": "qualifications to apply",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "bare"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "prefix"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "bare"
+          }
+        ]
+      }
+    },
+    "tacoma": {
+      "label": "City of Tacoma",
+      "agency": "tacoma",
+      "careers_url": "https://www.governmentjobs.com/careers/tacoma",
+      "company_name": "City of Tacoma",
+      "employer_domain": "tacoma.gov",
+      "source_class": "direct-employer",
+      "sector": "government",
+      "scope_states": [
+        "WA"
+      ],
+      "verified": "2026-09-22 - NEOGOV/GovernmentJobs.com. AJAX index GET /careers/home/index?agency=tacoma&page=N (X-Requested-With header), 10/page, stops on a real empty page (not the vendor total). Detail /careers/tacoma/jobs/{id}/{slug} JSON-LD JobPosting (no identifier/url -> id from {id}.html filename, url from row href; description entity-encoded -> html.unescape + isolate_headings). All-WA; scope_states=[WA].",
+      "extraction": {
+        "_note": "Derived 2026-09-22 from this platform's OWN captures (748 descriptions across 5 WA agencies), NOT copied. Shared NEOGOV template: county/city lead with 'Minimum Qualifications', the state board with 'Required Qualifications'; Desired/Preferred = PREFERRED. Match modes colon+bare+prefix because NEOGOV often glues the bold heading to the prior sentence with no colon on its own line; 'qualifications to apply' handles the 'Minimum Qualifications TO APPLY:' infix variant. Adapter also block-breaks glued headings (isolate_headings). ~58% carry a findable section; the rest are prose-only.",
+        "openers": [
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "prefix"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "prefix"
+          },
+          {
+            "text": "qualifications to apply",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "bare"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "prefix"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "bare"
+          }
+        ]
+      }
+    },
+    "washington": {
+      "label": "State of Washington",
+      "agency": "washington",
+      "careers_url": "https://www.governmentjobs.com/careers/washington",
+      "company_name": "State of Washington",
+      "employer_domain": "wa.gov",
+      "source_class": "direct-employer",
+      "sector": "government",
+      "scope_states": [
+        "WA"
+      ],
+      "verified": "2026-09-22 - NEOGOV/GovernmentJobs.com. AJAX index GET /careers/home/index?agency=washington&page=N (X-Requested-With header), 10/page, stops on a real empty page (not the vendor total). Detail /careers/washington/jobs/{id}/{slug} JSON-LD JobPosting (no identifier/url -> id from {id}.html filename, url from row href; description entity-encoded -> html.unescape + isolate_headings). All-WA; scope_states=[WA].",
+      "extraction": {
+        "_note": "Derived 2026-09-22 from this platform's OWN captures (748 descriptions across 5 WA agencies), NOT copied. Shared NEOGOV template: county/city lead with 'Minimum Qualifications', the state board with 'Required Qualifications'; Desired/Preferred = PREFERRED. Match modes colon+bare+prefix because NEOGOV often glues the bold heading to the prior sentence with no colon on its own line; 'qualifications to apply' handles the 'Minimum Qualifications TO APPLY:' infix variant. Adapter also block-breaks glued headings (isolate_headings). ~58% carry a findable section; the rest are prose-only.",
+        "openers": [
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "prefix"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "prefix"
+          },
+          {
+            "text": "qualifications to apply",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "bare"
+          },
+          {
+            "text": "desired qualifications",
+            "role": "PREFERRED",
+            "match": "prefix"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "bare"
+          }
+        ]
+      }
+    }
   }
 }

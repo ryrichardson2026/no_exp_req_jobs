@@ -14,7 +14,10 @@ import { LOGOS } from "./logos.js";
 // (employer_domain -> category, see config/tenant_category.json + normalize/enrich.py), NOT by a
 // title pattern, so it has no entry in normalize/category.py's CATEGORY_PATTERNS. Board-filter only;
 // deliberately absent from landing.js LANDING_CATS.
-export const CATEGORIES = ["Administrative","Customer Service","Sales","Retail","Grocery","Warehouse","Construction","Security","Facilities","Food Services","Transportation/Automotive"];
+// Government (12th, owner-approved 2026-09-22) is the same shape: a TENANT-assigned tag for the
+// NEOGOV/governmentjobs public-sector boards, whose civil-service titles do not map to the
+// function table (they fell UNCATEGORIZED). Board-filter only; not in LANDING_CATS.
+export const CATEGORIES = ["Administrative","Customer Service","Sales","Retail","Grocery","Warehouse","Construction","Security","Facilities","Food Services","Transportation/Automotive","Government"];
 export function recordCats(r){ return Array.isArray(r.category) ? r.category : (r.category ? [r.category] : []); }
 
 /* Presence filters. Facets group the employers' own raw values; the card and page
