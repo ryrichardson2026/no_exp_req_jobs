@@ -410,7 +410,13 @@ EXPLICIT_NONE_RX = (
 # may stand in for. This is WAIVED, distinct from EXPLICIT_NONE_RX above.
 WAIVER_RX = (
     r"\bin lieu of experience\b",
-    r"\bexperience (?:may|can|will) be (?:substituted|accepted)\b",
+    # NOTE: "experience (may|can|will) be substituted/accepted" was REMOVED (2026-09-22).
+    # It is backwards: "experience may be substituted for a degree" means experience is the
+    # SUBSTITUTE the applicant supplies when they lack the degree - the DEGREE is waived and
+    # experience is still required. Reading it as an experience waiver was the substitution-
+    # waiver false positive (ticket 16 Sep). Latent on the current board (0 matches), removed
+    # to close the path. A degree offered as the alternative to experience is likewise NOT a
+    # waiver - it stays REQUIRED via the experience clause / degree gate, no rule needed.
     # A high-school-level credential offered as an ALTERNATIVE to experience within one
     # clause ("HS diploma or equivalent, OR N years of verifiable experience"): a plain
     # diploma qualifies, so experience is not a barrier -> WAIVED. Scoped to HS/GED (NOT a
@@ -419,6 +425,20 @@ WAIVER_RX = (
     # one-clause substitution phrasing does. Measured on Allied; matched per requirement clause.
     r"\b(?:high school diploma|hs diploma|ged)\b[^.]*\bor\b[^.]*\b(?:years?|yrs?)\b[^.]*\bexperience\b",
 )
+
+# A credential-or-experience clause is a genuine waiver only when experience is the
+# ALTERNATIVE to the credential ("HS diploma or equivalent, OR 5 years experience" -> a plain
+# diploma qualifies). When the SAME clause ADDS an experience requirement on top of the
+# credential ("HS diploma or GED PLUS 1-2 years experience"), experience is required, not
+# waived - the "or" only separates the two diplomas. Such a clause must read as REQUIRED (the
+# experience bar in the clause), never WAIVED - the precedence correction, same class as the
+# "upon hire" bug. Keyed on ADDITIVE conjunctions only (plus / along with / in addition to /
+# as well as / together with), deliberately NOT "and" (too ambiguous: "diploma or equivalent,
+# or 5 years experience and a valid license" is still a genuine waiver). Engine-level English,
+# not tenant vocabulary. Measured: drops the Fred Meyer/Kroger over-match, keeps Allied.
+ADDITIVE_EXP_RX = re.compile(
+    r"\b(?:plus|along with|in addition to|as well as|together with)\b[^.]{0,80}\bexperience\b",
+    re.IGNORECASE)
 
 
 def parse_duration_months(s):
@@ -542,7 +562,8 @@ def derive_condition(reqs, found_required, zero_range_open=False, section_text="
         return NONE_NEEDED, explicit_none
 
     waiver = [r for r in reqs
-              if any(re.search(p, r["clause"].lower()) for p in WAIVER_RX)]
+              if any(re.search(p, r["clause"].lower()) for p in WAIVER_RX)
+              and not ADDITIVE_EXP_RX.search(r["clause"])]
     if waiver:
         return WAIVED, waiver
     if apply_exp:
