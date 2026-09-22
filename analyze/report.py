@@ -123,6 +123,21 @@ LICENSED_OCCUPATION_RX = re.compile(
 CAREER_PATH_OCCUPATION_RX = re.compile(
     r"\b(cna|certified nursing assistant|intern|internship)\b", re.IGNORECASE)
 
+# Degreed professional occupations where the TITLE carries the barrier - same
+# rationale as the licensed-occupation gate (the title IS the credential). An
+# "Accountant" (Staff/Senior/Project/Tax/Cost Accountant) is a degree-required
+# professional role; excluding by TITLE means a description that fails to sectionize
+# cannot read as no-experience. This is a SAFETY NET for exactly that miss: Compass's
+# salaried "PROJECT ACCOUNTANT" posts a logistics bullet "Requirement: In-office" that
+# the requirement-opener captures ahead of the real (colon-less) "Required
+# Qualifications" block - Bachelor's + 5+ years - yielding a false NONE_NEEDED.
+# Whole word only: entry accounting SUPPORT roles are titled "accounting clerk" /
+# "accounts payable associate" (no "accountant" token) and stay applicable.
+# Verified 2026-09-22: 7 board titles match, all degreed (Staff/Sr/Project/Tax); 0 entry.
+# "controller" is deliberately NOT here - "Air Logistics Controller" (aviation ops) is
+# a false friend; the financial Controller is left to a future management-gate call.
+PROFESSIONAL_OCCUPATION_RX = re.compile(r"\baccountant\b", re.IGNORECASE)
+
 # ---- gate 3: credential obtainability ---------------------------------------
 # Obtainable within ~90 days, no prerequisite -> passes.
 CREDENTIAL_QUICK_RX = re.compile(
@@ -247,6 +262,11 @@ def gate_exclusion(r):
     # career-path), not on obtainability. Same class as internships/apprenticeships.
     if CAREER_PATH_OCCUPATION_RX.search(title):
         return False, "occupation-career-path"
+    # Degreed professional occupation (accountant, ...): the title carries the
+    # degree/experience barrier; excluded here so a sectionize miss on the body can
+    # never read it as no-experience. Same class as the licensed-occupation gate.
+    if PROFESSIONAL_OCCUPATION_RX.search(title):
+        return False, "occupation-professional"
     # associate degree -> review (handled by caller as a separate bucket)
     if DEGREE_REVIEW_RX.search(edu):
         return False, "review-associate"
@@ -407,8 +427,8 @@ def main():
     p("\n\n### WHERE RECORDS FELL (first failing gate)\n")
     reasons = Counter(verdicts[id(r)] for r in recs)
     for k in ("applicable", "degree", "occupation-management", "occupation-licensed",
-              "occupation-career-path", "review-associate", "experience-required",
-              "credential", "prerequisite", "not-stated"):
+              "occupation-career-path", "occupation-professional", "review-associate",
+              "experience-required", "credential", "prerequisite", "not-stated"):
         p(f"  {reasons.get(k, 0):>6}  {k}")
 
     # ---- fill matrix ----
@@ -467,6 +487,7 @@ def main():
     p(f"  degree-exclude : {DEGREE_EXCLUDE_RX.pattern}")
     p(f"  degree-review  : {DEGREE_REVIEW_RX.pattern}")
     p(f"  management     : {MANAGEMENT_RX.pattern}")
+    p(f"  professional   : {PROFESSIONAL_OCCUPATION_RX.pattern}")
     p(f"  protect        : {PROTECT_RX.pattern}")
     p(f"  credential-ok  : {CREDENTIAL_QUICK_RX.pattern}")
     p("  NOTE: the occupation soft/hard split and the credential allowlist are this")

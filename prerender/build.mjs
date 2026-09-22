@@ -250,16 +250,25 @@ async function assembleDeploy(live, expiredBack, browse, lastmod = {}){
   // (stable — a job page's baked content doesn't change after posting), and the pull date for the
   // list/landing/browse pages that genuinely change every pull. Omitted when we have no honest
   // date, rather than fabricating "modified today" (which Google distrusts).
+  // Filename is sitemap-jobs.xml, NOT the conventional sitemap.xml: Search Console left the
+  // apex sitemap.xml stuck (submitted, never processed) despite it being valid and 200-ing.
+  // Resubmitting under a fresh URL is the standard way to force GSC to re-fetch from scratch.
+  // Served as a static file in out/, so Vercel returns it before any SPA rewrite (like robots.txt).
+  const SITEMAP = "sitemap-jobs.xml";
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + locs.map((u) => { const lm = lastmod[u];
         return "  <url><loc>" + base + u + "</loc>" + (lm ? "<lastmod>" + lm + "</lastmod>" : "") + "</url>"; }).join("\n")
     + "\n</urlset>\n";
-  await writeFile(join(OUT, "sitemap.xml"), xml, "utf8");
+  await writeFile(join(OUT, SITEMAP), xml, "utf8");
+  // The bake is incremental (no rm(OUT)), so a sitemap.xml from a prior bake would linger and
+  // ship frozen. Remove it: GSC seeing the old URL 404 helps it drop the stuck entry, and it
+  // leaves sitemap-jobs.xml as the single source of truth.
+  await rm(join(OUT, "sitemap.xml"), { force: true });
 
   // robots.txt — allow all + declare the sitemap. Written as a real file so Vercel serves it as
   // text/plain (its default for .txt), NOT routed through the SPA. Was missing (404) before.
   await writeFile(join(OUT, "robots.txt"),
-    "User-agent: *\nAllow: /\nSitemap: " + base + "/sitemap.xml\n", "utf8");
+    "User-agent: *\nAllow: /\nSitemap: " + base + "/" + SITEMAP + "\n", "utf8");
 
   // Unbaked browse routes (empty categories, jobless states) fall back to the SPA. Two
   // explicit rules — state root and sub-path with an unnamed (.*) wildcard — matching the
