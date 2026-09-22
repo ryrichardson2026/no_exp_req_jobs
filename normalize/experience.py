@@ -367,6 +367,37 @@ WORK_EXP_RX = re.compile(
     r"management|manager\w*|supervis\w*|leadership|retail|sales|warehouse|prior|previous|"
     r"proven|minimum|at\s+least|years?\s+of|yrs?\s+of|\d+\+?\s*(?:years?|yrs?|months?))\b", re.I)
 
+# Background-INVESTIGATION guard. A screening clause that LISTS 'experience' among the items a
+# background/eligibility check reviews ("must pass all phases ... driving record, credit history,
+# criminal history, experience ...") names no experience REQUIREMENT - it is what the check
+# examines, the same class as SERVICE_EXPERIENCE naming the service not the work history.
+# Untreated, the 'experience' cue types the whole posting REQUIRED (Tacoma Police Recruit - a
+# genuinely entry-level 'Recruit' role). Strip EXPERIENCE only when the clause is a background/
+# screening listing AND carries no real requirement signal (a duration or required/minimum/prior
+# keeps it -> fails SAFE to REQUIRED).
+BACKGROUND_LISTING_RX = re.compile(
+    r"\b(background (?:investigation|check|screening)|pass(?:ing)?\s+all\s+phases|"
+    r"eligibility list|criminal history|driving record|credit history|polygraph)\b", re.I)
+
+# Education-certificate guard. 'certificate' is a CREDENTIAL cue, but a high-school-equivalency
+# 'GED certificate' / 'high school certificate' is EDUCATION, not a gateable license, and a BARE
+# 'certificate' clause (a split artifact of 'G.E.D. certificate', where the '.' in G.E.D. splits
+# the clause) names no credential at all. Untreated, the credential GATE excludes the posting on a
+# non-allowlisted 'certificate' (King County / Pierce entry-level Corrections/Sheriff Deputy, whose
+# only quals are HS-diploma-or-GED + driver's license). Drop CREDENTIAL typing when the credential
+# signal is an education/bare certificate and NO hard credential is named -> fails SAFE.
+EDU_CERTIFICATE_RX = re.compile(
+    r"^\s*certificate\s*$"
+    r"|\b(?:ged|g\.e\.d|high school|secondary|equivalen\w*|diploma)\b[^.]{0,25}\bcertificate\b"
+    r"|\bcertificate\b[^.]{0,25}\b(?:of )?(?:completion|equivalency|attendance|high school|ged)\b",
+    re.I)
+HARD_CREDENTIAL_RX = re.compile(
+    r"\b(licen[sc]e[sd]?|\bcard\b|registration|registered|permit|endorsement|notary|"
+    r"food handler|food worker|food safety|servsafe|guard card|\bcpr\b|\bbls\b|\bacls\b|"
+    r"\bpals\b|first aid|\baed\b|forklift|osha|twic|\bcdl\b|"
+    r"(?:nurs|medic|teach|electric|plumb|weld|cosmetolog|barber|pharmac|real estate)\w*\s+"
+    r"(?:certificat|certified|certification))\b", re.I)
+
 # A completed trade apprenticeship is a multi-year runway even where no year count
 # appears - it is what separates the Painter (4y Journeyman) from the Engineer
 # (training will be on-the-job).
@@ -493,6 +524,22 @@ def classify_line(line, section_modality):
     if EXPERIENCE in types and months is None and SERVICE_EXPERIENCE_RX.search(low) \
             and not WORK_EXP_RX.search(low):
         types = [t for t in types if t != EXPERIENCE]
+        if not types:
+            return None
+
+    # Background-investigation guard: 'experience' listed among screened items is not a
+    # requirement (see BACKGROUND_LISTING_RX). Fails safe: a duration / required-signal keeps it.
+    if EXPERIENCE in types and months is None and BACKGROUND_LISTING_RX.search(low) \
+            and not EXP_REQ_SIGNAL.search(low):
+        types = [t for t in types if t != EXPERIENCE]
+        if not types:
+            return None
+
+    # Education-certificate guard: a GED / high-school / bare 'certificate' is education, not a
+    # gateable credential (see EDU_CERTIFICATE_RX). Only strips when no hard credential is named.
+    if CREDENTIAL in types and EDU_CERTIFICATE_RX.search(low) \
+            and not HARD_CREDENTIAL_RX.search(low):
+        types = [t for t in types if t != CREDENTIAL]
         if not types:
             return None
 
