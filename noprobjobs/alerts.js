@@ -25,6 +25,7 @@ import * as R from "./data/record.js";
 import * as L from "./data/resolve.js";
 import * as SB from "./data/supabase.js";
 import * as RT from "./data/routes.js";
+import { marketIndexPath, marketBySlug } from "./data/alertPages.js";
 
 const React = window.React;
 const BP = "(min-width:768px)";
@@ -1243,12 +1244,7 @@ class AlertsApp extends React.Component {
       h("script", { type: "application/ld+json", dangerouslySetInnerHTML: { __html: JSON.stringify(this.faqSchema()) } }));
   }
 
-  renderFooter(){
-    return h("footer", { style: s("flex:none;background:var(--ink)") },
-      h("div", { style: s("max-width:var(--rail,1120px);margin:0 auto;padding:14px;display:grid;justify-items:center;gap:6px") },
-        h("div", { style: s("font-size:14px;font-weight:600;color:var(--line);text-align:center") }, "Free for job seekers. No signup required to apply."),
-        h("a", { href: RT.PRIVACY_URL, target: "_blank", rel: "noopener noreferrer", style: s("min-height:44px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Privacy Policy")));
-  }
+  renderFooter(){ return siteFooter(CONTENT.marketSlug); }
 
   render(){
     return h("div", { className: "landing-scope", style: s("position:relative;display:flex;flex-direction:column;min-height:100%;background:var(--surface)") },
@@ -1271,6 +1267,50 @@ const mount = (data) => {
   const root = window.ReactDOM.createRoot(document.getElementById("root"));
   root.render(h(AlertsApp, { data }));
 };
+const mountIndex = (data) => {
+  const root = window.ReactDOM.createRoot(document.getElementById("root"));
+  root.render(h(AlertsIndex, { data }));
+};
+
+// Shared site footer (guide pages + the index). Market-aware: the "… job guides" link points at the
+// current page's market index (marketIndexPath); pass null to omit it (e.g. a marketless surface).
+const footerLink = "min-height:44px;display:inline-flex;align-items:center;font-size:13px;font-weight:600;color:var(--line)";
+function siteFooter(marketSlug){
+  const mk = marketSlug ? marketBySlug(marketSlug) : null;
+  return h("footer", { style: s("flex:none;background:var(--ink)") },
+    h("div", { style: s("max-width:" + RAIL + ";margin:0 auto;box-sizing:border-box;padding:16px 14px;display:grid;justify-items:center;gap:8px") },
+      h("div", { style: s("font-size:14px;font-weight:600;color:var(--line);text-align:center") }, "Free for job seekers. No signup required to apply."),
+      h("div", { style: s("display:flex;flex-wrap:wrap;justify-content:center;gap:4px 20px") },
+        marketSlug ? h("a", { key: "g", href: marketIndexPath(marketSlug), style: s(footerLink) }, (mk ? mk.name : "Washington") + " job guides") : null,
+        h("a", { key: "p", href: RT.PRIVACY_URL, target: "_blank", rel: "noopener noreferrer", style: s(footerLink) }, "Privacy Policy"))));
+}
+
+// The per-market index hub (/alerts/{market}/): a guides grid with live counts. Renders from the
+// index blob (kind:"index") that boot() detects — no signup form, it's a navigation/SEO hub.
+function AlertsIndex(props){
+  const d = props.data || { marketName: "Washington", marketSlug: "washington", guides: [] };
+  const wide = window.matchMedia(BP).matches;
+  const guides = d.guides || [];
+  const total = guides.reduce((sum, g) => sum + (g.count || 0), 0);
+  return h("div", { className: "landing-scope", style: s("position:relative;display:flex;flex-direction:column;min-height:100%;background:var(--surface)") },
+    h(Header, { productName: PRODUCT, alertsInHeader: false }),
+    h("section", { style: s("flex:none;background:linear-gradient(180deg,var(--fact) 0%,var(--surface) 72%);border-bottom:2px solid var(--ink)") },
+      h("div", { style: s("max-width:" + RAIL + ";margin:0 auto;box-sizing:border-box;padding:" + (wide ? "40px 24px 30px" : "26px 16px 22px") + ";display:grid;gap:12px;justify-items:start") },
+        h("h1", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:" + (wide ? "38px" : "27px") + ";line-height:1.08;letter-spacing:-0.01em;color:var(--ink)") }, d.marketName + " job guides"),
+        h("div", { style: s("font-size:16px;line-height:1.5;color:var(--ink-muted);text-wrap:pretty;max-width:46ch") }, "No-experience jobs in " + d.marketName + " by work type — what the work is, what it pays, how hiring works, and free alerts for each."),
+        total ? h("div", { style: s("font-size:14px;font-weight:800;color:var(--accent)") }, total.toLocaleString() + " no-experience jobs hiring right now") : null)),
+    h("main", { style: s("flex:1;max-width:" + RAIL + ";width:100%;margin:0 auto;box-sizing:border-box;padding:32px 16px 40px;display:grid;align-content:start") },
+      h("div", { style: s("display:grid;grid-template-columns:" + (wide ? "repeat(3,1fr)" : "1fr 1fr") + ";grid-auto-rows:1fr;gap:12px") },
+        guides.map((g, i) => h("div", { key: i, style: s("position:relative") },
+          h("span", { "aria-hidden": "true", style: s("position:absolute;inset:0;transform:translate(4px,4px);background:var(--mark);border:2px solid var(--ink);border-radius:3px") }),
+          h(Pressable, { tag: "a", href: g.path, className: "hv-bg-fact",
+              styleFor: (pd) => s("position:relative;height:100%;box-sizing:border-box;display:grid;align-content:start;gap:8px;min-height:104px;padding:15px;background:var(--surface-raised);border:2px solid var(--ink);border-radius:3px;text-decoration:none;transition:transform 45ms ease-out;" + (pd ? "transform:translate(4px,4px)" : "")) },
+            g.iconCat ? raw(catIconSvg(g.iconCat, 26)) : h("span", { style: s("display:block;height:26px") }),
+            h("div", { style: s("font-family:var(--font-display);font-weight:800;font-size:16px;line-height:1.2;color:var(--ink)") }, g.label),
+            h("div", { style: s("font-size:13px;font-weight:700;color:var(--accent)") }, g.count ? (g.count.toLocaleString() + " jobs hiring") : "Set an alert"),
+            h("div", { style: s("font-size:13px;font-weight:700;color:var(--ink-muted)") }, "View guide →")))))),
+    siteFooter(d.marketSlug));
+}
 // Data ships INLINE (baked by prerender/build.mjs) — no client query. Set today from the baked
 // pulledAt before first render, then mount. Fall back to an empty scaffold if the blob is missing.
 // Pick the page's content from the URL: /alerts/{market}/{category-slug}/ -> PAGES[slug].
@@ -1282,17 +1322,21 @@ function selectPage(){
   } catch (e) {}
   CONTENT = PAGES.retail;
 }
+// Index blob (kind:"index") -> the hub; otherwise a guide page: pick CONTENT from the path, then
+// mount from the inline slice. Empty guide scaffold only if the blob is missing (un-baked shell).
 const boot = () => {
-  selectPage();
   const el = document.getElementById("__npj_data");
   if (el) {
     try {
       const d = JSON.parse(el.textContent);
       if (d.pulledAt) R.setToday(d.pulledAt);
+      if (d.kind === "index") { mountIndex(d); return; }
+      selectPage();
       mount(d);
       return;
-    } catch (e) { /* malformed blob -> render empty scaffold */ }
+    } catch (e) { /* malformed blob -> render empty guide scaffold */ }
   }
+  selectPage();
   mount({ count: 0, maxPay: null, recent: [], otherCats: [], whosHiring: [], seasonalCount: 0, pulledAt: null });
 };
 boot();

@@ -12,6 +12,7 @@ import * as R from "./data/record.js";
 import * as L from "./data/resolve.js";
 import * as SB from "./data/supabase.js";
 import * as RT from "./data/routes.js";
+import { pagesForMarket, marketIndexPath } from "./data/alertPages.js";
 
 const React = window.React;
 const BP = "(min-width:768px)";
@@ -507,6 +508,27 @@ class LandingApp extends React.Component {
     );
   }
 
+  // "No-experience job guides" — the WA lander's link out to /alerts/washington/{category}/ guide
+  // pages (pay, hiring steps, free alerts). WA lander only (the national landing has no market
+  // context); rendered from the shared alertPages registry so new guides/geos appear automatically.
+  renderGuides(){
+    if (!isWaLander()) return null;
+    const guides = pagesForMarket("washington");
+    if (!guides.length) return null;
+    const cols = this.state.wide ? "repeat(3,1fr)" : "1fr 1fr";
+    return h("section", { style: s("display:grid;gap:var(--gap-block)") },
+      h("h2", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink)") }, "No-experience job guides"),
+      h("div", { style: s("font-size:15px;line-height:1.35;color:var(--ink-muted);text-wrap:pretty") }, "Pay, hiring steps and free alerts for each type of work in Washington."),
+      h("div", { style: s("display:grid;grid-template-columns:" + cols + ";grid-auto-rows:1fr;gap:12px") },
+        guides.map((g, i) => h("div", { key: i, style: s("position:relative") },
+          h("span", { "aria-hidden": "true", style: s("position:absolute;inset:0;transform:translate(4px,4px);background:var(--mark);border:2px solid var(--ink);border-radius:3px") }),
+          h(Pressable, { tag: "a", href: g.path, className: "hv-bg-fact",
+              styleFor: (pd) => s("position:relative;height:100%;box-sizing:border-box;display:flex;align-items:center;gap:9px;min-height:60px;padding:12px 14px;background:var(--surface-raised);border:2px solid var(--ink);border-radius:3px;text-decoration:none;transition:transform 45ms ease-out;" + (pd ? "transform:translate(4px,4px)" : "")) },
+            g.iconCat ? raw(catIconSvg(g.iconCat, 22)) : null,
+            h("span", { style: s("font-family:var(--font-display);font-weight:800;font-size:15px;line-height:1.15;color:var(--ink)") }, g.label))))),
+      h("a", { href: marketIndexPath("washington"), style: s("justify-self:start;min-height:44px;display:inline-flex;align-items:center;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:0.03em;color:var(--accent)") }, "See all job guides"));
+  }
+
   renderClosing(){
     return h("section", { style: s("margin:0 -14px;padding:16px 14px;background:var(--mark);display:grid;gap:10px;justify-items:center") },
       h(Pressable, { tag: "a", href: this.boardHref(), className: "hv-underline-none",
@@ -521,6 +543,7 @@ class LandingApp extends React.Component {
     return h("footer", { style: s("flex:none;background:var(--ink)") },
       h("div", { style: s("max-width:var(--rail,1120px);margin:0 auto;padding:12px 14px;display:grid;justify-items:center;gap:2px") },
         h("div", { style: s("display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px") },
+          h("a", { href: marketIndexPath("washington"), style: s("min-height:44px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Washington job guides"),
           h("a", { href: RT.PRIVACY_URL, target: "_blank", rel: "noopener noreferrer", style: s("min-height:44px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Privacy Policy"))
       )
     );
@@ -604,6 +627,7 @@ class LandingApp extends React.Component {
         this.renderRecent(),
         this.renderValueProps(),
         this.renderBrowse(),
+        this.renderGuides(),
         this.renderClosing()
       ),
       this.renderFooter(),

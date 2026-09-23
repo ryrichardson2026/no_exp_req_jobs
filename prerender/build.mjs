@@ -24,6 +24,7 @@ import { jobPath, browsePath, CAT_SLUG, STATE_SLUG, backTo } from "../noprobjobs
 import { LAUNCHED_STATES, SUPPRESSED_EMPLOYERS, isPublished } from "../noprobjobs/data/published.js";
 import * as PM from "../noprobjobs/data/pageMeta.js";
 import * as R from "../noprobjobs/data/record.js";
+import { ALERT_PAGES, ALERT_MARKETS, pagesForMarket, marketIndexPath } from "../noprobjobs/data/alertPages.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SITE = join(HERE, "..", "noprobjobs");
@@ -76,40 +77,11 @@ const MOBILE = { width: 412, height: 915, deviceScaleFactor: 2, isMobile: true, 
 // state-browse machinery entirely (no filtering, no state param). Trailing slash to match how
 // every other baked route is written and how trailingSlash serves it.
 const WA_LANDER = "/washington-jobs/";
-// Alert-signup landing pages — one job-type × market page each (spec: one page, no generator yet).
-// Baked like a landing page but served from alerts.html (→ alerts.js) with live slice data inlined
-// as __npj_data by serve(). Title/description mirror the CONTENT object in alerts.js — keep in sync.
-const ALERTS = [
-  { path: "/alerts/washington/retail/", state: "WA", category: "Retail",
-    title: "Retail Jobs, No Experience Needed | Washington | NoProbJobs",
-    description: "Retail jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
-  { path: "/alerts/washington/food-services/", state: "WA", category: "Food Services",
-    title: "Food Service Jobs, No Experience Needed | Washington | NoProbJobs",
-    description: "Food service jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
-  { path: "/alerts/washington/security/", state: "WA", category: "Security",
-    title: "Security Jobs, No Experience Needed | Washington | NoProbJobs",
-    description: "Security jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
-  { path: "/alerts/washington/warehouse/", state: "WA", category: "Warehouse",
-    title: "Warehouse Jobs, No Experience Needed | Washington | NoProbJobs",
-    description: "Warehouse jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
-  { path: "/alerts/washington/grocery/", state: "WA", category: "Grocery",
-    title: "Grocery Jobs, No Experience Needed | Washington | NoProbJobs",
-    description: "Grocery jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
-  { path: "/alerts/washington/transportation-automotive/", state: "WA", category: "Transportation/Automotive",
-    title: "Driving & Automotive Jobs, No Experience Needed | Washington | NoProbJobs",
-    description: "Driving and automotive jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
-  { path: "/alerts/washington/sales/", state: "WA", category: "Sales",
-    title: "Sales Jobs, No Experience Needed | Washington | NoProbJobs",
-    description: "Sales jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
-  { path: "/alerts/washington/facilities/", state: "WA", category: "Facilities",
-    title: "Facilities Jobs, No Experience Needed | Washington | NoProbJobs",
-    description: "Facilities jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
-  // Healthcare is a SECTOR, not a board category — scope by employer (the healthcare tenants).
-  { path: "/alerts/washington/healthcare/", state: "WA", employers: ["multicare.org"],
-    title: "Hospital & Healthcare Jobs, No Experience Needed | Washington | NoProbJobs",
-    description: "Non-clinical hospital and healthcare jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
-];
-const ALERT_PATHS = ALERTS.map((a) => a.path);
+// Alert-signup guide pages + a per-market index hub. The page list is the shared registry in
+// noprobjobs/data/alertPages.js (also read by the WA lander's guides section + the footer), so a new
+// page or geo touches one file. Baked from alerts.html (→ alerts.js); live slice inlined by serve().
+const ALERTS = ALERT_PAGES;
+const ALERT_PATHS = [...ALERT_PAGES.map((p) => p.path), ...Object.keys(ALERT_MARKETS).map(marketIndexPath)];
 
 // Live data for one /alerts/{market}/{category}/ page, computed from the published jobs_list the
 // SAME way the listing view derives it: "applicable" = the board's default exp facets (none +
@@ -631,6 +603,15 @@ async function main(){
   for (const a of ALERTS) {
     cache.alertsByPath[a.path] = alertSlice(list, a, cache.pulledAt);
     routes.push({ type: "alerts", path: a.path, url: null, meta: { title: a.title, description: a.description } });
+  }
+  // Per-market index hub (/alerts/{market}/) — the guides grid with live counts; the footer links here.
+  for (const ms of Object.keys(ALERT_MARKETS)) {
+    const mk = ALERT_MARKETS[ms];
+    const guides = pagesForMarket(ms).map((p) => ({ label: p.label, iconCat: p.iconCat || null, path: p.path, count: (cache.alertsByPath[p.path] || {}).count || 0 }));
+    cache.alertsByPath[marketIndexPath(ms)] = { kind: "index", marketSlug: ms, marketName: mk.name, guides, pulledAt: cache.pulledAt || null };
+    routes.push({ type: "alerts", path: marketIndexPath(ms), url: null, meta: {
+      title: mk.name + " Job Guides — No Experience Needed | NoProbJobs",
+      description: "No-experience job guides for " + mk.name + " by work type: pay, hiring steps, and free alerts for each." } });
   }
 
   const server = serve(cache);
