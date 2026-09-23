@@ -111,25 +111,42 @@ def log(tenant, event, **fields):
 # http
 # --------------------------------------------------------------------------
 
-def fetch_page(tenant, headers, offset, limit=PAGE_LIMIT):
-    url = f"{os.environ.get('NEJN_SCHEME','https')}://{tenant['host']}{LIST_PATH}"
-    # limit and offset MUST live inside the finder string. As top-level URL params
-    # they are silently ignored: the framework paginates the outer items array
-    # (always one wrapper element), not the inner requisitionList, so every page
-    # returns the same first 25 records. Inside the finder they paginate the
-    # requisitions and the 25-cap is lifted (limit=100 returns 100).
+def build_finder(tenant, offset, limit=PAGE_LIMIT):
+    """The findReqs finder string, including any config-driven server-side facet
+    scope. Pure (no I/O) so the scope logic is unit-testable without the network.
+
+    limit and offset MUST live inside the finder string. As top-level URL params
+    they are silently ignored: the framework paginates the outer items array
+    (always one wrapper element), not the inner requisitionList, so every page
+    returns the same first 25 records. Inside the finder they paginate the
+    requisitions and the 25-cap is lifted (limit=100 returns 100)."""
     finder = (
         f"findReqs;siteNumber={tenant['site_number']},sortBy=POSTING_DATES_DESC,"
         f"limit={limit},offset={offset}"
     )
-    # Server-side facet filters, config-driven. Kroger's board is 12,140 and the
-    # endpoint stops paginating past offset 10000, so the oldest ~2,140 records
-    # (any WA posting among them) are unreachable client-side. Passing the WA
-    # locationId as a bare finder variable makes the server return only the WA
-    # subset, which fits under the ceiling. Absent key -> no change in behaviour,
+    # Server-side facet filters, config-driven. TWO scoping axes ride here, both
+    # opaque: LOCATION (selectedLocationsFacet) - Kroger's board is 12,140 and the
+    # endpoint stops paginating past offset 10000, so passing the WA locationId
+    # makes the server return only the WA subset, which fits under the ceiling -
+    # and CATEGORY (selectedCategoriesFacet), the second axis, e.g. keep only a
+    # hospital's non-clinical categories. Absent key -> no change in behaviour,
     # and never a tenant branch: the values live in config, the mechanism here.
     for k, v in (tenant.get("finder_extra") or {}).items():
+        # A facet may carry several values. The vendor's multi-value delimiter
+        # INSIDE a finder variable is a bare ';' (measured on Providence: two
+        # category ids joined by ';' return their exact union; '%3B' and '|'
+        # return zero). Joining here is pure request syntax - the values stay
+        # opaque facet ids from config, never a category NAME in adapter code, so
+        # the source taxonomy never leaks into the board category.
+        if isinstance(v, (list, tuple)):
+            v = ";".join(str(x) for x in v)
         finder += f",{k}={v}"
+    return finder
+
+
+def fetch_page(tenant, headers, offset, limit=PAGE_LIMIT):
+    url = f"{os.environ.get('NEJN_SCHEME','https')}://{tenant['host']}{LIST_PATH}"
+    finder = build_finder(tenant, offset, limit)
     params = {
         "onlyData": "true",
         "expand": EXPAND,

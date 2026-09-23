@@ -150,6 +150,42 @@
             "match": "colon"
           }
         ]
+      },
+      "category_facet": {
+        "_note": "INERT DOCUMENTATION, not active scope. Providence is suppressed and is NOT re-added by this capture. This block records the vendor's own CATEGORIES facet (the second scoping axis, beside location) so a future editor can pick category ids by name without re-probing. To ACTIVATE a category scope, add a finder_extra block (see _example_scope) - the adapter joins a list value with the vendor ';' delimiter and passes the opaque ids through; no category NAME ever lives in adapter code, and the source taxonomy here NEVER sets the board category[] (that is derived from title + tenant_category.json in enrich.py; source_category is stored separately, verbatim).",
+        "platform_param": "selectedCategoriesFacet",
+        "multi_value_delimiter": ";",
+        "location_param": "selectedLocationsFacet",
+        "captured": {
+          "date": "2026-09-23",
+          "method": "list endpoint facetsList=CATEGORIES, selectedLocationsFacet=<WA state facet>; facet caps at 10 buckets so the tail was enumerated by keyword-probe + one exact WA+category count per id",
+          "market": "washington",
+          "location_facet_id": 300000004686048,
+          "location_facet_name": "WA, United States",
+          "board_total_all_states": 2021,
+          "wa_total": 845,
+          "categories_distinct_wa": 53
+        },
+        "non_clinical_candidates_wa": {
+          "_note": "Function-based, plausibly entry-level - the set a non-clinical scope would keep. Sum ~121 records WA (a prior full pull yielded ~45 applicable after the no-experience gate). Clinical/licensed categories (Nursing 202, Patient Care Non-Acute 124, Diagnostic Imaging 78, Rehabilitation 63, Pharmacy 23, etc., ~700 WA) are deliberately omitted here.",
+          "300000055008090": {"name": "Patient Access", "wa": 44},
+          "300000054987331": {"name": "Facilities Management", "wa": 15},
+          "300000055008036": {"name": "Food Preparation/Service", "wa": 14},
+          "300000055008081": {"name": "Facilities Security/Safety", "wa": 12},
+          "300000055224410": {"name": "Environmental Services", "wa": 10},
+          "300000055224413": {"name": "Administrative Support", "wa": 10},
+          "300000055008114": {"name": "Technical Services", "wa": 10},
+          "300000055007988": {"name": "Patient Financial Services", "wa": 5},
+          "300000054987358": {"name": "Materials Management", "wa": 1},
+          "300000055008045": {"name": "Logistics", "wa": 1}
+        },
+        "_example_scope": {
+          "_comment": "How to activate a WA non-clinical scope when/if Providence is re-onboarded (a SEPARATE task). Copy into the providence object as \"finder_extra\". location_filter still runs client-side as the authority.",
+          "finder_extra": {
+            "selectedLocationsFacet": 300000004686048,
+            "selectedCategoriesFacet": [300000055008090, 300000054987331, 300000055008036, 300000055008081, 300000055224410, 300000055224413, 300000055008114, 300000055007988, 300000054987358, 300000055008045]
+          }
+        }
       }
     },
     "kroger": {
