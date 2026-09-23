@@ -17,7 +17,7 @@ import { LOGOS } from "./logos.js";
 // Government (12th, owner-approved 2026-09-22) is the same shape: a TENANT-assigned tag for the
 // NEOGOV/governmentjobs public-sector boards, whose civil-service titles do not map to the
 // function table (they fell UNCATEGORIZED). Board-filter only; not in LANDING_CATS.
-export const CATEGORIES = ["Administrative","Customer Service","Sales","Retail","Grocery","Warehouse","Construction","Security","Facilities","Food Services","Transportation/Automotive","Government"];
+export const CATEGORIES = ["Administrative","Customer Service","Sales","Retail","Grocery","Warehouse","Construction","Security","Facilities","Food Services","Transportation/Automotive","Government","Healthcare"];
 export function recordCats(r){ return Array.isArray(r.category) ? r.category : (r.category ? [r.category] : []); }
 
 /* Presence filters. Facets group the employers' own raw values; the card and page

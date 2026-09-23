@@ -1755,6 +1755,52 @@
         "absent_barrier_is_none_needed": true
       },
       "verified": "DRAFT 2026-09-18 - Phenom, SEASONAL/DORMANT (WA=0 now, national 134; Christmas pop-up jobs appear ~Oct-Dec). allow_zero_records=true so its empty WA scope does NOT halt the daily publish (run_pull.py zero-records exemption); run_pull prints a loud activation line + surfaces jobs as 'entered' when WA opens. No baseline row by design (set one when it activates). Shares template + fallback with spencers/spirithalloween. LIVE in --all (pull.json), dormant (WA=0); no baseline until it activates."
+    },
+    "davita": {
+      "label": "DaVita",
+      "careers_base": "https://careers.davita.com",
+      "widgets_url": "https://careers.davita.com/widgets",
+      "detail_url_tmpl": "https://careers.davita.com/job/{pid}",
+      "detail_pid_field": "jobId",
+      "detail_source": "ddo",
+      "employer_domain": "davita.com",
+      "source_class": "direct-employer",
+      "sector": "healthcare",
+      "state": "WA",
+      "page_size": 50,
+      "search_body": {
+        "lang": "en_us",
+        "deviceType": "desktop",
+        "country": "us",
+        "pageName": "search-results",
+        "subsearch": "",
+        "jobs": true,
+        "counts": true,
+        "keywords": "Patient Care Technician",
+        "global": false,
+        "sortBy": "Most relevant",
+        "locationData": {}
+      },
+      "selected_fields": {
+        "state": [
+          "Washington"
+        ]
+      },
+      "location_filter": {
+        "_note": "state field is the FULL NAME 'Washington'. Chrome-validated 2026-09-23: keywords 'Patient Care Technician' + state:['WA'] -> 0 hits, state:['Washington'] -> 17 (national total 1146, diagnostic only). Opposite of Spencer's 'WA'-code convention - measured on THIS capture, not inherited. National board scoped to PCT + WA; TX expansion = add 'Texas' here and to selected_fields.state.",
+        "field": "state",
+        "match_any": [
+          "Washington"
+        ]
+      },
+      "extraction": {
+        "_note": "Derived from THIS employer's 17 WA Patient Care Technician descriptions (2026-09-23, Chrome), nothing inherited. Uniform template: a bare 'Requirements' heading (its own <p> line, 17/17) delimits the REQUIRED section - HS diploma/GED + physical/soft skills, NO work-experience requirement measured. A 'Preferred:' colon heading (16/17) lists preferred certs OR healthcare experience. So PCT types NONE_NEEDED/PREFERRED, credentials PREFERRED -> applicable (the no-experience role the scope targets).",
+        "openers": [
+          {"text": "requirements", "role": "REQUIRED", "match": "bare"},
+          {"text": "preferred", "role": "PREFERRED", "match": "colon"}
+        ]
+      },
+      "verified": "DRAFT 2026-09-23 (GATEs 1-3, Chrome + phenom extractor). Phenom (tenant DAVIUS), Workday apply. INDEX = refineSearch, byte-identical shape (Case A on phenom). DETAIL has NO JobPosting JSON-LD; full description lives in the server-rendered phApp.ddo -> new DATA-DRIVEN phenom options detail_source:'ddo' + detail_pid_field:'jobId' (bare /job/{jobId} carries the DDO). Scoped to the PCT keyword + state 'Washington' = 17 WA jobs, all genuine PCT. sector healthcare; category assigned by tenant (davita.com -> Healthcare, tenant_category.json). NOT in --all/pull.json until signed off."
     }
   },
   "appcast": {

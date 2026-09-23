@@ -58,10 +58,11 @@ def _load_tenant_category():
             cfg = json.load(fh)
     except FileNotFoundError:
         return {}, ()
-    return cfg.get("map", {}), tuple(cfg.get("keep_categories", []))
+    return (cfg.get("map", {}), tuple(cfg.get("keep_categories", [])),
+            {k: v for k, v in cfg.get("add", {}).items() if not k.startswith("_")})
 
 
-TENANT_CATEGORY, KEEP_CATEGORIES = _load_tenant_category()
+TENANT_CATEGORY, KEEP_CATEGORIES, TENANT_CATEGORY_ADD = _load_tenant_category()
 
 
 def tenant_of(path):
@@ -96,6 +97,13 @@ def enrich_records(recs, openers):
         if forced:
             keep = [c for c in cats if c in KEEP_CATEGORIES]
             cats = [forced] + keep
+        # Additive SECTOR tag (config/tenant_category.json "add"), e.g. a healthcare employer:
+        # keeps ALL the title/functional categories and appends the sector as a SECOND tag (a
+        # MultiCare cafeteria cook -> Food Services + Healthcare). A title with no functional match
+        # (PCT, patient transporter) already collapsed to [], so it gets Healthcare alone.
+        add = TENANT_CATEGORY_ADD.get(r.get("employer_domain"))
+        if add and add not in cats:
+            cats = cats + [add]
         r["category"] = cats
         if xo["section_found"]:
             counts["section_found"] += 1

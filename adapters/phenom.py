@@ -122,12 +122,17 @@ def job_id(job):
     return None
 
 
-def job_pid(job):
+def job_pid(job, tenant=None):
+    # Which index-record id builds the detail URL. Default = jobSeqNo (most Phenom sites); a
+    # tenant whose detail path keys on a different field declares it as config data
+    # (detail_pid_field: "jobId" for DaVita), never a tenant branch in code.
+    if tenant and tenant.get("detail_pid_field"):
+        return job.get(tenant["detail_pid_field"])
     return job.get("jobSeqNo") or job.get("jobId")
 
 
 def detail_url(tenant, job):
-    return tenant["detail_url_tmpl"].format(pid=job_pid(job))
+    return tenant["detail_url_tmpl"].format(pid=job_pid(job, tenant))
 
 
 def in_scope(job, tenant):
@@ -207,6 +212,29 @@ def extract_jobposting(html):
     return None
 
 
+# Some Phenom sites (DaVita) serve NO JobPosting JSON-LD; the full description is server-rendered
+# in the phApp.ddo object as a single JSON-escaped "description" string (one substantive occurrence
+# in the page). Config opts in with detail_source:"ddo" — data-driven, no tenant branch.
+def _ddo_description(html_text):
+    m = re.search(r'"description"\s*:\s*("(?:[^"\\]|\\.)*")', html_text or "")
+    if not m:
+        return None
+    try:
+        return json.loads(m.group(1))   # JSON-decode: < -> '<', escaped quotes, entities
+    except ValueError:
+        return None
+
+
+def extract_detail(html_text, tenant):
+    """The detail record fed to map_record. detail_source:"jsonld" (default) -> the JobPosting
+    JSON-LD dict; "ddo" -> a minimal {"description": ...} from phApp.ddo. Either way map_record
+    only REQUIRES `description` (title/date/employment_type fall back to the index record)."""
+    if (tenant.get("detail_source") or "jsonld") == "ddo":
+        desc = _ddo_description(html_text)
+        return {"description": desc} if desc else None
+    return extract_jobposting(html_text)
+
+
 def mode_inspect(tenant):
     """Fetch one in-scope job's detail page and print the JobPosting JSON-LD fields + fill.
 
@@ -227,12 +255,13 @@ def mode_inspect(tenant):
     print(f"status {d.status_code}, {len(d.content)} bytes\n")
     if d.status_code != 200:
         return 1
-    jp = extract_jobposting(d.text)
+    src = tenant.get("detail_source") or "jsonld"
+    jp = extract_detail(d.text, tenant)
     if not jp:
-        print("NO JobPosting JSON-LD found. The detail parse assumption is wrong -")
+        print(f"NO detail description found (detail_source={src}). The parse assumption is wrong -")
         print("stop and re-derive before running --detail.")
         return 1
-    print("JOBPOSTING FIELDS\n")
+    print(f"DETAIL FIELDS (source={src})\n")
     for k in sorted(jp):
         v = jp[k]
         s = v if isinstance(v, str) else json.dumps(v)
@@ -326,14 +355,14 @@ def mode_detail(tenant):
             body = r.text
             with open(out, "w", encoding="utf-8") as fh:
                 fh.write(body)
-            if not extract_jobposting(body):
+            if not extract_detail(body, tenant):
                 no_ld += 1
             done += 1
             if done % 25 == 0:
                 print(f"  [{i}/{len(unique)}] {done} fetched")
         time.sleep(DELAY_SECONDS)
     print(f"\ndetail complete: {done} fetched, {skipped} on disk, {failed} failed")
-    print(f"pages with no JSON-LD block: {no_ld}")
+    print(f"pages with no detail description: {no_ld}")
     log(tenant, "detail", scoped=len(unique), fetched=done, skipped=skipped,
         failed=failed, no_ldjson=no_ld)
     return 0
@@ -517,7 +546,7 @@ def mode_normalize(t):
         ld = None
         if os.path.exists(detail_file):
             with open(detail_file, "r", encoding="utf-8") as fh:
-                ld = extract_jobposting(fh.read())
+                ld = extract_detail(fh.read(), t)
         if not ld:
             no_detail += 1
         rec, w = map_record(job, ld, t, retrieved)
@@ -536,7 +565,7 @@ def mode_normalize(t):
             fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
     print(f"{len(unique)} in-scope -> {len(mapped)} normalized "
-          f"({no_detail} had no JSON-LD detail) -> {out_path}")
+          f"({no_detail} had no detail description) -> {out_path}")
     print(f"\nFILL RATE\n")
     for f, n, pct in model.fill_report(mapped):
         print(f"  {n:>5}  {pct:>5.1f}%  {f}")
