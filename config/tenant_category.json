@@ -16,10 +16,11 @@
     "tacoma.gov": "Government",
     "wa.gov": "Government"
   },
-  "_add_comment": "The 'add' map is a SECTOR tag ADDED as a SECOND category - it never replaces the title categories, unlike 'map'. A healthcare employer's jobs keep their functional category (a MultiCare cafeteria cook stays Food Services, a security officer stays Security) AND gain Healthcare; a title with no functional match (patient transporter, PCT) gets Healthcare alone (the empty [] + Healthcare). Owner-approved 2026-09-23: DaVita (PCT-scoped) + MultiCare -> Healthcare, double-tagged.",
+  "_add_comment": "The 'add' map is a SECTOR tag ADDED as a SECOND category - it never replaces the title categories, unlike 'map'. A healthcare employer's jobs keep their functional category (a MultiCare cafeteria cook stays Food Services, a security officer stays Security) AND gain Healthcare; a title with no functional match (patient transporter, PCT, Patient Access) gets Healthcare alone (the empty [] + Healthcare). Owner-approved 2026-09-23: DaVita (PCT-scoped) + MultiCare + Providence (non-clinical-scoped) -> Healthcare, double-tagged.",
   "add": {
     "davita.com": "Healthcare",
-    "multicare.org": "Healthcare"
+    "multicare.org": "Healthcare",
+    "providence.org": "Healthcare"
   },
   "keep_categories": ["Warehouse", "Security"]
 }
