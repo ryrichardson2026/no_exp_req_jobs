@@ -92,6 +92,22 @@ const ALERTS = [
   { path: "/alerts/washington/warehouse/", state: "WA", category: "Warehouse",
     title: "Warehouse Jobs, No Experience Needed | Washington | NoProbJobs",
     description: "Warehouse jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
+  { path: "/alerts/washington/grocery/", state: "WA", category: "Grocery",
+    title: "Grocery Jobs, No Experience Needed | Washington | NoProbJobs",
+    description: "Grocery jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
+  { path: "/alerts/washington/transportation-automotive/", state: "WA", category: "Transportation/Automotive",
+    title: "Driving & Automotive Jobs, No Experience Needed | Washington | NoProbJobs",
+    description: "Driving and automotive jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
+  { path: "/alerts/washington/sales/", state: "WA", category: "Sales",
+    title: "Sales Jobs, No Experience Needed | Washington | NoProbJobs",
+    description: "Sales jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
+  { path: "/alerts/washington/facilities/", state: "WA", category: "Facilities",
+    title: "Facilities Jobs, No Experience Needed | Washington | NoProbJobs",
+    description: "Facilities jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
+  // Healthcare is a SECTOR, not a board category — scope by employer (the healthcare tenants).
+  { path: "/alerts/washington/healthcare/", state: "WA", employers: ["multicare.org"],
+    title: "Hospital & Healthcare Jobs, No Experience Needed | Washington | NoProbJobs",
+    description: "Non-clinical hospital and healthcare jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
 ];
 const ALERT_PATHS = ALERTS.map((a) => a.path);
 
@@ -99,10 +115,15 @@ const ALERT_PATHS = ALERTS.map((a) => a.path);
 // SAME way the listing view derives it: "applicable" = the board's default exp facets (none +
 // preferred, i.e. R.expFacet != null), scoped to the market (state or null-state) and category.
 // Inlined by serve() so the page bakes with real content and the runtime needs no query.
-function alertSlice(list, state, category, pulledAt){
+function alertSlice(list, entry, pulledAt){
+  const { state, category, employers } = entry;
   const applicable = (r) => R.expFacet(r.experience_condition) != null;
   const inMarket = (r) => r.state === state || r.state == null;
-  const slice = list.filter((r) => inMarket(r) && applicable(r) && R.recordCats(r).indexOf(category) >= 0);
+  // Category pages scope by the job's category tag; a SECTOR page (e.g. Healthcare — not a board
+  // category) scopes by employer_domain instead. `listBase` is where the per-employer links point.
+  const inScope = employers ? (r) => employers.indexOf(r.employer_domain) >= 0 : (r) => R.recordCats(r).indexOf(category) >= 0;
+  const slice = list.filter((r) => inMarket(r) && applicable(r) && inScope(r));
+  const listBase = employers ? ("/" + STATE_SLUG[state] + "/") : browsePath(state, category);
 
   // highest employer-STATED hourly rate, floored to a whole dollar so "up to $X" never overstates.
   let maxPay = null;
@@ -127,7 +148,7 @@ function alertSlice(list, state, category, pulledAt){
     (byCo[key] = byCo[key] || { company: R.companyLabel(r.company_name), slug: key, count: 0 }).count++;
   }
   const whosHiring = Object.values(byCo).sort((a, b) => b.count - a.count || a.company.localeCompare(b.company)).slice(0, 6)
-    .map((e) => ({ company: e.company, count: e.count, href: browsePath(state, category) + "?emp=" + e.slug }));
+    .map((e) => ({ company: e.company, count: e.count, href: listBase + "?emp=" + e.slug }));
 
   // other categories in this market with live applicable jobs, current one excluded.
   const marketApplicable = list.filter((r) => inMarket(r) && applicable(r));
@@ -608,7 +629,7 @@ async function main(){
   // __npj_data, and register the route (baked as its own type; alerts.html shell + alerts.js).
   cache.alertsByPath = {};
   for (const a of ALERTS) {
-    cache.alertsByPath[a.path] = alertSlice(list, a.state, a.category, cache.pulledAt);
+    cache.alertsByPath[a.path] = alertSlice(list, a, cache.pulledAt);
     routes.push({ type: "alerts", path: a.path, url: null, meta: { title: a.title, description: a.description } });
   }
 
