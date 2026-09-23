@@ -83,6 +83,9 @@ const ALERTS = [
   { path: "/alerts/washington/retail/", state: "WA", category: "Retail",
     title: "Retail Jobs, No Experience Needed | Washington | NoProbJobs",
     description: "Retail jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
+  { path: "/alerts/washington/food-services/", state: "WA", category: "Food Services",
+    title: "Food Service Jobs, No Experience Needed | Washington | NoProbJobs",
+    description: "Food service jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
 ];
 const ALERT_PATHS = ALERTS.map((a) => a.path);
 

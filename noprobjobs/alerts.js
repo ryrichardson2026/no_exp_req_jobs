@@ -1,8 +1,9 @@
-/* Alert-signup landing page — ONE job-type × market page (page 1: Washington × Retail).
+/* Alert-signup landing pages — one job-type × market page each (WA Retail, WA Food Service, …).
    Destination for social / groups / ads; message-matched to the job type; goal is alert signups.
 
-   Built as a copy-me template: EVERY text value lives in the CONTENT object below, so the next
-   page (a different market×category) is a copy of this file with new CONTENT values, not a rebuild.
+   ONE component, many pages: every text value lives in the PAGES map below (keyed by the category
+   slug in the URL). boot() picks the entry from the path; adding a page = a PAGES key + a build.mjs
+   ALERTS row. The design/structure is shared, so a style fix hits every page at once.
    Live data (count, max stated pay, 6 recent jobs, top employers, other-category counts) is baked
    inline by prerender/build.mjs into a <script id="__npj_data"> blob and read in boot() — no client
    query, same pattern as the landing / WA lander. Never commit the generated blob.
@@ -40,9 +41,13 @@ const GAP_SUB = "28px";       // between the info block's subsections
 const GAP_BLOCK = "15px";     // header -> content within a section
 
 // ────────────────────────────────────────────────────────────────────────────
-// CONTENT — the ONLY place to edit for the next page. Copy this file, change these values.
+// PAGES — one entry per alert page, keyed by the category slug in the URL
+// (/alerts/{market}/{category}/). To add a page: add a key here + a row in build.mjs ALERTS.
+// `CONTENT` is set to the right entry at boot() from the path. Every text value lives here.
 // ────────────────────────────────────────────────────────────────────────────
-const CONTENT = {
+const PAGES = {
+
+  retail: {
   // ── identity (must match a data/record.js CATEGORIES value + a launched market) ──
   market: "WA",
   marketName: "Washington",
@@ -80,6 +85,8 @@ const CONTENT = {
     heading: "The Retail Job Market in Washington State",
 
     whatTheWork: "Retail jobs put you on a store floor: helping customers, running a register, stocking shelves, keeping the store in order, and processing returns or online pickup orders. Most stores train you on the job. You need to be reliable, friendly with customers, and available for the shifts they need.",
+
+    credential: null,
 
     payHeading: "What retail pays in Washington",
     payIntro: "Washington has the highest statewide minimum wage in the country, so retail pay here starts higher than almost anywhere else.",
@@ -120,7 +127,7 @@ const CONTENT = {
 
     leadsHeading: "Where retail can lead",
     leadsIntro: "Many retail workers move up within the store:",
-    leadsPath: ["Sales associate / cashier", "Shift lead or key holder (opens and closes the store, runs a shift)", "Supervisor or department lead (typically $30/hr in Washington)", "Assistant store manager / store manager"],
+    leadsPaths: [["Sales associate / cashier", "Shift lead or key holder (opens and closes the store, runs a shift)", "Supervisor or department lead (typically $30/hr in Washington)", "Assistant store manager / store manager"]],
     leadsNote: "Retail experience also carries over to customer service roles, which in Washington typically pay around $28/hr.",
   },
 
@@ -133,11 +140,116 @@ const CONTENT = {
     ["Will I need a resume?", "Many employers ask for one in their application. You don’t need one to browse or get alerts on NoProbJobs."],
     ["How fast can I get hired?", "For hourly store roles, often within one to two weeks from applying. Seasonal hiring can move faster."],
   ],
-};
+  },
 
-// UTM for every outbound listing link (spec).
-const LINK_UTM = "utm_source=alerts_page&utm_medium=internal&utm_campaign=" + CONTENT.market.toLowerCase() + "_" + CONTENT.categoryNoun;
-function withUtm(path){ return path + (path.indexOf("?") >= 0 ? "&" : "?") + LINK_UTM; }
+  "food-services": {
+  market: "WA",
+  marketName: "Washington",
+  marketSlug: "washington",
+  category: "Food Services",
+  categoryName: "Food Service",
+  categoryNoun: "food service",
+  listingPath: "/washington/food-services/",
+
+  metaTitle: "Food Service Jobs, No Experience Needed | Washington | NoProbJobs",
+  metaDescription: "Food service jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer.",
+
+  h1: "Get Food Service Job Alerts",
+  heroSub: "Be first to know when new No Experience Required Food Service Jobs show up in your area.",
+  formButton: "Get free alerts",
+  cadence: "as they’re posted",
+
+  valueProps: [
+    ["100% free", "Always free for job seekers."],
+    ["No sign-up needed to apply", "Apply directly with the employer."],
+    ["Real employers, real jobs", "Every job comes from the company’s own careers page."],
+    ["Requirements up front", "Spend less time searching and more time applying."],
+    ["Pay transparency", "Shown when the employer states it. Never estimated."],
+  ],
+  secondSignupHeading: "Get new food service jobs before they fill.",
+
+  info: {
+    heading: "The Food Service Job Market in Washington State",
+
+    whatTheWork: "Food service covers the counter, the kitchen and the dining room: taking orders, running a register, prepping ingredients, washing dishes, cooking simple menu items, and keeping everything clean. Jobs are in restaurants, fast food, coffee shops, and the cafeterias that serve hospitals, schools, campuses and offices. Most places train you on the job, usually over a few weeks, and no formal education is required.",
+
+    credential: {
+      heading: "The Food Worker Card",
+      lead: "Washington requires every food worker to get a Washington State Food Worker Card within 14 days of starting work. You don’t need it to apply.",
+      bullets: [
+        ["Cost", "$10, set by state rule and the same everywhere in Washington."],
+        ["Where", "online at foodworkercard.wa.gov, or through your local health department."],
+        ["How", "a short food safety course and test."],
+        ["How long it lasts", "your first card is good for 2 years. Renew before it expires and the next card lasts 3 years (5 with approved extra food safety training)."],
+        ["Where it works", "any Washington county. Cards from other states are not accepted."],
+      ],
+      extra: ["Serving alcohol?", "If the job involves serving alcohol, Washington also requires a MAST permit. Servers 18 to 20 get a Class 13 permit (serve beer and wine at tables). Bartending and mixing drinks takes a Class 12 permit, which is 21 and older. Your employer will tell you if you need one."],
+    },
+
+    payHeading: "What food service pays in Washington",
+    payIntro: "Washington does not let employers count tips toward minimum wage. You earn at least the full minimum wage, and tips are on top.",
+    payTable: [
+      ["Washington minimum wage (2026)", "$17.13/hr statewide", "2027 rate announced Sep 30, 2026"],
+      ["Seattle minimum wage (2026)", "$21.30/hr", null],
+      ["Fast food and counter workers", "Typically $20/hr; half earn $17–$23/hr", null],
+      ["Dishwashers", "Typically $22/hr; half earn $18–$24/hr", null],
+      ["Food preparation workers", "Typically $23/hr; half earn $19–$25/hr", null],
+      ["Cooks, restaurant", "Typically $25/hr; half earn $21–$28/hr", null],
+      ["Cooks, cafeteria and institution", "Typically $26/hr; half earn $21–$29/hr", null],
+    ],
+    payPartTime: "Most food service work in Washington is part-time: about 95% of fast food and counter workers and 89% of dishwashers worked part-time in the past year.",
+    payWhy: "Washington law requires employers with 15 or more employees to post a wage range and a description of benefits on every job posting. On NoProbJobs, pay is shown only when the employer states it — never estimated.",
+
+    whosHiringHeading: "Who’s hiring",
+    whosHiringFallback: "Food service hiring in Washington comes from restaurants, quick-service chains, coffee shops, and the companies that run cafeterias for hospitals, schools and offices. See every current opening on the food service board.",
+    seasonalNote: null,
+
+    stepsHeading: "How hiring usually works",
+    stepsIntro: "Every employer is different, but food service hiring usually looks like this:",
+    steps: [
+      ["Apply online or in person.", "You’ll give your contact info and your availability. Early mornings, late nights, weekends and holidays are common shifts, so the more of those you can cover, the better."],
+      ["Short interview with a manager.", "Expect questions about customer service, teamwork, and how you handle a rush. School, volunteer or life examples count."],
+      ["A trial shift (sometimes).", "Some kitchens ask you to work a short shift before they decide. Ask ahead of time whether it’s paid."],
+      ["Start and get your cards.", "Get your Food Worker Card within 14 days of starting, and a MAST permit if you’ll serve alcohol. Training happens on the job."],
+    ],
+    stepsNote: "Timelines vary by employer.",
+
+    tipsHeading: "How to land a food service job with no experience",
+    tips: [
+      ["Lead with availability.", "Early, late, weekends and holidays are the hardest shifts to fill."],
+      ["Get your Food Worker Card early (optional).", "It’s $10 and not required until 14 days after you start, but having it already shows you’re ready to go."],
+      ["Apply to several places at once.", "Counter, kitchen and cafeteria jobs all count, and cafeteria jobs often run on steadier weekday schedules."],
+      ["Answer with real examples.", "Staying calm under pressure, working as a team, being on time. Managers want reliable people who can handle a rush."],
+      ["Show up ready to work.", "On time, phone away, clean clothes. Some interviews turn into a quick look at the kitchen."],
+      ["Follow up.", "A short call or stop-in a few days later is normal in food service."],
+    ],
+
+    leadsHeading: "Where food service can lead",
+    leadsIntro: "Food service has clear steps up, in Washington pay terms:",
+    leadsPaths: [
+      ["Counter or crew", "Shift lead / food service supervisor (typical $29/hr)", "Food service manager (typical $36/hr; usually takes several years of food service experience)"],
+      ["Dishwasher or prep", "Line cook (typical $25/hr)", "Chef or head cook (typical $32/hr)"],
+    ],
+    leadsNote: null,
+  },
+
+  faqHeading: "Getting Hired in Food Service FAQ",
+  faq: [
+    ["Do I need a food handlers card to apply for food service jobs in Washington?", "No. You need a Washington State Food Worker Card within 14 days of starting work, not before you apply."],
+    ["How much does a Washington Food Worker Card cost?", "$10. The price is set by state rule and is the same in every county. Get it online at foodworkercard.wa.gov or through your local health department."],
+    ["How long is a Washington Food Worker Card good for?", "Your first card lasts 2 years. If you renew before it expires, the renewal lasts 3 years, or 5 years with approved extra food safety training."],
+    ["Do tips count toward minimum wage in Washington?", "No. Washington employers must pay at least the full minimum wage, and tips are yours on top of it."],
+    ["Can I serve alcohol with no experience?", "Yes, with a MAST permit. Servers 18 to 20 can get a Class 13 permit to serve beer and wine at tables. Bartending takes a Class 12 permit, which requires being 21 or older."],
+    ["Are most food service jobs part-time?", "Many are. About 95% of fast food and counter workers in Washington worked part-time in the past year. Full-time roles are available and are labeled on each job."],
+  ],
+  },
+
+};
+let CONTENT = PAGES.retail;   // reassigned in boot() from the URL
+
+// UTM for every outbound listing link (spec). Computed lazily from the selected page.
+function linkUtm(){ return "utm_source=alerts_page&utm_medium=internal&utm_campaign=" + CONTENT.market.toLowerCase() + "_" + CONTENT.categoryNoun.replace(/\s+/g, "_"); }
+function withUtm(path){ return path + (path.indexOf("?") >= 0 ? "&" : "?") + linkUtm(); }
 
 const CHEV = '<svg width="10" height="7" viewBox="0 0 10 7" fill="none" stroke="currentColor" stroke-width="1.6" style="flex:none" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4"></path></svg>';
 const CHEV_MUTED = '<svg width="10" height="7" viewBox="0 0 10 7" fill="none" stroke="var(--ink-muted)" stroke-width="1.6" style="flex:none" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4"></path></svg>';
@@ -171,7 +283,7 @@ class AlertsApp extends React.Component {
   // Page + channel encoded into the existing `source` field — no Make changes. Channel from the
   // inbound utm_source (fb_groups, reddit, …): "alerts_wa_retail" or "alerts_wa_retail|fb_groups".
   signupSource(){
-    const base = "alerts_" + CONTENT.market.toLowerCase() + "_" + CONTENT.categoryNoun;
+    const base = "alerts_" + CONTENT.market.toLowerCase() + "_" + CONTENT.categoryNoun.replace(/\s+/g, "_");
     const ch = (this.utm.utm_source || "").trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "_").replace(/^_+|_+$/g, "");
     return ch ? base + "|" + ch : base;
   }
@@ -372,6 +484,19 @@ class AlertsApp extends React.Component {
         note ? h("div", { style: s("font-size:12.5px;color:var(--ink-muted)") }, note) : null)));
   }
 
+  // Optional credential subsection (e.g. the Food Worker Card): heading, lead, a label:value
+  // bullet list, and an optional callout (MAST). Categories without a required card pass null.
+  renderCredential(cr){
+    return h("div", { style: s("display:grid;gap:10px") },
+      this.subH(cr.heading),
+      this.para(cr.lead),
+      h("ul", { style: s("margin:0;padding:0;list-style:none;display:grid;gap:7px") },
+        cr.bullets.map(([label, body], i) => h("li", { key: i, style: s("display:flex;gap:9px;align-items:flex-start") },
+          h("span", { "aria-hidden": "true", style: s("flex:none;margin-top:5px;width:16px;height:16px;border-radius:3px;background:var(--mark);display:grid;place-items:center") }, raw(ROW_CHECK)),
+          h("div", { style: s("font-size:15.5px;line-height:1.55;color:var(--ink);text-wrap:pretty") }, h("strong", null, label + ": "), body)))),
+      cr.extra ? h("div", { style: s("padding:12px 14px;background:var(--fact);border:1px solid var(--ink);border-radius:3px;font-size:14.5px;line-height:1.55;color:var(--fact-ink);text-wrap:pretty") }, h("strong", null, cr.extra[0] + " "), cr.extra[1]) : null);
+  }
+
   renderWhosHiring(){
     const info = CONTENT.info;
     const hiring = this.data.whosHiring || [];
@@ -384,17 +509,18 @@ class AlertsApp extends React.Component {
               h("span", { style: s("font-size:15px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap") }, e.company),
               h("span", { style: s("flex:none;font-size:13px;font-weight:700;color:var(--accent)") }, e.count.toLocaleString() + (e.count === 1 ? " job" : " jobs")))))
         : this.para(info.whosHiringFallback),
-      this.para(info.seasonalNote + (seasonal ? " " + seasonal.toLocaleString() + " seasonal " + (seasonal === 1 ? "role is" : "roles are") + " open right now." : "")));
+      info.seasonalNote ? this.para(info.seasonalNote + (seasonal ? " " + seasonal.toLocaleString() + " seasonal " + (seasonal === 1 ? "role is" : "roles are") + " open right now." : "")) : null);
   }
 
-  renderList(heading, intro, rows){
+  renderList(heading, intro, rows, note){
     return h("div", { style: s("display:grid;gap:10px") },
       this.subH(heading),
       intro ? this.para(intro) : null,
       h("ol", { style: s("margin:0;padding:0;list-style:none;display:grid;gap:10px;counter-reset:step") },
         rows.map(([lead, body], i) => h("li", { key: i, style: s("display:flex;gap:10px;align-items:flex-start") },
           h("span", { "aria-hidden": "true", style: s("flex:none;width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--surface);display:grid;place-items:center;font-size:13px;font-weight:800") }, String(i + 1)),
-          h("div", { style: s("font-size:15.5px;line-height:1.55;color:var(--ink);text-wrap:pretty") }, h("strong", null, lead), " " + body)))));
+          h("div", { style: s("font-size:15.5px;line-height:1.55;color:var(--ink);text-wrap:pretty") }, h("strong", null, lead), " " + body)))),
+      note ? this.para(note) : null);
   }
 
   renderTips(){
@@ -411,13 +537,13 @@ class AlertsApp extends React.Component {
     const info = CONTENT.info;
     return h("div", { style: s("display:grid;gap:10px") },
       this.subH(info.leadsHeading),
-      this.para(info.leadsIntro),
-      h("div", { style: s("display:flex;flex-wrap:wrap;align-items:center;gap:8px") },
-        info.leadsPath.map((step, i) => [
+      info.leadsIntro ? this.para(info.leadsIntro) : null,
+      (info.leadsPaths || []).map((path, pi) => h("div", { key: "p" + pi, style: s("display:flex;flex-wrap:wrap;align-items:center;gap:8px") },
+        path.map((step, i) => [
           i ? h("span", { key: "a" + i, "aria-hidden": "true", style: s("display:inline-flex") }, raw(ARROW)) : null,
           h("span", { key: "s" + i, style: s("padding:6px 11px;border:1px solid var(--ink);border-radius:3px;background:var(--surface-raised);font-size:13.5px;font-weight:700;color:var(--ink)") }, step),
-        ])),
-      this.para(info.leadsNote));
+        ]))),
+      info.leadsNote ? this.para(info.leadsNote) : null);
   }
 
   renderInfo(){
@@ -426,6 +552,8 @@ class AlertsApp extends React.Component {
       h("h2", { style: s(sectionH2) }, info.heading),
       // What the work is
       this.para(info.whatTheWork),
+      // Optional credential subsection (e.g. the Food Worker Card)
+      info.credential ? this.renderCredential(info.credential) : null,
       // Pay
       h("div", { style: s("display:grid;gap:10px") },
         this.subH(info.payHeading),
@@ -436,7 +564,7 @@ class AlertsApp extends React.Component {
       // Who's hiring + seasonal
       this.renderWhosHiring(),
       // How hiring works
-      this.renderList(info.stepsHeading, info.stepsIntro, info.steps),
+      this.renderList(info.stepsHeading, info.stepsIntro, info.steps, info.stepsNote),
       // Tips
       this.renderTips(),
       // Where retail can lead
@@ -532,7 +660,17 @@ const mount = (data) => {
 };
 // Data ships INLINE (baked by prerender/build.mjs) — no client query. Set today from the baked
 // pulledAt before first render, then mount. Fall back to an empty scaffold if the blob is missing.
+// Pick the page's content from the URL: /alerts/{market}/{category-slug}/ -> PAGES[slug].
+// Runs before mount() so the component constructs against the right CONTENT.
+function selectPage(){
+  try {
+    const m = (window.location.pathname || "").match(/\/alerts\/[^/]+\/([^/]+)/);
+    if (m && PAGES[m[1]]) { CONTENT = PAGES[m[1]]; return; }
+  } catch (e) {}
+  CONTENT = PAGES.retail;
+}
 const boot = () => {
+  selectPage();
   const el = document.getElementById("__npj_data");
   if (el) {
     try {
