@@ -48,7 +48,7 @@ export const ALERT_PAGES = [
     title: "Facilities Jobs, No Experience Needed | Washington | NoProbJobs",
     description: "Facilities jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
   // Healthcare is a SECTOR, not a board category — scoped by employer (see build.mjs alertSlice).
-  { state: "WA", marketSlug: "washington", slug: "healthcare", label: "Hospital & Healthcare", iconCat: null,
+  { state: "WA", marketSlug: "washington", slug: "healthcare", label: "Hospital & Healthcare", iconCat: "Healthcare",
     employers: ["multicare.org"], path: "/alerts/washington/healthcare/",
     title: "Hospital & Healthcare Jobs, No Experience Needed | Washington | NoProbJobs",
     description: "Non-clinical hospital and healthcare jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },

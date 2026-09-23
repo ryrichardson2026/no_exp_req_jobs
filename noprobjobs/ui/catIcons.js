@@ -19,6 +19,9 @@ const INNER = {
   "Food Services": '<path d="M12 3c1.918 0 3.52 1.35 3.91 3.151a4 4 0 0 1 2.09 7.723l0 7.126h-12v-7.126a4 4 0 1 1 2.092 -7.723a4 4 0 0 1 3.908 -3.151z"/><path d="M6.161 17.009l11.839 -.009"/>',
   // Transportation/Automotive (owner-approved 2026-09-11) — Tabler ti-truck-delivery.
   "Transportation/Automotive": '<path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M5 17h-2v-11a1 1 0 0 1 1 -1h9v12m-4 0h6m4 0h2v-6h-8m0 -5h5l3 5"/>',
+  // Healthcare — Tabler ti-heartbeat (heart + EKG pulse). Not a board category; used only by the
+  // alert-guide registry (Hospital & Healthcare is a sector page). Reads clearly as healthcare.
+  "Healthcare": '<path d="M19.5 13.572l-7.5 7.428l-2.896 -2.868m-6.117 -8.104a5 5 0 0 1 9.013 -3.022a5 5 0 1 1 7.5 6.572"/><path d="M3 13h2l2 3l2 -6l1 3h3"/>',
 };
 
 /* Raw SVG string for a category, or null if none. color defaults to the brand red;
