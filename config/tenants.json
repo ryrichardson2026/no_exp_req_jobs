@@ -21,6 +21,11 @@
       "nlx_wa_jobs": 2177,
       "source_class": "direct-employer",
       "verified": "2026-08-31 - host and site confirmed from three live apply URLs: req 452841, 455081, 455287. 455287 is a Swedish Health Services posting on the same host and site, so Providence St. Joseph, Providence and Swedish share one board. Run result: 2,034 board total across 7 states, 848 WA by PrimaryLocation, 851 detail records captured, zero failures.",
+      "finder_extra": {
+        "_note": "ACTIVE non-clinical scope, owner-approved 2026-09-23 (reverses the 2026-09-17 full suppression). Server-side: WA location facet + the 10 non-clinical CATEGORIES facet ids captured in category_facet below (Patient Access, Facilities Mgmt, Food Prep/Service, Facilities Security/Safety, Environmental Services, Administrative Support, Technical Services, Patient Financial Services, Materials Mgmt, Logistics). Clinical categories are never fetched, so the licensed-gate false-positives (EKG/Ophthalmic Tech, Perfusionist) can't reach the board. The client-side location_filter still runs as the WA authority.",
+        "selectedLocationsFacet": 300000004686048,
+        "selectedCategoriesFacet": [300000055008090, 300000054987331, 300000055008036, 300000055008081, 300000055224410, 300000055224413, 300000055008114, 300000055007988, 300000054987358, 300000055008045]
+      },
       "location_filter": {
         "_note": "field pins the match to one named field. Omit field to fall back to matching the whole record blob, which is correct on a NEW tenant before --inspect has been run.",
         "_confirmed": "2026-08-31 --survey over 851 detail records: all PrimaryLocation values are 'City, WA, United States'. Every WA record carries the ', WA' token, so this filter catches the full WA set with no under-count.",

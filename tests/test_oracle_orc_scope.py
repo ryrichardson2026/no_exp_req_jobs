@@ -63,6 +63,17 @@ def test_single_element_list_still_joins():
     assert oracle_orc.build_finder(t, offset=0, limit=100).endswith("selectedCategoriesFacet=111")
 
 
+def test_underscore_keys_are_comments_not_finder_vars():
+    """A _note comment inside finder_extra must never land in the request."""
+    t = {"site_number": "CX_1", "finder_extra": {
+        "_note": "owner-approved non-clinical scope",
+        "selectedLocationsFacet": 300000004686048,
+    }}
+    f = oracle_orc.build_finder(t, offset=0, limit=100)
+    assert "_note" not in f
+    assert f == BASE + ",selectedLocationsFacet=300000004686048"
+
+
 def test_offset_and_limit_flow_through():
     t = {"site_number": "CX_1"}
     f = oracle_orc.build_finder(t, offset=200, limit=50)

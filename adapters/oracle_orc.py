@@ -132,6 +132,10 @@ def build_finder(tenant, offset, limit=PAGE_LIMIT):
     # hospital's non-clinical categories. Absent key -> no change in behaviour,
     # and never a tenant branch: the values live in config, the mechanism here.
     for k, v in (tenant.get("finder_extra") or {}).items():
+        # Underscore keys are config comments (the repo-wide convention), not
+        # finder variables - skip them so a "_note" never lands in the request.
+        if k.startswith("_"):
+            continue
         # A facet may carry several values. The vendor's multi-value delimiter
         # INSIDE a finder variable is a bare ';' (measured on Providence: two
         # category ids joined by ';' return their exact union; '%3B' and '|'

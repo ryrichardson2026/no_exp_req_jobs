@@ -15,7 +15,9 @@
 export const LAUNCHED_STATES = new Set(["WA"]);
 
 // Whole employers pulled from the published surface, keyed by employer_domain.
-export const SUPPRESSED_EMPLOYERS = new Set(["providence.org", "dollargeneral.com"]);
+// providence.org un-suppressed 2026-09-23 (owner) - re-onboarded scoped to its
+// non-clinical categories only (see config/tenants.json providence.finder_extra).
+export const SUPPRESSED_EMPLOYERS = new Set(["dollargeneral.com"]);
 
 /* A record is published iff its state is launched (null tolerated — those are legit
    in-scope WA records whose state field failed to parse) AND its employer isn't
