@@ -175,15 +175,17 @@ const PAGES = {
 
     credential: {
       heading: "The Food Worker Card",
-      lead: "Washington requires every food worker to get a Washington State Food Worker Card within 14 days of starting work. You don’t need it to apply.",
-      bullets: [
-        ["Cost", "$10, set by state rule and the same everywhere in Washington."],
-        ["Where", "online at foodworkercard.wa.gov, or through your local health department."],
-        ["How", "a short food safety course and test."],
-        ["How long it lasts", "your first card is good for 2 years. Renew before it expires and the next card lasts 3 years (5 with approved extra food safety training)."],
-        ["Where it works", "any Washington county. Cards from other states are not accepted."],
+      parts: [
+        ["para", "Washington requires every food worker to get a Washington State Food Worker Card within 14 days of starting work. You don’t need it to apply."],
+        ["bullets", [
+          ["Cost", "$10, set by state rule and the same everywhere in Washington."],
+          ["Where", "online at foodworkercard.wa.gov, or through your local health department."],
+          ["How", "a short food safety course and test."],
+          ["How long it lasts", "your first card is good for 2 years. Renew before it expires and the next card lasts 3 years (5 with approved extra food safety training)."],
+          ["Where it works", "any Washington county. Cards from other states are not accepted."],
+        ]],
+        ["callout", "Serving alcohol?", "If the job involves serving alcohol, Washington also requires a MAST permit. Servers 18 to 20 get a Class 13 permit (serve beer and wine at tables). Bartending and mixing drinks takes a Class 12 permit, which is 21 and older. Your employer will tell you if you need one."],
       ],
-      extra: ["Serving alcohol?", "If the job involves serving alcohol, Washington also requires a MAST permit. Servers 18 to 20 get a Class 13 permit (serve beer and wine at tables). Bartending and mixing drinks takes a Class 12 permit, which is 21 and older. Your employer will tell you if you need one."],
     },
 
     payHeading: "What food service pays in Washington",
@@ -241,6 +243,209 @@ const PAGES = {
     ["Do tips count toward minimum wage in Washington?", "No. Washington employers must pay at least the full minimum wage, and tips are yours on top of it."],
     ["Can I serve alcohol with no experience?", "Yes, with a MAST permit. Servers 18 to 20 can get a Class 13 permit to serve beer and wine at tables. Bartending takes a Class 12 permit, which requires being 21 or older."],
     ["Are most food service jobs part-time?", "Many are. About 95% of fast food and counter workers in Washington worked part-time in the past year. Full-time roles are available and are labeled on each job."],
+  ],
+  },
+
+  security: {
+  market: "WA",
+  marketName: "Washington",
+  marketSlug: "washington",
+  category: "Security",
+  categoryName: "Security",
+  categoryNoun: "security",
+  listingPath: "/washington/security/",
+
+  metaTitle: "Security Jobs, No Experience Needed | Washington | NoProbJobs",
+  metaDescription: "Security jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer.",
+
+  h1: "Get Security Job Alerts",
+  heroSub: "Be first to know when new No Experience Required Security Jobs show up in your area.",
+  formButton: "Get free alerts",
+  cadence: "as they’re posted",
+
+  valueProps: [
+    ["100% free", "Always free for job seekers."],
+    ["No sign-up needed to apply", "Apply directly with the employer."],
+    ["Real employers, real jobs", "Every job comes from the company’s own careers page."],
+    ["Requirements up front", "Spend less time searching and more time applying."],
+    ["Pay transparency", "Shown when the employer states it. Never estimated."],
+  ],
+  secondSignupHeading: "Get new security jobs before they fill.",
+
+  info: {
+    heading: "The Security Job Market in Washington State",
+
+    whatTheWork: "Security officers watch over buildings, stores, hospitals, campuses, events and job sites. The work includes patrolling, checking IDs and visitors, answering alarms, writing incident reports, helping people find their way, and calling for help in an emergency. Many buildings are open around the clock, so night shifts are common. Most employers train new officers on the job, and most people learn the work in a few weeks.",
+
+    credential: {
+      heading: "The Washington security guard license",
+      parts: [
+        ["para", "If you work for a security company that provides guards to other businesses, Washington requires a Department of Licensing (DOL) security guard license. You don’t need it to apply, and you can’t get it on your own first: you need a job offer from a licensed security company."],
+        ["steps", "How it works for an unarmed guard:", [
+          ["Get a job offer", "from a licensed private security guard company. You must be at least 18."],
+          ["Complete 8 hours of pre-assignment training", "from a DOL-certified trainer. Many companies run this in-house."],
+          ["Apply for your license.", "The application fee is $101. DOL can take up to 60 days to issue it."],
+          ["Start working on a temporary card.", "Once training is done and your application is in, your company can issue a temporary registration card that lets you work for up to 60 days while DOL processes your license."],
+          ["Finish 8 more hours of training", "after you start, and then 4 hours of refresher training each year."],
+        ]],
+        ["callout", null, "The license renews every year (renewal fee $95). Ask the employer whether they cover the training and license fee."],
+        ["para", "Armed security", "is a separate step: you must be 21 or older and hold a firearms certificate from the Washington State Criminal Justice Training Commission. Most no-experience security jobs are unarmed."],
+        ["para", "In-house security:", "some guards employed directly by a single business, rather than by a security company, may not need this license. The employer will tell you what applies."],
+      ],
+    },
+
+    payHeading: "What security pays in Washington",
+    payIntro: null,
+    payTable: [
+      ["Washington minimum wage (2026)", "$17.13/hr statewide", "2027 rate announced Sep 30, 2026"],
+      ["Seattle minimum wage (2026)", "$21.30/hr", null],
+      ["Security guards, Washington", "Half earn $21–$29/hr", null],
+      ["Security supervisors, Washington", "Typically $31/hr; half earn $26–$40/hr", null],
+    ],
+    payPartTime: "Most security guards work full time, and night shifts are common.",
+    payWhy: "Washington law requires employers with 15 or more employees to post a wage range and a description of benefits on every job posting. On NoProbJobs, pay is shown only when the employer states it — never estimated.",
+
+    whosHiringHeading: "Who’s hiring",
+    whosHiringFallback: "Security hiring in Washington comes from contract security companies that staff offices, stores, hospitals, campuses and events, plus businesses that hire their own security teams. See every current opening on the security board.",
+    seasonalNote: null,
+
+    stepsHeading: "How hiring usually works",
+    stepsIntro: "Every company is different, but security hiring usually looks like this:",
+    steps: [
+      ["Apply online.", "You’ll give your contact info and your availability. Nights, weekends and holidays are common, so be clear about what you can cover."],
+      ["Interview.", "Expect questions about staying calm, following procedures, writing things down clearly, and dealing with difficult people. School, volunteer or life examples count."],
+      ["Background check.", "Security companies check backgrounds as part of hiring and licensing."],
+      ["Training and license.", "Complete the 8-hour pre-assignment training, submit your license application, and start on a temporary card while DOL processes it."],
+    ],
+    stepsNote: "Timelines vary by employer. The license itself can take up to 60 days, but the temporary card lets you work in the meantime.",
+
+    tipsHeading: "How to land a security job with no experience",
+    tips: [
+      ["Lead with reliability.", "Security is about showing up on time for every shift. Say so, and back it up with an example."],
+      ["Be open about shifts.", "Nights, weekends and overnight posts are the easiest to fill and the fastest way in."],
+      ["Apply to security companies, not just businesses.", "Contract security companies hire the most guards and handle the licensing with you."],
+      ["Ask about training and fees up front.", "Find out who pays for the 8-hour training and the $101 license."],
+      ["Talk about calm and communication.", "Managers want people who stay steady, follow instructions, and write clear reports."],
+      ["Follow up.", "A short call or email a few days after applying is normal."],
+    ],
+
+    leadsHeading: "Where security can lead",
+    leadsIntro: "Security has clear steps up, in Washington pay terms:",
+    leadsPaths: [
+      ["Unarmed officer", "Site lead or security supervisor (typical $31/hr in Washington)"],
+    ],
+    leadsNote: "Armed officer is a separate path: 21 or older, with a state firearms certificate.",
+  },
+
+  faqHeading: "Getting Hired in Security FAQ",
+  faq: [
+    ["Do I need a license to apply for security jobs in Washington?", "No. You need a job offer from a licensed security company first. The company then helps you complete the 8-hour training and license application."],
+    ["How much does a Washington security guard license cost?", "The application fee for an unarmed license is $101, and renewal is $95 a year. Ask your employer whether they cover it."],
+    ["How long does it take to get a security guard license in Washington?", "DOL can take up to 60 days to issue a license. After you finish training and apply, your company can give you a temporary card that lets you work for up to 60 days while you wait."],
+    ["How old do you have to be to work security in Washington?", "At least 18 for an unarmed license, and at least 21 for armed security."],
+    ["Do security jobs require experience?", "Many don’t. Every job on this page is marked as not requiring experience, and most employers train new officers on the job."],
+    ["Are security jobs full-time?", "Most security guards work full time, and night shifts are common. Part-time and on-call roles are labeled on each job."],
+  ],
+  },
+
+  warehouse: {
+  market: "WA",
+  marketName: "Washington",
+  marketSlug: "washington",
+  category: "Warehouse",
+  categoryName: "Warehouse",
+  categoryNoun: "warehouse",
+  listingPath: "/washington/warehouse/",
+
+  metaTitle: "Warehouse Jobs, No Experience Needed | Washington | NoProbJobs",
+  metaDescription: "Warehouse jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer.",
+
+  h1: "Get Warehouse Job Alerts",
+  heroSub: "Be first to know when new No Experience Required Warehouse Jobs show up in your area.",
+  formButton: "Get free alerts",
+  cadence: "as they’re posted",
+
+  valueProps: [
+    ["100% free", "Always free for job seekers."],
+    ["No sign-up needed to apply", "Apply directly with the employer."],
+    ["Real employers, real jobs", "Every job comes from the company’s own careers page."],
+    ["Requirements up front", "Spend less time searching and more time applying."],
+    ["Pay transparency", "Shown when the employer states it. Never estimated."],
+  ],
+  secondSignupHeading: "Get new warehouse jobs before they fill.",
+
+  info: {
+    heading: "The Warehouse Job Market in Washington State",
+
+    whatTheWork: "Warehouse jobs keep products moving: unloading trucks, picking and packing orders, stocking shelves and racks, scanning and labeling, and loading outbound shipments. You’ll be on your feet and lifting through most of a shift. Work happens in distribution centers, fulfillment centers, store backrooms and stockrooms. Most places train you on the job, and schedules often include nights and weekends.",
+
+    credential: {
+      heading: "Forklifts and your rights on the floor",
+      parts: [
+        ["para", "You don’t need a forklift card to apply.", "Under workplace safety rules, your employer must train you, evaluate you on their equipment, and certify that you’re competent before you operate a forklift. That evaluation repeats at least every 3 years. Many entry warehouse jobs don’t involve forklifts at all."],
+        ["para", "Washington’s warehouse quota law.", "At larger warehouse distribution centers that set production quotas (sometimes called a “rate”), Washington law says your employer:"],
+        ["bullets", [
+          "Must give you a written description of your quota when you’re hired, in your preferred language",
+          "Must build in time for rest breaks, bathroom use, and walking to and from break areas",
+          "Cannot discipline or fire you for missing a quota they didn’t properly give you in writing",
+          "Must give you your work speed data if you ask",
+        ]],
+        ["para", "This covers employers with at least 100 nonexempt workers at one Washington warehouse distribution center, or 1,000 across the state. Warehouses that don’t use quotas aren’t covered."],
+      ],
+    },
+
+    payHeading: "What warehouse work pays in Washington",
+    payIntro: null,
+    payTable: [
+      ["Washington minimum wage (2026)", "$17.13/hr statewide", "2027 rate announced Sep 30, 2026"],
+      ["Seattle minimum wage (2026)", "$21.30/hr", null],
+      ["Laborers and material movers", "Average $20/hr; half earn $17–$22/hr", null],
+      ["Stockers and order fillers", "Typically $24/hr; half earn $20–$26/hr", null],
+      ["Hand packers and packagers", "Typically $19/hr; half earn $17–$21/hr", null],
+      ["Warehouse supervisors (laborers and material movers)", "Typically $38/hr; half earn $27–$44/hr", null],
+    ],
+    payPartTime: "Many warehouse workers are full time, and part-time work is common too. Night and weekend shifts are regular.",
+    payWhy: "Washington law requires employers with 15 or more employees to post a wage range and a description of benefits on every job posting. On NoProbJobs, pay is shown only when the employer states it — never estimated.",
+
+    whosHiringHeading: "Who’s hiring",
+    whosHiringFallback: "Warehouse hiring in Washington comes from distribution and fulfillment centers, retailers’ supply chains, and store stockrooms. See every current opening on the warehouse board.",
+    seasonalNote: null,
+
+    stepsHeading: "How hiring usually works",
+    stepsIntro: "Every employer is different, but warehouse hiring usually looks like this:",
+    steps: [
+      ["Apply online.", "You’ll give your contact info and your availability. Shift choice (day, night, weekend) often matters as much as anything else."],
+      ["Short screening or interview.", "Some warehouses do a quick interview; some large ones hire with little or none. Expect questions about reliability, safety and physical work."],
+      ["Pre-hire steps (sometimes).", "Some employers run a background check or drug test before your start date."],
+      ["Start and train.", "Safety training and on-the-job training happen once you’re hired, including any equipment training."],
+    ],
+    stepsNote: "Timelines vary by employer.",
+
+    tipsHeading: "How to land a warehouse job with no experience",
+    tips: [
+      ["Be open about shifts.", "Nights, weekends and overnight shifts are the easiest to get and sometimes pay more. Check each listing."],
+      ["Show you’re reliable.", "Attendance matters more than experience in warehouse work."],
+      ["Be honest about physical work.", "Lifting, standing and walking all shift are normal. Say what you can do."],
+      ["Apply to several at once.", "Warehouses hire in volume, especially ahead of the holidays."],
+      ["Ask about the quota.", "If the job has a rate, ask what it is. At covered warehouses you’re entitled to it in writing."],
+      ["Follow up.", "A short call or email a few days after applying is normal."],
+    ],
+
+    leadsHeading: "Where warehouse work can lead",
+    leadsIntro: "Warehouse work has clear steps up, in Washington pay terms:",
+    leadsPaths: [
+      ["Picker, packer or material handler", "Stocker / order filler (typical $24/hr)", "Equipment operator (forklift and other trucks, employer-trained)", "Lead or supervisor (typical $38/hr in Washington)"],
+    ],
+    leadsNote: null,
+  },
+
+  faqHeading: "Getting Hired in Warehouse FAQ",
+  faq: [
+    ["Do I need forklift certification to get a warehouse job?", "No. Your employer must train and evaluate you on their own equipment before you drive a forklift, and many warehouse jobs don’t use forklifts at all."],
+    ["Can a warehouse fire me for missing a quota in Washington?", "At covered warehouse distribution centers, your employer must give you your quota in writing and can’t discipline or fire you for missing a quota they didn’t properly disclose. Quotas must also allow time for breaks and bathroom use."],
+    ["How much do warehouse jobs pay in Washington?", "At least $17.13 an hour statewide in 2026, and more in cities with higher minimums, like Seattle at $21.30. Stockers and order fillers in Washington typically earn about $24 an hour."],
+    ["Are warehouse jobs full-time?", "Many are, and part-time roles are common too. Shift and schedule are labeled on each job."],
+    ["Do warehouse jobs require experience?", "Many don’t. Every job on this page is marked as not requiring experience, and most employers train you on the job."],
   ],
   },
 
@@ -484,17 +689,42 @@ class AlertsApp extends React.Component {
         note ? h("div", { style: s("font-size:12.5px;color:var(--ink-muted)") }, note) : null)));
   }
 
-  // Optional credential subsection (e.g. the Food Worker Card): heading, lead, a label:value
-  // bullet list, and an optional callout (MAST). Categories without a required card pass null.
+  // Optional credential / rights subsection (Food Worker Card, security guard license, forklift +
+  // quota law). A flexible list of `parts`, each a typed tuple, so each trade renders what it needs:
+  //   ["para", text] | ["para", boldLead, text]      — paragraph, optional bold lead-in
+  //   ["steps", intro, [[title, body], …]]           — numbered process
+  //   ["bullets", [ "text" | [label, body], … ]]     — checkmark list (plain or label:value)
+  //   ["callout", boldLead|null, body]               — emphasized fact box
   renderCredential(cr){
-    return h("div", { style: s("display:grid;gap:10px") },
+    return h("div", { style: s("display:grid;gap:12px") },
       this.subH(cr.heading),
-      this.para(cr.lead),
-      h("ul", { style: s("margin:0;padding:0;list-style:none;display:grid;gap:7px") },
-        cr.bullets.map(([label, body], i) => h("li", { key: i, style: s("display:flex;gap:9px;align-items:flex-start") },
+      cr.parts.map((p, i) => this.credentialPart(p, i)));
+  }
+  credentialPart(p, key){
+    const type = p[0];
+    if (type === "para") {
+      const lead = p.length > 2 ? p[1] : null, text = p.length > 2 ? p[2] : p[1];
+      return h("p", { key, style: s("margin:0;font-size:15.5px;line-height:1.6;color:var(--ink);text-wrap:pretty") }, lead ? h("strong", null, lead + " ") : null, text);
+    }
+    if (type === "steps") {
+      const intro = p[1], items = p[2];
+      return h("div", { key, style: s("display:grid;gap:8px") },
+        intro ? this.para(intro) : null,
+        h("ol", { style: s("margin:0;padding:0;list-style:none;display:grid;gap:8px;counter-reset:step") },
+          items.map(([t, b], i) => h("li", { key: i, style: s("display:flex;gap:10px;align-items:flex-start") },
+            h("span", { "aria-hidden": "true", style: s("flex:none;width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--surface);display:grid;place-items:center;font-size:12px;font-weight:800") }, String(i + 1)),
+            h("div", { style: s("font-size:15px;line-height:1.55;color:var(--ink);text-wrap:pretty") }, h("strong", null, t), " " + b)))));
+    }
+    if (type === "bullets") {
+      return h("ul", { key, style: s("margin:0;padding:0;list-style:none;display:grid;gap:7px") },
+        p[1].map((it, i) => h("li", { key: i, style: s("display:flex;gap:9px;align-items:flex-start") },
           h("span", { "aria-hidden": "true", style: s("flex:none;margin-top:5px;width:16px;height:16px;border-radius:3px;background:var(--mark);display:grid;place-items:center") }, raw(ROW_CHECK)),
-          h("div", { style: s("font-size:15.5px;line-height:1.55;color:var(--ink);text-wrap:pretty") }, h("strong", null, label + ": "), body)))),
-      cr.extra ? h("div", { style: s("padding:12px 14px;background:var(--fact);border:1px solid var(--ink);border-radius:3px;font-size:14.5px;line-height:1.55;color:var(--fact-ink);text-wrap:pretty") }, h("strong", null, cr.extra[0] + " "), cr.extra[1]) : null);
+          h("div", { style: s("font-size:15.5px;line-height:1.55;color:var(--ink);text-wrap:pretty") }, Array.isArray(it) ? [h("strong", { key: "l" }, it[0] + ": "), it[1]] : it))));
+    }
+    if (type === "callout") {
+      return h("div", { key, style: s("padding:12px 14px;background:var(--fact);border:1px solid var(--ink);border-radius:3px;font-size:14.5px;line-height:1.55;color:var(--fact-ink);text-wrap:pretty") }, p[1] ? h("strong", null, p[1] + " ") : null, p[2]);
+    }
+    return null;
   }
 
   renderWhosHiring(){
@@ -557,7 +787,7 @@ class AlertsApp extends React.Component {
       // Pay
       h("div", { style: s("display:grid;gap:10px") },
         this.subH(info.payHeading),
-        this.para(info.payIntro),
+        info.payIntro ? this.para(info.payIntro) : null,
         this.renderPayTable(),
         this.para(info.payPartTime),
         h("div", { style: s("padding:12px 14px;background:var(--fact);border:1px solid var(--ink);border-radius:3px;font-size:14.5px;line-height:1.55;color:var(--fact-ink);text-wrap:pretty") }, h("strong", null, "Why you can see the pay: "), info.payWhy)),
