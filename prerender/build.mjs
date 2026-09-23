@@ -76,6 +76,63 @@ const MOBILE = { width: 412, height: 915, deviceScaleFactor: 2, isMobile: true, 
 // state-browse machinery entirely (no filtering, no state param). Trailing slash to match how
 // every other baked route is written and how trailingSlash serves it.
 const WA_LANDER = "/washington-jobs/";
+// Alert-signup landing pages — one job-type × market page each (spec: one page, no generator yet).
+// Baked like a landing page but served from alerts.html (→ alerts.js) with live slice data inlined
+// as __npj_data by serve(). Title/description mirror the CONTENT object in alerts.js — keep in sync.
+const ALERTS = [
+  { path: "/alerts/washington/retail/", state: "WA", category: "Retail",
+    title: "Retail Jobs, No Experience Needed | Washington | NoProbJobs",
+    description: "Retail jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
+];
+const ALERT_PATHS = ALERTS.map((a) => a.path);
+
+// Live data for one /alerts/{market}/{category}/ page, computed from the published jobs_list the
+// SAME way the listing view derives it: "applicable" = the board's default exp facets (none +
+// preferred, i.e. R.expFacet != null), scoped to the market (state or null-state) and category.
+// Inlined by serve() so the page bakes with real content and the runtime needs no query.
+function alertSlice(list, state, category, pulledAt){
+  const applicable = (r) => R.expFacet(r.experience_condition) != null;
+  const inMarket = (r) => r.state === state || r.state == null;
+  const slice = list.filter((r) => inMarket(r) && applicable(r) && R.recordCats(r).indexOf(category) >= 0);
+
+  // highest employer-STATED hourly rate, floored to a whole dollar so "up to $X" never overstates.
+  let maxPay = null;
+  for (const r of slice) if (r.salary_is_stated && r.pay_period === "HOURLY") {
+    const v = r.salary_max || r.salary_min || 0;
+    if (v > 0 && (maxPay == null || v > maxPay)) maxPay = v;
+  }
+  if (maxPay != null) maxPay = Math.floor(maxPay);
+
+  // 6 newest: prefer the baked eff_new_date recency (the landing "recent" key), backfill by
+  // newestFirst so 6 always show when the slice has them.
+  const dated = slice.filter((r) => r.eff_new_date).sort((a, b) =>
+    a.eff_new_date < b.eff_new_date ? 1 : (a.eff_new_date > b.eff_new_date ? -1 : String(a.internal_id).localeCompare(String(b.internal_id))));
+  const undated = slice.filter((r) => !r.eff_new_date).sort(R.newestFirst);
+  const recent = dated.concat(undated).slice(0, 6);
+
+  // top employers by open count; each links to the listing view pre-filtered to them (?emp=slug).
+  const byCo = {};
+  for (const r of slice) {
+    const key = R.employerSlug(r.company_name);
+    if (!key) continue;
+    (byCo[key] = byCo[key] || { company: R.companyLabel(r.company_name), slug: key, count: 0 }).count++;
+  }
+  const whosHiring = Object.values(byCo).sort((a, b) => b.count - a.count || a.company.localeCompare(b.company)).slice(0, 6)
+    .map((e) => ({ company: e.company, count: e.count, href: browsePath(state, category) + "?emp=" + e.slug }));
+
+  // other categories in this market with live applicable jobs, current one excluded.
+  const marketApplicable = list.filter((r) => inMarket(r) && applicable(r));
+  const catCount = {};
+  for (const r of marketApplicable) for (const c of R.recordCats(r)) if (CAT_SLUG[c]) catCount[c] = (catCount[c] || 0) + 1;
+  const otherCats = Object.keys(catCount).filter((c) => c !== category)
+    .sort((a, b) => catCount[b] - catCount[a] || a.localeCompare(b))
+    .map((c) => ({ label: c, displayLabel: c === "Transportation/Automotive" ? "Transportation" : c, count: catCount[c], href: browsePath(state, c) }));
+
+  // seasonal signal (content says "if any"): title/employment_type mentions seasonal or holiday.
+  const seasonalCount = slice.filter((r) => /seasonal|holiday/i.test(r.title || "") || /seasonal/i.test(r.employment_type || "")).length;
+
+  return { count: slice.length, maxPay, recent, whosHiring, otherCats, seasonalCount, pulledAt: pulledAt || null };
+}
 const MIME = { ".html":"text/html",".js":"text/javascript",".mjs":"text/javascript",".css":"text/css",
   ".json":"application/json",".svg":"image/svg+xml",".png":"image/png",".ico":"image/x-icon",".woff2":"font/woff2",".map":"application/json" };
 
@@ -103,6 +160,7 @@ const WAIT = {
   job: "document.querySelectorAll('[data-desc-html]').length >= 2 && !!document.querySelector('h1')",
   browse: "document.querySelectorAll(\"[role='list'] > *\").length > 0",
   landing: "document.getElementById('root') && document.getElementById('root').children.length > 0",
+  alerts: "document.getElementById('root') && document.getElementById('root').children.length > 0",
 };
 
 function serve(cache){
@@ -112,6 +170,17 @@ function serve(cache){
       if (p !== "/" && existsSync(join(SITE, p)) && (await stat(join(SITE, p))).isFile()) {
         res.writeHead(200, { "content-type": MIME[extname(p)] || "application/octet-stream" });
         return res.end(await readFile(join(SITE, p)));
+      }
+      // Alert-signup pages (/alerts/{market}/{category}/) are their own SPA (alerts.html →
+      // alerts.js) with the live slice inlined as __npj_data BEFORE boot. The page has no Supabase
+      // fetch, so (unlike the landing) it must render from the blob during the bake — like a job page.
+      const alertData = cache && cache.alertsByPath && cache.alertsByPath[p.replace(/\/+$/, "") + "/"];
+      if (alertData) {
+        let ah = await readFile(join(SITE, "alerts.html"), "utf8");
+        const blob = JSON.stringify(alertData).replace(/</g, "\\u003c");
+        ah = ah.replace("</body>", '<script id="__npj_data" type="application/json">' + blob + "</script></body>");
+        res.writeHead(200, { "content-type": "text/html" });
+        return res.end(ah);
       }
       // "/" and the Washington lander are the landing SPA (index.html → landing.js); every
       // other virtual path is the board SPA (board.html → board.js).
@@ -235,7 +304,7 @@ function middlewareSource(expiredBack, live){
 // (live URLs only) + vercel.json + the edge middleware. Idempotent, so a targeted rebake
 // still leaves out/ deployable. The baked landing owns out/index.html, so it is NOT copied.
 async function assembleDeploy(live, expiredBack, browse, lastmod = {}){
-  for (const f of ["board.html", "board.js", "landing.js", "styles.css", "404.html",
+  for (const f of ["board.html", "board.js", "landing.js", "alerts.js", "styles.css", "404.html",
                    "favicon.ico", "icon-192.png", "apple-touch-icon.png", "og.png", "logo.png"]) await copyFile(join(SITE, f), join(OUT, f));
   for (const d of ["data", "ui", "vendor"]) await cp(join(SITE, d), join(OUT, d), { recursive: true });
   // Hand-picked brand logos live at repo-root logos/ (the user's drop folder), served from
@@ -244,7 +313,7 @@ async function assembleDeploy(live, expiredBack, browse, lastmod = {}){
   if (existsSync(join(HERE, "..", "logos"))) await cp(join(HERE, "..", "logos"), join(OUT, "logos"), { recursive: true });
 
   const base = SITE_URL;
-  const locs = ["/", WA_LANDER, ...browse, ...live];               // change #2: lander in sitemap; expired/retired excluded
+  const locs = ["/", WA_LANDER, ...ALERT_PATHS, ...browse, ...live];   // change #2: lander in sitemap; alert pages added; expired/retired excluded
   // <lastmod> (W3C YYYY-MM-DD) is the one optional tag Google actually uses (changefreq/priority
   // are ignored). Values come from `lastmod` (built by the caller): a job's stated posted_at
   // (stable — a job page's baked content doesn't change after posting), and the pull date for the
@@ -526,6 +595,13 @@ async function main(){
   // Change #2: Washington lander. Same landing type (same render wait + meta injection), its
   // own path so bake() writes out/washington-jobs/index.html and sets canonical to itself.
   routes.push({ type: "landing", path: WA_LANDER, url: null, meta: { title: PM.waLanderTitle(), description: PM.waLanderDescription() } });
+  // Alert-signup pages: compute each page's live slice, stash it for serve() to inline as
+  // __npj_data, and register the route (baked as its own type; alerts.html shell + alerts.js).
+  cache.alertsByPath = {};
+  for (const a of ALERTS) {
+    cache.alertsByPath[a.path] = alertSlice(list, a.state, a.category, cache.pulledAt);
+    routes.push({ type: "alerts", path: a.path, url: null, meta: { title: a.title, description: a.description } });
+  }
 
   const server = serve(cache);
   await new Promise((r) => server.listen(PORT, r));
@@ -703,7 +779,7 @@ async function main(){
     if (d) lastmod[jobPath(r) + "/"] = d;
   }
   const gd = validDay(genDate);
-  if (gd) { for (const u of ["/", WA_LANDER, ...browsePaths]) lastmod[u] = gd; }
+  if (gd) { for (const u of ["/", WA_LANDER, ...ALERT_PATHS, ...browsePaths]) lastmod[u] = gd; }
 
   const deploy = await assembleDeploy(live, expiredBack, [...browsePaths], lastmod);
 
