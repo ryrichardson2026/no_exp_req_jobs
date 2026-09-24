@@ -490,7 +490,18 @@ def mode_detail(t):
     docs = load_discovery(t)
     print(f"discovery: {len(docs)} records to resolve against the Workday board")
 
-    done = skipped = failed = notfound = 0
+    # Liveness re-validation, EVERY run - the detail fetch is not just for the
+    # description, it is the ONLY trustworthy "is this job still postable" signal.
+    # Target's corporate discovery index is over-inclusive: it keeps listing WA
+    # requisitions the live Workday board answers 403 (permission denied) or 404
+    # for. The old skip-if-cached path let a job captured live on its first pull
+    # stay published forever, long after the board stopped serving it - that is
+    # what surfaced the dead apply links. So re-fetch every discovered job each
+    # run: a 200 is the only evidence it is live; a DEFINITIVE 403/404 drops it
+    # (delete any cached file) so it falls out of the published set and is retired
+    # downstream. A transient 5xx/network error keeps the last-known detail rather
+    # than dropping a real job over a blip - it re-validates next run.
+    done = dropped = failed = notfound = 0
     for i, doc in enumerate(docs, 1):
         rid = doc.get("requisitionid")
         ep = ext_path_from_applyurl(doc.get("applyurl"), t)
@@ -499,27 +510,27 @@ def mode_detail(t):
             log(t, "detail_skip", req=rid, reason="no reqid or path")
             continue
         out = os.path.join(p["detail"], f"{safe_name(rid)}.json")
-        if os.path.exists(out):
-            skipped += 1
-            continue
         r = fetch_detail(ws, t, ep)
-        if r.status_code != 200:
-            failed += 1
-            notfound += (r.status_code == 404)
-            print(f"  [{i}/{len(docs)}] {rid} status {r.status_code}"
-                  f"{'  (404 - stale search index vs live board)' if r.status_code == 404 else ''}")
-            log(t, "detail_error", req=rid, status=r.status_code)
-        else:
+        if r.status_code == 200:
             with open(out, "w", encoding="utf-8") as fh:
                 fh.write(r.text)
             done += 1
             if done % 25 == 0:
-                print(f"  [{i}/{len(docs)}] {done} fetched")
+                print(f"  [{i}/{len(docs)}] {done} live")
+        elif r.status_code in (403, 404):
+            if os.path.exists(out):
+                os.remove(out)
+            dropped += 1
+            notfound += (r.status_code == 404)
+            log(t, "detail_dropped", req=rid, status=r.status_code)
+        else:
+            failed += 1
+            log(t, "detail_error", req=rid, status=r.status_code)
         time.sleep(DELAY_SECONDS)
 
-    print(f"\ndetail complete: {done} fetched, {skipped} on disk, "
-          f"{failed} failed ({notfound} of them 404)")
-    log(t, "detail", discovered=len(docs), fetched=done, skipped=skipped,
+    print(f"\ndetail complete: {done} live, {dropped} dropped as not-postable "
+          f"({notfound} 404 / {dropped - notfound} 403), {failed} transient")
+    log(t, "detail", discovered=len(docs), fetched=done, dropped=dropped,
         failed=failed, notfound=notfound)
     return 0
 
@@ -550,7 +561,12 @@ def mode_normalize(t):
         base = base_reqid_from_applyurl(doc.get("applyurl"))
         info = detail.get(base) or detail.get(doc.get("requisitionid"))
         if info is None:
+            # No live detail on disk = the board did not serve this job (403/404)
+            # on this run, so it is not postable. Do NOT publish it. Mapping it with
+            # the discovery applyurl fallback is exactly what emitted the dead apply
+            # links (and the composite _R0000..-N fallback URL). Live detail only.
             no_detail += 1
+            continue
         rec, w = map_record(doc, info, t, retrieved)
         model.apply_seen_state(rec, seen_state, now)
         rec["is_new"] = True if known_before == 0 else rec["first_seen"] == now
@@ -568,7 +584,7 @@ def mode_normalize(t):
 
     print(f"{len(docs)} discovery x {len(detail)} detail -> {len(mapped)} "
           f"normalized -> {out_path}")
-    print(f"records with no matching detail: {no_detail}")
+    print(f"dropped (no live detail on the board, not published): {no_detail}")
     print(f"\nFILL RATE\n")
     for f, n, pct in model.fill_report(mapped):
         print(f"  {n:>5}  {pct:>5.1f}%  {f}")

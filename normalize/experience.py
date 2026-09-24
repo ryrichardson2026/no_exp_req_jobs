@@ -389,7 +389,16 @@ BACKGROUND_LISTING_RX = re.compile(
 EDU_CERTIFICATE_RX = re.compile(
     r"^\s*certificate\s*$"
     r"|\b(?:ged|g\.e\.d|high school|secondary|equivalen\w*|diploma)\b[^.]{0,25}\bcertificate\b"
-    r"|\bcertificate\b[^.]{0,25}\b(?:of )?(?:completion|equivalency|attendance|high school|ged)\b",
+    r"|\bcertificate\b[^.]{0,25}\b(?:of )?(?:completion|equivalency|attendance|high school|ged)\b"
+    # A high-school diploma / GED credential is secondary-education equivalency - EDUCATION, not a
+    # gateable license - even when phrased 'diploma'/'credential' rather than 'certificate' (DaVita
+    # PCT: 'High School diploma, general education development ("GED") credential, or equivalent'
+    # named no 'certificate', so the credential GATE excluded all 16 postings). Still guarded by
+    # HARD_CREDENTIAL_RX at the call site, so 'HS diploma AND active RN license' keeps the RN.
+    # Blast radius measured 2026-09-24: +16, all DaVita; no other tenant moved.
+    r"|\bhigh school\b[^.]{0,20}\bdiploma\b"
+    r"|\bg\.?e\.?d\.?\b"
+    r"|\bdiploma\b[^.]{0,25}\bor\b[^.]{0,20}\bequivalent\b",
     re.I)
 HARD_CREDENTIAL_RX = re.compile(
     r"\b(licen[sc]e[sd]?|\bcard\b|registration|registered|permit|endorsement|notary|"
