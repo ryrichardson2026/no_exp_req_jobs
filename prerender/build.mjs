@@ -585,7 +585,12 @@ async function main(){
   // browse: states present, and categories present within each state. state/category ride
   // on the route so bake() can build the title; the count comes from the rendered page.
   const byState = {};
-  for (const r of recs) { if (!r.state) continue; (byState[r.state] = byState[r.state] || new Set()); (r.category || []).forEach((c) => byState[r.state].add(c)); }
+  // Build from `list` (published + live + applicable; jobs_list omits expired), NOT `recs` (which
+  // includes expired/410 job rows). A category present only on an expired/suppressed record would
+  // emit a browse route that renders EMPTY, and the browse bake waits for >=1 list item
+  // (WAIT.browse) -> 20s timeout -> smoke-test abort (WA x construction, 0 live jobs, did exactly
+  // this). Empty browse routes are meant to stay UNBAKED and fall back to the SPA (see below).
+  for (const r of list) { if (!r.state) continue; (byState[r.state] = byState[r.state] || new Set()); (r.category || []).forEach((c) => byState[r.state].add(c)); }
   const browsePaths = new Set(["/jobs/"]);
   routes.push({ type: "browse", path: "/jobs/", url: null, state: null, category: null });
   for (const st of Object.keys(byState)) {
