@@ -15,6 +15,22 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Chivo:wght@700;800&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@700;800&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap"></noscript>
 <link rel="stylesheet" href="/styles.css">
+<!-- Hero (section 1) responsive layout is CSS-media-query driven, NOT this.state.wide: the SPA's
+     JS `wide` state is unreliable on the prerendered alert pages (hydration timing left the hero
+     rendering the single-column mobile layout on desktop). CSS guarantees the two-panel split at
+     >=768px regardless of JS. Scoped to the hero classes; everything else stays JS-driven. -->
+<style>
+.ah-hero{padding:24px 16px 30px;gap:22px;grid-template-columns:1fr}
+.ah-h1{font-size:31px}
+.ah-sub{font-size:15.5px}
+.ah-form{max-width:100%;justify-self:stretch}
+@media(min-width:768px){
+.ah-hero{padding:48px 24px 54px;gap:48px;grid-template-columns:1.05fr 430px;align-items:start}
+.ah-h1{font-size:44px}
+.ah-sub{font-size:17.5px}
+.ah-form{max-width:430px;justify-self:end}
+}
+</style>
 <!-- Vendored React (no CDN, no build step). defer so they don't block first paint (the page
      is prerendered — React only hydrates); deferred scripts still run in document order,
      before the module app script below. -->

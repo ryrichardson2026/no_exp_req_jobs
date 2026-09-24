@@ -1034,15 +1034,15 @@ class AlertsApp extends React.Component {
       : null;
     const ticks = h("div", { style: s("display:flex;flex-wrap:wrap;gap:9px 18px;font-size:13px;font-weight:700;color:var(--ink)") },
       ["100% free", "No sign-up to apply", "Real employers"].map((t, i) => h("span", { key: i, style: s("display:inline-flex;align-items:center;gap:5px") }, raw(TICK), t)));
-    const copy = h("div", { style: s("display:grid;gap:15px;align-content:center") },
+    const copy = h("div", { style: s("display:grid;gap:15px;align-content:start") },
       payPill,
-      h("h1", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:" + (wide ? "44px" : "31px") + ";line-height:1.04;letter-spacing:-0.015em;color:var(--ink)") }, CONTENT.h1),
-      h("div", { style: s("font-size:" + (wide ? "17.5px" : "15.5px") + ";line-height:1.5;color:var(--ink-muted);text-wrap:pretty;max-width:36ch") }, CONTENT.heroSub),
+      h("h1", { className: "ah-h1", style: s("margin:0;font-family:var(--font-display);font-weight:800;line-height:1.04;letter-spacing:-0.015em;color:var(--ink)") }, CONTENT.h1),
+      h("div", { className: "ah-sub", style: s("line-height:1.5;color:var(--ink-muted);text-wrap:pretty;max-width:36ch") }, CONTENT.heroSub),
       ticks,
       countLine);
-    const form = h("div", { style: s("width:100%;max-width:" + (wide ? "430px" : "520px") + ";justify-self:" + (wide ? "end" : "center")) }, this.renderHeroForm());
+    const form = h("div", { className: "ah-form", style: s("width:100%") }, this.renderHeroForm());
     return h("section", { style: s("flex:none;background:linear-gradient(180deg,var(--fact) 0%,var(--surface) 60%);border-bottom:2px solid var(--ink)") },
-      h("div", { style: s("max-width:1060px;margin:0 auto;box-sizing:border-box;padding:" + (wide ? "48px 24px 54px" : "24px 16px 30px") + ";display:grid;gap:" + (wide ? "48px" : "22px") + ";" + (wide ? "grid-template-columns:1.05fr 430px;align-items:center" : "grid-template-columns:1fr")) },
+      h("div", { className: "ah-hero", style: s("max-width:1060px;margin:0 auto;box-sizing:border-box;display:grid") },
         copy, form));
   }
 
