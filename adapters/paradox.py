@@ -314,6 +314,20 @@ def _iso_date(v):
     return None
 
 
+def _abs_apply_url(original, t):
+    """Make the Paradox apply link ABSOLUTE. originalURL is absolute for some tenants (Chipotle:
+    'https://jobs.chipotle.com/...') but RELATIVE for others (Shake Shack/Sonic/Arby's/BWW/Jimmy
+    John's: 'slug/job/ID'). A relative href on a noprobjobs.com job page resolves against OUR host
+    -> a dead No Prob Jobs URL, never the employer -> the Apply button 404s. Prefix the tenant's
+    careers_host so Apply always leaves the site to the real ATS."""
+    if not original:
+        return None
+    if re.match(r"^https?://", original, re.I):
+        return original                                      # already absolute (Chipotle) — leave it
+    host = (t.get("careers_host") or "").rstrip("/")
+    return host + "/" + original.lstrip("/") if host else original
+
+
 def map_record(rec, t, retrieved_at):
     r = model.new_record()
     warnings = []
@@ -341,12 +355,13 @@ def map_record(rec, t, retrieved_at):
     r["posted_at"] = _iso_date(rec.get("postedAt"))
     r["freshness_state"] = "UNKNOWN"
 
-    r["apply_url"] = rec.get("originalURL")
+    apply = _abs_apply_url(rec.get("originalURL"), t)
+    r["apply_url"] = apply
     r["apply_class"] = "ATS"
     r["source_class"] = t.get("source_class", "direct-employer")
     r["source_category"] = None
     r["source_function"] = None
-    r["source_url"] = rec.get("originalURL")
+    r["source_url"] = apply
     r["retrieved_at"] = retrieved_at
     r["terms_reference"] = t.get("terms_reference")
     r["dedupe_hash"] = model.dedupe_hash(r["company_name"], r["title"], r["location_raw"])
