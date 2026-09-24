@@ -964,6 +964,19 @@ def _publish():
     print(f"\ndeploy: {url or '(url not captured - check vercel output)'}")
     print("STATUS: PUBLISH COMPLETE")
 
+    # Deploy-then-flip: the pages are now LIVE, so stamp jobs.first_deployed_at for every job page
+    # this bake shipped (from prerender/out/_lifecycle.json). Until stamped, a job is NULL and
+    # jobs_list hides it — so the live board never links to a job whose page isn't deployed yet
+    # (the "new-job 404 drift"). MUST run only here, AFTER a successful deploy. Best-effort: a
+    # failed stamp just leaves new jobs hidden (safe — no dead link) and self-heals next pull.
+    print("\n--- mark deployed (deploy-then-flip stamp) ---")
+    try:
+        rc_md, _ = run([sys.executable, "-m", "analyze.mark_deployed"], cwd=ROOT)
+        if rc_md != 0:
+            print("[mark_deployed] non-zero exit (non-fatal): new jobs stay hidden until next pull's stamp")
+    except Exception as e:
+        print(f"[mark_deployed] skipped (non-fatal): {type(e).__name__}: {e}")
+
     # Notify Google of new/retired pages — ONLY after a successful publish, and strictly
     # best-effort (never changes the publish result). new -> URL_UPDATED, retired -> URL_DELETED.
     print("\n--- indexing: notify Google (new -> URL_UPDATED, retired -> URL_DELETED) ---")

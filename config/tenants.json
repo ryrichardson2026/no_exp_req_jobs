@@ -1996,10 +1996,9 @@
       "source_class": "direct-employer",
       "sector": "food_services",
       "markets": [
-        "WA",
-        "TX"
+        "WA"
       ],
-      "verified": "2026-09-17 Chrome+cold-Python: totalJob 586 company-owned; stateAbbr scope WA=10/TX=33 (client-side; site geo-radius bleeds). Descriptions inline. Opener 'Job Qualifications'. First Paradox tenant; adapter serves Chipotle/Inspire/Panda next.",
+      "verified": "2026-09-17 Chrome+cold-Python: totalJob 586 company-owned; stateAbbr scope WA=10/TX=33 (client-side; site geo-radius bleeds). Descriptions inline. Opener 'Job Qualifications'. First Paradox tenant; adapter serves Chipotle/Inspire/Panda next. TX dropped 2026-09-24 (unlaunched state → 22 dead /jobs pages; match Sonic WA-only until TX launches).",
       "extraction": {
         "_note": "DERIVED from Shake Shack Paradox descriptions: requirements under 'Job Qualifications'. 'Job Responsibilities'=duties, 'Perks'/'About Us'=END_HEADINGS fence it. Hourly-rate line handled by pay-disclaimer guard.",
         "openers": [
