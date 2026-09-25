@@ -1601,7 +1601,8 @@
         ]
       },
       "extraction": {
-        "_note": "DERIVED from Panera WA capture (12 recs 2026-09-17): requirements under 'This Opportunity Is for You If:' (colon, 19x). 'What's In It for You?'=benefits, 'Responsibilities'=duties (both excluded). Forked per-tenant like TJX.",
+        "absent_barrier_is_none_needed": true,
+        "_note": "DERIVED from Panera WA capture (12 recs 2026-09-17): requirements under 'This Opportunity Is for You If:' (colon, 19x). 'What's In It for You?'=benefits, 'Responsibilities'=duties (both excluded). Forked per-tenant like TJX. Headingless fallback ON 2026-09-25: many WA posts are marketing prose with no requirements section (Retail Team Member) -> NOT_STATED; managers still occupation-gated.",
         "openers": [
           {
             "text": "this opportunity is for you if",

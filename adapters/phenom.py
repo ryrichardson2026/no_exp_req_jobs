@@ -232,7 +232,15 @@ def extract_detail(html_text, tenant):
     if (tenant.get("detail_source") or "jsonld") == "ddo":
         desc = _ddo_description(html_text)
         return {"description": desc} if desc else None
-    return extract_jobposting(html_text)
+    # jsonld (default): prefer the JobPosting JSON-LD, but fall back to phApp.ddo when a page
+    # ships NO JobPosting block. tjx mixes templates within one tenant (HomeGoods pages carry
+    # JSON-LD; TJ Maxx / Marshalls "REQ"-prefix pages carry only the ddo description), so a
+    # single detail_source dropped ~half the brands' descriptions -> NOT_STATED -> off the board.
+    jp = extract_jobposting(html_text)
+    if jp:
+        return jp
+    desc = _ddo_description(html_text)
+    return {"description": desc} if desc else None
 
 
 def mode_inspect(tenant):
