@@ -2073,6 +2073,7 @@
       ],
       "verified": "2026-09-17 Paradox filter[state] server-side scope (WA 80/TX 188). Inspire portfolio brand.",
       "extraction": {
+        "absent_barrier_is_none_needed": true,
         "_note": "Arby's Team/Crew Member requirements are woven into the 'Job Description' prose (no discrete requirements heading; only 'Physical Requirements'). Open on 'Job Description' so absence-inference reads soft-traits-only -> NONE_NEEDED; 'Requirements:' still catches director/manager roles as REQUIRED (precedence). Owner: only Crew/Team Member are the applicable targets.",
         "openers": [
           {
@@ -2107,6 +2108,7 @@
       ],
       "verified": "2026-09-17 Paradox filter[state] server-side scope (WA 87/TX 129). Inspire portfolio brand.",
       "extraction": {
+        "absent_barrier_is_none_needed": true,
         "_note": "JJ mixes 'Requirements:' (colon) with role-prefixed bold headings ('Team Member Requirements', 'Delivery Driver Requirements' - no colon). Enumerate the role headings as full bare openers; content is age/work-auth/bring-bike (no barrier) -> absence-inference NONE_NEEDED.",
         "openers": [
           {
@@ -2160,6 +2162,7 @@
       ],
       "verified": "2026-09-17 Paradox filter[state] server-side scope (WA 69; TX 5093 SKIPPED (>5k, owner call)). Inspire portfolio brand.",
       "extraction": {
+        "absent_barrier_is_none_needed": true,
         "_note": "DERIVED from sonic Paradox descriptions 2026-09-17.",
         "openers": [
           {

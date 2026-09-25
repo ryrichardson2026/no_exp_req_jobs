@@ -52,9 +52,9 @@
       "density": 25.4
     },
     "gensco": {
-      "records": 7,
+      "records": 9,
       "applicable": 6,
-      "density": 85.7
+      "density": 66.7
     },
     "sherwin_williams": {
       "records": 45,
@@ -138,8 +138,8 @@
     },
     "arbys": {
       "records": 268,
-      "applicable": 96,
-      "density": 35.8
+      "applicable": 122,
+      "density": 45.5
     },
     "buffalo_wild_wings": {
       "records": 210,
@@ -147,9 +147,9 @@
       "density": 9.0
     },
     "jimmy_johns": {
-      "records": 216,
-      "applicable": 34,
-      "density": 15.7
+      "records": 221,
+      "applicable": 135,
+      "density": 61.1
     },
     "chipotle": {
       "records": 122,

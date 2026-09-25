@@ -407,6 +407,14 @@ HARD_CREDENTIAL_RX = re.compile(
     r"(?:nurs|medic|teach|electric|plumb|weld|cosmetolog|barber|pharmac|real estate)\w*\s+"
     r"(?:certificat|certified|certification))\b", re.I)
 
+# A driver's license is an obtainable, near-universal credential (already on report.py's
+# CREDENTIAL_QUICK_RX allowlist), NOT a barrier to applying for an entry-level role - a Jimmy
+# John's / Domino's delivery driver is a no-experience job. It must not (a) block the
+# absence-inference NONE_NEEDED via the bare "licen[sc]e" alternative in _INFER_BARRIER_RX, nor
+# (b) count as a hard credential in the headingless fallback. Scoped to DRIVER's license only:
+# an RN/CDL/pharmacist license is still a real barrier. Keep in sync with report.py's allowlist.
+_OBTAINABLE_CRED_RX = re.compile(r"driver'?s?\s+licen[sc]e|driving\s+licen[sc]e", re.I)
+
 # A completed trade apprenticeship is a multi-year runway even where no year count
 # appears - it is what separates the Painter (4y Journeyman) from the Engineer
 # (training will be on-the-job).
@@ -584,7 +592,10 @@ def _clean_section_no_barrier(section_text):
     (age stripped first). The basis for the absence-inference NONE_NEEDED above."""
     if not (section_text or "").strip():
         return False
-    return not _INFER_BARRIER_RX.search(_AGE_STRIP_RX.sub(" ", section_text))
+    # Age and a driver's license are non-barriers - strip both before the barrier scan so a
+    # section whose only "requirement" is "valid driver's license" reads as no-barrier -> NONE_NEEDED.
+    cleaned = _OBTAINABLE_CRED_RX.sub(" ", _AGE_STRIP_RX.sub(" ", section_text))
+    return not _INFER_BARRIER_RX.search(cleaned)
 
 
 def derive_condition(reqs, found_required, zero_range_open=False, section_text=""):
@@ -669,7 +680,7 @@ def _is_hard_barrier(r):
         return True
     if EDUCATION in t and _HARD_DEGREE_RX.search(low) and "high school" not in low:
         return True
-    if CREDENTIAL in t and r["modality"] == TO_APPLY:
+    if CREDENTIAL in t and r["modality"] == TO_APPLY and not _OBTAINABLE_CRED_RX.search(low):
         return True
     return False
 
