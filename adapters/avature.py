@@ -202,7 +202,14 @@ def extract_description(detail_html):
     <div class="article__content__view__field">. Depth-balanced so nested markup is kept."""
     anchor = detail_html.find("Requirements and Description")
     search_from = anchor if anchor >= 0 else 0
-    j = detail_html.find("article__content__view__field", search_from)
+    # Anchor on the article__content__view CONTAINER (class exactly that), not the first
+    # __field. On video-template postings (e.g. Unifi GEG ramp agents) the first __field is a
+    # recruiting-video iframe with no text; the real "No experience required / Job Summary ..."
+    # sits in the NEXT __field. Grabbing the container (depth-balanced) keeps every field, and
+    # html->text drops the iframe, so both video-first and text-only layouts capture the body.
+    j = detail_html.find('article__content__view"', search_from)
+    if j < 0:
+        j = detail_html.find("article__content__view__field", search_from)   # fallback: legacy shape
     if j < 0:
         j = detail_html.find("article__content__view", search_from)
     if j < 0:
