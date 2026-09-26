@@ -202,9 +202,17 @@ HARD_CREDENTIAL_RX = re.compile(
 # the second condition regardless of timeframe. Deliberately not exhaustive; it
 # fails in the safe direction (drops the record) and is scoped to TO_APPLY only,
 # so an after-hire "complete our training program" path is untouched.
+# 2026-09-26: widened "graduate of accredited" -> "graduat(e|ion) of|from accredited" to
+# catch the WA gov attorney-track leaker (Financial Legal Examiner: to-apply requirement
+# "Graduation from an accredited law school" - a JD, read no-experience because the barrier
+# is the degree, not stated experience, and "graduation from" narrowly missed "graduate of").
+# The (?!high school) guard keeps secondary-education entry roles applicable (Program
+# Specialist 4 = "High school graduation or GED"). Measured net effect: exactly 1 record
+# leaves applicable (the Examiner); RN2/Recreation Therapist siblings were already excluded
+# by the licensed-occupation title gate, so this drops no additional real entry role.
 PREREQUISITE_RX = re.compile(
     r"completion of (?:an?\s+)?(?:[\w\-/]+\s+){0,6}(?:program|course)|"
-    r"graduate of (?:an?\s+)?accredited|"
+    r"graduat\w+\s+(?:of|from)\s+(?:an?\s+)?accredited(?!\s+high school)|"
     r"accredited program|training program|degree program|"
     r"certificate program|apprenticeship program", re.IGNORECASE)
 

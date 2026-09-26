@@ -2,9 +2,9 @@
   "_comment": "QA baseline for run_pull.py halt checks (spec step 5 / Finding 41 - the unbuilt QA that should exist). Per-tenant records/applicable/density from the last ACCEPTED run. run_pull.py reads this to gate a pull: a tenant returning zero, under 50% of baseline records, or a density more than 15 points off baseline makes the run PARTIAL (no publish). It is updated ONLY on an accepted run and never automatically - run `python run_pull.py --update-baseline` after a COMPLETE run whose numbers and movement file you have inspected. Seeded 2026-09-09 from the operator-provided table; density is applicable/records * 100.",
   "tenants": {
     "multicare": {
-      "records": 114,
-      "applicable": 26,
-      "density": 22.8
+      "records": 128,
+      "applicable": 39,
+      "density": 30.5
     },
     "davita": {
       "records": 17,
@@ -12,24 +12,24 @@
       "density": 94.1
     },
     "providence": {
-      "records": 121,
-      "applicable": 28,
-      "density": 23.1
+      "records": 122,
+      "applicable": 25,
+      "density": 20.5
     },
     "kroger": {
-      "records": 466,
-      "applicable": 287,
-      "density": 61.6
+      "records": 410,
+      "applicable": 260,
+      "density": 63.4
     },
     "compass_group": {
-      "records": 319,
-      "applicable": 85,
+      "records": 289,
+      "applicable": 77,
       "density": 26.6
     },
     "target": {
-      "records": 70,
-      "applicable": 60,
-      "density": 85.7
+      "records": 296,
+      "applicable": 286,
+      "density": 96.6
     },
     "dollar_general": {
       "records": 202,
@@ -37,19 +37,19 @@
       "density": 97.0
     },
     "allied_security": {
-      "records": 104,
-      "applicable": 47,
-      "density": 45.2
+      "records": 152,
+      "applicable": 61,
+      "density": 40.1
     },
     "uhaul": {
       "records": 50,
-      "applicable": 37,
-      "density": 74.0
+      "applicable": 35,
+      "density": 70.0
     },
     "cintas": {
-      "records": 63,
-      "applicable": 16,
-      "density": 25.4
+      "records": 60,
+      "applicable": 11,
+      "density": 18.3
     },
     "gensco": {
       "records": 9,
@@ -57,9 +57,9 @@
       "density": 66.7
     },
     "sherwin_williams": {
-      "records": 45,
-      "applicable": 36,
-      "density": 80.0
+      "records": 48,
+      "applicable": 38,
+      "density": 79.2
     },
     "sysco": {
       "records": 25,
@@ -67,44 +67,44 @@
       "density": 20.0
     },
     "ontrac": {
-      "records": 20,
+      "records": 21,
       "applicable": 19,
-      "density": 95.0
+      "density": 90.5
     },
     "tjx": {
-      "records": 121,
-      "applicable": 76,
-      "density": 62.8
+      "records": 124,
+      "applicable": 84,
+      "density": 67.7
     },
     "wfs_tx": {
-      "records": 68,
-      "applicable": 20,
-      "density": 29.4
+      "records": 67,
+      "applicable": 19,
+      "density": 28.4
     },
     "wfs_wa": {
-      "records": 14,
-      "applicable": 9,
-      "density": 64.3
+      "records": 15,
+      "applicable": 10,
+      "density": 66.7
     },
     "abm": {
-      "records": 445,
-      "applicable": 349,
-      "density": 78.4
+      "records": 473,
+      "applicable": 374,
+      "density": 79.1
     },
     "aramark": {
-      "records": 955,
-      "applicable": 342,
-      "density": 35.8
+      "records": 944,
+      "applicable": 341,
+      "density": 36.1
     },
     "primeflight": {
-      "records": 34,
-      "applicable": 17,
-      "density": 50.0
+      "records": 35,
+      "applicable": 16,
+      "density": 45.7
     },
     "menzies": {
-      "records": 75,
-      "applicable": 18,
-      "density": 24.0
+      "records": 72,
+      "applicable": 17,
+      "density": 23.6
     },
     "allianceground": {
       "records": 7,
@@ -122,19 +122,19 @@
       "density": 36.5
     },
     "dutchbros": {
-      "records": 280,
-      "applicable": 110,
-      "density": 39.3
+      "records": 281,
+      "applicable": 114,
+      "density": 40.6
     },
     "shake_shack": {
-      "records": 7,
+      "records": 8,
       "applicable": 5,
-      "density": 71.4
+      "density": 62.5
     },
     "sonic": {
-      "records": 69,
+      "records": 70,
       "applicable": 14,
-      "density": 20.3
+      "density": 20.0
     },
     "arbys": {
       "records": 268,
@@ -142,18 +142,18 @@
       "density": 45.5
     },
     "buffalo_wild_wings": {
-      "records": 210,
-      "applicable": 19,
+      "records": 189,
+      "applicable": 17,
       "density": 9.0
     },
     "jimmy_johns": {
-      "records": 221,
-      "applicable": 135,
-      "density": 61.1
+      "records": 222,
+      "applicable": 136,
+      "density": 61.3
     },
     "chipotle": {
-      "records": 122,
-      "applicable": 72,
+      "records": 117,
+      "applicable": 69,
       "density": 59.0
     },
     "spencers": {
@@ -162,34 +162,34 @@
       "density": 23.2
     },
     "spirithalloween": {
-      "records": 165,
-      "applicable": 49,
-      "density": 29.7
+      "records": 154,
+      "applicable": 46,
+      "density": 29.9
     },
     "kingcounty": {
-      "records": 102,
-      "applicable": 5,
-      "density": 4.9
+      "records": 105,
+      "applicable": 4,
+      "density": 3.8
     },
     "piercecountywa": {
-      "records": 31,
+      "records": 36,
       "applicable": 2,
-      "density": 6.5
+      "density": 5.6
     },
     "seattle": {
-      "records": 84,
-      "applicable": 3,
-      "density": 3.6
+      "records": 76,
+      "applicable": 2,
+      "density": 2.6
     },
     "tacoma": {
-      "records": 19,
+      "records": 22,
       "applicable": 0,
       "density": 0.0
     },
     "washington": {
-      "records": 516,
-      "applicable": 12,
-      "density": 2.3
+      "records": 518,
+      "applicable": 16,
+      "density": 3.1
     }
   }
 }
