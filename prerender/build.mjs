@@ -422,6 +422,11 @@ async function bake(page, route, cache){
         const blob = JSON.stringify({ list: JSON.parse(cache.list), pulledAt: cache.pulledAt || null }).replace(/</g, "\\u003c");
         out = out.replace("</body>", '<script id="__npj_data" type="application/json">' + blob + "</script></body>");
       }
+      // Internal-link mesh: append the related-jobs <nav> just before </body> (a sibling of the
+      // SPA root, so hydration never touches it and the links ship in the raw baked HTML).
+      if (route.type === "job" && route.related) {
+        out = out.replace("</body>", route.related + "</body>");
+      }
       await writeBaked(route.path, out);
       return { path: route.path, type: route.type, bytes: Buffer.byteLength(out, "utf8"), ld: !!route.ld };
     } catch (e) {
@@ -572,6 +577,38 @@ async function main(){
     cache.jobsSeed = seedDetail || null;
   }
 
+  // ---- Internal-link mesh (SEO crawlability) ----
+  // Every job page gets a static <a href> block linking to sibling LIVE jobs in the same primary
+  // category, arranged as a RING by job_number: coverage is complete (every job both GIVES and
+  // RECEIVES up to K inbound links) and stable (a new job appends to the ring, it doesn't
+  // reshuffle it). This is the fix for "Discovered - currently not indexed": a sitemap-only page
+  // with no internal links reads to Google as low-priority. Plain navigation anchors only - NO
+  // per-job markup here (that would be the list-page-carries-JobPosting violation). Built from the
+  // LIVE subset of recs (never links an expired/410 page); injected before </body> below, a sibling
+  // of the SPA root, so it survives client hydration AND is in the raw HTML Google reads.
+  const REL_K = 8;
+  const relCity = (s) => { const raw = String(s || "").trim().replace(/\s+/g, " "); return (raw && raw === raw.toUpperCase()) ? raw.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase()) : raw; };
+  const relEsc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+  const relByNum = {};
+  {
+    const byCat = {};
+    for (const r of recs) { if (r.expired || r.retired) continue; const c = (r.category || [])[0] || "_uncat"; (byCat[c] = byCat[c] || []).push(r); }
+    for (const c of Object.keys(byCat)) {
+      const arr = byCat[c].slice().sort((a, b) => a.job_number - b.job_number);
+      const N = arr.length;
+      if (N < 2) continue;
+      for (let i = 0; i < N; i++) {
+        const picks = [];
+        for (let j = 1; j <= Math.min(REL_K, N - 1); j++) picks.push(arr[(i + j) % N]);
+        const li = picks.map((o) => {
+          const loc = [relCity(o.city), o.state].filter(Boolean).join(", ");
+          return '<li><a href="' + jobPath(o) + '/">' + relEsc(o.title) + (loc ? " — " + relEsc(loc) : "") + "</a></li>";
+        }).join("");
+        relByNum[String(arr[i].job_number)] = '<nav class="npj-related" aria-label="Related jobs"><h2>More no-experience jobs</h2><ul>' + li + "</ul></nav>";
+      }
+    }
+  }
+
   // enumerate routes
   const routes = [];
   let ldCount = 0, expiredCount = 0, retiredCount = 0;
@@ -580,6 +617,7 @@ async function main(){
     const ld = r.expired ? null : jobPostingScript(jobPostingLd(r, COUNTRY)); // parity: no JSON-LD once expired
     if (r.expired) expiredCount++; if (ld) ldCount++;
     routes.push({ type: "job", path: jobPath(r) + "/", url: null, ld, num: r.job_number,
+      related: relByNum[String(r.job_number)] || null,
       meta: { title: PM.jobTitle(r), description: PM.jobDescription(r) } });
   }
   // browse: states present, and categories present within each state. state/category ride
@@ -637,7 +675,7 @@ async function main(){
   const isNewByNum = {}; for (const r of list) isNewByNum[String(r.job_number)] = !!r.is_new;
   const diskFile = (rp) => join(OUT, rp.replace(/\/$/, ""), "index.html");
   for (const r of jobRoutes) {
-    r._hash = sha1(JSON.stringify({ d: cache.byNum[String(r.num)] || null, n: isNewByNum[String(r.num)] || false, ld: r.ld || null }));
+    r._hash = sha1(JSON.stringify({ d: cache.byNum[String(r.num)] || null, n: isNewByNum[String(r.num)] || false, ld: r.ld || null, rel: r.related || null }));
     // Skip only on a normal full run (never on ONLY/LIMIT partials); needs matching template,
     // matching content hash, AND the file actually present on disk.
     r._skip = fullRun && templateMatch && prevManifest.pages[r.path] === r._hash && existsSync(diskFile(r.path));
