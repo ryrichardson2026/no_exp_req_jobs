@@ -2644,6 +2644,8 @@
         "pay_frequency": ["Hourly"],
         "exclude_categories": ["Pharmacy"]
       },
+      "enumerate_total_slack": 8,
+      "_enumerate_total_slack_note": "Per-store enumeration yields a few fewer than the vendor's headline total_jobs (a relevance-overlap tail on the large stores: a couple of jobs never surface in the paged relevance window despite paging each store to its own count). Observed gap 2-4; slack 8 gives headroom so the run_pull enumerate guard doesn't HOLD the whole tenant (and publish nothing) over a benign ~0.4% shortfall - same mechanism as kroger's constant +4. The REAL truncation backstops remain: the adapter's agg_sum==total_jobs tripwire (catches a capped aggregation) and run_pull's layer-b delta band (catches a big drop); a genuine store failure loses >=11 jobs, well past slack.",
       "description_strip_after": [
         "At Walmart, we offer competitive pay"
       ],
