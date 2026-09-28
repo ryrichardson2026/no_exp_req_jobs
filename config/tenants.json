@@ -2621,5 +2621,39 @@
         ]
       }
     }
+  },
+  "walmart": {
+    "_platform_note": "Custom Walmart careers GraphQL 'job search assistant' (POST careers.walmart.com/api/graphql, persisted queryId). Case-B adapter adapters/walmart.py. Index enumerates PER STORE (store_jobs_aggregation_result counts sum to the true total; relevance paging alone does NOT converge). Detail = SSR job page /us/en/jobs/{job_id} __NEXT_DATA__ props.pageProps.jobDetails. load_tenant/scope skip keys starting with _.",
+    "walmart": {
+      "label": "Walmart",
+      "index_query_id": "b0467c1f-f578-4261-9280-0ea4614f251c",
+      "refined_query": "jobId == '*'",
+      "employer_domain": "walmart.com",
+      "source_class": "direct-employer",
+      "sector": "retail",
+      "state": "WA",
+      "location_filter": {
+        "_note": "Server-side WA scope via the filter DSL field 'primaryLocationState'; the client-side authority re-checks the index record's own 'state' field.",
+        "field": "state",
+        "match_any": ["WA"],
+        "query_field": "primaryLocationState"
+      },
+      "scope": {
+        "_note": "Store-hourly frontline only. source_prefix CP = store jobs (R = corporate/facility, gated downstream anyway); pay_frequency Hourly drops salaried; exclude_categories Pharmacy per owner (2026-09-28) - credentialed pharmacy tech roles pre-empted at the index. All three are reversible config.",
+        "source_prefix": ["CP"],
+        "pay_frequency": ["Hourly"],
+        "exclude_categories": ["Pharmacy"]
+      },
+      "description_strip_after": [
+        "At Walmart, we offer competitive pay"
+      ],
+      "_description_strip_after_note": "Fences the fixed Walmart benefits/legal boilerplate tail of the 'What you'll do' field (Live Better U 'high school completion ... certificates', 'required minimum wage') - a requirements-span leak that read as a required education/credential and flipped every store job to experience-required (0 applicable). Earliest-matching marker wins; unmatched = keep prose.",
+      "extraction": {
+        "_note": "2026-09-28. DERIVED from Walmart's OWN store-job captures, nothing inherited. Store roles are TEMPLATED and HEADINGLESS: jobDetails.minimumQualification/preferredQualification are null on 100% of sampled store roles; the body is only descriptionSummary (Role summary) + description (What you'll do / benefits boilerplate) + additionalDescription (What you'll bring / duties). There is NO requirements/qualifications heading, so openers=[] and the absent-barrier fallback classifies: full-body scan -> REQUIRED if a hard inline req else NONE_NEEDED. WATCH: the 'What you'll do' benefits boilerplate ('Live Better U ... high school completion', 'required minimum wage') is a known requirements-span-leak vector - inspect gate attribution on first run.",
+        "openers": [],
+        "absent_barrier_is_none_needed": true
+      },
+      "verified": "2026-09-28 SIGNED OFF - Chrome audit + cold-Python end-to-end. Read surface: POST /api/graphql persisted queryId b0467c1f..., context.job_search_context.filters DSL. Only primaryLocationState and storeNumber are server-filterable (category/payFrequency return 0 -> scoped client-side). Relevance paging does NOT converge (~465/549), so index enumerates PER STORE off store_jobs_aggregation_result (per-store counts). COMPLETENESS TRIPWIRE: agg_sum must equal vendor total_jobs from the same base response (else the aggregation is capped and new/hidden stores would be missed) -> index ABORTS loud. Detail = SSR /us/en/jobs/{id} __NEXT_DATA__ props.pageProps.jobDetails (no per-req description; templated + headingless, minimumQualification null). Full run: 380 records / 329 applicable / 86.6% density. Excluded = 35 Team Supervisor (occupation-management, correct) + ~17 Auto Care (acquire-frame 'become certified on equipment' not waived - conservative false-negative, extractor-level, deferred)."
+    }
   }
 }

@@ -373,6 +373,7 @@ _ENUMERATE_ARTIFACT = {
     "appcast": ("index.jsonl", False),
     "avature": ("index.jsonl", False),
     "paradox": ("records.jsonl", False),   # single-pass: records.jsonl carries descriptions inline
+    "walmart": ("records.jsonl", False),   # per-store enumeration unions into records.jsonl
 }
 
 
@@ -410,6 +411,9 @@ def _live_detail_names(platform, tenant_key):
         return {f"{mod.safe_name(d.get('requisitionid'))}.json" for d in mod.load_discovery(t) if d.get("requisitionid")}, ".json"
     if platform == "phenom":
         # detail files are {job_id}.html for each in-scope index record (mode_detail's scheme).
+        return {f"{mod.job_id(j)}.html" for j in mod.load_records(t) if mod.in_scope(j, t) and mod.job_id(j)}, ".html"
+    if platform == "walmart":
+        # records.jsonl is the per-store union; detail files are {job_id}.html (mode_detail's scheme).
         return {f"{mod.job_id(j)}.html" for j in mod.load_records(t) if mod.in_scope(j, t) and mod.job_id(j)}, ".html"
     if platform == "ultipro":
         # index.jsonl is ALREADY the in-scope set; detail files are {opportunityId}.json.

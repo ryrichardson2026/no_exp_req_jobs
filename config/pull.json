@@ -157,6 +157,17 @@
         "detail",
         "normalize"
       ]
+    },
+    {
+      "platform": "walmart",
+      "modes": [
+        "index",
+        "detail",
+        "normalize"
+      ],
+      "tenants": [
+        "walmart"
+      ]
     }
   ]
 }

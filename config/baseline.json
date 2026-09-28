@@ -1,6 +1,11 @@
 {
   "_comment": "QA baseline for run_pull.py halt checks (spec step 5 / Finding 41 - the unbuilt QA that should exist). Per-tenant records/applicable/density from the last ACCEPTED run. run_pull.py reads this to gate a pull: a tenant returning zero, under 50% of baseline records, or a density more than 15 points off baseline makes the run PARTIAL (no publish). It is updated ONLY on an accepted run and never automatically - run `python run_pull.py --update-baseline` after a COMPLETE run whose numbers and movement file you have inspected. Seeded 2026-09-09 from the operator-provided table; density is applicable/records * 100.",
   "tenants": {
+    "walmart": {
+      "records": 380,
+      "applicable": 329,
+      "density": 86.6
+    },
     "multicare": {
       "records": 128,
       "applicable": 39,
