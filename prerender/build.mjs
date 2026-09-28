@@ -83,6 +83,39 @@ const WA_LANDER = "/washington-jobs/";
 const ALERTS = ALERT_PAGES;
 const ALERT_PATHS = [...ALERT_PAGES.map((p) => p.path), ...Object.keys(ALERT_MARKETS).map(marketIndexPath)];
 
+// board category -> its alert-lander path (the "guide" hub for that category). Drives the
+// lander cross-links, the job-page "See all {category} jobs" link, and the breadcrumb category
+// level. Healthcare is an employer-scoped SECTOR page but carries the "Healthcare" category tag
+// (tenant_category add), so map it by that tag. Categories with no lander (Administrative,
+// Customer Service, Government, Construction) fall back to the browse page where used.
+const LANDER_BY_CAT = {};
+for (const p of ALERT_PAGES) {
+  const cat = p.category || (p.slug === "healthcare" ? "Healthcare" : null);
+  if (cat) LANDER_BY_CAT[cat] = p.path;
+}
+// category page URL for a job: its lander if one exists, else the state/category browse page.
+const catPageUrl = (state, cat) => LANDER_BY_CAT[cat] || browsePath(state, cat);
+
+// BreadcrumbList JSON-LD for a job page: Home > {Category} jobs > {Job title}. The category
+// level points at the job's category hub (lander if one exists, else the browse page) — real
+// crawlable ancestry AND a Google rich-result type. Omits the category level when the job has
+// no board category (or one with no hub), so no item ever points at a dead URL.
+function breadcrumbLd(r){
+  const items = [{ name: "No-Experience Jobs", url: SITE_URL + "/" }];
+  const cat = (r.category || [])[0];
+  if (cat && (LANDER_BY_CAT[cat] || CAT_SLUG[cat])) {
+    const label = (cat === "Transportation/Automotive" ? "Transportation" : cat) + " Jobs";
+    items.push({ name: label, url: SITE_URL + catPageUrl(r.state, cat) });
+  }
+  items.push({ name: r.title || "Job", url: SITE_URL + jobPath(r) + "/" });
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, i) => ({ "@type": "ListItem", position: i + 1, name: it.name, item: it.url })),
+  };
+  return '<script type="application/ld+json">\n' + JSON.stringify(ld, null, 2).replace(/</g, "\\u003c") + "\n</script>";
+}
+
 // Live data for one /alerts/{market}/{category}/ page, computed from the published jobs_list the
 // SAME way the listing view derives it: "applicable" = the board's default exp facets (none +
 // preferred, i.e. R.expFacet != null), scoped to the market (state or null-state) and category.
@@ -105,12 +138,15 @@ function alertSlice(list, entry, pulledAt){
   }
   if (maxPay != null) maxPay = Math.floor(maxPay);
 
-  // 6 newest: prefer the baked eff_new_date recency (the landing "recent" key), backfill by
-  // newestFirst so 6 always show when the slice has them.
+  // Newest first: prefer the baked eff_new_date recency (the landing "recent" key), backfill by
+  // newestFirst. `recent` = the 6 featured cards; `openings` = the next ~24 as a compact static
+  // <a href> list — SEO crawl equity to job pages + a substantial listing, not just a signup form.
   const dated = slice.filter((r) => r.eff_new_date).sort((a, b) =>
     a.eff_new_date < b.eff_new_date ? 1 : (a.eff_new_date > b.eff_new_date ? -1 : String(a.internal_id).localeCompare(String(b.internal_id))));
   const undated = slice.filter((r) => !r.eff_new_date).sort(R.newestFirst);
-  const recent = dated.concat(undated).slice(0, 6);
+  const sorted = dated.concat(undated);
+  const recent = sorted.slice(0, 6);
+  const openings = sorted.slice(6, 30).map((r) => ({ t: r.title, c: r.city, s: r.state, h: jobPath(r) + "/" }));
 
   // top employers by open count; each links to the listing view pre-filtered to them (?emp=slug).
   const byCo = {};
@@ -128,12 +164,12 @@ function alertSlice(list, entry, pulledAt){
   for (const r of marketApplicable) for (const c of R.recordCats(r)) if (CAT_SLUG[c]) catCount[c] = (catCount[c] || 0) + 1;
   const otherCats = Object.keys(catCount).filter((c) => c !== category)
     .sort((a, b) => catCount[b] - catCount[a] || a.localeCompare(b))
-    .map((c) => ({ label: c, displayLabel: c === "Transportation/Automotive" ? "Transportation" : c, count: catCount[c], href: browsePath(state, c) }));
+    .map((c) => ({ label: c, displayLabel: c === "Transportation/Automotive" ? "Transportation" : c, count: catCount[c], href: browsePath(state, c), landerHref: LANDER_BY_CAT[c] || null }));
 
   // seasonal signal (content says "if any"): title/employment_type mentions seasonal or holiday.
   const seasonalCount = slice.filter((r) => /seasonal|holiday/i.test(r.title || "") || /seasonal/i.test(r.employment_type || "")).length;
 
-  return { count: slice.length, maxPay, recent, whosHiring, otherCats, seasonalCount, pulledAt: pulledAt || null };
+  return { count: slice.length, maxPay, recent, openings, whosHiring, otherCats, seasonalCount, pulledAt: pulledAt || null };
 }
 const MIME = { ".html":"text/html",".js":"text/javascript",".mjs":"text/javascript",".css":"text/css",
   ".json":"application/json",".svg":"image/svg+xml",".png":"image/png",".ico":"image/x-icon",".woff2":"font/woff2",".map":"application/json" };
@@ -378,6 +414,12 @@ async function bake(page, route, cache){
           document.head.appendChild(t.content.firstChild);
         }, route.ld);
       }
+      if (route.crumbLd) {
+        await page.evaluate((html) => {
+          const t = document.createElement("template"); t.innerHTML = html.trim();
+          document.head.appendChild(t.content.firstChild);
+        }, route.crumbLd);
+      }
       // Per-page metadata. Browse counts come from the rendered "N jobs found" on the page
       // (same source as displayed, never recomputed). Sets <title>, injects meta/canonical/
       // OG/favicon, and absolutizes the ItemList item urls the board rendered relative.
@@ -597,6 +639,9 @@ async function main(){
       const arr = byCat[c].slice().sort((a, b) => a.job_number - b.job_number);
       const N = arr.length;
       if (N < 2) continue;
+      const landerHref = LANDER_BY_CAT[c];
+      const catLabel = c === "Transportation/Automotive" ? "Transportation" : c;
+      const seeAll = landerHref ? '<a class="npj-related-all" href="' + landerHref + '">See all ' + relEsc(catLabel) + " jobs in WA</a>" : "";
       for (let i = 0; i < N; i++) {
         const picks = [];
         for (let j = 1; j <= Math.min(REL_K, N - 1); j++) picks.push(arr[(i + j) % N]);
@@ -604,7 +649,7 @@ async function main(){
           const loc = [relCity(o.city), o.state].filter(Boolean).join(", ");
           return '<li><a href="' + jobPath(o) + '/">' + relEsc(o.title) + (loc ? " — " + relEsc(loc) : "") + "</a></li>";
         }).join("");
-        relByNum[String(arr[i].job_number)] = '<nav class="npj-related" aria-label="Related jobs"><h2>More no-experience jobs</h2><ul>' + li + "</ul></nav>";
+        relByNum[String(arr[i].job_number)] = '<nav class="npj-related" aria-label="Related jobs"><h2>More no-experience jobs</h2><ul>' + li + "</ul>" + seeAll + "</nav>";
       }
     }
   }
@@ -618,6 +663,7 @@ async function main(){
     if (r.expired) expiredCount++; if (ld) ldCount++;
     routes.push({ type: "job", path: jobPath(r) + "/", url: null, ld, num: r.job_number,
       related: relByNum[String(r.job_number)] || null,
+      crumbLd: r.expired ? null : breadcrumbLd(r),
       meta: { title: PM.jobTitle(r), description: PM.jobDescription(r) } });
   }
   // browse: states present, and categories present within each state. state/category ride

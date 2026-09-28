@@ -1216,7 +1216,7 @@ class AlertsApp extends React.Component {
       cards.length ? h("div", { style: s("display:grid;grid-template-columns:" + cols + ";grid-auto-rows:1fr;gap:12px") },
         cards.map((c, i) => h("div", { key: i, style: s("position:relative") },
           h("span", { "aria-hidden": "true", style: s("position:absolute;inset:0;transform:translate(4px,4px);background:var(--mark);border:2px solid var(--ink);border-radius:3px") }),
-          h(Pressable, { tag: "a", href: withUtm(c.href), className: "hv-bg-fact",
+          h(Pressable, { tag: "a", href: withUtm(c.landerHref || c.href), className: "hv-bg-fact",
               styleFor: (pd) => s("position:relative;height:100%;box-sizing:border-box;display:grid;align-content:start;gap:7px;min-height:66px;padding:14px;background:var(--surface-raised);border:2px solid var(--ink);border-radius:3px;text-decoration:none;transition:transform 45ms ease-out;" + (pd ? "transform:translate(4px,4px)" : "")) },
             raw(catIconSvg(c.label, 24)),
             h("div", { style: s("display:grid;gap:2px") },
@@ -1246,12 +1246,55 @@ class AlertsApp extends React.Component {
 
   renderFooter(){ return siteFooter(CONTENT.marketSlug); }
 
+  // ── breadcrumb (crawl path up + BreadcrumbList rich result) ──
+  breadcrumbSchema(){
+    const ORIGIN = "https://noprobjobs.com";                       // canonical origin (matches build.mjs SITE_URL default)
+    let path = CONTENT.listingPath;
+    try { path = window.location.pathname || path; } catch (e) {}  // the lander's own path (bake navigates to the real route)
+    const cat = CONTENT.categoryName || CONTENT.category;
+    const items = [
+      { name: "No-Experience Jobs", url: ORIGIN + "/" },
+      { name: "Washington Jobs", url: ORIGIN + "/washington-jobs/" },
+      { name: cat + " Jobs", url: ORIGIN + path },
+    ];
+    return { "@context": "https://schema.org", "@type": "BreadcrumbList",
+      itemListElement: items.map((it, i) => ({ "@type": "ListItem", position: i + 1, name: it.name, item: it.url })) };
+  }
+  renderBreadcrumb(){
+    const cat = CONTENT.categoryName || CONTENT.category;
+    const link = s("min-height:34px;display:inline-flex;align-items:center;color:var(--accent);text-decoration:none;font-weight:700");
+    return h("nav", { "aria-label": "Breadcrumb", style: s("display:flex;flex-wrap:wrap;gap:7px;align-items:center;font-size:13px;color:var(--ink-muted)") },
+      h("a", { href: "/", style: link }, "No-Experience Jobs"),
+      h("span", { "aria-hidden": "true" }, "›"),
+      h("a", { href: "/washington-jobs/", style: link }, "Washington"),
+      h("span", { "aria-hidden": "true" }, "›"),
+      h("span", { style: s("color:var(--ink);font-weight:700") }, cat),
+      // JSON-LD baked into the DOM (search engines read it anywhere in the document).
+      h("script", { type: "application/ld+json", dangerouslySetInnerHTML: { __html: JSON.stringify(this.breadcrumbSchema()) } }));
+  }
+
+  // ── current openings (compact static <a href> list — SEO crawl equity to job pages) ──
+  renderOpenings(){
+    const jobs = this.data.openings || [];
+    if (!jobs.length) return null;
+    return h("section", { style: s("display:grid;gap:12px") },
+      h("h2", { style: s(sectionH2) }, "Current " + CONTENT.categoryNoun + " openings"),
+      h("ul", { style: s("list-style:none;margin:0;padding:0;display:grid;gap:1px") },
+        jobs.map((j, i) => h("li", { key: i },
+          h("a", { href: j.h, style: s("display:flex;flex-wrap:wrap;gap:2px 8px;min-height:36px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.35;text-decoration:none") },
+            h("span", { style: s("font-weight:700;color:var(--ink)") }, j.t),
+            (j.c || j.s) ? h("span", { style: s("color:var(--ink-muted)") }, "— " + [j.c, j.s].filter(Boolean).join(", ")) : null)))),
+      this.data.count ? h("a", { href: withUtm(CONTENT.listingPath), style: s("justify-self:start;min-height:44px;display:inline-flex;align-items:center;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:0.03em;color:var(--accent)") }, "See all " + this.data.count.toLocaleString() + " " + CONTENT.categoryNoun + " jobs") : null);
+  }
+
   render(){
     return h("div", { className: "landing-scope", style: s("position:relative;display:flex;flex-direction:column;min-height:100%;background:var(--surface)") },
       h(Header, { productName: PRODUCT, alertsInHeader: false }),
       this.renderHero(),
       h("main", { style: s("flex:1;max-width:" + RAIL + ";width:100%;margin:0 auto;box-sizing:border-box;padding:38px 16px 44px;display:grid;gap:" + GAP_SECTION + ";align-content:start") },
+        this.renderBreadcrumb(),
         this.renderRecent(),
+        this.renderOpenings(),
         this.renderInfo(),
         this.renderFaq(),
         this.renderValueProps(),
