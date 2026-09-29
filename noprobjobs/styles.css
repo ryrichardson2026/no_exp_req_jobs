@@ -175,6 +175,14 @@ button{font:inherit;color:inherit}
   .landing-scope{ --gap-section: 12px; }
 }
 
+/* Related-jobs internal-link mesh: prerender/build.mjs injects <nav class="npj-related"> below
+   #root on job pages purely for crawlable internal links (job -> sibling jobs + the category
+   guide) that help Google index the deep pages. It is HIDDEN from view: the board is a
+   full-screen app (like Indeed) with no connected footer, so the block dangled below the app as
+   an unstyled slab. Hidden keeps the <a href>s in the raw HTML for URL discovery without showing
+   the broken block. (Revisit if we ever build a proper on-scheme link section.) */
+.npj-related{ display:none; }
+
 /* C1 depth — press behaviour is JS-driven (see ui/pressable.js): iOS Safari does not
    apply :active without a bound touch handler, so CSS :active alone is dead on a phone.
    This class only carries the properties that make a press feel right; the pressed
