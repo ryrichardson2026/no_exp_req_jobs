@@ -264,6 +264,14 @@ function serve(cache){
       // other virtual path is the board SPA (board.html → board.js).
       const isLanding = p === "/" || p.replace(/\/+$/, "") === WA_LANDER.replace(/\/+$/, "");
       let html = await readFile(join(SITE, isLanding ? "index.html" : "board.html"), "utf8");
+      if (isLanding && cache) {
+        // Inline the landing blob (jobs list + pulledAt + employer-carousel brands) BEFORE serving,
+        // so the bake-time prerender renders the recent jobs AND the logo carousel from it (the
+        // carousel brand list is only known here, not from the runtime jobs_list fetch). Same blob
+        // the runtime reads, so baked and hydrated DOM match.
+        const lblob = JSON.stringify({ list: JSON.parse(cache.list), pulledAt: cache.pulledAt || null, brands: cache.carouselBrands || [] }).replace(/</g, "\\u003c");
+        html = html.replace("</body>", '<script id="__npj_data" type="application/json">' + lblob + "</script></body>");
+      }
       // A job route (/jobs/{slug}-{num}) inlines its panel-seed blob BEFORE the app boots, so the
       // bake paints the panel (chrome + panel + skeleton list) — attachCache withholds jobs_list
       // for job routes, so the list stays a skeleton. Same blob the runtime page ships.
@@ -500,10 +508,8 @@ async function bake(page, route, cache){
       // query (drops the ~2.8s critical-path call and the freshCount/R.today() flash). The blob
       // is the same jobs_list the bake rendered from, so baked and hydrated DOM stay identical.
       let out = html;
-      if (route.type === "landing" && cache) {
-        const blob = JSON.stringify({ list: JSON.parse(cache.list), pulledAt: cache.pulledAt || null }).replace(/</g, "\\u003c");
-        out = out.replace("</body>", '<script id="__npj_data" type="application/json">' + blob + "</script></body>");
-      }
+      // (Landing __npj_data is now inlined at SERVE time above, so it's already in the rendered
+      // DOM and the bake-time prerender uses it — no post-render injection needed here.)
       // Internal-link mesh: append the related-jobs <nav> just before </body> (a sibling of the
       // SPA root, so hydration never touches it and the links ship in the raw baked HTML).
       if (route.type === "job" && route.related) {
@@ -743,7 +749,9 @@ async function main(){
       description: "No-experience job guides for " + mk.name + " by work type: pay, hiring steps, and free alerts for each." } });
   }
   // Static content pages (/about/, /partners/) — pages.html shell + pages.js, brand list inlined.
+  // The same brand list rides the landing blob (see the landing __npj_data injection in bake()).
   const brands = await carouselBrands(list);
+  cache.carouselBrands = brands;
   cache.staticByPath = {
     "/about/": { page: "about", brands },
     "/partners/": { page: "partners", brands },

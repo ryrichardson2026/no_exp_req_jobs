@@ -13,6 +13,12 @@ import * as L from "./data/resolve.js";
 import * as SB from "./data/supabase.js";
 import * as RT from "./data/routes.js";
 import { pagesForMarket, marketIndexPath } from "./data/alertPages.js";
+import { logoCarousel } from "./ui/logoCarousel.js";
+import { siteFooter } from "./ui/siteFooter.js";
+
+// Employer-logo strip brands, from the inline __npj_data blob (baked by prerender/build.mjs).
+// Set in boot() before mount so the first render has them; empty on the live-fetch fallback path.
+let CAROUSEL_BRANDS = [];
 
 const React = window.React;
 const BP = "(min-width:768px)";
@@ -462,6 +468,12 @@ class LandingApp extends React.Component {
     );
   }
 
+  // Employer-logo strip, between "Recent jobs" and "What you landed on". Uses the landing's own
+  // uppercase section-heading style (not the alert pages' underlined H2) so it matches the page.
+  renderEmployers(){
+    return logoCarousel(CAROUSEL_BRANDS, "margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink)");
+  }
+
   renderRecent(){
     const loading = this.state.recs === null;
     let jobs = [];
@@ -539,15 +551,7 @@ class LandingApp extends React.Component {
     );
   }
 
-  renderFooter(){
-    return h("footer", { style: s("flex:none;background:var(--ink)") },
-      h("div", { style: s("max-width:var(--rail,1120px);margin:0 auto;padding:12px 14px;display:grid;justify-items:center;gap:2px") },
-        h("div", { style: s("display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px") },
-          h("a", { href: marketIndexPath("washington"), style: s("min-height:44px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Washington job guides"),
-          h("a", { href: RT.PRIVACY_URL, target: "_blank", rel: "noopener noreferrer", style: s("min-height:44px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--line)") }, "Privacy Policy"))
-      )
-    );
-  }
+  renderFooter(){ return siteFooter("washington"); }
 
   // Job-type multi-select for the alert form — all board categories (R.CATEGORIES), same checkbox
   // format as the job board's Work Type filter, packaged as a dropdown. Optional: none = all types.
@@ -625,6 +629,7 @@ class LandingApp extends React.Component {
         // C3 order: the jobs come first (the reader sees the product), then "what's
         // different" explains what they just saw, then browse, then the closing CTA.
         this.renderRecent(),
+        this.renderEmployers(),
         this.renderValueProps(),
         this.renderBrowse(),
         this.renderGuides(),
@@ -656,6 +661,7 @@ const boot = () => {
     try {
       const d = JSON.parse(el.textContent);
       if (d.pulledAt) R.setToday(d.pulledAt);
+      CAROUSEL_BRANDS = d.brands || [];
       mount(d.list || []);
       return;
     } catch (e) { /* malformed blob -> fall through to a live fetch */ }

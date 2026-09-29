@@ -12,6 +12,7 @@ import { h, s } from "./ui/h.js";
 import { Header } from "./ui/header.js";
 import { Pressable } from "./ui/pressable.js";
 import { siteFooter } from "./ui/siteFooter.js";
+import { logoCarousel } from "./ui/logoCarousel.js";
 
 const React = window.React;
 const PRODUCT = "NoProbJobs.com";
@@ -29,14 +30,6 @@ const card = "width:100%;box-sizing:border-box;background:var(--surface-raised);
 const inputStyle = "box-sizing:border-box;width:100%;min-height:50px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:15px;color:var(--ink);outline:0";
 const areaStyle = "box-sizing:border-box;width:100%;min-height:120px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:15px;line-height:1.5;color:var(--ink);outline:0;resize:vertical;font-family:inherit";
 const cta = "min-height:52px;border-radius:11px;background:var(--accent);border:0;font-size:16px;font-weight:800;letter-spacing:0.01em;color:var(--accent-ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px";
-
-// horizontal auto-scrolling logo strip; pauses on hover, and stops + wraps under reduced-motion.
-const CAROUSEL_CSS =
-  "@keyframes npj-marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}"
-  + ".npj-marquee{overflow:hidden;position:relative;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}"
-  + ".npj-marquee-track{display:flex;align-items:center;gap:34px;width:max-content;animation:npj-marq 55s linear infinite}"
-  + ".npj-marquee:hover .npj-marquee-track{animation-play-state:paused}"
-  + "@media(prefers-reduced-motion:reduce){.npj-marquee-track{animation:none;flex-wrap:wrap;width:auto;justify-content:center;gap:18px 30px}}";
 
 function postContact(payload){
   return fetch(MAKE_HOOK, {
@@ -89,20 +82,8 @@ class PagesApp extends React.Component {
       h("script", { type: "application/ld+json", dangerouslySetInnerHTML: { __html: JSON.stringify(this.breadcrumbSchema(label, path)) } }));
   }
 
-  // ── logo carousel ──
-  renderCarousel(){
-    const brands = this.data.brands || [];
-    if (!brands.length) return null;
-    const logo = (b, i) => h("div", { key: i, style: s("flex:none;display:flex;align-items:center;justify-content:center;height:46px") },
-      h("img", { src: "/logos/" + b.file, alt: b.name, height: 36, loading: "lazy",
-        style: s("height:36px;max-width:132px;width:auto;object-fit:contain;display:block") }));
-    const loop = brands.concat(brands).map(logo);   // two copies -> seamless -50% loop
-    return h("section", { style: s("display:grid;gap:16px") },
-      h("h2", { style: s(sectionH2) }, "See jobs from employers like:"),
-      h("style", { dangerouslySetInnerHTML: { __html: CAROUSEL_CSS } }),
-      h("div", { className: "npj-marquee" },
-        h("div", { className: "npj-marquee-track" }, loop)));
-  }
+  // ── logo carousel (shared component; uses this page's H2 style) ──
+  renderCarousel(){ return logoCarousel(this.data.brands || [], sectionH2); }
 
   // ── contact form (Name req, Email req, Organization, Message req; hidden source_page) ──
   renderContactForm(){
@@ -145,12 +126,12 @@ class PagesApp extends React.Component {
             style: s("width:92px;height:92px;border-radius:14px;object-fit:cover;flex:none;box-shadow:0 8px 24px rgba(10,58,117,0.16)") }),
           h("div", { style: s("display:grid;gap:2px") },
             h("div", { style: s("font-family:var(--font-display);font-weight:800;font-size:20px;color:var(--ink)") }, "Ryaire Richardson"),
-            h("div", { style: s("font-size:15px;color:var(--ink-muted)") }, "Founder, NoProbJobs"))),
-        this.para("20+ years in tech, leading partnerships and business development. University of Washington graduate, Seattle-based.")));
+            h("div", { style: s("font-size:15px;color:var(--ink-muted)") }, "Founder, NoProbJobs")))));
   }
 
   renderAbout(){
     return [
+      this.para("20+ years in tech, leading partnerships and business development. University of Washington graduate, Seattle-based."),
       this.para("I believe in the human element of hiring, and in leveling the playing field so everyone, no matter their background, has free and fair access to opportunity."),
       this.para("As a tech leader, I see hundreds of resumes a month. Many get turned down for one reason: not enough experience. That has always weighed on me. Some of those people had the drive and the ability to do great work. They just never got the chance to show it."),
       this.para("I've been on the other side too. I've searched for jobs, found titles that sounded like a great fit, then read the requirements and decided I wasn't qualified. So I skipped it and kept looking. Hours went by. By the end I'd only feel confident applying to a handful of jobs, even though the real work was often closer to my background than the posting made it sound."),
