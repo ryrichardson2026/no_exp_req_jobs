@@ -240,8 +240,11 @@ export function ownsDomain(companyName, domain){
    be fetched literally before hydration. */
 export function logoImg(src, size){
   const React = window.React;
-  return React.createElement("img", { src: src, alt: "", width: size, height: size,
-    style: { width: size + "px", height: size + "px", objectFit: "contain", borderRadius: size > 20 ? "4px" : "3px", flex: "none" } });
+  // Height-locked, width flows to the logo's own aspect ratio (capped at ~2.6x). A horizontal
+  // wordmark (Walmart, Allied Universal, U-Haul, Shake Shack) stays legible instead of being
+  // crushed into a size×size box by object-fit:contain; square marks still render size×size.
+  return React.createElement("img", { src: src, alt: "", height: size,
+    style: { height: size + "px", width: "auto", maxWidth: Math.round(size * 2.6) + "px", objectFit: "contain", borderRadius: size > 20 ? "4px" : "3px", flex: "none" } });
 }
 
 /* card.py truncates the title with an explicit ellipsis; three lines at card width

@@ -952,7 +952,7 @@ class AlertsApp extends React.Component {
       id: r.internal_id,
       company: R.companyLabel(r.company_name),
       cardTitle: R.cardTitle(r.title),
-      logoImg: showLogo ? R.logoImg(logoSrc, 20) : null,
+      logoImg: showLogo ? R.logoImg(logoSrc, 28) : null,
       showLogo, showMonogram: !showLogo,
       monogram: (r.company_name || "?").trim().charAt(0).toUpperCase(),
       locationLine: [L.cityName(r.city), r.state].filter(Boolean).join(", "),

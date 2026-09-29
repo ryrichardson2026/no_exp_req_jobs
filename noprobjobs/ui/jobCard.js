@@ -75,7 +75,7 @@ export function JobCard({ job, flush, listMeta, dense }){
       h("div", { style: s("display:flex;align-items:center;gap:8px") },
         job.showLogo && h("span", { key: "lg", style: s("display:flex;flex:none") }, job.logoImg),
         job.showMonogram && h("span", { key: "mo", "aria-hidden": "true",
-          style: s("width:20px;height:20px;display:grid;place-items:center;border-radius:3px;background:var(--fact);color:var(--fact-ink);font-size:12px;font-weight:800;flex:none") }, job.monogram),
+          style: s("width:28px;height:28px;display:grid;place-items:center;border-radius:4px;background:var(--fact);color:var(--fact-ink);font-size:15px;font-weight:800;flex:none") }, job.monogram),
         h("span", { style: s("font-size:13px;font-weight:500;color:var(--ink-muted)") }, job.company),
         // "New" badge (same marigold pill + single recency rule as the dense variant above; the
         // default layout — desktop board list, browse pages, landing "Recent jobs" grid — omitted
