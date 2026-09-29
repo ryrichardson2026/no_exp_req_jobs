@@ -171,6 +171,35 @@ function alertSlice(list, entry, pulledAt){
 
   return { count: slice.length, maxPay, recent, openings, whosHiring, otherCats, seasonalCount, pulledAt: pulledAt || null };
 }
+
+// Logo-carousel brand list for /about/ and /partners/ ("See jobs from employers like:"). Every
+// file in repo-root logos/ EXCEPT aboutusimage.png. Shake Shack / Jimmy John's / Walmart are gated
+// on live feed presence (only shown if that employer has jobs in `list` right now). Display names
+// come from CAROUSEL_NAMES, with a hyphens->words title-case fallback for any future file.
+const CAROUSEL_NAMES = {
+  "TJ-Maxx.png": "TJ Maxx", "allied-universal.png": "Allied Universal", "fred-meyer.png": "Fred Meyer",
+  "homegoods.jpg": "HomeGoods", "marshalls.png": "Marshalls", "ontrac.png": "OnTrac",
+  "providence.png": "Providence", "quality-food-centers.jpg": "Quality Food Centers", "sierra.png": "Sierra",
+  "u-haul.jpg": "U-Haul", "Walmart.png": "Walmart", "target.jpg": "Target", "king-county.png": "King County",
+  "Shake-Shack.png": "Shake Shack", "Jimmy-Johns.png": "Jimmy John's",
+};
+async function carouselBrands(list){
+  const dir = join(HERE, "..", "logos");
+  let files = [];
+  try { files = await readdir(dir); } catch { files = []; }
+  const OKEXT = new Set([".png", ".jpg", ".jpeg", ".svg", ".webp"]);
+  const GATED = { "Shake-Shack.png": "shakeshack.com", "Jimmy-Johns.png": "jimmyjohns.com", "Walmart.png": "walmart.com" };
+  const has = (dom) => list.some((r) => r.employer_domain === dom);
+  const titleCase = (f) => f.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const out = [];
+  for (const f of files.sort()) {
+    if (f === "aboutusimage.png") continue;
+    if (!OKEXT.has(extname(f).toLowerCase())) continue;
+    if (GATED[f] && !has(GATED[f])) continue;
+    out.push({ name: CAROUSEL_NAMES[f] || titleCase(f), file: f });
+  }
+  return out;
+}
 const MIME = { ".html":"text/html",".js":"text/javascript",".mjs":"text/javascript",".css":"text/css",
   ".json":"application/json",".svg":"image/svg+xml",".png":"image/png",".ico":"image/x-icon",".woff2":"font/woff2",".map":"application/json" };
 
@@ -199,6 +228,7 @@ const WAIT = {
   browse: "document.querySelectorAll(\"[role='list'] > *\").length > 0",
   landing: "document.getElementById('root') && document.getElementById('root').children.length > 0",
   alerts: "document.getElementById('root') && document.getElementById('root').children.length > 0",
+  static: "document.getElementById('root') && document.getElementById('root').children.length > 0",
 };
 
 function serve(cache){
@@ -219,6 +249,16 @@ function serve(cache){
         ah = ah.replace("</body>", '<script id="__npj_data" type="application/json">' + blob + "</script></body>");
         res.writeHead(200, { "content-type": "text/html" });
         return res.end(ah);
+      }
+      // Static content pages (/about/, /partners/) are their own SPA (pages.html → pages.js) with
+      // their content/brand-list inlined as __npj_data, same pattern as the alert pages.
+      const staticData = cache && cache.staticByPath && cache.staticByPath[p.replace(/\/+$/, "") + "/"];
+      if (staticData) {
+        let ph = await readFile(join(SITE, "pages.html"), "utf8");
+        const blob = JSON.stringify(staticData).replace(/</g, "\\u003c");
+        ph = ph.replace("</body>", '<script id="__npj_data" type="application/json">' + blob + "</script></body>");
+        res.writeHead(200, { "content-type": "text/html" });
+        return res.end(ph);
       }
       // "/" and the Washington lander are the landing SPA (index.html → landing.js); every
       // other virtual path is the board SPA (board.html → board.js).
@@ -342,7 +382,7 @@ function middlewareSource(expiredBack, live){
 // (live URLs only) + vercel.json + the edge middleware. Idempotent, so a targeted rebake
 // still leaves out/ deployable. The baked landing owns out/index.html, so it is NOT copied.
 async function assembleDeploy(live, expiredBack, browse, lastmod = {}){
-  for (const f of ["board.html", "board.js", "landing.js", "alerts.js", "styles.css", "404.html",
+  for (const f of ["board.html", "board.js", "landing.js", "alerts.js", "pages.js", "styles.css", "404.html",
                    "favicon.ico", "icon-192.png", "apple-touch-icon.png", "og.png", "logo.png"]) await copyFile(join(SITE, f), join(OUT, f));
   for (const d of ["data", "ui", "vendor"]) await cp(join(SITE, d), join(OUT, d), { recursive: true });
   // Hand-picked brand logos live at repo-root logos/ (the user's drop folder), served from
@@ -351,7 +391,7 @@ async function assembleDeploy(live, expiredBack, browse, lastmod = {}){
   if (existsSync(join(HERE, "..", "logos"))) await cp(join(HERE, "..", "logos"), join(OUT, "logos"), { recursive: true });
 
   const base = SITE_URL;
-  const locs = ["/", WA_LANDER, ...ALERT_PATHS, ...browse, ...live];   // change #2: lander in sitemap; alert pages added; expired/retired excluded
+  const locs = ["/", WA_LANDER, "/about/", "/partners/", ...ALERT_PATHS, ...browse, ...live];   // change #2: lander in sitemap; alert pages added; expired/retired excluded
   // <lastmod> (W3C YYYY-MM-DD) is the one optional tag Google actually uses (changefreq/priority
   // are ignored). Values come from `lastmod` (built by the caller): a job's stated posted_at
   // (stable — a job page's baked content doesn't change after posting), and the pull date for the
@@ -702,6 +742,18 @@ async function main(){
       title: mk.name + " Job Guides — No Experience Needed | NoProbJobs",
       description: "No-experience job guides for " + mk.name + " by work type: pay, hiring steps, and free alerts for each." } });
   }
+  // Static content pages (/about/, /partners/) — pages.html shell + pages.js, brand list inlined.
+  const brands = await carouselBrands(list);
+  cache.staticByPath = {
+    "/about/": { page: "about", brands },
+    "/partners/": { page: "partners", brands },
+  };
+  routes.push({ type: "static", path: "/about/", url: null, meta: {
+    title: "About NoProbJobs | Jobs That Don't Require Experience",
+    description: "Why NoProbJobs exists and how it works. Every job is checked for experience requirements, so what is left are roles where no experience is needed or the employer will train you." } });
+  routes.push({ type: "static", path: "/partners/", url: null, meta: {
+    title: "Partner With NoProbJobs | A Free Job Seeker Resource",
+    description: "Partner with NoProbJobs, a free tool for workforce centers, nonprofits, schools, libraries, and community programs helping people find no-experience jobs." } });
 
   const server = serve(cache);
   await new Promise((r) => server.listen(PORT, r));
@@ -879,7 +931,7 @@ async function main(){
     if (d) lastmod[jobPath(r) + "/"] = d;
   }
   const gd = validDay(genDate);
-  if (gd) { for (const u of ["/", WA_LANDER, ...ALERT_PATHS, ...browsePaths]) lastmod[u] = gd; }
+  if (gd) { for (const u of ["/", WA_LANDER, "/about/", "/partners/", ...ALERT_PATHS, ...browsePaths]) lastmod[u] = gd; }
 
   const deploy = await assembleDeploy(live, expiredBack, [...browsePaths], lastmod);
 

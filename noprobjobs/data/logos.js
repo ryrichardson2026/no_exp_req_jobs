@@ -2,14 +2,20 @@
    logos/. Maps a brand slug (see brandSlug in record.js) to its logo filename so the
    runtime knows the file + extension. Add a logo: drop <slug>.<png|jpg|svg> into logos/. */
 export const LOGOS = {
+  "jimmy-johns": "Jimmy-Johns.png",
+  "shake-shack": "Shake-Shack.png",
   "tj-maxx": "TJ-Maxx.png",
+  "walmart": "Walmart.png",
+  "aboutusimage": "aboutusimage.png",
   "allied-universal": "allied-universal.png",
   "fred-meyer": "fred-meyer.png",
   "homegoods": "homegoods.jpg",
+  "king-county": "king-county.png",
   "marshalls": "marshalls.png",
   "ontrac": "ontrac.png",
   "providence": "providence.png",
   "quality-food-centers": "quality-food-centers.jpg",
   "sierra": "sierra.png",
+  "target": "target.jpg",
   "u-haul": "u-haul.jpg"
 };

@@ -26,6 +26,7 @@ import * as L from "./data/resolve.js";
 import * as SB from "./data/supabase.js";
 import * as RT from "./data/routes.js";
 import { marketIndexPath, marketBySlug } from "./data/alertPages.js";
+import { siteFooter } from "./ui/siteFooter.js";
 
 const React = window.React;
 const BP = "(min-width:768px)";
@@ -1315,18 +1316,8 @@ const mountIndex = (data) => {
   root.render(h(AlertsIndex, { data }));
 };
 
-// Shared site footer (guide pages + the index). Market-aware: the "… job guides" link points at the
-// current page's market index (marketIndexPath); pass null to omit it (e.g. a marketless surface).
-const footerLink = "min-height:44px;display:inline-flex;align-items:center;font-size:13px;font-weight:600;color:var(--line)";
-function siteFooter(marketSlug){
-  const mk = marketSlug ? marketBySlug(marketSlug) : null;
-  return h("footer", { style: s("flex:none;background:var(--ink)") },
-    h("div", { style: s("max-width:" + RAIL + ";margin:0 auto;box-sizing:border-box;padding:16px 14px;display:grid;justify-items:center;gap:8px") },
-      h("div", { style: s("font-size:14px;font-weight:600;color:var(--line);text-align:center") }, "Free for job seekers. No signup required to apply."),
-      h("div", { style: s("display:flex;flex-wrap:wrap;justify-content:center;gap:4px 20px") },
-        marketSlug ? h("a", { key: "g", href: marketIndexPath(marketSlug), style: s(footerLink) }, (mk ? mk.name : "Washington") + " job guides") : null,
-        h("a", { key: "p", href: RT.PRIVACY_URL, target: "_blank", rel: "noopener noreferrer", style: s(footerLink) }, "Privacy Policy"))));
-}
+// siteFooter now lives in ./ui/siteFooter.js (shared with the About/Partners static pages) so the
+// footer links stay identical across every surface. Imported at the top of this module.
 
 // The per-market index hub (/alerts/{market}/): a guides grid with live counts. Renders from the
 // index blob (kind:"index") that boot() detects — no signup form, it's a navigation/SEO hub.
