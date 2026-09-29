@@ -464,6 +464,8 @@
       "nlx_wa_jobs": 69,
       "source_class": "direct-employer",
       "sector": "facilities",
+      "enumerate_total_slack": 4,
+      "enumerate_total_slack_note": "Oracle ORC TotalJobsCount wobbles a job or two over what pagination yields on this large (~2300) board (observed captured-vs-total gap 0-1: 2328/2328, 2326/2326, then 2320/2321). Without slack a benign 1-off HOLDS the entire oracle_orc source - kroger/sherwin_williams/providence share the source_id - so all four go a day stale. Slack 4 matches kroger's Oracle slack and is negligible vs a 2300-job board; a genuine truncation loses far more (still caught by the layer-b delta band). Providence/sherwin_williams have no observed gap yet; add the same if they ever hold the source.",
       "verified": "2026-09-17 onboarding: oracle_orc CX_1001, board 2219, 445 in-scope WA+TX. WA janitorial-heavy (Seattle/Spokane/Kirkland/Redmond...), TX Houston/Austin/San Antonio/DFW. Openers DERIVED from ABM's own ExternalQualificationsStr (--survey 445 recs): 199x janitorial 'experience a plus', 32x 'No experience required + OJT', skilled trades correctly experience-gated.",
       "location_filter": {
         "field": "PrimaryLocation",
