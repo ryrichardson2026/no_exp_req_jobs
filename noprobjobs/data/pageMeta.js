@@ -48,22 +48,22 @@ export function jobDescription(r){
   return d;
 }
 
-export function landingTitle(){ return BRAND + " — Get Hired Now, No Experience Needed"; }
-export function landingDescription(){ return stateName(MARKET) + " jobs hiring now, no experience required. " + DIFF; }
+export function landingTitle(){ return "No-Experience & Entry Level Jobs in " + stateName(MARKET) + " | " + BRAND; }
+export function landingDescription(){ return stateName(MARKET) + " no-experience and entry level jobs hiring now. " + DIFF; }
 
 /* The Washington lander (change #2): the landing page served at /washington-jobs, whose only
    content difference is the "Washington companies hiring now." headline. Its own title/
    description so it reads as a distinct indexable page; canonical points to itself (set by
    the baker from the route path). */
-export function waLanderTitle(){ return "Washington Companies Hiring Now, No Experience Needed | " + BRAND; }
-export function waLanderDescription(){ return "Washington companies hiring now, no experience required. " + DIFF; }
+export function waLanderTitle(){ return "No-Experience & Entry Level Jobs at Washington Companies"; }
+export function waLanderDescription(){ return "Washington companies hiring now — no-experience and entry level roles. " + DIFF; }
 
-export function stateTitle(abbr){ return "Jobs in " + stateName(abbr) + " - No Experience Needed | " + BRAND; }
-export function stateDescription(abbr, count){ return count + " " + stateName(abbr) + " jobs hiring now, no experience required. " + DIFF; }
+export function stateTitle(abbr){ return "No-Experience and Entry Level Jobs in " + stateName(abbr); }
+export function stateDescription(abbr, count){ return count + " " + stateName(abbr) + " no-experience and entry level jobs hiring now. " + DIFF; }
 export function stateH1(abbr){ return "Jobs in " + stateName(abbr); }
 
-export function categoryTitle(cat, abbr){ return cat + " Jobs in " + stateName(abbr) + " - No Experience Needed | " + BRAND; }
-export function categoryDescription(cat, abbr, count){ return count + " " + cat.toLowerCase() + " jobs in " + stateName(abbr) + " hiring now, no experience required. " + DIFF; }
+export function categoryTitle(cat, abbr){ return "No-Experience and Entry Level " + cat + " Jobs in " + stateName(abbr); }
+export function categoryDescription(cat, abbr, count){ return count + " " + cat.toLowerCase() + " no-experience and entry level jobs in " + stateName(abbr) + " hiring now. " + DIFF; }
 export function categoryH1(cat, abbr){ return cat + " jobs in " + stateName(abbr); }
 
 function esc(s){ return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }

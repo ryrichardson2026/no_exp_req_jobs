@@ -757,11 +757,11 @@ async function main(){
     "/partners/": { page: "partners", brands },
   };
   routes.push({ type: "static", path: "/about/", url: null, meta: {
-    title: "About NoProbJobs | Jobs That Don't Require Experience",
-    description: "Why NoProbJobs exists and how it works. Every job is checked for experience requirements, so what is left are roles where no experience is needed or the employer will train you." } });
+    title: "About NoProbJobs | No-Experience & Entry Level Jobs",
+    description: "Why NoProbJobs exists and how it works. Every job is checked for experience requirements, so what is left are no-experience and entry level roles where none is needed or the employer will train you." } });
   routes.push({ type: "static", path: "/partners/", url: null, meta: {
     title: "Partner With NoProbJobs | A Free Job Seeker Resource",
-    description: "Partner with NoProbJobs, a free tool for workforce centers, nonprofits, schools, libraries, and community programs helping people find no-experience jobs." } });
+    description: "Partner with NoProbJobs, a free tool for workforce centers, nonprofits, schools, libraries, and community programs helping people find no-experience and entry level jobs." } });
 
   const server = serve(cache);
   await new Promise((r) => server.listen(PORT, r));
