@@ -514,6 +514,10 @@ async function bake(page, route, cache){
       // SPA root, so hydration never touches it and the links ship in the raw baked HTML).
       if (route.type === "job" && route.related) {
         out = out.replace("</body>", route.related + "</body>");
+      } else if (route.hubIndex) {
+        // Browse/landing hubs: inject the full crawlable job-link index (same sibling-of-#root,
+        // hidden-but-present-in-raw-HTML technique as the related mesh above).
+        out = out.replace("</body>", route.hubIndex + "</body>");
       }
       await writeBaked(route.path, out);
       return { path: route.path, type: route.type, bytes: Buffer.byteLength(out, "utf8"), ld: !!route.ld };
@@ -700,6 +704,24 @@ async function main(){
     }
   }
 
+  // ---- Hub crawl index (SEO crawlability) ----
+  // A full, crawlable <ul> of every LIVE job under each hub (all-jobs /jobs/, per-state, per-
+  // category) plus the two landers, injected before </body> exactly like the related-jobs mesh:
+  // a sibling of the SPA root, so hydration never touches it and the <a href>s ship in the raw
+  // baked HTML. Hidden via .npj-hub-index (same rationale as .npj-related). This gives the
+  // INDEXED hub/home pages a direct crawlable path to the WHOLE corpus — the fix for job pages
+  // stuck at "Discovered - currently not indexed" with no inbound internal links. Built from
+  // `list` (published + live; never an expired/410 page), sorted by job_number for stable output.
+  const hubNav = (records, label) => {
+    const arr = records.slice().sort((a, b) => a.job_number - b.job_number);
+    if (!arr.length) return null;
+    const li = arr.map((o) => {
+      const loc = [relCity(o.city), o.state].filter(Boolean).join(", ");
+      return '<li><a href="' + jobPath(o) + '/">' + relEsc(o.title) + (loc ? " — " + relEsc(loc) : "") + "</a></li>";
+    }).join("");
+    return '<nav class="npj-hub-index" aria-label="' + relEsc(label) + '"><ul>' + li + "</ul></nav>";
+  };
+
   // enumerate routes
   const routes = [];
   let ldCount = 0, expiredCount = 0, retiredCount = 0;
@@ -721,17 +743,33 @@ async function main(){
   // (WAIT.browse) -> 20s timeout -> smoke-test abort (WA x construction, 0 live jobs, did exactly
   // this). Empty browse routes are meant to stay UNBAKED and fall back to the SPA (see below).
   for (const r of list) { if (!r.state) continue; (byState[r.state] = byState[r.state] || new Set()); (r.category || []).forEach((c) => byState[r.state].add(c)); }
+
+  // Hub cross-links: a crawlable map from EVERY hub/landing page to all the OTHER hubs (the all-
+  // jobs index, each state hub, and every category hub that has live jobs). Fixes the orphaned
+  // category hubs (6 of 12 had zero inbound links — sitemap-only) and gives the indexed homepage a
+  // one-hop path to every hub, so crawl can flow homepage -> hub -> jobs. Prepended to each hub's
+  // job index below; same hidden .npj-hub-index block, present in the raw baked HTML.
+  const hubCrossLinks = (() => {
+    const items = ['<li><a href="/jobs/">All jobs</a></li>'];
+    for (const st of Object.keys(byState)) {
+      items.push('<li><a href="' + browsePath(st, null) + '">All jobs in ' + relEsc(st) + "</a></li>");
+      for (const c of [...byState[st]].sort()) if (CAT_SLUG[c])
+        items.push('<li><a href="' + browsePath(st, c) + '">' + relEsc(c) + " jobs in " + relEsc(st) + "</a></li>");
+    }
+    return '<nav class="npj-hub-index" aria-label="Browse all job hubs"><ul>' + items.join("") + "</ul></nav>";
+  })();
+
   const browsePaths = new Set(["/jobs/"]);
-  routes.push({ type: "browse", path: "/jobs/", url: null, state: null, category: null });
+  routes.push({ type: "browse", path: "/jobs/", url: null, state: null, category: null, hubIndex: hubCrossLinks + hubNav(list, "All jobs") });
   for (const st of Object.keys(byState)) {
     const sp = browsePath(st, null); browsePaths.add(sp);
-    routes.push({ type: "browse", path: sp, url: null, state: st, category: null });
-    for (const c of byState[st]) if (CAT_SLUG[c]) { const cp = browsePath(st, c); browsePaths.add(cp); routes.push({ type: "browse", path: cp, url: null, state: st, category: c }); }
+    routes.push({ type: "browse", path: sp, url: null, state: st, category: null, hubIndex: hubCrossLinks + hubNav(list.filter((r) => r.state === st), "All jobs in " + st) });
+    for (const c of byState[st]) if (CAT_SLUG[c]) { const cp = browsePath(st, c); browsePaths.add(cp); routes.push({ type: "browse", path: cp, url: null, state: st, category: c, hubIndex: hubCrossLinks + hubNav(list.filter((r) => r.state === st && (r.category || []).includes(c)), c + " jobs in " + st) }); }
   }
-  routes.push({ type: "landing", path: "/", url: null, meta: { title: PM.landingTitle(), description: PM.landingDescription() } });
+  routes.push({ type: "landing", path: "/", url: null, hubIndex: hubCrossLinks + hubNav(list, "All jobs"), meta: { title: PM.landingTitle(), description: PM.landingDescription() } });
   // Change #2: Washington lander. Same landing type (same render wait + meta injection), its
   // own path so bake() writes out/washington-jobs/index.html and sets canonical to itself.
-  routes.push({ type: "landing", path: WA_LANDER, url: null, meta: { title: PM.waLanderTitle(), description: PM.waLanderDescription() } });
+  routes.push({ type: "landing", path: WA_LANDER, url: null, hubIndex: hubCrossLinks + hubNav(list.filter((r) => r.state === "WA"), "All jobs in WA"), meta: { title: PM.waLanderTitle(), description: PM.waLanderDescription() } });
   // Alert-signup pages: compute each page's live slice, stash it for serve() to inline as
   // __npj_data, and register the route (baked as its own type; alerts.html shell + alerts.js).
   cache.alertsByPath = {};

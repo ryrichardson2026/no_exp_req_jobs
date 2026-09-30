@@ -183,6 +183,12 @@ button{font:inherit;color:inherit}
    the broken block. (Revisit if we ever build a proper on-scheme link section.) */
 .npj-related{ display:none; }
 
+/* Hub crawl index: prerender/build.mjs injects <nav class="npj-hub-index"> below #root on the
+   browse/landing hub pages — a full crawlable <ul> of every live job under that hub, present in
+   the raw HTML so Google can reach the whole corpus from the indexed hub/home pages. Hidden for
+   the same reason as .npj-related (the board is a full-screen app with no connected footer). */
+.npj-hub-index{ display:none; }
+
 /* C1 depth — press behaviour is JS-driven (see ui/pressable.js): iOS Safari does not
    apply :active without a bound touch handler, so CSS :active alone is dead on a phone.
    This class only carries the properties that make a press feel right; the pressed
