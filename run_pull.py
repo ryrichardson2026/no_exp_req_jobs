@@ -901,6 +901,15 @@ def _finish(stamp, units, results, prior_counts, baseline, table, mv, partial, p
         print(f"\nrun record: {dash}   (supabase: {note})")
     except Exception as e:
         print(f"\n(run record/dashboard skipped - non-fatal: {type(e).__name__}: {e})")
+
+    # GSC indexation snapshot — best-effort trend log (out/runs/gsc_status.jsonl) so job-page
+    # indexation can be watched climbing over time. Never fatal; never affects the run outcome.
+    try:
+        from analyze import gsc_status
+        print("\n--- gsc status (indexation trend) ---")
+        gsc_status.snapshot(stamp=stamp)
+    except Exception as e:
+        print(f"(gsc_status snapshot skipped - non-fatal: {type(e).__name__}: {e})")
     return rc
 
 
