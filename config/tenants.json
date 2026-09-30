@@ -1858,18 +1858,16 @@
       "search_radius": 50,
       "scope_params": {
         "searchlocations": [
-          "Washington",
-          "Texas"
+          "Washington"
         ]
       },
       "location_filter": {
         "state_codes": [
-          "WA",
-          "TX"
+          "WA"
         ]
       },
       "terms_reference": "https://careers.aramark.com/robots.txt",
-      "verified": "2026-09-17 onboarding: Appcast WP careers site (calc-results/?searchlocation={State}&mypage=N server-side state scope; /job/{slug}/{loc}/{id}/ detail, Desc__copy container). WA=46, 59% applicable. Openers = 'Qualifications'. Paradox only apply.",
+      "verified": "2026-09-17 onboarding: Appcast WP careers site (calc-results/?searchlocation={State}&mypage=N server-side state scope; /job/{slug}/{loc}/{id}/ detail, Desc__copy container). WA=46, 59% applicable. Openers = 'Qualifications'. Paradox only apply. 2026-09-30 scoped to WA-only (dropped TX, ~903 unpublished records): board is WA-only, so the TX server-side fetch was pure waste. Re-add 'Texas'/'TX' when TX launches. Baseline re-blessed to WA-only numbers.",
       "extraction": {
         "_note": "DERIVED 2026-09-17: detail Desc__copy h2 sections; requirements under 'Qualifications'.",
         "openers": [
