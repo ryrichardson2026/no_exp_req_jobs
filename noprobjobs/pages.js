@@ -141,8 +141,7 @@ class PagesApp extends React.Component {
             this.para("Seattle-based with roots in the Bay Area. 20+ years in tech, leading partnerships and business development. University of Washington, undergrad and MBA.")))),
       this.renderCarousel(),
       h("section", { style: s("display:grid;gap:12px") },
-        this.h2("Employers and partners"),
-        this.para("Hiring for roles where the right attitude matters more than a resume? Working with job seekers who need a place to start? Let's talk."),
+        this.h2("Get Connected"),
         this.renderContactForm()),
     ];
   }
@@ -171,6 +170,7 @@ class PagesApp extends React.Component {
         this.h2("How we Partner"),
         h("ul", { style: s("list-style:none;margin:0;padding:0;display:grid;gap:10px") },
           this.bullet("List NoProbJobs as a free resource for the people you serve"),
+          this.bullet("A branded no-experience job board for your organization"),
           this.bullet("Import NoProbJobs listings into your own job board via API"),
           this.bullet("Custom employer or job-type sourcing on request"))),
       this.renderCarousel(),
