@@ -195,6 +195,11 @@
       "records": 518,
       "applicable": 16,
       "density": 3.1
+    },
+    "securitas": {
+      "records": 25,
+      "applicable": 14,
+      "density": 56.0
     }
   }
 }

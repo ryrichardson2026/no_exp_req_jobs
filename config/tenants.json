@@ -10,6 +10,41 @@
     "compass_call_shape": "Compass Group careers-site API. Captured from the site's own XHR 2 Sep 2026. POST https://careers.compass-usa.com/api/get-jobs with the filters in the QUERY STRING, not the body: radius=15, filter[state][0]=WA, filter[state][1]=Washington, page_number=N, enable_kilometers=false. The observed request carried a small JSON body (content-length 78) whose contents were not captured, and a 'ct=' session cookie holding a JWT - whether either is REQUIRED is unverified and --probe answers it. Response carries jobs[] with FULL descriptions (no detail fetch), a facets[] catalog (Employment Type, State, City, Brand, Category) with counts, and totalJob."
   },
   "oracle_orc": {
+    "securitas": {
+      "label": "Securitas Security Services",
+      "host": "ekaw.fa.us2.oraclecloud.com",
+      "site_number": "CX",
+      "language": "en",
+      "careers_url": "https://ekaw.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX/jobs",
+      "employer_domain": "securitasinc.com",
+      "source_class": "direct-employer",
+      "sector": "security",
+      "location_filter": {
+        "field": "PrimaryLocation",
+        "state_codes": [
+          "WA"
+        ]
+      },
+      "finder_extra": {
+        "_note": "WA server-side scope via the state locationId facet from the target URL (locationId=300000016746482, locationLevel=state). Confirmed --index returns 25 WA, not the 1300 national board.",
+        "selectedLocationsFacet": 300000016746482
+      },
+      "extraction": {
+        "_note": "DERIVED 2026-09-30 from Securitas' OWN 25 WA ExternalDescriptionStr (ExternalQualificationsStr empty 0/25). Requirements section headed by 'Requirements' (22/25; incl Basic/Position Requirements) + a tail (Minimum Qualifications / Minimum Hiring Standards, Qualifications, Education/Experience, Competencies, What you need). Nothing inherited from a sibling.",
+        "openers": [
+          { "text": "requirements", "role": "REQUIRED", "match": "bare" },
+          { "text": "minimum qualifications", "role": "REQUIRED", "match": "bare" },
+          { "text": "minimum hiring standards", "role": "REQUIRED", "match": "bare" },
+          { "text": "qualifications", "role": "REQUIRED", "match": "bare" },
+          { "text": "education/experience", "role": "REQUIRED", "match": "bare" },
+          { "text": "competencies", "role": "REQUIRED", "match": "bare" },
+          { "text": "what you need", "role": "REQUIRED", "match": "bare" }
+        ],
+        "absent_barrier_is_none_needed": true,
+        "_headingless_note": "Many entry-level Security Officer postings are headingless marketing prose ('No experience necessary! ...we will provide you with the training') with NO Requirements section, so the openers above find nothing and return NOT_STATED. VERIFIED 2026-09-30. Opt-in full-body fallback -> NONE_NEEDED when no hard requirement, REQUIRED for the mgmt/HR roles that state one. Same mechanism walmart uses."
+      },
+      "verified": "2026-09-30 GATES CLEARED (pending sign-off + baseline): oracle_orc site CX, host ekaw.fa.us2.oraclecloud.com. Probe 200, national board 1300. WA server-side scope via locationId 300000016746482 -> 25 (matches live ~24). Openers DERIVED from the 25 WA descriptions (see extraction._note) + headingless fallback (the entry-level officer roles are marketing-prose with no Requirements section). 2nd security-sector tenant (allied_security is 1st) per allied's _sector_baseline note. Owner-signed-off 2026-09-30: baseline 25/14/56.0, enabled in --all. Known lever: 2 patrol roles (Campus Response, Virtual Corporate) sit at REQUIRED via a vague boilerplate credential ('certifications/authorizations specified for the assigned accounts'), not a real barrier; excluding that boilerplate would take it to ~16/64% (deferred, board-wide change)."
+    },
     "providence": {
       "label": "Providence / Providence Swedish / Swedish Health Services",
       "host": "evac.fa.us2.oraclecloud.com",
