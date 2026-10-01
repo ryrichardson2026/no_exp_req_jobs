@@ -198,8 +198,8 @@
     },
     "securitas": {
       "records": 25,
-      "applicable": 14,
-      "density": 56.0
+      "applicable": 16,
+      "density": 64.0
     }
   }
 }

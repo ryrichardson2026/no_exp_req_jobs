@@ -415,6 +415,22 @@ HARD_CREDENTIAL_RX = re.compile(
 # an RN/CDL/pharmacist license is still a real barrier. Keep in sync with report.py's allowlist.
 _OBTAINABLE_CRED_RX = re.compile(r"driver'?s?\s+licen[sc]e|driving\s+licen[sc]e", re.I)
 
+# A VAGUE credential catch-all names NO concrete credential: "meet requirements for (specific)
+# skills, certifications or authorizations specified for the assigned accounts" / "...as required
+# by the client/site". This is staffing boilerplate (the worker will satisfy whatever the CLIENT
+# ACCOUNT specifies), not a gateable credential - Securitas patrol postings carry it and it wrongly
+# gated no-experience officer roles to REQUIRED. Matched ONLY as the generic 3-item list or the
+# explicit "...for the assigned account/client/site" catch-all, and the guard still fails SAFE:
+# a clause also naming a real credential (RN/CDL/guard card) keeps it via HARD_CREDENTIAL_RX. This
+# does NOT touch "licensing requirements for Security Officers" (the guard-card question - separate).
+VAGUE_CREDENTIAL_RX = re.compile(
+    r"skills,?\s+certifications?,?\s+(?:or|and)\s+authorizations?"
+    r"|(?:certification|authorization|credential|licens\w+|requirement|skill)s?"
+    r"[^.]{0,45}(?:specified|requested|needed|applicable|established|mandated|determined)"
+    r"[^.]{0,25}(?:for|by|to)\s+(?:the\s+|a\s+|each\s+|their\s+|specific\s+|assigned\s+|individual\s+|client'?s?\s+)*"
+    r"(?:account|client|site|assignment|customer)",
+    re.I)
+
 # A completed trade apprenticeship is a multi-year runway even where no year count
 # appears - it is what separates the Painter (4y Journeyman) from the Engineer
 # (training will be on-the-job).
@@ -555,6 +571,16 @@ def classify_line(line, section_modality):
     # Education-certificate guard: a GED / high-school / bare 'certificate' is education, not a
     # gateable credential (see EDU_CERTIFICATE_RX). Only strips when no hard credential is named.
     if CREDENTIAL in types and EDU_CERTIFICATE_RX.search(low) \
+            and not HARD_CREDENTIAL_RX.search(low):
+        types = [t for t in types if t != CREDENTIAL]
+        if not types:
+            return None
+
+    # Vague-credential guard: a client/account catch-all that names no concrete credential
+    # ("...skills, certifications or authorizations specified for the assigned accounts") is
+    # staffing boilerplate, not a gateable credential. Strip CREDENTIAL when vague AND no hard
+    # credential is named (RN/CDL/guard card keep theirs via HARD_CREDENTIAL_RX). Fails safe.
+    if CREDENTIAL in types and VAGUE_CREDENTIAL_RX.search(low) \
             and not HARD_CREDENTIAL_RX.search(low):
         types = [t for t in types if t != CREDENTIAL]
         if not types:
