@@ -11,7 +11,8 @@ Design:
     genuinely new URLs are pinged. Existing pages are discovered by Google via the sitemap; we do
     not backfill the whole site (that would blow the daily quota). The FIRST run bootstraps: it
     seeds the known-live set and submits nothing.
-  * quota-capped per run (DAILY_CAP) with un-submitted URLs left un-recorded so they retry next run.
+  * quota-capped per CALENDAR DAY (DAILY_CAP, Pacific-midnight reset, persisted + shared across
+    same-day runs) with un-submitted URLs left un-recorded so they retry next run.
   * best-effort: ANY error is logged and swallowed. Indexing can never affect the pull/publish.
 
 Key: .env.local GOOGLE_INDEXING_KEY_FILE (path to the SA json) or GOOGLE_INDEXING_KEY_JSON (inline).
@@ -21,7 +22,7 @@ imports are inside functions so a missing dep degrades to a logged skip, never a
 import json
 import os
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -32,9 +33,34 @@ STATE = os.path.join(ROOT, "out", "runs", "indexing_state.json")
 SITE = (os.environ.get("SITE_URL") or "https://noprobjobs.com").rstrip("/")
 SCOPE = ["https://www.googleapis.com/auth/indexing"]
 ENDPOINT = "https://indexing.googleapis.com/v3/urlNotifications:publish"
-# Per-run submission cap = the Indexing API publish quota, confirmed 200/day in Cloud Console
+# Submission cap = the Indexing API publish quota, confirmed 200/day in Cloud Console
 # (APIs & Services -> Indexing API -> Quotas). Both URL_UPDATED and URL_DELETED draw from it.
 DAILY_CAP = 200
+
+# Google's quota is per CALENDAR DAY, resetting at Pacific midnight (the account's project
+# timezone). The drawdown is tracked in the state file as {"date","used"} and SHARED across every
+# run on the same PT day — so same-day re-runs (a kill/fix republish) draw the SAME 200 budget
+# instead of each getting a fresh 200. That per-run-reset bug drew 121x HTTP 429 on 2026-09-26.
+
+
+def _today_pt():
+    """US-Pacific calendar date, dependency-free. zoneinfo needs a tz database that the Windows
+    pull host lacks (and `tzdata` isn't installed) — importing ZoneInfo there raises and would
+    silently disable indexing. US DST = 2nd Sunday of March to 1st Sunday of November: PDT UTC-7
+    else PST UTC-8. Day-grain is all a calendar-day quota bucket needs, so the ~2am switch is
+    approximated at the UTC hour of the transition."""
+    u = datetime.now(timezone.utc)
+    y = u.year
+
+    def nth_sunday(month, n):                     # date of the n-th Sunday of (y, month)
+        first = datetime(y, month, 1, tzinfo=timezone.utc)
+        first_sun = 1 + (6 - first.weekday()) % 7   # Mon=0..Sun=6
+        return first_sun + 7 * (n - 1)
+
+    dst_start = datetime(y, 3, nth_sunday(3, 2), 10, tzinfo=timezone.utc)   # ~2am PST -> PDT
+    dst_end = datetime(y, 11, nth_sunday(11, 1), 9, tzinfo=timezone.utc)    # ~2am PDT -> PST
+    offset = -7 if dst_start <= u < dst_end else -8
+    return (u + timedelta(hours=offset)).strftime("%Y-%m-%d")
 
 
 def _env_val(name):
@@ -72,7 +98,7 @@ def _load_state():
         return None
 
 
-def _save_state(live, deleted, submitted=None):
+def _save_state(live, deleted, submitted=None, quota=None):
     os.makedirs(os.path.dirname(STATE), exist_ok=True)
     d = {"live": sorted(live), "deleted": sorted(deleted),
          "saved_at": datetime.now(timezone.utc).isoformat()}
@@ -81,6 +107,10 @@ def _save_state(live, deleted, submitted=None):
         # bootstrap seeds `live` without submitting, so `submitted` is what the backlog-fill
         # dedupes against so each page is pinged once, never re-spammed.
         d["submitted"] = sorted(submitted)
+    if quota is not None:
+        # {"date": PT YYYY-MM-DD, "used": n} — the per-calendar-day quota drawdown, shared across
+        # every run on that PT day so the real 200/day Google quota is never overshot.
+        d["quota"] = quota
     with open(STATE, "w", encoding="utf-8") as fh:
         json.dump(d, fh, indent=2)
 
@@ -105,12 +135,17 @@ def _run():
     cur_retired = {SITE + p for p in manifest.get("retired", [])}
 
     state = _load_state()
+    # Per-calendar-day quota drawdown (Pacific). used_today carries across same-day runs; it resets
+    # to 0 once the PT date rolls over. This run may spend at most DAILY_CAP - used_today.
+    today = _today_pt()
+    qstate = (state or {}).get("quota") or {}
+    used_today = qstate.get("used", 0) if qstate.get("date") == today else 0
     # Bootstrap: no prior state -> seed known-live, submit nothing (the sitemap already exposes
     # existing pages; we only ping Google for pages that become new AFTER this point).
     if state is None:
         # Seed known-live + retired, submit nothing THIS run. submitted={} so subsequent runs
         # treat the whole live set as backlog and fill the daily quota until it's cleared.
-        _save_state(cur_live, cur_retired, submitted=set())
+        _save_state(cur_live, cur_retired, submitted=set(), quota={"date": today, "used": 0})
         print(f"[indexing] bootstrap: seeded {len(cur_live)} live + {len(cur_retired)} retired URLs, submitted 0")
         return {"ok": True, "bootstrap": True, "seeded_live": len(cur_live)}
 
@@ -122,7 +157,8 @@ def _run():
 
     if not new_pages and not to_delete and cur_live <= submitted:
         # nothing new/retired AND every live page already notified -> idle day, spend nothing.
-        _save_state(cur_live, prev_deleted & cur_retired, submitted & (cur_live | cur_retired))
+        _save_state(cur_live, prev_deleted & cur_retired, submitted & (cur_live | cur_retired),
+                    quota={"date": today, "used": used_today})
         print("[indexing] nothing to submit (0 new, 0 newly-retired, backlog cleared)")
         return {"ok": True, "updated": 0, "deleted": 0, "backlog": 0}
 
@@ -136,7 +172,8 @@ def _run():
                          data=json.dumps({"url": url, "type": typ}), timeout=30)
         return r.status_code, r.text
 
-    budget = DAILY_CAP
+    budget = max(0, DAILY_CAP - used_today)   # per-calendar-day remainder, not a fresh 200 per run
+    start_budget = budget
     submitted_new, submitted_del, submitted_backlog = [], [], []
     upd_ok = upd_fail = del_ok = del_fail = bl_ok = bl_fail = 0
 
@@ -187,14 +224,18 @@ def _run():
     new_deleted = (prev_deleted | set(submitted_del)) & cur_retired
     new_submitted = (submitted | set(submitted_new) | set(submitted_backlog) | set(submitted_del)) \
         & (cur_live | cur_retired)
-    _save_state(new_known_live, new_deleted, new_submitted)
+    sent = start_budget - budget                 # POSTs made THIS run
+    used_after = used_today + sent               # total drawn against TODAY's PT quota
+    _save_state(new_known_live, new_deleted, new_submitted, quota={"date": today, "used": used_after})
 
     backlog_left = backlog_total - bl_ok
     print(f"[indexing] new ok={upd_ok} fail={upd_fail} | retired ok={del_ok} fail={del_fail} | "
-          f"backlog ok={bl_ok} fail={bl_fail} (remaining {backlog_left}) | quota used {DAILY_CAP - budget}/{DAILY_CAP}")
+          f"backlog ok={bl_ok} fail={bl_fail} (remaining {backlog_left}) | "
+          f"quota used {used_after}/{DAILY_CAP} today ({sent} this run, {used_today} earlier)")
     return {"ok": True, "updated": upd_ok, "deleted": del_ok, "backlog": bl_ok,
             "update_fail": upd_fail, "delete_fail": del_fail,
-            "backlog_remaining": backlog_left, "quota_used": DAILY_CAP - budget}
+            "backlog_remaining": backlog_left,
+            "quota_used_today": used_after, "quota_sent_this_run": sent, "quota_day": today}
 
 
 if __name__ == "__main__":
