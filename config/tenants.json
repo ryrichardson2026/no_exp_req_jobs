@@ -559,6 +559,35 @@
           }
         ]
       }
+    },
+    "_dollar_general": {
+      "_ASSESS_2026-10-01": "Batch-2 F: re-source ASSESSMENT ONLY. dollargeneral.com stays in SUPPRESSED_EMPLOYERS; this key is NOT in pull.json oracle_orc tenants (so --all never pulls it); run manually via `python -m adapters.oracle_orc --tenant _dollar_general`. Do NOT un-suppress or publish. Replaces the dead jibe_api._dollar_general discovery surface (DG migrated Jibe->Oracle 2026-09-21).",
+      "label": "Dollar General (Oracle ORC, re-sourced from Jibe)",
+      "host": "ibxwjb.fa.ocs.oraclecloud.com",
+      "site_number": "CX_1",
+      "language": "en",
+      "careers_url": "https://ibxwjb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/jobs",
+      "employer_domain": "dollargeneral.com",
+      "source_class": "direct-employer",
+      "sector": "retail",
+      "verified": "2026-10-01 GATES CLEARED (ASSESS ONLY — NOT signed off, NOT in pull.json/--all, dollargeneral.com STAYS suppressed). Probe 200, national board 90,569; WA server-side scope via locationId 100000008868365 -> 208 (PrimaryLocation all WA, 44 towns). ExternalQualificationsStr empty 0/208 (Providence regime; requirements in ExternalDescriptionStr). Openers DERIVED from DG's own 208 Oracle descriptions: 'Work Experience and/or Education' (bare, 207/208) + 'Education/Experience' (bare, 1/208) — the dead Jibe 'colon' mode would match 0. Applicable 196/208 = 94.2% (PREFERRED 147 + NONE_NEEDED 49); 12 excluded = spelled-out STORE MANAGER roles (abbreviated ASST STORE MGR stays applicable per _management_title_open; '21 and older only' age-gate in titles per _age_gate_open). Movement audit: +196 applicable DG-only, ZERO collateral. Adapter needs NO code change (pure config). TO ACTIVATE (owner decision): add a baseline.json row, add this key to pull.json oracle_orc tenants + rename off the underscore, retire the 196 orphaned jibe_api rows, un-suppress dollargeneral.com.",
+      "location_filter": {
+        "field": "PrimaryLocation",
+        "state_codes": [
+          "WA"
+        ]
+      },
+      "finder_extra": {
+        "_note": "WA server-side scope via the state locationId facet from the target URL (locationId=100000008868365, locationLevel=state). Confirm via --probe/--index.",
+        "selectedLocationsFacet": 100000008868365
+      },
+      "extraction": {
+        "_note": "DERIVED 2026-10-01 from DG's OWN 208 WA Oracle ExternalDescriptionStr (ExternalQualificationsStr empty 0/208 — the Providence regime; requirements live in the description). The experience/education bar is headed 'Work Experience and/or Education' with NO trailing colon (207/208) + one 'Education/Experience' variant — so match mode is 'bare', NOT the dead Jibe 'colon'. Regime is uniformly PREFERRED ('High school diploma or equivalent [strongly] preferred', 'six months supervisory experience ... preferred'), i.e. the same content the Jibe era scored 196/196 applicable. 'Knowledge and Skills'/'Competencies' are skills/behavioral sections, not the experience bar, so they are NOT openers. Nothing ported from the dead Jibe surface.",
+        "openers": [
+          { "text": "work experience and/or education", "role": "REQUIRED", "match": "bare" },
+          { "text": "education/experience", "role": "REQUIRED", "match": "bare" }
+        ]
+      }
     }
   },
   "workday": {
