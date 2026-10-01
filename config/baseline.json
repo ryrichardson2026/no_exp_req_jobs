@@ -132,9 +132,9 @@
       "density": 40.6
     },
     "shake_shack": {
-      "records": 8,
-      "applicable": 5,
-      "density": 62.5
+      "records": 5,
+      "applicable": 2,
+      "density": 40.0
     },
     "sonic": {
       "records": 70,
