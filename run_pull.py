@@ -975,6 +975,9 @@ def _publish():
         # record as is_new (the per-card New badge). Must run BEFORE the bake; reads the local
         # applicable.jsonl + config, no network.
         ("freshness (new badges)", [sys.executable, "-m", "analyze.freshness"], ROOT, False),
+        # gone-map: killed takedowns -> out/gone.json so the bake 410s them (jobs_detail hides
+        # killed from the publishable-key bake). Best-effort inside the module (always exits 0).
+        ("gone-map (killed -> 410)", [sys.executable, "-m", "analyze.gone"], ROOT, False),
         ("bake (prerender build)", ["node", "build.mjs"], PRERENDER, True),
         ("retire", ["node", "retire.mjs"], PRERENDER, True),
     ]

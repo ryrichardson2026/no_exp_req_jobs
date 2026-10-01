@@ -964,6 +964,26 @@ async function main(){
     expiredBack[jobPath(r) + "/"] = { back: backTo(r.state, r.category).href,
       cat: (r.category && r.category[0]) || null, city: r.city || null };
   }
+  // Killed records (intentional takedowns) are EXCLUDED from jobs_detail, so recs above can't see
+  // them and their pages would be swept -> 404. analyze/gone.py (service-role, RLS-bypassing)
+  // writes out/gone.json with their path fields; merge each into the 410 map so a killed job 410s
+  // with the same "gone" page an expired job gets. Missing/empty file = no-op (publishable-key
+  // bake never sees killed rows itself). These paths are NOT in `live`/the sitemap (recs excludes
+  // killed), and the stale-page sweep removes their static dir — the middleware 410s via EXPIRED
+  // before it would ever check for a static file.
+  const gonePath = join(HERE, "..", "out", "gone.json");
+  if (existsSync(gonePath)) {
+    let goneList = [];
+    try { goneList = JSON.parse(readFileSync(gonePath, "utf8")); } catch { goneList = []; }
+    let goneMerged = 0;
+    for (const r of (Array.isArray(goneList) ? goneList : [])) {
+      if (!r || r.job_number == null || !r.slug) continue;
+      expiredBack[jobPath(r) + "/"] = { back: backTo(r.state, r.category).href,
+        cat: (r.category && r.category[0]) || null, city: r.city || null };
+      goneMerged++;
+    }
+    if (goneMerged) process.stderr.write("  gone: merged " + goneMerged + " killed URL(s) into the 410 map\n");
+  }
 
   // <lastmod> per sitemap URL. Job pages: the job's stated posted_at (YYYY-MM-DD) when valid —
   // stable, so an unchanged job doesn't churn its lastmod every pull; omitted when the employer
