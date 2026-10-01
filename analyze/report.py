@@ -116,7 +116,14 @@ LICENSED_OCCUPATION_RX = re.compile(
     # NOT 'social service specialist' (entry) - only the licensed 'social worker'.
     r"dentist|dental hygienist|veterinarian|optometrist|podiatrist|chiropractor|"
     r"psychologist|social worker|mental health counselor|"
-    r"substance use disorder professional|chemical dependency professional)\b",
+    r"substance use disorder professional|chemical dependency professional|"
+    # 2026-10-01 (batch 2, owner-approved): Emergency (ER/ED) Technician. Bedside ED patient care
+    # (vitals, EKG, phlebotomy, CPR) — Providence's OWN source_function = "Clinical Care". A
+    # targeted exception to the "technician stays applicable" rule above: these 4 leaked via the
+    # allowlisted "Technical Services" category facet, not a requirements miss. Does NOT match
+    # "Emergency Medical Technician"/EMT ("medical" breaks the adjacency), and the optional
+    # room|department covers "Emergency Room/Department Technician" without widening further.
+    r"emergency (?:room |department )?technician)\b",
     re.IGNORECASE)
 
 # Career-path occupations. Excluded under the POSITIONING rule (master doc §3:

@@ -17,7 +17,11 @@ export const LAUNCHED_STATES = new Set(["WA"]);
 // Whole employers pulled from the published surface, keyed by employer_domain.
 // providence.org un-suppressed 2026-09-23 (owner) - re-onboarded scoped to its
 // non-clinical categories only (see config/tenants.json providence.finder_extra).
-export const SUPPRESSED_EMPLOYERS = new Set(["dollargeneral.com"]);
+// davita.com suppressed 2026-10-01 (batch 2, owner-approved): the DaVita tenant's entire WA
+// footprint is Patient Care Technician (dialysis bedside clinical care) - onboarded as a
+// no-experience entry pipeline but removed from scope as a clinical role. Config-level removal
+// (no tenant branching); the 15 live rows are also killed for immediate takedown.
+export const SUPPRESSED_EMPLOYERS = new Set(["dollargeneral.com", "davita.com"]);
 
 /* A record is published iff its state is launched (null tolerated — those are legit
    in-scope WA records whose state field failed to parse) AND its employer isn't
