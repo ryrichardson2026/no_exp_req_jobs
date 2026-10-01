@@ -933,6 +933,9 @@ def _finish(stamp, units, results, prior_counts, baseline, table, mv, partial, p
             "bake_jobs_fetched": pub.get("bake_jobs_fetched"), "bake_jobs_total": pub.get("bake_jobs_total"),
             "bake_complete": pub.get("bake_complete"),
             "live_jobs": live, "expired_jobs": expired,
+            # Indexing API outcome (batch 1 D): attempted / succeeded / errors-by-code / quota used,
+            # from analyze.indexing.submit_after_publish(). None when the run didn't publish.
+            "indexing": pub.get("indexing"),
             "git_head": _git_head(), "halts": list(movement or []),
             "quarantined": list(quarantined or []), "tenants": tenant_rows,
         }

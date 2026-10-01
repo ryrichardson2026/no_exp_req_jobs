@@ -176,6 +176,7 @@ def _run():
     start_budget = budget
     submitted_new, submitted_del, submitted_backlog = [], [], []
     upd_ok = upd_fail = del_ok = del_fail = bl_ok = bl_fail = 0
+    err_codes = {}   # HTTP status -> count (e.g. {"403": 2, "429": 7}); persisted in the run record
 
     # Deletions first — a retired page should stop being served promptly.
     for url in to_delete:
@@ -185,7 +186,8 @@ def _run():
         if code == 200:
             del_ok += 1; submitted_del.append(url)
         else:
-            del_fail += 1; print(f"[indexing] URL_DELETED {code}: {url}  {body[:120]}")
+            del_fail += 1; err_codes[str(code)] = err_codes.get(str(code), 0) + 1
+            print(f"[indexing] URL_DELETED {code}: {url}  {body[:120]}")
     # Then genuinely NEW pages (this publish added them).
     for url in new_pages:
         if budget <= 0:
@@ -194,7 +196,8 @@ def _run():
         if code == 200:
             upd_ok += 1; submitted_new.append(url)
         else:
-            upd_fail += 1; print(f"[indexing] URL_UPDATED {code}: {url}  {body[:120]}")
+            upd_fail += 1; err_codes[str(code)] = err_codes.get(str(code), 0) + 1
+            print(f"[indexing] URL_UPDATED {code}: {url}  {body[:120]}")
 
     # BACKLOG FILL — spend the REST of the daily quota on live pages Google was never notified
     # about (the bootstrap seeded `live` as known but submitted nothing; the sitemap alone was too
@@ -214,7 +217,7 @@ def _run():
         if code == 200:
             bl_ok += 1; submitted_backlog.append(url)
         else:
-            bl_fail += 1
+            bl_fail += 1; err_codes[str(code)] = err_codes.get(str(code), 0) + 1
             if bl_fail <= 3:
                 print(f"[indexing] backlog {code}: {url}  {body[:120]}")
 
@@ -234,7 +237,8 @@ def _run():
           f"quota used {used_after}/{DAILY_CAP} today ({sent} this run, {used_today} earlier)")
     return {"ok": True, "updated": upd_ok, "deleted": del_ok, "backlog": bl_ok,
             "update_fail": upd_fail, "delete_fail": del_fail,
-            "backlog_remaining": backlog_left,
+            "attempted": sent, "succeeded": upd_ok + del_ok + bl_ok,
+            "errors_by_code": err_codes, "backlog_remaining": backlog_left,
             "quota_used_today": used_after, "quota_sent_this_run": sent, "quota_day": today}
 
 
