@@ -15,6 +15,7 @@
 import { createServer } from "node:http";
 import { readFile, writeFile, mkdir, stat, rm, cp, copyFile, readdir } from "node:fs/promises";
 import { existsSync, readFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { extname, join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -724,10 +725,20 @@ async function main(){
 
   // enumerate routes
   const routes = [];
-  let ldCount = 0, expiredCount = 0, retiredCount = 0;
+  let ldCount = 0, expiredCount = 0, retiredCount = 0, jjLdDropped = 0;
+  // Batch 1 H: drop JobPosting JSON-LD on Jimmy John's (Paradox) records whose posted_at is more
+  // than a year stale — Paradox emits unreliable 2019-2023 dates, and a JobPosting with a years-old
+  // datePosted is misleading structured data Google can distrust. Removes ONLY the <script> block;
+  // the page HTML, its sitemap entry, and the board card are unchanged. Scoped tight (source +
+  // employer + stale date) so no other tenant is touched.
+  const jjCutoff = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10);
+  const staleJJ = (r) => r.source_id === "paradox" && /jimmy\s*john/i.test(r.company_name || "")
+    && /^\d{4}-\d{2}-\d{2}/.test(String(r.posted_at || "")) && String(r.posted_at).slice(0, 10) < jjCutoff;
   for (const r of recs) {
     if (r.retired) { retiredCount++; continue; }                              // retired -> not baked; retire.mjs removes any stale file
-    const ld = r.expired ? null : jobPostingScript(jobPostingLd(r, COUNTRY)); // parity: no JSON-LD once expired
+    const dropLd = r.expired || staleJJ(r);                                   // expired: markup-page parity; staleJJ: unreliable datePosted
+    const ld = dropLd ? null : jobPostingScript(jobPostingLd(r, COUNTRY));
+    if (staleJJ(r) && !r.expired) jjLdDropped++;
     if (r.expired) expiredCount++; if (ld) ldCount++;
     routes.push({ type: "job", path: jobPath(r) + "/", url: null, ld, num: r.job_number,
       related: relByNum[String(r.job_number)] || null,
@@ -818,11 +829,20 @@ async function main(){
   const templateMatch = !BAKE_FULL && prevManifest.templateVersion === templateVer;
   const isNewByNum = {}; for (const r of list) isNewByNum[String(r.job_number)] = !!r.is_new;
   const diskFile = (rp) => join(OUT, rp.replace(/\/$/, ""), "index.html");
+  // Sitemap <lastmod> (batch 1 A): the date THIS page's content last changed, tracked in the
+  // manifest — NEVER the employer's posted_at. `bakeStamp` = this pull's date. A manifest entry is
+  // {h: content-hash, c: changed_at}. A page whose hash is unchanged keeps its prior changed_at; a
+  // new or changed page takes bakeStamp (a brand-new job's changed_at is the first bake it appears
+  // in — the first_seen-equivalent). Old string-hash entries (pre-batch-1) are read as {h, c:null}.
+  const bakeStamp = (() => { const d = String((meta[0] && meta[0].pulled_at) || "").slice(0, 10); return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : new Date().toISOString().slice(0, 10); })();
+  const prevEntry = (p) => { const e = prevManifest.pages[p]; return (e && typeof e === "object") ? e : (typeof e === "string" ? { h: e, c: null } : null); };
   for (const r of jobRoutes) {
     r._hash = sha1(JSON.stringify({ d: cache.byNum[String(r.num)] || null, n: isNewByNum[String(r.num)] || false, ld: r.ld || null, rel: r.related || null }));
+    const pe = prevEntry(r.path);
+    r._changedAt = (pe && pe.c && pe.h === r._hash) ? pe.c : bakeStamp;   // unchanged -> keep date; new/changed -> this pull
     // Skip only on a normal full run (never on ONLY/LIMIT partials); needs matching template,
     // matching content hash, AND the file actually present on disk.
-    r._skip = fullRun && templateMatch && prevManifest.pages[r.path] === r._hash && existsSync(diskFile(r.path));
+    r._skip = fullRun && templateMatch && pe && pe.h === r._hash && existsSync(diskFile(r.path));
   }
   const toBake = jobRoutes.filter((r) => !r._skip);
   const reused = jobRoutes.length - toBake.length;
@@ -931,8 +951,8 @@ async function main(){
   let staleSwept = 0;
   if (fullRun && !breaker.aborted && !breaker.smokeFailed) {
     const newPages = {};
-    for (const r of jobRoutes) if (r._skip) newPages[r.path] = r._hash;
-    for (const res of results) if (res.type === "job" && !res.error && jobByPath[res.path]) newPages[res.path] = jobByPath[res.path]._hash;
+    for (const r of jobRoutes) if (r._skip) newPages[r.path] = { h: r._hash, c: r._changedAt };
+    for (const res of results) if (res.type === "job" && !res.error && jobByPath[res.path]) { const jr = jobByPath[res.path]; newPages[res.path] = { h: jr._hash, c: jr._changedAt }; }
     await writeFile(MANIFEST_PATH, JSON.stringify({ templateVersion: templateVer, pages: newPages }), "utf8");
 
     const liveSet = new Set(jobRoutes.map((r) => r.path));
@@ -985,19 +1005,36 @@ async function main(){
     if (goneMerged) process.stderr.write("  gone: merged " + goneMerged + " killed URL(s) into the 410 map\n");
   }
 
-  // <lastmod> per sitemap URL. Job pages: the job's stated posted_at (YYYY-MM-DD) when valid —
-  // stable, so an unchanged job doesn't churn its lastmod every pull; omitted when the employer
-  // stated no date (same rule the JobPosting datePosted uses — we never fabricate one). List/
-  // landing/browse pages actually change every pull, so they take the pull date.
-  const genDate = String((meta[0] && meta[0].pulled_at) || "").slice(0, 10);
+  // <lastmod> per sitemap URL (batch 1 A/B): the date OUR page content last changed, NEVER the
+  // employer's posted_at (which stays untouched for datePosted / card date / board sort / New badge).
+  // Job pages take their manifest changed_at; listing/browse views take the most-recent changed_at
+  // among the live jobs in that slice (sliceChanged() — reused by batch 3 city pages); static pages
+  // take their source module's last git-commit date. Omitted only when no honest date exists.
+  const genDate = bakeStamp;   // retained alias: the pull date, for any downstream reference
   const validDay = (d) => /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : "";
+  const changedAtByPath = {}; for (const r of jobRoutes) if (validDay(r._changedAt)) changedAtByPath[r.path] = r._changedAt;
   const lastmod = {};
   for (const r of recs) if (!r.expired && !r.retired) {
-    const d = validDay(String(r.posted_at || "").slice(0, 10));
-    if (d) lastmod[jobPath(r) + "/"] = d;
+    const c = changedAtByPath[jobPath(r) + "/"];
+    if (validDay(c)) lastmod[jobPath(r) + "/"] = c;
   }
-  const gd = validDay(genDate);
-  if (gd) { for (const u of ["/", WA_LANDER, "/about/", "/partners/", ...ALERT_PATHS, ...browsePaths]) lastmod[u] = gd; }
+  // Listing-view slice changed_at = most-recent changed_at among the slice's live jobs.
+  // sliceChanged() is the reusable helper batch 3 city pages call with their own member set.
+  const sliceRecs = {};
+  for (const r of recs) { if (r.expired || r.retired) continue;
+    const ps = new Set([browsePath(r.state, null)]);
+    for (const c of (r.category || [])) ps.add(browsePath(r.state, c));
+    for (const p of ps) (sliceRecs[p] = sliceRecs[p] || []).push(r);
+  }
+  const sliceChanged = (rs) => { let m = ""; for (const r of (rs || [])) { const c = changedAtByPath[jobPath(r) + "/"]; if (validDay(c) && c > m) m = c; } return m; };
+  for (const u of browsePaths) { const c = sliceChanged(sliceRecs[u]); if (validDay(c)) lastmod[u] = c; }
+  // Static pages: content-change date = last git commit touching the source module that renders the
+  // page (auto-maintaining + honest), falling back to this pull's date if git is unavailable.
+  const gitDate = (file) => { try { return execSync('git log -1 --format=%cs -- "' + file + '"', { cwd: join(HERE, ".."), encoding: "utf8" }).trim(); } catch { return ""; } };
+  const STATIC_SRC = { "/": "noprobjobs/landing.js", [WA_LANDER]: "noprobjobs/landing.js", "/about/": "noprobjobs/pages.js", "/partners/": "noprobjobs/pages.js" };
+  for (const [u, f] of Object.entries(STATIC_SRC)) lastmod[u] = validDay(gitDate(f)) || bakeStamp;
+  const alertSrcDate = validDay(gitDate("noprobjobs/alerts.js")) || bakeStamp;
+  for (const u of ALERT_PATHS) lastmod[u] = alertSrcDate;
 
   const deploy = await assembleDeploy(live, expiredBack, [...browsePaths], lastmod);
 
@@ -1018,6 +1055,7 @@ async function main(){
     job_pages_swept: staleSwept,                                 // stale pages deleted (suppressed/removed)
     job_pages_with_jsonld: jobs.filter((r) => r.ld).length,
     expired_no_jsonld: expiredCount,
+    jj_ld_dropped: jjLdDropped,
     manifest_live: live.length,
     manifest_expired: expired.length,
     manifest_retired: retired.length,
