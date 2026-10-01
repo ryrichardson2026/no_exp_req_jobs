@@ -1,5 +1,9 @@
 {
   "_comment": "Run plan for run_pull.py (recurring pull orchestration). One entry per PLATFORM, where PLATFORM = the adapters.<platform> module = the out/<platform>/ output dir = the adapter's source_id. It is NOT always a tenants.json top-level key: 'section' names the tenants.json key that actually holds this platform's tenant coordinates. It defaults to the platform name; TARGET is the exception - Target's detail IS Workday, so its coordinates live under the 'workday' section (see adapters/target.py load_tenant), while its code path and output dir are 'target'. 'tenants' pins which keys of that section belong to this platform, needed only where two platforms share one section (workday holds multicare AND target). 'modes' is the ordered adapter mode sequence; normalize is always last (the extractor reads description_html/qualifications_html off the contract, which only exist after normalize's map_record). Mode sequence is config, not code. Each mode verified against the adapter's own argparse 2026-09-09. Tenant identities themselves are read from config/tenants.json, never hardcoded here. Adding a platform or tenant: follow the required SOP at docs/onboarding-a-tenant.md.",
+  "halt_thresholds": {
+    "_comment": "run_pull.py halt tuning. small_n_density_exempt_records: a tenant with fewer than this many records (current OR baseline) is exempt from the >15pt density-move PARTIAL halt, because on a low-count tenant one applicable flip swings density double digits (gensco at 8 records: a single flip ~12.5pt) and would false-PARTIAL the whole publish. The record-floor (<50% of baseline), the enumerate-completeness guard, and the movement audit still gate these tenants; only the density signal is waived. Raise to protect more tenants from the density guard; lower to re-arm it on mid-size tenants.",
+    "small_n_density_exempt_records": 30
+  },
   "platforms": [
     {
       "platform": "oracle_orc",

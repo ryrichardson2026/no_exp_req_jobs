@@ -74,6 +74,12 @@ MIN_RECORD_FRACTION = 0.50      # a tenant under 50% of baseline records -> PART
 MAX_DENSITY_MOVE = 15.0         # density more than 15 points off baseline -> PARTIAL
 MAX_SET_MOVEMENT_PCT = 2.0      # more than 2% of the applicable set moves -> PARTIAL
 MAX_EMPLOYER_MOVEMENT_PCT = 5.0 # any single employer over 5% movement -> PARTIAL
+# Small-N density exemption: on a tiny tenant one applicable flip swings density double digits
+# (gensco at 8 records: a single flip ≈ 12.5 pts), so the >15pt density halt fires on benign
+# churn and PARTIALs the whole publish. Tenants with fewer than this many records (current OR
+# baseline) are exempt from the DENSITY halt only — the record-floor (50%), enumerate guard, and
+# movement audit still gate them. Overridable in config/pull.json -> halt_thresholds.
+SMALL_N_DENSITY_RECORDS_DEFAULT = 30
 
 
 # --------------------------------------------------------------------------
@@ -792,6 +798,9 @@ def main(argv):
     tcfg_halt = load_json(os.path.join(CONFIG_DIR, "tenants.json"))
     def _allow_zero(u):
         return bool(((tcfg_halt.get(u["platform"]) or {}).get(u["tenant"]) or {}).get("allow_zero_records"))
+    # Small-N density exemption threshold (config-driven, not hardcoded policy).
+    _halt_cfg = load_json(os.path.join(CONFIG_DIR, "pull.json")).get("halt_thresholds", {})
+    small_n_records = _halt_cfg.get("small_n_density_exempt_records", SMALL_N_DENSITY_RECORDS_DEFAULT)
     for u in units:
         t = u["tenant"]
         row = table.get(t)
@@ -811,7 +820,13 @@ def main(argv):
         elif base and row["records"] < MIN_RECORD_FRACTION * base["records"]:
             bucket.append(f"{t}: {row['records']} records < 50% of baseline {base['records']}")
         if base and abs(row["density"] - base["density"]) > MAX_DENSITY_MOVE:
-            bucket.append(f"{t}: density {row['density']:.1f}% moved >15pts from baseline {base['density']:.1f}%")
+            if row["records"] < small_n_records or base["records"] < small_n_records:
+                print(f"    small-N density exemption: {t} records {row['records']} "
+                      f"(baseline {base['records']}) < {small_n_records} — density {row['density']:.1f}% vs "
+                      f"{base['density']:.1f}% ({row['density'] - base['density']:+.1f}pt) NOT gated "
+                      f"(record-floor + guard + movement still apply)")
+            else:
+                bucket.append(f"{t}: density {row['density']:.1f}% moved >15pts from baseline {base['density']:.1f}%")
     if mv_halt:
         halts.append(f"movement {mv_pct:.2f}% of set / worst employer {worst_emp} {worst_pct:.2f}% over threshold")
 
