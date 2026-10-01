@@ -730,7 +730,7 @@ def main(argv):
     # ---- enumerate-completeness guard: which sources are complete enough to push. A short or
     #      broken enumerate HOLDS its source_id at prior state (supabase_sink reads guard_status),
     #      so a partial pull can no longer false-expire the board. Runs before the push.
-    run_guard(units, results, stamp)
+    guard_status = run_guard(units, results, stamp)
 
     # ---- enrich: persist verdicts + category onto normalized.jsonl (THE MISSING LAYER) ----
     # Adapters leave experience_condition/evidence_clauses/credentials/category empty by
@@ -764,11 +764,25 @@ def main(argv):
           f"{worst_emp} {worst_pct:.2f}%  ->  {mv_path}")
 
     # ---- halt conditions (step 6) ----
+    # A source the enumerate guard already HELD (skipped/failed in guard_status) is quarantined:
+    # supabase_sink keeps it at its prior DB state and it auto-retries next pull, so its records
+    # never reach production and the bake (which reads the DB) stays correct. Counting its halts
+    # here would block the publish of every OTHER (clean) source over a source that is already
+    # protected and is not going to push — the all-or-nothing stall this removes. So a halt whose
+    # tenant's source is held is routed to `quarantined` (reported, does NOT gate); clean sources
+    # publish and held ones retry next run with no manual review. Non-held halts still gate: a real
+    # anomaly on a source that WILL push must stop the publish. The hold itself is already logged by
+    # run_guard and persisted to out/guard_status.json for observability.
+    def _held(platform):
+        return guard_status.get(platform) in ("skipped", "failed")
+
     halts = []
+    quarantined = []
     if any_mode_failed:
         for t, r in results.items():
             if r["failed_mode"]:
-                halts.append(f"{t}: adapter mode '{r['failed_mode']}' exited non-zero")
+                msg = f"{t}: adapter mode '{r['failed_mode']}' exited non-zero"
+                (quarantined if _held(r["platform"]) else halts).append(msg)
     # Per-tenant "seasonal/dormant" exemption. A tenant that config-flags allow_zero_records
     # (config/tenants.json) is a verified seasonal board that is legitimately empty out of season
     # (Spirit Christmas: 0 in WA until ~Oct-Dec). Its zero does NOT halt the whole publish - it
@@ -782,9 +796,10 @@ def main(argv):
         t = u["tenant"]
         row = table.get(t)
         base = baseline.get(t)
+        bucket = quarantined if _held(u["platform"]) else halts
         if row is None:
             if not _allow_zero(u):
-                halts.append(f"{t}: no rows in consolidated report (zero records?)")
+                bucket.append(f"{t}: no rows in consolidated report (zero records?)")
             continue
         if _allow_zero(u) and row["records"] > 0:
             print(f"    *** SEASONAL TENANT ACTIVATED: {t} now has {row['records']} records "
@@ -792,20 +807,28 @@ def main(argv):
                   f"Inspect and set a config/baseline.json row. ***")
         if row["records"] == 0:
             if not _allow_zero(u):
-                halts.append(f"{t}: zero records")
+                bucket.append(f"{t}: zero records")
         elif base and row["records"] < MIN_RECORD_FRACTION * base["records"]:
-            halts.append(f"{t}: {row['records']} records < 50% of baseline {base['records']}")
+            bucket.append(f"{t}: {row['records']} records < 50% of baseline {base['records']}")
         if base and abs(row["density"] - base["density"]) > MAX_DENSITY_MOVE:
-            halts.append(f"{t}: density {row['density']:.1f}% moved >15pts from baseline {base['density']:.1f}%")
+            bucket.append(f"{t}: density {row['density']:.1f}% moved >15pts from baseline {base['density']:.1f}%")
     if mv_halt:
         halts.append(f"movement {mv_pct:.2f}% of set / worst employer {worst_emp} {worst_pct:.2f}% over threshold")
 
+    if quarantined:
+        print("\n--- quarantined (source held by enumerate guard — kept at prior state, retries "
+              "next pull; does NOT block this publish) ---")
+        for q in quarantined:
+            print(f"    held: {q}")
+
     complete = not halts
     return _finish(stamp, units, results, prior_counts, baseline, table, (mv_pct, worst_emp, worst_pct, mv_path),
-                   partial=not complete, publish=a.publish, complete=complete, movement=halts)
+                   partial=not complete, publish=a.publish, complete=complete, movement=halts,
+                   quarantined=quarantined)
 
 
-def _finish(stamp, units, results, prior_counts, baseline, table, mv, partial, publish, complete, movement):
+def _finish(stamp, units, results, prior_counts, baseline, table, mv, partial, publish, complete, movement,
+            quarantined=None):
     # ---- output table (step 9) ----
     print("\n" + "=" * 78)
     print("RUN TABLE")
@@ -895,7 +918,8 @@ def _finish(stamp, units, results, prior_counts, baseline, table, mv, partial, p
             "bake_jobs_fetched": pub.get("bake_jobs_fetched"), "bake_jobs_total": pub.get("bake_jobs_total"),
             "bake_complete": pub.get("bake_complete"),
             "live_jobs": live, "expired_jobs": expired,
-            "git_head": _git_head(), "halts": list(movement or []), "tenants": tenant_rows,
+            "git_head": _git_head(), "halts": list(movement or []),
+            "quarantined": list(quarantined or []), "tenants": tenant_rows,
         }
         dash, note = runlog.emit(record)
         print(f"\nrun record: {dash}   (supabase: {note})")
