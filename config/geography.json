@@ -1,0 +1,83 @@
+{
+  "_comment": "Geography table for listing views + the wage block (batch 3). CONFIG, NOT CODE: a market/state/city is a ROW here, never an `if` in an adapter or the bake. Market stays a PARAMETER (noprobjobs/data/routes.js MARKET); a second state (e.g. Texas) is added by APPENDING rows (one kind:state + its kind:city rows) with no code change. Each city inherits its state's wage rate unless it has a local ordinance (wage.rule). Rates carry effective dates + a source URL; the wage block NEVER displays a figure not in this table. min_jobs = the CITY-ONLY NONE_NEEDED primary count a listing view must reach to publish (batch 3 TASK 2); nearby jobs never count toward it. nearby_radius_miles + nearby_sort govern the 'More Jobs Nearby' feed below the separator.",
+  "_wage_sources": {
+    "state": "https://www.lni.wa.gov/workers-rights/wages/minimum-wage/",
+    "local": "https://www.lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates",
+    "verified": "2026-10-01 — WA state 2026 $17.13 (eff Jan 1). 2027 rates INTENTIONALLY OMITTED per directive (L&I lists state $17.73 eff 2027-01-01; add once owner-confirmed). L&I local page: Seattle $21.30; Everett tiered; Renton tiered (Jul 1 step); Tukwila $21.65 (15+ ww + conditions); SeaTac $20.74 HOSPITALITY/TRANSPORTATION ONLY (general jobs follow state). Auburn/Kent/Spokane Valley/Spokane/Tacoma/Bellevue not listed -> inherit state. Spokane added 2026-10-01 (owner reversed the hold — 109 jobs / 72 NONE_NEEDED). Redmond/Lynnwood/Bothell/Vancouver/Yakima NOT built (owner)."
+  },
+  "min_jobs_default": 5,
+  "nearby_radius_miles": 25,
+  "nearby_sort": "distance_then_newest",
+  "rows": [
+    {
+      "kind": "state",
+      "slug": "washington",
+      "parent": null,
+      "display": "Washington",
+      "market": "WA",
+      "min_jobs": 5,
+      "wage": {
+        "rule": "state",
+        "rates": [
+          { "amount": 17.13, "period": "hour", "effective": "2026-01-01", "source": "https://www.lni.wa.gov/workers-rights/wages/minimum-wage/" }
+        ]
+      }
+    },
+    {
+      "kind": "city", "slug": "seattle", "parent": "washington", "display": "Seattle", "market": "WA", "min_jobs": 5,
+      "wage": {
+        "rule": "local",
+        "rates": [ { "amount": 21.30, "period": "hour", "effective": "2026-01-01", "source": "https://www.lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates" } ]
+      }
+    },
+    {
+      "kind": "city", "slug": "everett", "parent": "washington", "display": "Everett", "market": "WA", "min_jobs": 5,
+      "wage": {
+        "rule": "local_tiered",
+        "note": "Tiered by employer size; 14-or-fewer-employee employers are not covered and follow the WA state rate. Render as a range 'depending on employer size', never a single tier.",
+        "source": "https://www.lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates",
+        "tiers": [
+          { "label": "500+ employees", "amount": 20.77, "period": "hour", "effective": "2026-01-01" },
+          { "label": "15–499 employees", "amount": 18.77, "period": "hour", "effective": "2026-01-01" },
+          { "label": "15–499 employees", "amount": 19.77, "period": "hour", "effective": "2026-07-01" }
+        ]
+      }
+    },
+    {
+      "kind": "city", "slug": "renton", "parent": "washington", "display": "Renton", "market": "WA", "min_jobs": 5,
+      "wage": {
+        "rule": "local_tiered",
+        "note": "Tiered by employer size; 14-or-fewer-employee employers are exempt and follow the WA state rate. Render as a range 'depending on employer size'.",
+        "source": "https://www.lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates",
+        "tiers": [
+          { "label": "500+ employees", "amount": 21.57, "period": "hour", "effective": "2026-01-01" },
+          { "label": "15–500 employees", "amount": 20.57, "period": "hour", "effective": "2026-01-01" },
+          { "label": "15–500 employees", "amount": 21.57, "period": "hour", "effective": "2026-07-01" }
+        ]
+      }
+    },
+    {
+      "kind": "city", "slug": "tukwila", "parent": "washington", "display": "Tukwila", "market": "WA", "min_jobs": 5,
+      "wage": {
+        "rule": "local",
+        "note": "Applies to employers with 15+ employees worldwide (plus revenue/franchise conditions); smaller employers follow the WA state rate.",
+        "source": "https://www.lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates",
+        "rates": [ { "amount": 21.65, "period": "hour", "effective": "2026-01-01" } ]
+      }
+    },
+    {
+      "kind": "city", "slug": "seatac", "parent": "washington", "display": "SeaTac", "market": "WA", "min_jobs": 5,
+      "wage": {
+        "rule": "inherit",
+        "industry_note": { "amount": 20.74, "period": "hour", "scope": "hospitality & transportation industries only", "effective": "2026-01-01", "source": "https://www.lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates" },
+        "note": "SeaTac's local ordinance covers ONLY hospitality & transportation employers; general jobs follow the WA state rate. Wage block shows the state rate + this industry note."
+      }
+    },
+    { "kind": "city", "slug": "tacoma", "parent": "washington", "display": "Tacoma", "market": "WA", "min_jobs": 5, "wage": { "rule": "inherit" } },
+    { "kind": "city", "slug": "bellevue", "parent": "washington", "display": "Bellevue", "market": "WA", "min_jobs": 5, "wage": { "rule": "inherit" } },
+    { "kind": "city", "slug": "auburn", "parent": "washington", "display": "Auburn", "market": "WA", "min_jobs": 5, "wage": { "rule": "inherit" } },
+    { "kind": "city", "slug": "kent", "parent": "washington", "display": "Kent", "market": "WA", "min_jobs": 5, "wage": { "rule": "inherit" } },
+    { "kind": "city", "slug": "spokane-valley", "parent": "washington", "display": "Spokane Valley", "market": "WA", "min_jobs": 5, "wage": { "rule": "inherit" } },
+    { "kind": "city", "slug": "spokane", "parent": "washington", "display": "Spokane", "market": "WA", "min_jobs": 5, "wage": { "rule": "inherit" } }
+  ]
+}
