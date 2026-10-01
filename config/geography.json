@@ -3,7 +3,7 @@
   "_wage_sources": {
     "state": "https://www.lni.wa.gov/workers-rights/wages/minimum-wage/",
     "local": "https://www.lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates",
-    "verified": "2026-10-01 — WA state 2026 $17.13 (eff Jan 1). 2027 rates INTENTIONALLY OMITTED per directive (L&I lists state $17.73 eff 2027-01-01; add once owner-confirmed). L&I local page: Seattle $21.30; Everett tiered; Renton tiered (Jul 1 step); Tukwila $21.65 (15+ ww + conditions); SeaTac $20.74 HOSPITALITY/TRANSPORTATION ONLY (general jobs follow state). Auburn/Kent/Spokane Valley/Spokane/Tacoma/Bellevue not listed -> inherit state. Spokane added 2026-10-01 (owner reversed the hold — 109 jobs / 72 NONE_NEEDED). Redmond/Lynnwood/Bothell/Vancouver/Yakima NOT built (owner)."
+    "verified": "2026-10-01 — WA state 2026 $17.13 (eff Jan 1). 2027 rates INTENTIONALLY OMITTED per directive (L&I lists state $17.73 eff 2027-01-01; add once owner-confirmed). L&I local page: Seattle $21.30; Everett tiered; Renton tiered (Jul 1 step); Tukwila $21.65 (15+ ww + conditions); SeaTac $20.74 HOSPITALITY/TRANSPORTATION ONLY (general jobs follow state). Auburn/Kent/Spokane Valley/Tacoma/Bellevue not listed -> inherit state. SPOKANE is GEO-ONLY (no page): its jobs feed Nearby via lat/lng + cities-geo.js centroids, independent of this table, so it is NOT a row here. Redmond/Lynnwood/Bothell/Vancouver/Yakima NOT built (owner)."
   },
   "min_jobs_default": 5,
   "nearby_radius_miles": 25,
@@ -77,7 +77,6 @@
     { "kind": "city", "slug": "bellevue", "parent": "washington", "display": "Bellevue", "market": "WA", "min_jobs": 5, "wage": { "rule": "inherit" } },
     { "kind": "city", "slug": "auburn", "parent": "washington", "display": "Auburn", "market": "WA", "min_jobs": 5, "wage": { "rule": "inherit" } },
     { "kind": "city", "slug": "kent", "parent": "washington", "display": "Kent", "market": "WA", "min_jobs": 5, "wage": { "rule": "inherit" } },
-    { "kind": "city", "slug": "spokane-valley", "parent": "washington", "display": "Spokane Valley", "market": "WA", "min_jobs": 5, "wage": { "rule": "inherit" } },
-    { "kind": "city", "slug": "spokane", "parent": "washington", "display": "Spokane", "market": "WA", "min_jobs": 5, "wage": { "rule": "inherit" } }
+    { "kind": "city", "slug": "spokane-valley", "parent": "washington", "display": "Spokane Valley", "market": "WA", "min_jobs": 5, "wage": { "rule": "inherit" } }
   ]
 }
