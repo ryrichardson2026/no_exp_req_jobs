@@ -51,6 +51,13 @@ CATEGORIES.forEach((c) => { CAT_SLUG[c] = catToSlug(c); SLUG_CAT[catToSlug(c)] =
    decision and not an accident of implementation order. */
 export const CATEGORY_SLUGS = new Set(CATEGORIES.map(catToSlug));
 
+/* "alerts" is RESERVED at the /{state}/ level — the signup-guide subtree lives at
+   /{state}/alerts/ (hub) and /{state}/alerts/{type}/ (one per category or job-type/modifier).
+   Reserving the slug here — and asserting it at build time (prerender/build.mjs) against the
+   category (and any future city) slug sets — means no browse page can ever shadow the subtree,
+   and the whole scheme works for any state row with no code change. */
+export const ALERTS_SLUG = "alerts";
+
 export function stateSlug(abbr){ return STATE_SLUG[abbr] || null; }
 
 /* Full state name for prose ("Washington", "New York", "District of Columbia"), derived
@@ -101,9 +108,21 @@ export function browsePath(stateAbbr, category){
   return "/" + st + (category && CAT_SLUG[category] ? "/" + CAT_SLUG[category] + "/" : "/");
 }
 
-/* Explicit level-2 precedence: category first (the nine fixed slugs), then metro when a
-   model exists, else 404. Category always wins on collision. */
+/* Alert-signup guide pages live UNDER the state: /{state}/alerts/ (hub) and
+   /{state}/alerts/{type}/ (one per category or job-type/modifier). `alertType` is an
+   already-formed slug (a category slug, or a modifier like "part-time"); no/unknown state ->
+   the all-jobs index, NEVER a guessed state. State-generic: a second market needs no code here. */
+export function alertsPath(stateAbbr, alertType){
+  const st = stateSlug(stateAbbr);
+  if (!st) return "/jobs/";
+  return "/" + st + "/" + ALERTS_SLUG + "/" + (alertType ? alertType + "/" : "");
+}
+
+/* Explicit level-2 precedence: the reserved "alerts" subtree first, then category (the nine
+   fixed slugs), then metro when a model exists, else 404. "alerts" and category always win on
+   collision (a city model, when added, must exclude both — enforced at build time). */
 export function resolveLevel2(segment){
+  if (segment === ALERTS_SLUG) return { kind: "alerts" };
   if (CATEGORY_SLUGS.has(segment)) return { kind: "category", category: SLUG_CAT[segment] };
   // if (METROS[segment]) return { kind: "metro", metro: segment };   // no metro model yet
   return { kind: "404" };
@@ -123,5 +142,6 @@ export function parsePath(pathname){
   if (!parts[1]) return { kind: "browse", state, category: null };
   const lvl2 = resolveLevel2(parts[1]);
   if (lvl2.kind === "category") return { kind: "browse", state, category: lvl2.category };
+  if (lvl2.kind === "alerts") return { kind: "alerts", state, alertType: parts[2] || null };
   return { kind: "404" };                                     // metro (none yet) / bad segment
 }

@@ -520,7 +520,7 @@ class LandingApp extends React.Component {
     );
   }
 
-  // "No-experience job guides" — the WA lander's link out to /alerts/washington/{category}/ guide
+  // "No-experience job guides" — the WA lander's link out to /washington/alerts/{category}/ guide
   // pages (pay, hiring steps, free alerts). WA lander only (the national landing has no market
   // context); rendered from the shared alertPages registry so new guides/geos appear automatically.
   renderGuides(){

@@ -44,7 +44,7 @@ const GAP_BLOCK = "15px";     // header -> content within a section
 
 // ────────────────────────────────────────────────────────────────────────────
 // PAGES — one entry per alert page, keyed by the category slug in the URL
-// (/alerts/{market}/{category}/). To add a page: add a key here + a row in build.mjs ALERTS.
+// (/{market}/alerts/{slug}/). To add a page: add a key here + a row in build.mjs ALERTS.
 // `CONTENT` is set to the right entry at boot() from the path. Every text value lives here.
 // ────────────────────────────────────────────────────────────────────────────
 // Shared across every page (identical copy) — referenced below to keep the pages readable.
@@ -1319,7 +1319,7 @@ const mountIndex = (data) => {
 // siteFooter now lives in ./ui/siteFooter.js (shared with the About/Partners static pages) so the
 // footer links stay identical across every surface. Imported at the top of this module.
 
-// The per-market index hub (/alerts/{market}/): a guides grid with live counts. Renders from the
+// The per-market index hub (/{market}/alerts/): a guides grid with live counts. Renders from the
 // index blob (kind:"index") that boot() detects — no signup form, it's a navigation/SEO hub.
 function AlertsIndex(props){
   const d = props.data || { marketName: "Washington", marketSlug: "washington", guides: [] };
@@ -1347,11 +1347,11 @@ function AlertsIndex(props){
 }
 // Data ships INLINE (baked by prerender/build.mjs) — no client query. Set today from the baked
 // pulledAt before first render, then mount. Fall back to an empty scaffold if the blob is missing.
-// Pick the page's content from the URL: /alerts/{market}/{category-slug}/ -> PAGES[slug].
+// Pick the page's content from the URL: /{market}/alerts/{slug}/ -> PAGES[slug] (TASK 4 scheme).
 // Runs before mount() so the component constructs against the right CONTENT.
 function selectPage(){
   try {
-    const m = (window.location.pathname || "").match(/\/alerts\/[^/]+\/([^/]+)/);
+    const m = (window.location.pathname || "").match(/\/[^/]+\/alerts\/([^/]+)/);
     if (m && PAGES[m[1]]) { CONTENT = PAGES[m[1]]; return; }
   } catch (e) {}
   CONTENT = PAGES.retail;

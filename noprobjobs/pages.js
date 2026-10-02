@@ -13,12 +13,13 @@ import { Header } from "./ui/header.js";
 import { Pressable } from "./ui/pressable.js";
 import { siteFooter } from "./ui/siteFooter.js";
 import { logoCarousel } from "./ui/logoCarousel.js";
+import { marketIndexPath } from "./data/alertPages.js";
 
 const React = window.React;
 const PRODUCT = "NoProbJobs.com";
 const RAIL = "760px";
 const ORIGIN = "https://noprobjobs.com";
-const ALERTS_HUB = "/alerts/washington/";
+const ALERTS_HUB = marketIndexPath("washington");   // /{market}/alerts/ — derived so the URL scheme lives in one place (TASK 4)
 const MAKE_HOOK = "https://hook.us2.make.com/o30dw0i6emep7uaurcg6lf2i5kdkg6o3";
 
 // ---- shared style strings (copied verbatim from the alert template so styling matches) ----

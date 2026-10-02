@@ -1,6 +1,6 @@
-/* Single source of truth for the alert-signup guide pages (/alerts/{market}/{slug}/).
+/* Single source of truth for the alert-signup guide pages (/{market}/alerts/{slug}/).
    Everything that LINKS to them reads THIS module — the WA lander's "job guides" section, the site
-   footer, and the /alerts/{market}/ index hub — so adding a page or a whole new geo updates every
+   footer, and the /{market}/alerts/ index hub — so adding a page or a whole new geo updates every
    surface at once. build.mjs bakes each entry as a route (plus one index page per market);
    alerts.js holds the per-page CONTENT keyed by `slug`.
 
@@ -16,46 +16,46 @@ export const ALERT_MARKETS = {
 
 export const ALERT_PAGES = [
   { state: "WA", marketSlug: "washington", slug: "retail", label: "Retail", iconCat: "Retail",
-    category: "Retail", path: "/alerts/washington/retail/",
+    category: "Retail", path: "/washington/alerts/retail/",
     title: "Retail Jobs, No Experience Needed | Washington | NoProbJobs",
     description: "Retail jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
   { state: "WA", marketSlug: "washington", slug: "food-services", label: "Food Service", iconCat: "Food Services",
-    category: "Food Services", path: "/alerts/washington/food-services/",
+    category: "Food Services", path: "/washington/alerts/food-services/",
     title: "Food Service Jobs, No Experience Needed | Washington | NoProbJobs",
     description: "Food service jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
   { state: "WA", marketSlug: "washington", slug: "security", label: "Security", iconCat: "Security",
-    category: "Security", path: "/alerts/washington/security/",
+    category: "Security", path: "/washington/alerts/security/",
     title: "Security Jobs, No Experience Needed | Washington | NoProbJobs",
     description: "Security jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
   { state: "WA", marketSlug: "washington", slug: "warehouse", label: "Warehouse", iconCat: "Warehouse",
-    category: "Warehouse", path: "/alerts/washington/warehouse/",
+    category: "Warehouse", path: "/washington/alerts/warehouse/",
     title: "Warehouse Jobs, No Experience Needed | Washington | NoProbJobs",
     description: "Warehouse jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
   { state: "WA", marketSlug: "washington", slug: "grocery", label: "Grocery", iconCat: "Grocery",
-    category: "Grocery", path: "/alerts/washington/grocery/",
+    category: "Grocery", path: "/washington/alerts/grocery/",
     title: "Grocery Jobs, No Experience Needed | Washington | NoProbJobs",
     description: "Grocery jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
   { state: "WA", marketSlug: "washington", slug: "transportation-automotive", label: "Driving & Automotive", iconCat: "Transportation/Automotive",
-    category: "Transportation/Automotive", path: "/alerts/washington/transportation-automotive/",
+    category: "Transportation/Automotive", path: "/washington/alerts/transportation-automotive/",
     title: "Driving & Automotive Jobs, No Experience Needed | Washington | NoProbJobs",
     description: "Driving and automotive jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
   { state: "WA", marketSlug: "washington", slug: "sales", label: "Sales", iconCat: "Sales",
-    category: "Sales", path: "/alerts/washington/sales/",
+    category: "Sales", path: "/washington/alerts/sales/",
     title: "Sales Jobs, No Experience Needed | Washington | NoProbJobs",
     description: "Sales jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
   { state: "WA", marketSlug: "washington", slug: "facilities", label: "Facilities", iconCat: "Facilities",
-    category: "Facilities", path: "/alerts/washington/facilities/",
+    category: "Facilities", path: "/washington/alerts/facilities/",
     title: "Facilities Jobs, No Experience Needed | Washington | NoProbJobs",
     description: "Facilities jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
   // Healthcare is a SECTOR, not a board category — scoped by employer (see build.mjs alertSlice).
   { state: "WA", marketSlug: "washington", slug: "healthcare", label: "Hospital & Healthcare", iconCat: "Healthcare",
-    employers: ["multicare.org"], path: "/alerts/washington/healthcare/",
+    employers: ["multicare.org"], path: "/washington/alerts/healthcare/",
     title: "Hospital & Healthcare Jobs, No Experience Needed | Washington | NoProbJobs",
     description: "Non-clinical hospital and healthcare jobs in Washington hiring now, no experience required. Free alerts, apply direct with the employer." },
 ];
 
 export function pagesForMarket(marketSlug){ return ALERT_PAGES.filter((p) => p.marketSlug === marketSlug); }
-export function marketIndexPath(marketSlug){ return "/alerts/" + marketSlug + "/"; }
+export function marketIndexPath(marketSlug){ return "/" + marketSlug + "/alerts/"; }
 export function marketBySlug(marketSlug){ return ALERT_MARKETS[marketSlug] || null; }
 // The market a given page path belongs to (for a market-aware footer link). Falls back to the sole
 // launched market so single-geo pages still get a valid "job guides" link.

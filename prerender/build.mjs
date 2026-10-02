@@ -21,7 +21,7 @@ import { extname, join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import puppeteer from "puppeteer-core";
 import { jobPostingLd, jobPostingScript } from "../noprobjobs/data/jobPosting.js";
-import { jobPath, browsePath, CAT_SLUG, STATE_SLUG, backTo } from "../noprobjobs/data/routes.js";
+import { jobPath, browsePath, CAT_SLUG, STATE_SLUG, backTo, alertsPath, ALERTS_SLUG, CATEGORY_SLUGS } from "../noprobjobs/data/routes.js";
 import { LAUNCHED_STATES, SUPPRESSED_EMPLOYERS, isPublished } from "../noprobjobs/data/published.js";
 import * as PM from "../noprobjobs/data/pageMeta.js";
 import * as R from "../noprobjobs/data/record.js";
@@ -82,7 +82,23 @@ const WA_LANDER = "/washington-jobs/";
 // noprobjobs/data/alertPages.js (also read by the WA lander's guides section + the footer), so a new
 // page or geo touches one file. Baked from alerts.html (→ alerts.js); live slice inlined by serve().
 const ALERTS = ALERT_PAGES;
-const ALERT_PATHS = [...ALERT_PAGES.map((p) => p.path), ...Object.keys(ALERT_MARKETS).map(marketIndexPath)];
+// Build-time guards for the /{state}/alerts/ scheme (TASK 4) — fail the bake loudly rather than
+// silently ship a colliding or mis-homed alert URL:
+//   (1) "alerts" is RESERVED at the state level: no category (or future city) slug may equal it,
+//       so /{state}/alerts/ can never be shadowed by a browse page;
+//   (2) alert-type slugs must be unique within a market's /alerts/ folder (category + job-type);
+//   (3) each registry path must equal routes.alertsPath() — one source of truth for the scheme.
+(function assertAlertScheme(){
+  if (CATEGORY_SLUGS.has(ALERTS_SLUG)) throw new Error('alert-scheme: a category uses the reserved "' + ALERTS_SLUG + '" slug');
+  const seen = new Set();
+  for (const a of ALERT_PAGES) {
+    const key = a.marketSlug + "/" + a.slug;
+    if (seen.has(key)) throw new Error("alert-scheme: duplicate alert-type slug under /" + a.marketSlug + "/alerts/: " + a.slug);
+    seen.add(key);
+    const want = alertsPath(a.state, a.slug);
+    if (a.path !== want) throw new Error("alert-scheme: " + a.slug + " path '" + a.path + "' != expected '" + want + "'");
+  }
+})();
 
 // board category -> its alert-lander path (the "guide" hub for that category). Drives the
 // lander cross-links, the job-page "See all {category} jobs" link, and the breadcrumb category
@@ -117,7 +133,7 @@ function breadcrumbLd(r){
   return '<script type="application/ld+json">\n' + JSON.stringify(ld, null, 2).replace(/</g, "\\u003c") + "\n</script>";
 }
 
-// Live data for one /alerts/{market}/{category}/ page, computed from the published jobs_list the
+// Live data for one /{market}/alerts/{category}/ page, computed from the published jobs_list the
 // SAME way the listing view derives it: "applicable" = the board's default exp facets (none +
 // preferred, i.e. R.expFacet != null), scoped to the market (state or null-state) and category.
 // Inlined by serve() so the page bakes with real content and the runtime needs no query.
@@ -240,7 +256,7 @@ function serve(cache){
         res.writeHead(200, { "content-type": MIME[extname(p)] || "application/octet-stream" });
         return res.end(await readFile(join(SITE, p)));
       }
-      // Alert-signup pages (/alerts/{market}/{category}/) are their own SPA (alerts.html →
+      // Alert-signup pages (/{market}/alerts/{category}/) are their own SPA (alerts.html →
       // alerts.js) with the live slice inlined as __npj_data BEFORE boot. The page has no Supabase
       // fetch, so (unlike the landing) it must render from the blob during the bake — like a job page.
       const alertData = cache && cache.alertsByPath && cache.alertsByPath[p.replace(/\/+$/, "") + "/"];
@@ -390,7 +406,7 @@ function middlewareSource(expiredBack, live){
 // Assemble a complete deployable static site in out/: baked pages + SPA assets + sitemap
 // (live URLs only) + vercel.json + the edge middleware. Idempotent, so a targeted rebake
 // still leaves out/ deployable. The baked landing owns out/index.html, so it is NOT copied.
-async function assembleDeploy(live, expiredBack, browse, lastmod = {}){
+async function assembleDeploy(live, expiredBack, browse, lastmod = {}, alertPaths = []){
   for (const f of ["board.html", "board.js", "landing.js", "alerts.js", "pages.js", "styles.css", "404.html",
                    "favicon.ico", "icon-192.png", "apple-touch-icon.png", "og.png", "logo.png"]) await copyFile(join(SITE, f), join(OUT, f));
   for (const d of ["data", "ui", "vendor"]) await cp(join(SITE, d), join(OUT, d), { recursive: true });
@@ -400,7 +416,7 @@ async function assembleDeploy(live, expiredBack, browse, lastmod = {}){
   if (existsSync(join(HERE, "..", "logos"))) await cp(join(HERE, "..", "logos"), join(OUT, "logos"), { recursive: true });
 
   const base = SITE_URL;
-  const locs = ["/", WA_LANDER, "/about/", "/partners/", ...ALERT_PATHS, ...browse, ...live];   // change #2: lander in sitemap; alert pages added; expired/retired excluded
+  const locs = ["/", WA_LANDER, "/about/", "/partners/", ...alertPaths, ...browse, ...live];   // alert pages = only those whose parent listing published (TASK 4 gate); expired/retired excluded
   // <lastmod> (W3C YYYY-MM-DD) is the one optional tag Google actually uses (changefreq/priority
   // are ignored). Values come from `lastmod` (built by the caller): a job's stated posted_at
   // (stable — a job page's baked content doesn't change after posting), and the pull date for the
@@ -420,6 +436,12 @@ async function assembleDeploy(live, expiredBack, browse, lastmod = {}){
   // ship frozen. Remove it: GSC seeing the old URL 404 helps it drop the stuck entry, and it
   // leaves sitemap-jobs.xml as the single source of truth.
   await rm(join(OUT, "sitemap.xml"), { force: true });
+
+  // TASK 4: alert pages moved from /alerts/{state}/* to /{state}/alerts/*. The bake is incremental
+  // (no rm(OUT)), so the old /alerts/ tree from prior bakes would linger and keep serving. Remove it
+  // outright — no redirects, the old URLs simply 404 (they were sitemap-only, never ranked). Once
+  // the old tree is gone this is a harmless no-op.
+  await rm(join(OUT, "alerts"), { recursive: true, force: true });
 
   // robots.txt — allow all + declare the sitemap. Written as a real file so Vercel serves it as
   // text/plain (its default for .txt), NOT routed through the SPA. Was missing (404) before.
@@ -784,19 +806,34 @@ async function main(){
   // Alert-signup pages: compute each page's live slice, stash it for serve() to inline as
   // __npj_data, and register the route (baked as its own type; alerts.html shell + alerts.js).
   cache.alertsByPath = {};
+  // Parent-listing-publish gate (TASK 4): an alert page bakes only when its parent listing view
+  // publishes. A category page's parent is that category's browse page; a sector page (Healthcare —
+  // no board category) and the per-market hub hang off the state browse. Gating on browsePaths (the
+  // listing routes actually baked this run) means a category with no live jobs — hence no browse
+  // page — never ships an empty alert page, and the rule needs no per-state code.
+  const publishedAlertPaths = [];
+  let alertsGated = 0;
+  const alertParent = (a) => (a.category && CAT_SLUG[a.category]) ? browsePath(a.state, a.category) : browsePath(a.state, null);
   for (const a of ALERTS) {
+    if (!browsePaths.has(alertParent(a))) { alertsGated++; continue; }
     cache.alertsByPath[a.path] = alertSlice(list, a, cache.pulledAt);
     routes.push({ type: "alerts", path: a.path, url: null, meta: { title: a.title, description: a.description } });
+    publishedAlertPaths.push(a.path);
   }
-  // Per-market index hub (/alerts/{market}/) — the guides grid with live counts; the footer links here.
+  // Per-market index hub (/{market}/alerts/) — the guides grid with live counts; the footer links
+  // here. Published only when the state listing publishes, and it lists only the pages that passed
+  // the gate above (never a link to an un-baked guide).
   for (const ms of Object.keys(ALERT_MARKETS)) {
     const mk = ALERT_MARKETS[ms];
-    const guides = pagesForMarket(ms).map((p) => ({ label: p.label, iconCat: p.iconCat || null, path: p.path, count: (cache.alertsByPath[p.path] || {}).count || 0 }));
+    if (!browsePaths.has(browsePath(mk.code, null))) { alertsGated++; continue; }
+    const guides = pagesForMarket(ms).filter((p) => cache.alertsByPath[p.path]).map((p) => ({ label: p.label, iconCat: p.iconCat || null, path: p.path, count: (cache.alertsByPath[p.path] || {}).count || 0 }));
     cache.alertsByPath[marketIndexPath(ms)] = { kind: "index", marketSlug: ms, marketName: mk.name, guides, pulledAt: cache.pulledAt || null };
     routes.push({ type: "alerts", path: marketIndexPath(ms), url: null, meta: {
       title: mk.name + " Job Guides — No Experience Needed | NoProbJobs",
       description: "No-experience job guides for " + mk.name + " by work type: pay, hiring steps, and free alerts for each." } });
+    publishedAlertPaths.push(marketIndexPath(ms));
   }
+  if (alertsGated) process.stderr.write("  alert pages gated (parent listing not published): " + alertsGated + "\n");
   // Static content pages (/about/, /partners/) — pages.html shell + pages.js, brand list inlined.
   // The same brand list rides the landing blob (see the landing __npj_data injection in bake()).
   const brands = await carouselBrands(list);
@@ -1034,9 +1071,9 @@ async function main(){
   const STATIC_SRC = { "/": "noprobjobs/landing.js", [WA_LANDER]: "noprobjobs/landing.js", "/about/": "noprobjobs/pages.js", "/partners/": "noprobjobs/pages.js" };
   for (const [u, f] of Object.entries(STATIC_SRC)) lastmod[u] = validDay(gitDate(f)) || bakeStamp;
   const alertSrcDate = validDay(gitDate("noprobjobs/alerts.js")) || bakeStamp;
-  for (const u of ALERT_PATHS) lastmod[u] = alertSrcDate;
+  for (const u of publishedAlertPaths) lastmod[u] = alertSrcDate;
 
-  const deploy = await assembleDeploy(live, expiredBack, [...browsePaths], lastmod);
+  const deploy = await assembleDeploy(live, expiredBack, [...browsePaths], lastmod, publishedAlertPaths);
 
   const secs = (Date.now() - t0) / 1000;
   const jobs = results.filter((r) => r.type === "job");
