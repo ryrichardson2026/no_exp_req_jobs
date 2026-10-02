@@ -18,5 +18,6 @@ export function siteFooter(marketSlug){
         marketSlug ? h("a", { key: "g", href: marketIndexPath(marketSlug), style: s(footerLink) }, (mk ? mk.name : "Washington") + " job guides") : null,
         h("a", { key: "about", href: "/about/", style: s(footerLink) }, "About"),
         h("a", { key: "partners", href: "/partners/", style: s(footerLink) }, "Partners"),
+        h("a", { key: "employers", href: "/employers/", style: s(footerLink) }, "Employers"),
         h("a", { key: "p", href: RT.PRIVACY_URL, target: "_blank", rel: "noopener noreferrer", style: s(footerLink) }, "Privacy Policy"))));
 }

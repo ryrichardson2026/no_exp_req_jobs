@@ -416,7 +416,7 @@ async function assembleDeploy(live, expiredBack, browse, lastmod = {}, alertPath
   if (existsSync(join(HERE, "..", "logos"))) await cp(join(HERE, "..", "logos"), join(OUT, "logos"), { recursive: true });
 
   const base = SITE_URL;
-  const locs = ["/", WA_LANDER, "/about/", "/partners/", ...alertPaths, ...browse, ...live];   // alert pages = only those whose parent listing published (TASK 4 gate); expired/retired excluded
+  const locs = ["/", WA_LANDER, "/about/", "/partners/", "/employers/", ...alertPaths, ...browse, ...live];   // alert pages = only those whose parent listing published (TASK 4 gate); expired/retired excluded
   // <lastmod> (W3C YYYY-MM-DD) is the one optional tag Google actually uses (changefreq/priority
   // are ignored). Values come from `lastmod` (built by the caller): a job's stated posted_at
   // (stable — a job page's baked content doesn't change after posting), and the pull date for the
@@ -841,6 +841,7 @@ async function main(){
   cache.staticByPath = {
     "/about/": { page: "about", brands },
     "/partners/": { page: "partners", brands },
+    "/employers/": { page: "employers", brands },
   };
   routes.push({ type: "static", path: "/about/", url: null, meta: {
     title: "About NoProbJobs | No-Experience & Entry Level Jobs",
@@ -848,6 +849,9 @@ async function main(){
   routes.push({ type: "static", path: "/partners/", url: null, meta: {
     title: "Partner With NoProbJobs | A Free Job Seeker Resource",
     description: "Partner with NoProbJobs, a free tool for workforce centers, nonprofits, schools, libraries, and community programs helping people find no-experience and entry level jobs." } });
+  routes.push({ type: "static", path: "/employers/", url: null, meta: {
+    title: "Hire Frontline Workers in Washington | NoProbJobs for Employers",
+    description: "Reach local frontline workers ready to start now. NoProbJobs puts your no-experience and entry level openings in front of Washington job seekers, with applications sent straight to your own careers site." } });
 
   const server = serve(cache);
   await new Promise((r) => server.listen(PORT, r));
@@ -1068,7 +1072,7 @@ async function main(){
   // Static pages: content-change date = last git commit touching the source module that renders the
   // page (auto-maintaining + honest), falling back to this pull's date if git is unavailable.
   const gitDate = (file) => { try { return execSync('git log -1 --format=%cs -- "' + file + '"', { cwd: join(HERE, ".."), encoding: "utf8" }).trim(); } catch { return ""; } };
-  const STATIC_SRC = { "/": "noprobjobs/landing.js", [WA_LANDER]: "noprobjobs/landing.js", "/about/": "noprobjobs/pages.js", "/partners/": "noprobjobs/pages.js" };
+  const STATIC_SRC = { "/": "noprobjobs/landing.js", [WA_LANDER]: "noprobjobs/landing.js", "/about/": "noprobjobs/pages.js", "/partners/": "noprobjobs/pages.js", "/employers/": "noprobjobs/pages.js" };
   for (const [u, f] of Object.entries(STATIC_SRC)) lastmod[u] = validDay(gitDate(f)) || bakeStamp;
   const alertSrcDate = validDay(gitDate("noprobjobs/alerts.js")) || bakeStamp;
   for (const u of publishedAlertPaths) lastmod[u] = alertSrcDate;

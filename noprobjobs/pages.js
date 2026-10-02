@@ -1,11 +1,12 @@
-/* Static content pages: /about/ and /partners/. Reuses the alert-lander template chrome and
-   styles (Header, siteFooter, breadcrumb, H2 section styling, hero gradient, the soft form card,
-   fonts, CSS variables) so nothing new is invented visually. One module renders both pages; it
-   picks which from the inlined __npj_data blob (baked by prerender/build.mjs) or the URL path.
+/* Static content pages: /about/, /partners/, and /employers/. Reuses the alert-lander template
+   chrome and styles (Header, siteFooter, breadcrumb, H2 section styling, hero gradient, the soft
+   form card, fonts, CSS variables) so nothing new is invented visually. One module renders all
+   three; it picks which from the inlined __npj_data blob (baked by prerender/build.mjs) or the
+   URL path.
 
    The contact form POSTs to the same Make webhook the alert signups use, with a hidden
-   source_page ("about" | "partners") so a Make router can split contact submissions from alert
-   signups. No page reload; no other storage. The logo carousel renders the brand list the bake
+   source_page ("about" | "partners" | "employers") so a Make router can split contact
+   submissions from alert signups. No page reload; no other storage. The logo carousel renders the brand list the bake
    inlines (every /logos/ file except aboutusimage.png, plus Shake Shack / Jimmy John's / Walmart
    only when they have live jobs). */
 import { h, s } from "./ui/h.js";
@@ -43,7 +44,7 @@ function postContact(payload){
 class PagesApp extends React.Component {
   constructor(props){
     super(props);
-    this.page = props.page === "partners" ? "partners" : "about";
+    this.page = (props.page === "partners" || props.page === "employers") ? props.page : "about";
     this.data = props.data || {};
     this.state = { name: "", email: "", organization: "", message: "", phase: "form", error: "" };
   }
@@ -181,14 +182,51 @@ class PagesApp extends React.Component {
     ];
   }
 
+  renderEmployersHero(){
+    return h("section", { style: s("flex:none;background:linear-gradient(180deg,var(--fact) 0%,var(--surface) 60%);border-bottom:2px solid var(--ink)") },
+      h("div", { style: s("max-width:" + RAIL + ";margin:0 auto;box-sizing:border-box;padding:22px 16px 30px;display:grid;gap:16px;align-content:start") },
+        this.renderBreadcrumb("Employers", "/employers/"),
+        h("h1", { style: s(H1) }, "Need a hire? No problem."),
+        h("p", { style: s(PARA + ";max-width:54ch") }, "NoProbJobs connects employers with local frontline workers across Washington. We focus on roles that hire without experience or train on the job: retail, sales, warehouse, food service, security, facilities, and more.")));
+  }
+
+  renderEmployers(){
+    return [
+      h("section", { style: s("display:grid;gap:12px") },
+        this.h2("How it works"),
+        this.para("The people on NoProbJobs aren't shopping for a career path. They want work they can start now. We present your openings the way they search: what the job is, what it requires, and how to apply."),
+        h("p", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:18px;color:var(--ink)") }, "Real roles, ready candidates, no barriers in the way.")),
+      h("section", { style: s("display:grid;gap:12px") },
+        this.h2("What employers get"),
+        h("ul", { style: s("list-style:none;margin:0;padding:0;display:grid;gap:10px") },
+          this.bullet("Your openings in front of people ready to start"),
+          this.bullet("Applications go straight to your own careers site, with no extra system to manage"),
+          this.bullet("Listings structured so candidates understand the role before they apply"))),
+      h("section", { style: s("display:grid;gap:12px") },
+        this.h2("Ways to work together"),
+        h("ul", { style: s("list-style:none;margin:0;padding:0;display:grid;gap:10px") },
+          this.bullet("A branded no-experience job board for your organization"),
+          this.bullet("Custom sourcing for specific roles or locations on request"),
+          this.bullet("Your listings imported straight from your careers site, kept current every day"))),
+      this.renderCarousel(),
+      h("section", { style: s("display:grid;gap:12px") },
+        this.h2("Hiring for frontline roles? Let's talk."),
+        this.renderContactForm()),
+    ];
+  }
+
   render(){
-    const isAbout = this.page === "about";
-    const sections = isAbout ? this.renderAbout() : this.renderPartners();
+    const hero = this.page === "partners" ? this.renderPartnersHero()
+      : this.page === "employers" ? this.renderEmployersHero()
+      : this.renderAboutHero();
+    const sections = this.page === "partners" ? this.renderPartners()
+      : this.page === "employers" ? this.renderEmployers()
+      : this.renderAbout();
     const main = h("main", { style: s("flex:1;max-width:" + RAIL + ";width:100%;margin:0 auto;box-sizing:border-box;padding:32px 16px 44px;display:grid;gap:34px;align-content:start") },
       ...sections);
     return h("div", { className: "landing-scope", style: s("position:relative;display:flex;flex-direction:column;min-height:100%;background:var(--surface)") },
       h(Header, { productName: PRODUCT, alertsInHeader: false }),
-      isAbout ? this.renderAboutHero() : this.renderPartnersHero(),
+      hero,
       main,
       siteFooter("washington"));
   }
@@ -200,12 +238,16 @@ const mount = (page, data) => {
 
 const boot = () => {
   let page = "about", data = {};
-  try { if ((window.location.pathname || "").indexOf("/partners") === 0) page = "partners"; } catch (e) {}
+  try {
+    const path = window.location.pathname || "";
+    if (path.indexOf("/partners") === 0) page = "partners";
+    else if (path.indexOf("/employers") === 0) page = "employers";
+  } catch (e) {}
   const el = document.getElementById("__npj_data");
   if (el) {
     try {
       const d = JSON.parse(el.textContent);
-      if (d.page === "about" || d.page === "partners") page = d.page;
+      if (d.page === "about" || d.page === "partners" || d.page === "employers") page = d.page;
       data = d;
     } catch (e) { /* fall back to path-derived page + empty data */ }
   }
