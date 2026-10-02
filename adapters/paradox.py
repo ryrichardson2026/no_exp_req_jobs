@@ -277,6 +277,12 @@ def mode_inspect(t):
 
 
 def _emp_type(v):
+    # Paradox returns employmentType as a LIST, e.g. ['Full Time'] (FedEx/Jimmy John's/Shake
+    # Shack/Arby's/Sonic/BWW). Without unwrapping, str(['Full Time']) fell through to the
+    # title-case fallback and the card rendered the literal "['Full Time']". Take the first
+    # entry (these are single-valued in practice); a scalar still works unchanged.
+    if isinstance(v, (list, tuple)):
+        v = next((x for x in v if x), None)
     if not v:
         return None
     key = str(v).strip().upper().replace("-", "_").replace(" ", "_")
