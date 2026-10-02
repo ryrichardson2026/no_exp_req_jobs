@@ -304,6 +304,24 @@ AFTER_HIRE_CUES = (
     "days of hire", "date of hire",
 )
 
+# EMPLOYER-PROVIDES frame: the credential/training is GIVEN by the employer, not required of the
+# applicant — same non-blocking class as after-hire. Mirrors report.py's EMPLOYER_PROVIDES_RX (keep
+# in sync), PLUS an EFFECT form for when clause-splitting separates the "we'll set you up" subject
+# from the credential noun: "[trainings, certifications, knowledge tests] WILL ENSURE/HELP/PREPARE
+# you ...". Proven on Dutch Bros Broista: "We'll set you up with ... trainings, certifications, and
+# knowledge tests [that] will ensure you can meet Dutch Bros standards" was read as a required cert
+# and gated ~160 no-experience Broista. The fail-safe still holds: a genuine long-lead credential
+# (RN/CDL/degree) is caught by _is_hard_barrier's own experience/degree checks, and no RN clause is
+# phrased "certifications will ensure you can meet standards".
+EMPLOYER_PROVIDES_RX = re.compile(
+    r"\b(?:we(?:'|’)?ll|we\s+will|we|company|employer)\s+"
+    r"(?:set\s+you\s+up|provide|offer|sponsor|cover|pay\s+for|train)\b"
+    r"|\bpaid\s+training\b"
+    r"|\b(?:provided|sponsored|paid\s+for)\s+by\s+(?:us|the\s+company|the\s+employer)\b"
+    r"|\b(?:training|trainings|certification|certifications|knowledge\s+tests?)\b"
+    r"[^.]{0,60}\bwill\s+(?:ensure|help|prepare|equip|enable|set\s+you)\b",
+    re.IGNORECASE)
+
 # A requirement line that qualifies ITSELF as wanted-not-required, whatever section
 # it sits in. "Serve-Safe certification preferred" under a Requirements heading is
 # preferred, not a gate. After-hire wins if both are present.
@@ -529,7 +547,7 @@ def classify_line(line, section_modality):
     low = line.lower()
 
     modality = section_modality
-    if any(c in low for c in AFTER_HIRE_CUES):
+    if any(c in low for c in AFTER_HIRE_CUES) or EMPLOYER_PROVIDES_RX.search(low):
         modality = AFTER_HIRE
     elif any(c in low for c in PREFERRED_CUES):
         modality = PREFERRED_M

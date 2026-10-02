@@ -1717,7 +1717,8 @@
         ]
       },
       "extraction": {
-        "_note": "DERIVED from Dutch Bros Broista detail (2026-09-17): requirements under 'Who You Are:' (colon). 'What You'll Do'=duties, 'What to Expect'=conditions, 'Why You'll Love It Here'=benefits, 'Compensation'=pay (excluded). Forked per-tenant like TJX/Panera.",
+        "absent_barrier_is_none_needed": true,
+        "_note": "DERIVED from Dutch Bros Broista detail (2026-09-17): requirements under 'Who You Are:' (colon). 'What You'll Do'=duties, 'What to Expect'=conditions, 'Why You'll Love It Here'=benefits, 'Compensation'=pay (excluded). Forked per-tenant like TJX/Panera. 2026-10-02: 166/279 Broista use a SECOND template with no 'Who You Are:' heading (headingless) -> NOT_STATED -> excluded (41%). Verified barrier-free: the only 'requirements' are a Food Handler Permit (obtainable, waived) and 'trainings, certifications, and knowledge tests will ensure you can meet Dutch Bros standards' (employer-PROVIDED, waived via EMPLOYER_PROVIDES_RX). Enabled the headingless full-body fallback -> 278 NONE_NEEDED / 1 REQUIRED (~100%, a single entry-level role replicated across WA/TX). Big density jump from baseline is expected; re-bless.",
         "openers": [
           {
             "text": "who you are",
