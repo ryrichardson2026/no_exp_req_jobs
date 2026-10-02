@@ -437,7 +437,12 @@ HARD_CREDENTIAL_RX = re.compile(
 # on "Food Handler Permit or Certification"). An RN/CDL/pharmacist license is still a real barrier.
 # Keep in sync with report.py's allowlist. Owner directive 2026-10-02: food handler is never a gate.
 _OBTAINABLE_CRED_RX = re.compile(
-    r"driver'?s?\s+licen[sc]e|driving\s+licen[sc]e|"
+    # a plain driver's license is obtainable, but a COMMERCIAL driver's license (CDL) is a real
+    # long-lead barrier - the negative lookbehind stops "commercial driver's license" (the
+    # parenthetical in "Valid Class A CDL license (commercial driver's license)") from being
+    # waived via the bare "driver's license" substring. CDL is also typed by HARD_CREDENTIAL_RX
+    # and gated by report.py's HARD_CREDENTIAL_RX; this keeps the headingless fallback in sync.
+    r"(?<!commercial )driver'?s?\s+licen[sc]e|driving\s+licen[sc]e|"
     r"food handler|food worker|food safety|servsafe", re.I)
 
 # A VAGUE credential catch-all names NO concrete credential: "meet requirements for (specific)
