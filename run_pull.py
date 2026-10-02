@@ -93,6 +93,32 @@ def load_json(path):
         return json.load(fh)
 
 
+def load_env_local():
+    """Load repo-root .env.local (KEY=VALUE lines) into os.environ so the documented
+    `python run_pull.py --all --publish` works STANDALONE — the same secrets the ops/
+    run_pull_daily.ps1 wrapper loads. Without this, a direct invocation fails preflight on a
+    missing SUPABASE_SERVICE_ROLE_KEY even though it's sitting in .env.local, which both reads
+    as a spurious pipeline failure AND tempts a bypass of the one recording path (every run,
+    pass or fail, MUST reach _finish -> runlog.emit). Never overrides an already-set variable
+    (an explicit env / the wrapper still wins); a missing file is fine. Mirrors the wrapper's
+    parse (optional `export `, surrounding quotes)."""
+    path = os.path.join(ROOT, ".env.local")
+    if not os.path.isfile(path):
+        return
+    try:
+        with open(path, encoding="utf-8") as fh:
+            for line in fh:
+                m = re.match(r"^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$", line)
+                if m and m.group(1) not in os.environ:
+                    os.environ[m.group(1)] = m.group(2).strip().strip('"').strip("'")
+        # runlog captured SUPABASE_SERVICE_ROLE_KEY at import (before this ran); refresh it so the
+        # pipeline_runs mirror works on a standalone invocation too. Subprocess steps (supabase_sink)
+        # inherit os.environ directly and need no refresh.
+        runlog.SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+    except OSError as e:
+        print(f"(.env.local not loaded - non-fatal: {e})")
+
+
 def resolve_units(only_tenant):
     """Turn config/pull.json + config/tenants.json into an ordered work list of
     (platform, tenant, modes). Tenant identities come from tenants.json; the platform
@@ -684,6 +710,11 @@ def main(argv):
     print("=" * 78)
     print(f"RECURRING PULL   {stamp}   {'DRY-RUN' if a.dry_run else ('PUBLISH' if a.publish else 'no-publish')}")
     print("=" * 78)
+
+    # Make the documented standalone command self-sufficient: load .env.local BEFORE preflight so a
+    # direct `python run_pull.py --all --publish` has the same secrets the ps1 wrapper injects. (The
+    # wrapper also sets these; load_env_local never overrides, so running under the wrapper is a no-op.)
+    load_env_local()
 
     # preflight ("prep"): abort fast WITH a recorded reason on a structural problem, rather than
     # crashing deep in the run where nothing reaches the dashboard.
