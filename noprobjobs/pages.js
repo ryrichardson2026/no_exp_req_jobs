@@ -194,7 +194,7 @@ class PagesApp extends React.Component {
     return [
       h("section", { style: s("display:grid;gap:12px") },
         this.h2("How it works"),
-        this.para("The people on NoProbJobs aren't shopping for a career path. They want work they can start now. We present your openings the way they search: what the job is, what it requires, and how to apply."),
+        this.para("The people on NoProbJobs want work they can start now. We present your openings the way they search: what the job is, what it requires, and how to apply."),
         h("p", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:18px;color:var(--ink)") }, "Real roles, ready candidates, no barriers in the way.")),
       h("section", { style: s("display:grid;gap:12px") },
         this.h2("What employers get"),
