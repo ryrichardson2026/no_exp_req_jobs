@@ -407,13 +407,20 @@ HARD_CREDENTIAL_RX = re.compile(
     r"(?:nurs|medic|teach|electric|plumb|weld|cosmetolog|barber|pharmac|real estate)\w*\s+"
     r"(?:certificat|certified|certification))\b", re.I)
 
-# A driver's license is an obtainable, near-universal credential (already on report.py's
-# CREDENTIAL_QUICK_RX allowlist), NOT a barrier to applying for an entry-level role - a Jimmy
-# John's / Domino's delivery driver is a no-experience job. It must not (a) block the
-# absence-inference NONE_NEEDED via the bare "licen[sc]e" alternative in _INFER_BARRIER_RX, nor
-# (b) count as a hard credential in the headingless fallback. Scoped to DRIVER's license only:
-# an RN/CDL/pharmacist license is still a real barrier. Keep in sync with report.py's allowlist.
-_OBTAINABLE_CRED_RX = re.compile(r"driver'?s?\s+licen[sc]e|driving\s+licen[sc]e", re.I)
+# Obtainable, near-universal credentials (already on report.py's CREDENTIAL_QUICK_RX allowlist),
+# NOT a barrier to applying for an entry-level role. A driver's license (Jimmy John's / Domino's
+# delivery driver) and a food handler / food worker card (any WA food-service crew job - a $10
+# online course obtainable in a day; WA law even lets you start and get it within 14 days of hire)
+# are both quick-obtainable, no-prerequisite credentials. They must not (a) block the absence-
+# inference NONE_NEEDED via the bare "licen[sc]e"/credential alternative in _INFER_BARRIER_RX, nor
+# (b) count as a hard credential in the headingless fallback. This list MIRRORS the food + driver
+# entries of report.py's CREDENTIAL_QUICK_RX (the two had drifted: report.py already waived food
+# handler, experience.py did not, so the fallback false-gated every entry-level Dutch Bros Broista
+# on "Food Handler Permit or Certification"). An RN/CDL/pharmacist license is still a real barrier.
+# Keep in sync with report.py's allowlist. Owner directive 2026-10-02: food handler is never a gate.
+_OBTAINABLE_CRED_RX = re.compile(
+    r"driver'?s?\s+licen[sc]e|driving\s+licen[sc]e|"
+    r"food handler|food worker|food safety|servsafe", re.I)
 
 # A VAGUE credential catch-all names NO concrete credential: "meet requirements for (specific)
 # skills, certifications or authorizations specified for the assigned accounts" / "...as required
