@@ -156,6 +156,16 @@
       "applicable": 136,
       "density": 61.3
     },
+    "fedex": {
+      "records": 46,
+      "applicable": 17,
+      "density": 37.0
+    },
+    "ups": {
+      "records": 44,
+      "applicable": 24,
+      "density": 54.5
+    },
     "chipotle": {
       "records": 117,
       "applicable": 69,

@@ -1575,6 +1575,67 @@
   },
   "phenom": {
     "_platform_note": "Phenom People career sites. Read surface = POST /widgets (ddoKey=refineSearch) JSON search, paged by from/size to a genuinely empty page (totalHits is a diagnostic, never a stop); the index carries only a descriptionTeaser, so the full description is fetched per job from the Phenom job-detail page ({careers_base}/global/en/job/{jobSeqNo}), which embeds a JobPosting JSON-LD block. NEW platform 2026-09-15 (TJX): distinct fetch shape from every existing adapter (JSON POST search + JSON-LD detail). apply_url points at Workday but the READ surface is Phenom - the ATS is not the adapter boundary (Finding 42). --probe first for any new Phenom tenant.",
+    "ups": {
+      "label": "UPS / United Parcel Service (jobs-ups.com, Phenom UPBUPSGLOBAL) — onboarded 2026-10-02",
+      "careers_base": "https://www.jobs-ups.com",
+      "widgets_url": "https://www.jobs-ups.com/widgets",
+      "detail_url_tmpl": "https://www.jobs-ups.com/us/en/job/{pid}",
+      "employer_domain": "ups.com",
+      "source_class": "direct-employer",
+      "sector": "logistics",
+      "state": "WA",
+      "page_size": 50,
+      "search_body": {
+        "lang": "en_us",
+        "deviceType": "desktop",
+        "country": "us",
+        "pageName": "search-results",
+        "subsearch": "",
+        "jobs": true,
+        "counts": true,
+        "keywords": "",
+        "global": false,
+        "sortBy": "Most relevant",
+        "locationData": {}
+      },
+      "selected_fields": {
+        "state": [
+          "Washington"
+        ]
+      },
+      "location_filter": {
+        "field": "state",
+        "match_any": [
+          "Washington"
+        ]
+      },
+      "extraction": {
+        "absent_barrier_is_none_needed": true,
+        "_note": "DERIVED from UPS jobs-ups.com WA capture 2026-10-02 (43 records, Phenom JSON-LD detail). Requirements under 'Basic Qualifications:' (29/43; leads with benign work-authorization boilerplate, real reqs follow), 'Qualifications' (26), 'What You'll Need' (4), 'Requirements' (3). 'Job Summary'/'Responsibilities'=duties, 'What's In It For You'=benefits, 'So, what is UPS all about?'=about, 'Pay Range'=pay (excluded). 'Other Criteria' left OUT pending a legal/EEO check. 2026-10-02: 9 Seasonal Package Delivery Drivers use a marketing template (only 'What's in it for you?'/'So, what is UPS all about?' headings, NO requirements section) -> NOT_STATED -> excluded; enabled absent_barrier_is_none_needed so they resolve to NONE_NEEDED (entry-level, driver's license is obtainable). Seasonal Tractor Trailer Driver stays REQUIRED (Class A CDL = commercial driver's license, real barrier - CDL waiver bug fixed in experience.py same day). Supervisor roles carry 'Management experience - Preferred' and are excluded by the management-title gate at report. Nothing inherited from a phenom sibling.",
+        "openers": [
+          {
+            "text": "basic qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "qualifications",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "what you'll need",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          }
+        ]
+      }
+    },
     "tjx": {
       "label": "TJX Companies - Retail Associates (jobs.tjx.com, Phenom TJCOGLOBAL)",
       "careers_base": "https://jobs.tjx.com",
@@ -2053,6 +2114,54 @@
   },
   "paradox": {
     "_platform_note": "Paradox/Olivia careers boards (cdn.olivia.paradox.ai widget). Read surface = POST {careers_host}/api/get-jobs (JSON, descriptions INLINE, no detail fetch). Scope client-side on locations[].stateAbbr (NOT the geo-radius). Session+Referer+Origin required (cold 403). Serves Shake Shack/Chipotle/Inspire/Panda - same shape, per-brand host. NEW platform 2026-09-17.",
+    "fedex": {
+      "label": "FedEx (careers.fedex.com, Paradox) — WA courier/warehouse, onboarded 2026-10-02",
+      "careers_host": "https://careers.fedex.com",
+      "api_path": "/api/get-jobs",
+      "company_name": "FedEx",
+      "employer_domain": "fedex.com",
+      "source_class": "direct-employer",
+      "sector": "logistics",
+      "markets": [
+        "WA"
+      ],
+      "extraction": {
+        "absent_barrier_is_none_needed": true,
+        "_note": "DERIVED from FedEx careers.fedex.com WA capture 2026-10-02 (46 records). LABEL/VALUE format: <strong>Minimum Experience</strong><p>None</p> (bold label, value in the NEXT block, NO colon), so openers use match=BARE not colon — a colon match never fires and the fallback then mis-reads the bare label 'Minimum Experience' as a requirement (EXP_REQ_SIGNAL matches 'minimum...experience') while ignoring the 'None' value: measured 13% applicable with colon vs 70% with bare. Warehouse/courier = 'Minimum Experience: None' -> NONE_NEEDED; real reqs are durations ('6+ months', '4 years' for Sr techs/service agents) -> REQUIRED. 'Preferred Qualifications' = PREFERRED. Some Package Handler roles are headingless prose -> absent_barrier_is_none_needed fallback (owner-approved; verified safe 2026-10-02, 0 real-exp leaks). Nothing inherited from a paradox sibling.",
+        "openers": [
+          {
+            "text": "minimum qualifications and requirements",
+            "role": "REQUIRED",
+            "match": "colon"
+          },
+          {
+            "text": "minimum qualifications and requirements",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "minimum experience",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "minimum education",
+            "role": "REQUIRED",
+            "match": "bare"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "colon"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "bare"
+          }
+        ]
+      }
+    },
     "shake_shack": {
       "label": "Shake Shack",
       "careers_host": "https://careers.shakeshack.com",
