@@ -2094,7 +2094,8 @@
       ],
       "verified": "2026-09-17 Paradox filter[state] server-side scope (WA 31/TX 178). Inspire portfolio brand.",
       "extraction": {
-        "_note": "BWW templates vary: 'What We're Looking For' (cashier/cook), 'Qualifications:', and a tagline heading 'YOU HAVE THE TALENT' (Team Member - requirements woven in incl. 'previous restaurant experience is a plus, but not required'). Bartenders genuinely REQUIRED.",
+        "absent_barrier_is_none_needed": true,
+        "_note": "BWW templates vary: 'What We're Looking For' (cashier/cook), 'Qualifications:', and a tagline heading 'YOU HAVE THE TALENT' (Team Member - requirements woven in incl. 'previous restaurant experience is a plus, but not required'). Bartenders genuinely REQUIRED. 2026-10-02: the LEGACY 'GAMEDAY / HERE'S WHAT YOU BRING TO THE TABLE' prose template (Server/Kitchen/Cashier/FoH) is HEADINGLESS - no opener matches, so 128/165 fell to NOT_STATED and were excluded (10.3% applicable, implausibly low for crew). Verified the template states experience INLINE when a role needs it ('one plus years of recent restaurant experience'; managers 'minimum of 2 years experience'), so absence is a real signal. Enabled the headingless full-body fallback (same lever as arbys/sonic/jimmy_johns/panera): simulation flips the 128 NOT_STATED -> 67 REQUIRED (every inline req kept out, 0 leaked) + 58 NONE_NEEDED + 3 NOT_STATED, i.e. 10% -> ~45% board-applicable.",
         "openers": [
           {
             "text": "what we're looking for",
