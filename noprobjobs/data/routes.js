@@ -51,6 +51,19 @@ CATEGORIES.forEach((c) => { CAT_SLUG[c] = catToSlug(c); SLUG_CAT[catToSlug(c)] =
    decision and not an accident of implementation order. */
 export const CATEGORY_SLUGS = new Set(CATEGORIES.map(catToSlug));
 
+/* City slugs that route to a city listing view. Promotes the existing location facet to a
+   PATH level. TEST SCOPE is Seattle only; expand this set as city pages are built (it mirrors
+   the kind:"city" rows in config/geography.json — the roster). A city slug must never collide
+   with a CATEGORY_SLUG: category always wins resolveLevel2, so a colliding city would be
+   unreachable. Validated below. Imported by the bake (enumeration) so there is one source. */
+export const CITY_SLUGS = new Set(["seattle"]);
+for (const c of CITY_SLUGS) if (CATEGORY_SLUGS.has(c)) throw new Error("city slug collides with a category slug: " + c);
+
+/* Reserved terminal segment for the nested job-alerts child of any listing view
+   (/{state}/{city}/{category}/job-alerts/). Reserved so no category/city/filter slug can
+   ever collide with it. */
+export const ALERTS_SLUG = "job-alerts";
+
 export function stateSlug(abbr){ return STATE_SLUG[abbr] || null; }
 
 /* Full state name for prose ("Washington", "New York", "District of Columbia"), derived
@@ -95,33 +108,63 @@ export function jobRefFromPath(pathname){
 
 /* Browse path from a state abbrev (pass rec.state — per record) and optional category.
    No/unknown state -> the state-less all-jobs index /jobs/, NEVER a guessed state. */
-export function browsePath(stateAbbr, category){
+export function browsePath(stateAbbr, category, city){
   const st = stateSlug(stateAbbr);
   if (!st) return "/jobs/";
-  return "/" + st + (category && CAT_SLUG[category] ? "/" + CAT_SLUG[category] + "/" : "/");
+  let p = "/" + st + "/";
+  if (city) p += city + "/";                                   // city is already a slug (from CITY_SLUGS)
+  if (category && CAT_SLUG[category]) p += CAT_SLUG[category] + "/";
+  return p;
 }
 
-/* Explicit level-2 precedence: category first (the nine fixed slugs), then metro when a
-   model exists, else 404. Category always wins on collision. */
+/* The nested job-alerts child of a listing view: [listing path]/job-alerts/. */
+export function alertsPath(stateAbbr, category, city){
+  return browsePath(stateAbbr, category, city) + ALERTS_SLUG + "/";
+}
+
+/* Explicit level-2 precedence: category first (the fixed slugs) — category ALWAYS wins a slug
+   collision — then a known city, else 404. The job-alerts terminal is handled in parsePath (it
+   can follow a state, category, or city), not here. */
 export function resolveLevel2(segment){
   if (CATEGORY_SLUGS.has(segment)) return { kind: "category", category: SLUG_CAT[segment] };
-  // if (METROS[segment]) return { kind: "metro", metro: segment };   // no metro model yet
+  if (CITY_SLUGS.has(segment)) return { kind: "city", city: segment };
   return { kind: "404" };
 }
 
-/* Parse a pathname into a route the SPA acts on. */
+/* Parse a pathname into a route the SPA acts on. Levels under a state:
+     /{state}/                         browse state
+     /{state}/{category}/              browse state+category
+     /{state}/{city}/                  city listing view
+     /{state}/{city}/{category}/       city+category listing view
+   plus an optional reserved trailing /job-alerts/ at any of those depths -> kind:"alerts".
+   Backward-compatible: browse routes still return {kind:"browse", state, category}; city is an
+   added field (null on non-city browse). */
 export function parsePath(pathname){
   const parts = String(pathname || "").split("/").filter(Boolean);
   if (!parts.length) return { kind: "home" };
   if (parts[0] === "jobs") {
-    if (parts.length === 1) return { kind: "browse", state: null, category: null };  // /jobs index
+    if (parts.length === 1) return { kind: "browse", state: null, category: null, city: null };  // /jobs index
     const ref = jobRefFromPath("/" + parts.join("/"));
     return ref ? Object.assign({ kind: "job" }, ref) : { kind: "404" };   // non-numeric junk -> 404
   }
   const state = SLUG_STATE[parts[0]] || null;
   if (!state) return { kind: "other" };                       // reserved/unknown top-level
-  if (!parts[1]) return { kind: "browse", state, category: null };
-  const lvl2 = resolveLevel2(parts[1]);
-  if (lvl2.kind === "category") return { kind: "browse", state, category: lvl2.category };
-  return { kind: "404" };                                     // metro (none yet) / bad segment
+
+  // Peel a trailing reserved /job-alerts/ segment; the remainder describes the parent listing view.
+  let segs = parts.slice(1);
+  let alerts = false;
+  if (segs.length && segs[segs.length - 1] === ALERTS_SLUG) { alerts = true; segs = segs.slice(0, -1); }
+  const result = (city, category) => ({ kind: alerts ? "alerts" : "browse", state, city, category });
+
+  if (!segs.length) return result(null, null);                // /{state}/ or /{state}/job-alerts/
+  const lvl2 = resolveLevel2(segs[0]);
+  if (lvl2.kind === "category") {
+    return segs.length === 1 ? result(null, lvl2.category) : { kind: "404" };
+  }
+  if (lvl2.kind === "city") {
+    if (segs.length === 1) return result(lvl2.city, null);
+    const lvl3 = resolveLevel2(segs[1]);
+    return (segs.length === 2 && lvl3.kind === "category") ? result(lvl2.city, lvl3.category) : { kind: "404" };
+  }
+  return { kind: "404" };                                     // unknown level-2 segment
 }
