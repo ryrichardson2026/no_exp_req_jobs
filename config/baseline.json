@@ -123,13 +123,13 @@
     },
     "panera": {
       "records": 96,
-      "applicable": 35,
-      "density": 36.5
+      "applicable": 40,
+      "density": 41.7
     },
     "dutchbros": {
-      "records": 281,
-      "applicable": 114,
-      "density": 40.6
+      "records": 279,
+      "applicable": 278,
+      "density": 99.6
     },
     "shake_shack": {
       "records": 5,
@@ -147,9 +147,9 @@
       "density": 45.5
     },
     "buffalo_wild_wings": {
-      "records": 189,
-      "applicable": 17,
-      "density": 9.0
+      "records": 165,
+      "applicable": 81,
+      "density": 49.1
     },
     "jimmy_johns": {
       "records": 222,
