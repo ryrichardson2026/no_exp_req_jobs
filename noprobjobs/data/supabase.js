@@ -11,7 +11,12 @@ const KEY = "sb_publishable_T49bDaIS8d7-AhQ8SsFU0g_ZA55yNQE";
 const HEADERS = { apikey: KEY, Authorization: "Bearer " + KEY };
 
 function get(path){
-  return fetch(REST + path, { headers: HEADERS }).then((res) => {
+  // cache:"no-store" — always read the LIVE jobs_list/jobs_detail from Supabase, never a
+  // browser-cached copy. Without it, a warm session (or a bfcache restore) served a stale
+  // list, so a freshly published job (e.g. a new tenant) only appeared after a manual page
+  // refresh. The board data is the source of truth and must reflect the current DB on every
+  // load; the list is paged (getAll) and re-fetched once per page load, not per interaction.
+  return fetch(REST + path, { headers: HEADERS, cache: "no-store" }).then((res) => {
     if (!res.ok) throw new Error("supabase " + path + " -> " + res.status);
     return res.json();
   });
