@@ -34,6 +34,7 @@ COMPLETE flag is true AND --publish is set AND this is not a dry run.
 """
 
 import argparse
+import concurrent.futures
 import glob
 import importlib
 import json
@@ -42,6 +43,7 @@ import re
 import shutil
 import subprocess
 import sys
+import threading
 import traceback
 import urllib.error
 import urllib.request
@@ -137,9 +139,19 @@ def wc_l(path):
 # subprocess (sequential, never parallel - these sit behind Cloudflare)
 # --------------------------------------------------------------------------
 
-def run(cmd, cwd=ROOT, capture=False):
-    """Run a child command, streaming its output. Returns (returncode, stdout_or_None)."""
-    print(f"    $ {' '.join(cmd)}", flush=True)
+def run(cmd, cwd=ROOT, capture=False, emit=None):
+    """Run a child command, streaming its output. Returns (returncode, stdout_or_None).
+
+    emit: when given a callable, the command line AND all child output (stdout+stderr) are
+    routed to it instead of printed directly, and the child is always captured. A parallel
+    tenant worker passes emit=buf.append so it can flush its whole log as one atomic block
+    (no interleaving with other tenants running concurrently). emit=None preserves the
+    original streaming behaviour byte-for-byte (the publish path relies on it)."""
+    line = f"    $ {' '.join(cmd)}"
+    if emit is None:
+        print(line, flush=True)
+    else:
+        emit(line)
     # Windows: npm-installed CLIs (vercel) are .CMD/.ps1 shims with no .exe. CreateProcess
     # (shell=False) only appends .exe, so a bare "vercel" raises FileNotFoundError and sinks
     # the whole publish. Resolve the real path via PATHEXT-aware which() so node/python/vercel
@@ -147,15 +159,16 @@ def run(cmd, cwd=ROOT, capture=False):
     exe = shutil.which(cmd[0])
     if exe:
         cmd = [exe, *cmd[1:]]
-    if capture:
+    if capture or emit is not None:
         p = subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
+        sink = emit if emit is not None else (lambda s: print(s, flush=True))
         if p.stdout:
-            print(p.stdout, flush=True)
+            sink(p.stdout)
         if p.stderr:
             # Fold the child's stderr into the tee'd stdout stream. Node (build.mjs,
             # retire.mjs) writes ALL its progress to stderr; routed to sys.stderr it
             # bypasses the per-stage tee and the stage logs empty (the bug this fixes).
-            print(p.stderr, flush=True)
+            sink(p.stderr)
         return p.returncode, p.stdout
     return subprocess.run(cmd, cwd=cwd).returncode, None
 
@@ -383,7 +396,7 @@ _ENUMERATE_ARTIFACT = {
 }
 
 
-def clean_enumerate(platform, tenant):
+def clean_enumerate(platform, tenant, emit=print):
     name, is_dir = _ENUMERATE_ARTIFACT.get(platform, (None, None))
     if not name:
         return
@@ -394,7 +407,7 @@ def clean_enumerate(platform, tenant):
         elif not is_dir and os.path.isfile(path):
             os.remove(path)
     except OSError as e:
-        print(f"    reconcile: could not clear {path}: {e}")
+        emit(f"    reconcile: could not clear {path}: {e}")
 
 
 def _live_detail_names(platform, tenant_key):
@@ -433,7 +446,7 @@ def _live_detail_names(platform, tenant_key):
     return None, None
 
 
-def reconcile_detail(platform, tenant):
+def reconcile_detail(platform, tenant, emit=print):
     """Drop detail files whose URL/id isn't in today's live index. Guarded and reversible:
     dead files move to raw/<platform>/<tenant>/_purged/ (cleared each run), never deleted."""
     detdir = os.path.join(RAW, platform, tenant, "detail")
@@ -442,7 +455,7 @@ def reconcile_detail(platform, tenant):
     try:
         live, ext = _live_detail_names(platform, tenant)
     except Exception as e:
-        print(f"    reconcile {tenant}: SKIP - could not compute live set ({type(e).__name__}: {e}); nothing purged")
+        emit(f"    reconcile {tenant}: SKIP - could not compute live set ({type(e).__name__}: {e}); nothing purged")
         return
     if live is None:
         return
@@ -450,13 +463,13 @@ def reconcile_detail(platform, tenant):
     dead = [f for f in ondisk if f not in live]
     kept = len(ondisk) - len(dead)
     if not dead:
-        print(f"    reconcile {tenant}: {len(ondisk)} detail files, all live")
+        emit(f"    reconcile {tenant}: {len(ondisk)} detail files, all live")
         return
     # Guard: the live set must reproduce the cache. If it doesn't (scheme drift), kept
     # collapses and we must NOT purge - leave the zombies, flag it, let the run continue.
     if not (len(live) > 0 and kept >= 0.80 * len(live)):
-        print(f"    reconcile {tenant}: SKIP - live set ({len(live)}) did not reproduce cache "
-              f"(kept {kept}/{len(ondisk)}); {len(dead)} left in place")
+        emit(f"    reconcile {tenant}: SKIP - live set ({len(live)}) did not reproduce cache "
+             f"(kept {kept}/{len(ondisk)}); {len(dead)} left in place")
         return
     pdir = os.path.join(RAW, platform, tenant, "_purged")
     if os.path.isdir(pdir):
@@ -464,7 +477,7 @@ def reconcile_detail(platform, tenant):
     os.makedirs(pdir, exist_ok=True)
     for f in dead:
         shutil.move(os.path.join(detdir, f), os.path.join(pdir, f))
-    print(f"    reconcile {tenant}: purged {len(dead)} dead (URL gone from board), kept {kept} live")
+    emit(f"    reconcile {tenant}: purged {len(dead)} dead (URL gone from board), kept {kept} live")
 
 
 # ---------------------------------------------------------------------------
@@ -697,35 +710,69 @@ def main(argv):
     # Step 4: capture prior record counts BEFORE normalize overwrites them.
     prior_counts = {u["tenant"]: wc_l(normalized_path(u["platform"], u["tenant"])) for u in units}
 
-    # ---- run each tenant's mode sequence, sequential, never parallel ----
+    # ---- run each tenant's mode sequence. Tenants are INDEPENDENT - each reads/writes only its
+    #      own out/<platform>/<tenant>/ and raw/<platform>/<tenant>/ trees - and the work is almost
+    #      pure network wait on detail fetches, so up to PULL_CONC tenants run concurrently (default
+    #      6; the pull phase is the bottleneck, ~80% of wall time, and nothing here is CPU-bound).
+    #      Each tenant's mode sequence stays STRICTLY SERIAL within the tenant (index -> detail ->
+    #      normalize), and per-tenant failure isolation is unchanged: a failed mode stops only that
+    #      tenant's remaining modes and never touches another's. Output is buffered per tenant and
+    #      flushed as one atomic block under a lock the moment that tenant finishes, so the log
+    #      groups cleanly by tenant instead of interleaving. PULL_CONC=1 reproduces the old
+    #      strictly-serial behaviour exactly (same code path, pool of one). ----
     results = {}   # tenant -> {platform, modes: {mode: ok/FAIL/skip}, failed_mode}
-    any_mode_failed = False
-    for u in units:
+    conc = max(1, int(os.environ.get("PULL_CONC", "6")))
+    _print_lock = threading.Lock()
+
+    def process_tenant(u):
         platform, tenant = u["platform"], u["tenant"]
         modes = [u["modes"][0]] if a.dry_run else u["modes"]   # dry-run = enumerate step only
-        print(f"\n--- {tenant} ({platform}) : {' -> '.join(modes)}"
-              + ("   [dry-run: index/discovery only]" if a.dry_run else "") + " ---")
+        buf = []
+        emit = buf.append
+        emit(f"\n--- {tenant} ({platform}) : {' -> '.join(modes)}"
+             + ("   [dry-run: index/discovery only]" if a.dry_run else "") + " ---")
         mres, failed_mode = {}, None
-        if not a.dry_run:
-            clean_enumerate(platform, tenant)   # fresh enumerate so in-scope == this pull's board
-        for mode in u["modes"]:
-            if mode not in modes:
-                mres[mode] = "skip"
-                continue
-            if mode == "normalize":
-                reconcile_detail(platform, tenant)   # drop detail whose URL left the board
-            rc, _ = run(adapter_cmd(platform, tenant, mode))
-            if rc != 0:
-                mres[mode] = "FAIL"
-                failed_mode = mode
-                any_mode_failed = True
-                print(f"    !! {tenant} {mode} exited {rc} - stopping this tenant, continuing to next")
-                # mark remaining modes skipped
-                for later in u["modes"][u["modes"].index(mode) + 1:]:
-                    mres[later] = "skip"
-                break
-            mres[mode] = "ok"
-        results[tenant] = {"platform": platform, "modes": mres, "failed_mode": failed_mode}
+        try:
+            if not a.dry_run:
+                clean_enumerate(platform, tenant, emit=emit)   # fresh enumerate so in-scope == this pull's board
+            for mode in u["modes"]:
+                if mode not in modes:
+                    mres[mode] = "skip"
+                    continue
+                if mode == "normalize":
+                    reconcile_detail(platform, tenant, emit=emit)   # drop detail whose URL left the board
+                rc, _ = run(adapter_cmd(platform, tenant, mode), emit=emit)
+                if rc != 0:
+                    mres[mode] = "FAIL"
+                    failed_mode = mode
+                    emit(f"    !! {tenant} {mode} exited {rc} - stopping this tenant, continuing to next")
+                    # mark remaining modes skipped
+                    for later in u["modes"][u["modes"].index(mode) + 1:]:
+                        mres[later] = "skip"
+                    break
+                mres[mode] = "ok"
+        except Exception as e:
+            # A worker must never take the pool down. Treat an unexpected crash as a failed mode
+            # so the downstream halt/quarantine logic sees it exactly like an adapter non-zero exit.
+            failed_mode = failed_mode or next((m for m in modes), "index")
+            mres[failed_mode] = "FAIL"
+            emit(f"    !! {tenant} crashed: {type(e).__name__}: {e} - treated as a failed mode")
+            emit(traceback.format_exc())
+        with _print_lock:
+            print("\n".join(buf), flush=True)
+        return tenant, {"platform": platform, "modes": mres, "failed_mode": failed_mode}
+
+    if conc == 1:
+        for u in units:
+            tenant, rec = process_tenant(u)
+            results[tenant] = rec
+    else:
+        print(f"\n(running up to {conc} tenants concurrently - set PULL_CONC to change; =1 is serial)")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=conc) as ex:
+            for fut in concurrent.futures.as_completed([ex.submit(process_tenant, u) for u in units]):
+                tenant, rec = fut.result()
+                results[tenant] = rec
+    any_mode_failed = any(r["failed_mode"] for r in results.values())
 
     if a.dry_run:
         print("\nDRY-RUN complete: index/discovery only, nothing normalized, no downstream.")
