@@ -8,6 +8,7 @@
    `listMeta` prop is passed (browse pages), the card is an ItemList ListItem carrying its
    rendered position and canonical URL — structured data about the LIST, not the job. */
 import { h, s, raw } from "./h.js";
+import { SHARE_ICON } from "./share.js";
 
 const OK_ICON = '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--ok-ink-text)" stroke-width="1.8" style="flex:none" aria-hidden="true"><circle cx="8" cy="8" r="6.6"></circle><path d="M5 8.3l2.1 2.1L11 6.1"></path></svg>';
 const STAR_ICON = '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="var(--fact-ink)" stroke-width="1.8" style="flex:none" aria-hidden="true"><path d="M8 1.8l1.9 3.9 4.3.6-3.1 3 .74 4.3L8 11.5l-3.84 2.1.74-4.3-3.1-3 4.3-.6z"></path></svg>';
@@ -45,11 +46,22 @@ export function JobCard({ job, flush, listMeta, dense }){
         // is layered on top (opaque bg covers the monogram). onError hides a failed <img> so
         // the monogram shows through — the previous card decided logo-vs-monogram at render
         // time only, so a logo that 404'd at runtime left a broken-image glyph with no fallback.
-        h("span", { key: "lg", "aria-hidden": "true", style: s("position:relative;width:30px;height:30px;flex:none") },
-          h("span", { style: s("position:absolute;inset:0;display:grid;place-items:center;border-radius:4px;background:var(--fact);color:var(--fact-ink);font-size:15px;font-weight:800") }, job.monogram),
-          job.showLogo && job.logoSrc && h("img", { src: job.logoSrc, alt: "", width: 30, height: 30,
-            onError: (e) => { e.currentTarget.style.display = "none"; },
-            style: s("position:absolute;inset:0;width:30px;height:30px;object-fit:contain;border-radius:4px;background:var(--surface-raised)") })
+        h("div", { key: "lg", style: s("display:flex;flex-direction:column;align-items:center;flex:none") },
+          h("span", { "aria-hidden": "true", style: s("position:relative;width:30px;height:30px;flex:none") },
+            h("span", { style: s("position:absolute;inset:0;display:grid;place-items:center;border-radius:4px;background:var(--fact);color:var(--fact-ink);font-size:15px;font-weight:800") }, job.monogram),
+            job.showLogo && job.logoSrc && h("img", { src: job.logoSrc, alt: "", width: 30, height: 30,
+              onError: (e) => { e.currentTarget.style.display = "none"; },
+              style: s("position:absolute;inset:0;width:30px;height:30px;object-fit:contain;border-radius:4px;background:var(--surface-raised)") })
+          ),
+          // Share icon, centered under the logo. Light/unpronounced (muted, no label/bg/border).
+          // 44px tap target via content-box padding, neutralised by a matching negative margin so
+          // it overflows invisibly and adds almost no height. stopPropagation so it never opens the
+          // panel. Rendered only when job.onShare is wired (test-gated to /washington in board.js).
+          job.onShare && h("span", { style: s("display:flex;margin-top:5px") },
+            h("button", { type: "button", "aria-label": "Share this job",
+              onClick: (e) => { e.preventDefault(); e.stopPropagation(); job.onShare("card"); },
+              style: s("appearance:none;border:0;background:transparent;color:var(--ink-muted);cursor:pointer;display:grid;place-items:center;box-sizing:content-box;width:18px;height:18px;padding:13px;margin:-13px") },
+              raw(SHARE_ICON)))
         ),
         h("div", { style: s("min-width:0;display:grid;gap:3px") },
           h("div", { style: s("display:flex;align-items:flex-start;gap:7px") },
