@@ -419,7 +419,7 @@ class LandingApp extends React.Component {
     return { title, body };
   }
   renderValueProps(){
-    // "What you landed on" — the value props the visitor just experienced.
+    // "Need a job? No Problem" — the value props the visitor just experienced.
     const items = [
       ["100% free", "No sign-up or resume required to apply."],
       ["Real employers, real jobs", "Every job comes from the company’s own careers page."],
@@ -427,7 +427,7 @@ class LandingApp extends React.Component {
       ["Pay Transparency", "Shown when the employer states it. Never estimated."],
     ];
     if (this.state.wide) return h("section", { style: s("margin:0 -14px;padding:16px 14px;background:var(--ink);display:grid;gap:10px") },
-      h("h2", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--mark)") }, "What you landed on"),
+      h("h2", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--mark)") }, "Need a job? No Problem"),
       h("div", { style: s("display:grid;grid-template-columns:repeat(4,1fr);gap:8px") },
         items.map(([t, b], i) => h("div", { key: i, style: s("display:grid;align-content:start;gap:6px;padding:12px;background:var(--surface-raised);border:1px solid var(--ink);border-radius:3px") },
           h("span", { "aria-hidden": "true", style: s("width:32px;height:32px;border-radius:3px;background:var(--mark);display:grid;place-items:center") }, raw(VP_CHECK)),
@@ -435,7 +435,7 @@ class LandingApp extends React.Component {
           h("span", { style: s("font-size:15px;line-height:1.35;color:var(--ink-muted);text-wrap:pretty") }, b))))
     );
     return h("section", { style: s("margin:0 -14px;padding:16px 14px;background:var(--ink);display:grid;gap:14px") },
-      h("h2", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--mark)") }, "What you landed on"),
+      h("h2", { style: s("margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--mark)") }, "Need a job? No Problem"),
       h("div", { style: s("display:grid;grid-template-columns:repeat(auto-fit,minmax(min(400px,100%),1fr));gap:10px 20px") },
         items.map(([t, b], i) => h("div", { key: i, style: s("display:flex;gap:10px;align-items:flex-start") },
           h("span", { "aria-hidden": "true", style: s("flex:none;width:32px;height:32px;border-radius:3px;background:var(--mark);display:grid;place-items:center") }, raw(VP_CHECK)),
@@ -468,7 +468,7 @@ class LandingApp extends React.Component {
     );
   }
 
-  // Employer-logo strip, between "Recent jobs" and "What you landed on". Uses the landing's own
+  // Employer-logo strip, between "Recent jobs" and "Need a job? No Problem". Uses the landing's own
   // uppercase section-heading style (not the alert pages' underlined H2) so it matches the page.
   renderEmployers(){
     return logoCarousel(CAROUSEL_BRANDS, "margin:0;font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink)");
