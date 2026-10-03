@@ -521,6 +521,14 @@ def reconcile_detail(platform, tenant, emit=print):
 # A tenant that fails HOLDS its whole source_id (fail-closed, option A: records key by source_id,
 # so a shared platform can't hold one tenant). supabase_sink then skips held sources entirely.
 ENUM_BAND = 0.85   # layer (b): in_scope must be >= 85% of the trailing reference
+# Small-N enumerate exemption. The 85% band is miscalibrated for a tiny board: one job of ordinary
+# daily churn is >15% of a 6-job tenant, so shake_shack 6->5 and davita 16->12 tripped the band and
+# HELD their WHOLE platform (the hold is source-level, so one tiny tenant punishes every healthy
+# sibling). For a small trailing reference, use a looser band so normal wobble passes; a genuinely
+# large drop (and the separate zero-records halt) is still caught, and large tenants keep 0.85.
+# Both config-overridable in config/pull.json -> halt_thresholds, like the density small-N exempt.
+SMALL_N_ENUM_REF = 30      # trailing reference at/below this = a small tenant
+SMALL_N_ENUM_BAND = 0.70   # looser band for small tenants (allows ~30% wobble vs 15%)
 
 
 def _latest_index_events(platform, tenant, n=6):
@@ -543,7 +551,7 @@ def _latest_index_events(platform, tenant, n=6):
     return evs[-n:]
 
 
-def enumerate_complete(platform, tenant, slack=0):
+def enumerate_complete(platform, tenant, slack=0, small_n_ref=SMALL_N_ENUM_REF, small_n_band=SMALL_N_ENUM_BAND):
     """(ok, reason). Layer (a) source-total if the adapter logs one; else layer (b) delta band.
     No run_log or no prior reference -> ok (nothing to compare against, e.g. first run).
 
@@ -569,8 +577,12 @@ def enumerate_complete(platform, tenant, slack=0):
     if curv is None or not prior:
         return True, "no prior reference (uncheckable)"
     ref = max(prior)
-    if curv < ENUM_BAND * ref:
-        return False, f"short enumerate: {metric} {curv} < {int(ENUM_BAND * 100)}% of trailing {ref}"
+    # Small-N exemption (see SMALL_N_ENUM_* above): a tiny board gets the looser band so ordinary
+    # ±1-few-job wobble doesn't short-trip and hold its platform; large tenants keep the strict band.
+    band = small_n_band if ref <= small_n_ref else ENUM_BAND
+    if curv < band * ref:
+        tag = " (small-N band)" if ref <= small_n_ref else ""
+        return False, f"short enumerate: {metric} {curv} < {int(band * 100)}% of trailing {ref}{tag}"
     return True, f"within band: {metric} {curv} vs trailing {ref}"
 
 
@@ -581,6 +593,9 @@ def run_guard(units, results, stamp):
     src = {}          # source_id -> ok|skipped|failed
     reasons = {}
     tcfg = load_json(os.path.join(CONFIG_DIR, "tenants.json"))   # per-tenant enumerate_total_slack
+    _ht = load_json(os.path.join(CONFIG_DIR, "pull.json")).get("halt_thresholds", {})
+    small_n_ref = _ht.get("small_n_enum_ref", SMALL_N_ENUM_REF)
+    small_n_band = _ht.get("small_n_enum_band", SMALL_N_ENUM_BAND)
     for u in units:
         plat, tenant = u["platform"], u["tenant"]
         if results[tenant]["failed_mode"]:
@@ -588,7 +603,7 @@ def run_guard(units, results, stamp):
             reasons.setdefault(plat, []).append(f"{tenant}: adapter mode '{results[tenant]['failed_mode']}' exited non-zero")
             continue
         slack = ((tcfg.get(plat) or {}).get(tenant) or {}).get("enumerate_total_slack", 0)
-        ok, why = enumerate_complete(plat, tenant, slack=slack)
+        ok, why = enumerate_complete(plat, tenant, slack=slack, small_n_ref=small_n_ref, small_n_band=small_n_band)
         if not ok:
             if src.get(plat) != "failed":
                 src[plat] = "skipped"
