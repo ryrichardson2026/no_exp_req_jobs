@@ -22,16 +22,6 @@ import { CITIES } from "./data/cities.js";
 import { ZIPS } from "./data/zips.js";
 import { CITY_GEO } from "./data/cities-geo.js";
 import * as RT from "./data/routes.js";
-
-// TEST GATE (feature/share-job) — REMOVE for the full rollout. Limits the share feature to one
-// board page and two job pages for a live test: the card share icon shows only on the /washington
-// board page; "Apply later" shows only on these 2 job pages (FedEx #4629, UPS #4646). To go full:
-// delete this block and the two gate checks (shape() onShare, and the page onShare override).
-const SHARE_TEST_CARD_PATH = "/washington";
-const SHARE_TEST_JOB_NUMBERS = new Set([4629, 4646]);
-function shareOnCardsHere(){
-  try { return (window.location.pathname || "").replace(/\/+$/, "") === SHARE_TEST_CARD_PATH; } catch (e) { return false; }
-}
 import * as PM from "./data/pageMeta.js";
 
 const React = window.React;
@@ -563,8 +553,9 @@ class BoardApp extends React.Component {
       onCardClick: this.open(r),              // intercepts the link -> opens the panel in-app
       open: this.open(r),
       openKey: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); this.open(r)(e); } },
-      // Card share icon — gated to the /washington page for the test (TEST GATE above).
-      onShare: shareOnCardsHere() ? (loc) => this.doShare(r, loc) : null,
+      // Card share icon — wired for every card; rendered only on the dense (mobile) card, so the
+      // desktop/default card never shows it (mobile-only, per owner).
+      onShare: (loc) => this.doShare(r, loc),
     });
   }
 
@@ -696,9 +687,6 @@ class BoardApp extends React.Component {
         // jobPage.js. job_id prefers the public job_number, falls back to internal_id.
         applyEvt: { job_id: openRec.job_number != null ? openRec.job_number : openRec.internal_id,
           employer: R.companyLabel(openRec.company_name), category: R.recordCats(openRec)[0] || null },
-        // "Apply later" (opens the share flow) — gated to the 2 test job pages (TEST GATE above);
-        // overrides shape()'s card-gated onShare with the per-job gate for the detail view.
-        onShare: SHARE_TEST_JOB_NUMBERS.has(openRec.job_number) ? (loc) => this.doShare(openRec, loc) : null,
       });
     }
 
