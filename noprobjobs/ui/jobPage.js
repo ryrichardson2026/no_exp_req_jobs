@@ -8,6 +8,7 @@
 import { h, s, raw } from "./h.js";
 import { Pressable } from "./pressable.js";
 import { track, sourcePage } from "./track.js";
+import { SHARE_ICON } from "./share.js";
 
 /* Primary-CTA bevel (C1): 3px bevel derived from --accent's own fill, no radius; on
    press the bevel inverts and the label shifts 1px. A press state is not a loading
@@ -42,6 +43,15 @@ export function JobPage({ page, categories = [], back, isMobilePage = false, isP
   const applyBtn = (key) => h(Pressable, { key, tag: "a", href: page.applyUrl, target: "_blank", rel: "noopener noreferrer", className: "hv-bright", onClick: onApply,
     styleFor: (pd) => s("margin-top:14px;justify-self:center;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 24px;font-size:15.5px;font-weight:700;" + CTA_BEVEL(pd)) }, "Apply on employer site");
 
+  // "Apply later" — SECONDARY (outline, no red fill), narrower than Apply, share icon to the left.
+  // Despite the label it does NOT save to an account: it opens the share flow so the visitor can
+  // send the job to themselves. Rendered under BOTH Apply buttons. Gated by page.onShare, which
+  // board.js wires only for the test job pages (removed for full rollout).
+  const laterBtn = (key) => page.onShare ? h(Pressable, { key, tag: "button", type: "button", className: "hv-bd-accent-tx",
+    onClick: () => page.onShare("job_page"),
+    styleFor: (pd) => s("margin-top:8px;justify-self:center;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 16px;font-size:14px;font-weight:700;color:var(--accent);background:transparent;border:1.5px solid var(--line);border-radius:3px;cursor:pointer;transition:transform 40ms ease-out;" + (pd ? "transform:translate(1px,1px)" : "")) },
+    raw(SHARE_ICON), h("span", null, "Apply later")) : null;
+
   // ── content blocks, built once and shared by all three placements ────────
   const titleBlock = h("div", { key: "title", style: s("padding:16px 20px 20px;display:grid;gap:5px;border-bottom:1px solid var(--line)") },
     h("h1", { style: s("margin:0;font-family:var(--font-display);font-size:27px;line-height:1.14;font-weight:800;letter-spacing:-0.008em;color:var(--ink);text-wrap:pretty") }, page.title),
@@ -63,7 +73,8 @@ export function JobPage({ page, categories = [], back, isMobilePage = false, isP
         style: s("min-height:44px;padding:0 14px;border-radius:3px;background:var(--surface-raised);border:1px solid var(--line);font-size:15px;font-weight:500;color:var(--ink);cursor:pointer") }, cat))
     ),
 
-    page.live && applyBtn("apply-top")
+    page.live && applyBtn("apply-top"),
+    page.live && laterBtn("later-top")
   );
 
   const modsBlock = page.hasModifiers && h("div", { key: "mods", style: s("margin:14px 20px;padding:12px 14px;background:var(--surface-raised);border:2px solid var(--line);border-radius:3px;display:grid;gap:8px") },
@@ -93,6 +104,7 @@ export function JobPage({ page, categories = [], back, isMobilePage = false, isP
   const applyBtm = page.live && h("div", { key: "apply-btm", style: s("padding:8px 20px 28px;display:grid;gap:8px;justify-items:center") },
     h(Pressable, { tag: "a", href: page.applyUrl, target: "_blank", rel: "noopener noreferrer", className: "hv-bright", onClick: onApply,
       styleFor: (pd) => s("min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 24px;font-size:15.5px;font-weight:700;" + CTA_BEVEL(pd)) }, "Apply on employer site"),
+    laterBtn("later-btm"),
     h("div", { style: s("font-size:13px;line-height:1.45;color:var(--ink-muted);text-align:center") }, "Job posting managed by employer")
   );
 
