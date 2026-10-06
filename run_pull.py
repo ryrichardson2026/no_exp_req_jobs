@@ -1048,6 +1048,45 @@ def _finish(stamp, units, results, prior_counts, baseline, table, mv, partial, p
     return rc
 
 
+def _prune_old_deploys(days=3):
+    """Delete this project's Vercel deployments older than `days`, keeping the live aliased one
+    and everything newer (a rollback window). Hobby has no retention policy and we deploy every
+    pull, so stale deployments accumulate. Lists with `vercel api` (uses the CLI's own auth — no
+    token in env) to get real `created` timestamps + the alias flag, then removes stale ones in a
+    single `vercel remove ... --yes`. Best-effort; the caller wraps it so nothing here can affect
+    the publish result. NEVER removes an aliased deployment (production) regardless of age."""
+    # Single query param ONLY — a '&' in the URL is re-parsed by Windows cmd (the vercel .CMD
+    # shim) and splits the command. The default page (newest ~20) covers a 3-day daily-deploy
+    # window; any older overflow is pruned on subsequent runs (incremental, self-healing).
+    rc, out = run(["vercel", "api", "/v6/deployments?app=no_exp_req_jobs"],
+                  cwd=DEPLOY_DIR, capture=True)
+    if rc != 0 or not out:
+        print(f"    prune skipped: could not list deployments (exit {rc})")
+        return
+    try:
+        data = json.loads(out)
+    except (ValueError, TypeError) as e:
+        print(f"    prune skipped: unparseable deployment list ({type(e).__name__})")
+        return
+    deps = data.get("deployments", []) if isinstance(data, dict) else (data or [])
+    now_s = datetime.now(timezone.utc).timestamp()
+    cutoff = (now_s - days * 86400) * 1000.0                  # ms, matches Vercel's created/createdAt
+    stale = []
+    for d in deps:
+        created = d.get("created") or d.get("createdAt")
+        if created and created < cutoff and not d.get("aliasAssigned") and d.get("url"):
+            stale.append(d["url"])
+    kept = len(deps) - len(stale)
+    if not stale:
+        print(f"    prune: nothing older than {days}d (kept {len(deps)} deploy[s])")
+        return
+    rcr, _ = run(["vercel", "remove", *stale, "--yes"], cwd=DEPLOY_DIR, capture=True)
+    if rcr == 0:
+        print(f"    prune: removed {len(stale)} deploy(s) older than {days}d; kept {kept} (live + <{days}d)")
+    else:
+        print(f"    prune: remove exited {rcr} — non-fatal (kept everything)")
+
+
 def _publish():
     """In order, halting immediately on any non-zero exit. report.py already ran at
     consolidation (it produces the applicable.jsonl the push consumes); site_data.py/jobs.js
@@ -1138,17 +1177,12 @@ def _publish():
         print(f"[indexing] skipped (non-fatal): {type(e).__name__}: {e}")
 
     # Deployment retention. Vercel keeps every prior deploy (Hobby has no retention policy) and
-    # this pipeline deploys on every pull, so old UNALIASED deployments pile up (~1/day). Prune
-    # them with `vercel remove --safe`: --safe NEVER removes an aliased deployment, so the live
-    # production deploy (noprobjobs.com) is always kept — only superseded ones go. Pure
-    # housekeeping, STRICTLY non-fatal: a prune failure must never affect the publish result.
-    # (Rollback is redeploy-from-git, not a Vercel-side buffer — acceptable for a daily rebake.)
-    print("\n--- prune old deployments (vercel remove --safe) ---")
+    # this pipeline deploys on every pull, so old deployments pile up (~1/day). Keep a 3-day
+    # rollback window and prune anything older. STRICTLY non-fatal (same pattern as the steps
+    # above): a prune failure must never affect the publish result.
+    print("\n--- prune old deployments (keep 3 days) ---")
     try:
-        rc_pr, _ = run(["vercel", "remove", "no_exp_req_jobs", "--safe", "--yes"],
-                       cwd=DEPLOY_DIR, capture=True)
-        print("    prune ok (kept the live aliased deploy)" if rc_pr == 0
-              else f"    prune skipped (exit {rc_pr}) — non-fatal")
+        _prune_old_deploys(days=3)
     except Exception as e:
         print(f"    prune skipped (non-fatal): {type(e).__name__}: {e}")
 
