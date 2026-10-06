@@ -1638,6 +1638,67 @@
         ]
       }
     },
+    "lowes": {
+      "label": "Lowe's",
+      "verified": "ONBOARDED 2026-10-06 (Case A, Phenom - existing adapter, config only). label is 'Lowe's' because the phenom adapter sets company_name = job.brand or label, and Lowe's jobs carry no brand (same as UPS/Dutch Bros, whose verbose labels DO leak into company_name - a separate cleanup). Chrome-validated: POST talent.lowes.com/widgets ddoKey=refineSearch selected_fields{state:[Washington]} -> totalHits 58, matching the site's State/Province=Washington facet; response refineSearch.data.jobs[]; detail id = jobSeqNo; apply = Workday (lowes.wd5.myworkdayjobs.com, externalApply); postedDate real ISO. Paradox 'Luci' is only the chat widget, not the job surface. Openers derived from Lowe's own 58 WA descriptions (prefix mode: Minimum/Required Qualifications = REQUIRED, Preferred = PREFERRED), section found 55/58. 58 records / 28 applicable / 48.3% density. Shipped two shared-engine changes this onboarding: the tool/technology-familiarity guard (normalize/experience.py - 'experience using a computer/retail technology' is not work history; affected ONLY Lowe's, 26 REQUIRED->PREFERRED) and the 'Mgr' abbreviation in the management gate (analyze/report.py - 5 genuine management roles board-wide). The 2 remaining ProServices/Fulfillment-Lead WAIVED false positives are the deferred substitution-waiver issue.",
+      "careers_base": "https://talent.lowes.com",
+      "widgets_url": "https://talent.lowes.com/widgets",
+      "detail_url_tmpl": "https://talent.lowes.com/us/en/job/{pid}",
+      "employer_domain": "lowes.com",
+      "source_class": "direct-employer",
+      "sector": "retail",
+      "state": "WA",
+      "page_size": 50,
+      "search_body": {
+        "lang": "en_us",
+        "deviceType": "desktop",
+        "country": "us",
+        "pageName": "search-results",
+        "subsearch": "",
+        "jobs": true,
+        "counts": true,
+        "keywords": "",
+        "global": false,
+        "sortBy": "Most relevant",
+        "locationData": {}
+      },
+      "selected_fields": {
+        "state": [
+          "Washington"
+        ]
+      },
+      "location_filter": {
+        "field": "state",
+        "match_any": [
+          "Washington"
+        ]
+      },
+      "extraction": {
+        "_note": "DERIVED from Lowe's talent.lowes.com WA capture 2026-10-06 (58 records, Phenom JSON-LD detail). Requirements section headings (colon-less <b> leading the line, first item on the same line -> prefix): 'Minimum Qualifications' (44 records) and 'Required Qualifications' (11) = REQUIRED; 'Preferred Qualifications' (nearly all) + rare 'Preferred Skills' = PREFERRED. 'Key Responsibilities'/'What You Will Do'/'Your Day at Lowe's'/'Your Impact at Lowe's' = duties; 'About Lowe's' = about; benefits boilerplate (tuition assistance, 10% discount, Track to the Trades, Travel Requirements) = perks. 3 records with no qualifications heading are CDL Delivery Drivers (commercial license = real barrier, excluded by credential/licensed gate). Nothing inherited from a phenom sibling.",
+        "openers": [
+          {
+            "text": "minimum qualifications",
+            "role": "REQUIRED",
+            "match": "prefix"
+          },
+          {
+            "text": "required qualifications",
+            "role": "REQUIRED",
+            "match": "prefix"
+          },
+          {
+            "text": "preferred qualifications",
+            "role": "PREFERRED",
+            "match": "prefix"
+          },
+          {
+            "text": "preferred skills",
+            "role": "PREFERRED",
+            "match": "prefix"
+          }
+        ]
+      }
+    },
     "tjx": {
       "label": "TJX Companies - Retail Associates (jobs.tjx.com, Phenom TJCOGLOBAL)",
       "careers_base": "https://jobs.tjx.com",

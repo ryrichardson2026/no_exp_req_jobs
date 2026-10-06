@@ -385,6 +385,31 @@ WORK_EXP_RX = re.compile(
     r"management|manager\w*|supervis\w*|leadership|retail|sales|warehouse|prior|previous|"
     r"proven|minimum|at\s+least|years?\s+of|yrs?\s+of|\d+\+?\s*(?:years?|yrs?|months?))\b", re.I)
 
+# Tool/technology FAMILIARITY is not work experience. "6 Months experience using a computer",
+# "experience using common retail technology such as smart phones and tablets" name familiarity
+# with a TOOL, not time worked in a role or field. UNLIKE the service/background guards this strips
+# EVEN WITH a stated duration, because the barrier named is the tool, not the job (owner 2026-10-06,
+# Lowe's: these light minimum-quals - computer/retail-tech familiarity + basic literacy - are
+# acceptable for a no-experience audience). Fails safe via FIELD_EXP_RX below.
+TOOL_FAMILIARITY_RX = re.compile(
+    r"\bexperience\s+(?:using|with|operating|navigating)\s+"
+    r"(?:a\s+|an\s+|the\s+|common\s+|basic\s+|various\s+|standard\s+)?"
+    r"(?:computers?|retail\s+technolog(?:y|ies)|technolog(?:y|ies)|smart\s?phones?|tablets?|"
+    r"software|computer\s+systems?|point[-\s]of[-\s]sale|pos\b|scanners?|handheld\s+devices?|"
+    r"mobile\s+devices?|microsoft|ms\s+office|email|the\s+internet|web\s+browsers?)\b", re.I)
+# A clause that ALSO names FIELD/ROLE experience keeps its typing -> REQUIRED. This matches the
+# FIELD form ("retail experience", "experience in/providing ...", "prior/relevant experience") NOT
+# a bare duration - so "6 Months experience using a computer" (duration, no field) strips, while
+# "1 Year of Retail experience providing customer service" stays. Note "retail technology" is a
+# TOOL, not the "retail experience" FIELD: this matches only the FIELD form, so it does not fire on
+# "experience using common retail technology".
+FIELD_EXP_RX = re.compile(
+    r"\b(?:retail|sales|customer[\s-]+service|warehouse|kitchen|restaurant|food|culinary|"
+    r"cook\w*|bartend\w*|serv\w*|management|manager\w*|supervis\w*|leadership|merchandis\w*|"
+    r"cashier\w*|industry|manufacturing|hospitality|security|clerical|administrative)\s+experience\b"
+    r"|\bexperience\s+(?:in|within|providing|delivering|leading|managing|supervising|performing)\b"
+    r"|\b(?:prior|previous|proven|related|relevant)\s+(?:work\s+)?experience\b", re.I)
+
 # Background-INVESTIGATION guard. A screening clause that LISTS 'experience' among the items a
 # background/eligibility check reviews ("must pass all phases ... driving record, credit history,
 # criminal history, experience ...") names no experience REQUIREMENT - it is what the check
@@ -586,6 +611,16 @@ def classify_line(line, section_modality):
     # history. Strip EXPERIENCE typing when service-qualified and no real work-history signal.
     if EXPERIENCE in types and months is None and SERVICE_EXPERIENCE_RX.search(low) \
             and not WORK_EXP_RX.search(low):
+        types = [t for t in types if t != EXPERIENCE]
+        if not types:
+            return None
+
+    # Tool/technology-familiarity guard (see TOOL_FAMILIARITY_RX): "experience using a computer /
+    # common retail technology" is tool familiarity, not work history. Strips EXPERIENCE EVEN WITH a
+    # duration. Fails safe: a clause that also names a field/role ("1 Year of Retail experience")
+    # keeps its typing -> REQUIRED. Per-clause, so a role listing BOTH a computer-familiarity line
+    # and a real field-experience line stays REQUIRED on the latter.
+    if EXPERIENCE in types and TOOL_FAMILIARITY_RX.search(low) and not FIELD_EXP_RX.search(low):
         types = [t for t in types if t != EXPERIENCE]
         if not types:
             return None
