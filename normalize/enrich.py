@@ -41,11 +41,67 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 from normalize import experience as X   # noqa: E402  the shared extractor
+from normalize import pay as PAY           # noqa: E402  the description pay parser
 from normalize.category import categorize  # noqa: E402  the shared title->category table
 
 OUT_GLOB = os.path.join(ROOT, "out", "*", "*", "normalized.jsonl")
+CONFIG_PATH = os.path.join(ROOT, "config", "tenants.json")
 
 DERIVED = ("experience_condition", "evidence_clauses", "credentials")
+
+_TAG = __import__("re").compile(r"<[^>]+>")
+_WS = __import__("re").compile(r"\s+")
+
+
+def pay_text(r):
+    """The prose the pay parser reads: the record's own description_text, falling
+    back to a tag-stripped description_html. Nothing else — pay is read from the
+    description, never from a title or a sibling record."""
+    t = r.get("description_text")
+    if t:
+        return t
+    return _WS.sub(" ", _TAG.sub(" ", r.get("description_html") or "")).strip()
+
+
+# The board publishes one state (the bake's launched-state allowlist, LAUNCHED_STATES
+# in prerender/build.mjs). The description pay parser reads the pay stated on THIS
+# record's posting; for an out-of-market posting that is out-of-market pay (measured:
+# 100% of sub-WA-minimum description fills were Texas postings, e.g. a $10-16/hr TX
+# abm/BWW row). Since those records can still reach jobs_list, we do NOT fill pay from
+# a non-launched-state posting. A null state is tolerated (kept), matching the rest of
+# the pipeline. Mirror the bake's allowlist here; keep in sync if a state launches.
+LAUNCHED_STATES = frozenset({"WA"})
+
+
+def pay_allowed(rec, cfg):
+    """Whether the description pay parser may run for this record: tenant not held
+    (pay_exclude) AND the posting is in a launched state (or stateless)."""
+    if cfg.get("exclude"):
+        return False
+    st = rec.get("state")
+    return (not st) or (st in LAUNCHED_STATES)
+
+
+def load_pay_settings(tenant):
+    """Per-tenant pay config from config/tenants.json -> extraction. Returns
+    {default_period, exclude}. Both OFF unless a tenant opts in, so a lever is
+    scoped to exactly the tenant that set it (same discipline as load_openers):
+
+      pay_period_when_unstated : period to read a period-LESS figure at (Chipotle,
+                                 owner-verified hourly). Still subject to the sane band.
+      pay_exclude              : suppress the description pay parser for this tenant
+                                 entirely (BWW, held pending owner confirmation)."""
+    try:
+        with open(CONFIG_PATH, encoding="utf-8") as fh:
+            cfg = json.load(fh)
+    except FileNotFoundError:
+        return {"default_period": None, "exclude": False}
+    for _platform, tenants in cfg.items():
+        if isinstance(tenants, dict) and isinstance(tenants.get(tenant), dict):
+            ext = tenants[tenant].get("extraction") or {}
+            return {"default_period": ext.get("pay_period_when_unstated"),
+                    "exclude": bool(ext.get("pay_exclude"))}
+    return {"default_period": None, "exclude": False}
 
 
 def _load_tenant_category():
@@ -69,11 +125,14 @@ def tenant_of(path):
     return path.replace("\\", "/").split("/")[-2]   # out/<platform>/<tenant>/...
 
 
-def enrich_records(recs, openers):
+def enrich_records(recs, openers, pay_cfg=None):
     """Mutate each record in place with the extractor's output. Returns per-field
     populated counts (null/''/[] = unpopulated), plus section-found count."""
+    pay_cfg = pay_cfg or {"default_period": None, "exclude": False}
     counts = {f: 0 for f in DERIVED}
     counts["section_found"] = 0
+    counts["pay_from_description"] = 0
+    counts["pay_review"] = 0
     for r in recs:
         xo = X.extract(r.get("description_html") or "",
                        r.get("description_text") or "",
@@ -107,6 +166,28 @@ def enrich_records(recs, openers):
         r["category"] = cats
         if xo["section_found"]:
             counts["section_found"] += 1
+
+        # PAY. Structured always wins (rule 2): if an adapter already stated pay,
+        # only stamp its provenance and leave the numbers untouched. Otherwise fall
+        # back to the description parser — unless this tenant is held (pay_exclude).
+        if r.get("salary_is_stated"):
+            if not r.get("pay_source"):
+                r["pay_source"] = "structured"
+        elif pay_allowed(r, pay_cfg):
+            fill, review, _pr = PAY.fill_from_text(
+                pay_text(r), default_period=pay_cfg["default_period"])
+            if fill:
+                r["salary_min"] = fill["salary_min"]
+                r["salary_max"] = fill["salary_max"]
+                r["pay_period"] = fill["pay_period"]
+                r["salary_is_stated"] = True
+                r["pay_source"] = "description"
+                r["pay_evidence"] = fill["pay_evidence"]
+                counts["pay_from_description"] += 1
+            elif review:
+                r["pay_review"] = review
+                counts["pay_review"] += 1
+
         for f in DERIVED:
             v = r.get(f)
             if v not in (None, "", [], {}):
@@ -135,9 +216,10 @@ def main():
     for path in paths:
         tenant = tenant_of(path)
         openers = X.load_openers(tenant)
+        pay_cfg = load_pay_settings(tenant)
         with open(path, "r", encoding="utf-8") as fh:
             recs = [json.loads(l) for l in fh if l.strip()]
-        counts = enrich_records(recs, openers)
+        counts = enrich_records(recs, openers, pay_cfg)
         n = len(recs)
         grand[tenant] = (n, counts)
 
@@ -156,6 +238,10 @@ def main():
               f"{pct(counts['section_found']):5.1f}%")
         for f in DERIVED:
             print(f"  {f:<20} {counts[f]:>5}/{n}  {pct(counts[f]):5.1f}%")
+        if counts["pay_from_description"] or counts["pay_review"]:
+            print(f"  pay from description {counts['pay_from_description']:>5}/{n}  "
+                  f"{pct(counts['pay_from_description']):5.1f}%"
+                  f"   (review: {counts['pay_review']})")
 
     total = sum(n for n, _ in grand.values())
     print("\n" + "-" * 78)

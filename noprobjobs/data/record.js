@@ -72,6 +72,10 @@ export function money(r){
   const per = PERIOD[r.pay_period] || "";
   const lo = r.salary_min, hi = r.salary_max;
   if (lo && hi && lo !== hi) return f(lo) + "–" + f(hi) + per;
+  // A stated floor ("Starting at $X") carries a min and no max. It is a minimum,
+  // not a point rate, so it must read "From $X" — never a flat "$X" that would
+  // claim a ceiling the employer never gave.
+  if (lo && !hi) return "From " + f(lo) + per;
   return f(lo || hi) + per;
 }
 

@@ -113,6 +113,17 @@ def new_record():
         "salary_is_stated": False,  # False until an employer-published number parses
         "pay_period": "UNKNOWN",
         "fte": None,
+        # Pay provenance (additive). pay_source records WHERE the numbers above came
+        # from: "structured" (an adapter read a source pay field) or "description"
+        # (normalize/pay.py parsed them from prose, only ever when structured was
+        # empty). pay_evidence is the exact source sentence a description-parsed value
+        # came from; pay_review flags a case left for a human (e.g. conflicting pay
+        # statements). None until the pay stage runs. Not pull-managed columns yet —
+        # they live in the data layer for traceability; add to supabase_sink
+        # PULL_COLUMNS + a migration if they ever need to be queryable in the DB.
+        "pay_source": None,
+        "pay_evidence": None,
+        "pay_review": None,
 
         # time
         "posted_at": None,
