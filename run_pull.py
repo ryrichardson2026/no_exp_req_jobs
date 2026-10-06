@@ -1137,6 +1137,21 @@ def _publish():
     except Exception as e:
         print(f"[indexing] skipped (non-fatal): {type(e).__name__}: {e}")
 
+    # Deployment retention. Vercel keeps every prior deploy (Hobby has no retention policy) and
+    # this pipeline deploys on every pull, so old UNALIASED deployments pile up (~1/day). Prune
+    # them with `vercel remove --safe`: --safe NEVER removes an aliased deployment, so the live
+    # production deploy (noprobjobs.com) is always kept — only superseded ones go. Pure
+    # housekeeping, STRICTLY non-fatal: a prune failure must never affect the publish result.
+    # (Rollback is redeploy-from-git, not a Vercel-side buffer — acceptable for a daily rebake.)
+    print("\n--- prune old deployments (vercel remove --safe) ---")
+    try:
+        rc_pr, _ = run(["vercel", "remove", "no_exp_req_jobs", "--safe", "--yes"],
+                       cwd=DEPLOY_DIR, capture=True)
+        print("    prune ok (kept the live aliased deploy)" if rc_pr == 0
+              else f"    prune skipped (exit {rc_pr}) — non-fatal")
+    except Exception as e:
+        print(f"    prune skipped (non-fatal): {type(e).__name__}: {e}")
+
     return 0, info
 
 
