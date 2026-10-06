@@ -80,7 +80,9 @@ _RANGE_FRAME = (
     r"(?:hourly\s+rate|pay\s+rate|base\s+pay|pay|salary|wage|compensation)\s+for\s+this\s+(?:position|role)\s+is|"
     # bare label: "Pay: $X - $Y", "Pay Rate: ...", "Salary: ..."
     r"pay\s+rate|base\s+pay|payrate|pay|salary|wage|compensation|"
-    r"ranges?\s+from")
+    # "ranges from $X to $Y" and "...base salary for this role ranges between $X - $Y/Hour"
+    # (Cintas). "between" takes a '-' or 'to' separator like "from"; RANGE_RX handles both.
+    r"ranges?\s+from|ranges?\s+between")
 
 # The high-end '$' is optional ("$27.75-28.75"); an explicit period + sane band
 # keep a stray second number out. A unit may sit after EITHER end
@@ -113,7 +115,9 @@ FLOOR_RX = re.compile(
 # Point rate — a SINGLE figure (min == max). Floor words live in FLOOR_RX, not here.
 _SINGLE_FRAME = (
     r"paying|pay\s+rate\s+of|pay\s+rate\s+is|pay\s+rate|pays|pay\s+is|pay\s+of|"
-    r"(?:hourly\s+rate|pay\s+rate|base\s+pay|rate|wage|pay|compensation)\s+for\s+this\s+(?:position|role)\s+is|"
+    # "<label> for this position/role is $X" — includes 'salary' for Cintas single-value comp
+    # ("base salary for this role is $69,000/Year"). Still needs an explicit period (frame/unit).
+    r"(?:hourly\s+rate|pay\s+rate|base\s+pay|salary|rate|wage|pay|compensation)\s+for\s+this\s+(?:position|role)\s+is|"
     r"payrate|rate\s+of|rate\s+is|compensation\s+of|wage\s+of|wage\s+is|"
     r"base\s+pay|compensation|wage|pay")
 
@@ -384,6 +388,14 @@ _SAMPLES = [
     ("chipotle/default-hourly-GM-rejected-by-band",
      "A reasonable estimate of the current base pay range for this position is $55,000.00-$77,500.00.",
      None, None, "HOURLY"),
+    ("cintas/ranges-between-hourly",
+     "Compensation A reasonable estimate of base salary for this role ranges between "
+     "$19.25 - $24.08/Hour. The range takes into account factors ...",
+     {"salary_min": 19.25, "salary_max": 24.08, "pay_period": "HOURLY"}, None, None),
+    ("cintas/ranges-between-annual",
+     "base salary for this role ranges between $82,960 - $106,140/Year and is eligible for "
+     "an annual target bonus",
+     {"salary_min": 82960.0, "salary_max": 106140.0, "pay_period": "ANNUAL"}, None, None),
     ("reject/bonus-range-bound",
      "An annual bonus ranges from $10,000 to $20,000 depending on performance.",
      None, None, None),
