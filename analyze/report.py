@@ -66,9 +66,12 @@ DEGREE_REVIEW_RX = re.compile(r"\bassociate", re.IGNORECASE)
 # "lead"/"leader" (frontline "Team Leader" is not management here); the experience
 # gate handles those.
 MANAGEMENT_RX = re.compile(
-    r"\b(manager|management|director|supervisor|superintendent|foreman|"
+    r"\b(manager|mgr|management|director|supervisor|superintendent|foreman|"
     r"principal|chief|president|vice president|\bvp\b|executive|general manager)\b",
     re.IGNORECASE)
+# 'mgr' is the abbreviation form (Lowe's "Asset Protection & Safety Mgr" slipped the
+# gate on the full word). Same head-noun semantics as "manager": "Assistant Mgr" has
+# head noun 'Mgr' -> not protected -> excluded, matching "Assistant Manager".
 # Protected occupations: kept unless the title is also management.
 PROTECT_RX = re.compile(r"\b(assistant|trainee|apprentice)\b", re.IGNORECASE)
 
