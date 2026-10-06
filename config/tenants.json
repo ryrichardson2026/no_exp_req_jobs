@@ -1145,6 +1145,8 @@
       },
       "extraction": {
         "_note": "DERIVED 2026-09-17: requirements under 'WHAT YOU'LL BRING TO THE TABLE' (all-caps, colon-less heading -> bare; curly apostrophe folded at match). 'WHAT'S IN IT FOR YOU'=benefits, 'THE OPPORTUNITY'=intro.",
+        "pay_period_when_unstated": "HOURLY",
+        "_pay_period_when_unstated_note": "Owner-verified 2026-10-06: Chipotle states its pay range in the 'PAY TRANSPARENCY' block ('base pay range for this position is $X-$Y') WITHOUT a period. Hourly roles (Crew, Apprentice) are confirmed hourly, so a period-less range is read HOURLY. SCOPED TO CHIPOTLE ONLY. The sane-band guard still applies: the General Manager 'base pay range ... is $55,000-$77,500' exceeds the hourly band and stays empty rather than being shown as $55,000/hr.",
         "openers": [
           {
             "text": "what you'll bring to the table",
@@ -2205,6 +2207,7 @@
       "verified": "2026-09-17 Paradox filter[state] server-side scope (WA 31/TX 178). Inspire portfolio brand.",
       "extraction": {
         "absent_barrier_is_none_needed": true,
+        "_pay_note": "No pay_exclude: the general WA pay-gate (normalize/enrich.LAUNCHED_STATES) already keeps BWW's 5 TX records ($12-14/hr, below WA minimum, out-of-market) empty, and BWW's WA postings state no pay. Owner ungated BWW 2026-10-06 once the WA-gate subsumed the special case.",
         "_note": "BWW templates vary: 'What We're Looking For' (cashier/cook), 'Qualifications:', and a tagline heading 'YOU HAVE THE TALENT' (Team Member - requirements woven in incl. 'previous restaurant experience is a plus, but not required'). Bartenders genuinely REQUIRED. 2026-10-02: the LEGACY 'GAMEDAY / HERE'S WHAT YOU BRING TO THE TABLE' prose template (Server/Kitchen/Cashier/FoH) is HEADINGLESS - no opener matches, so 128/165 fell to NOT_STATED and were excluded (10.3% applicable, implausibly low for crew). Verified the template states experience INLINE when a role needs it ('one plus years of recent restaurant experience'; managers 'minimum of 2 years experience'), so absence is a real signal. Enabled the headingless full-body fallback (same lever as arbys/sonic/jimmy_johns/panera): simulation flips the 128 NOT_STATED -> 67 REQUIRED (every inline req kept out, 0 leaked) + 58 NONE_NEEDED + 3 NOT_STATED, i.e. 10% -> ~45% board-applicable.",
         "openers": [
           {
