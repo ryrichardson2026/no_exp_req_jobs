@@ -113,7 +113,17 @@ class LandingApp extends React.Component {
     // R.setToday is set in boot() (from the inline blob's pulledAt) before first render, so
     // postedLabel ("Posted N days ago") is deterministic — no async SB.pulledAt() race.
     if (this.state.recs) {
-      this.preflightLogos(this.state.recs);                 // seeded at mount — no refetch, no wipe
+      this.preflightLogos(this.state.recs);                 // baked at mount — instant paint
+      // Background revalidation (deploy-then-flip lag): the baked list lags the live set by one
+      // bake — a tenant deployed AFTER this page was baked (first_deployed_at stamped post-bake)
+      // isn't in it yet. Reconcile to live jobs_list so the shown list AND the seed handed to the
+      // board pick up newly-deployed jobs without a manual refresh. Guarded: only swap in a
+      // NON-EMPTY live result of a DIFFERENT size — never wipe the shown list, never re-render when
+      // nothing changed (keeps the "no flash" intent for the common no-change load).
+      SB.listJobs().then((recs) => {
+        const cur = this.state.recs ? this.state.recs.length : 0;
+        if (recs && recs.length && recs.length !== cur) { this.setState({ recs }); this.preflightLogos(recs); }
+      }).catch(() => {});
     } else {
       SB.listJobs().then((recs) => {
         this.setState({ recs });

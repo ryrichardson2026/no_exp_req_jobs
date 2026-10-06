@@ -369,8 +369,20 @@ class BoardApp extends React.Component {
       this.setState({ recs, openId }, () => this.writeUrl({}));
       this.preflightLogos(recs);
     };
-    if (this.state.recs) resolve(this.state.recs);            // seeded at mount — no refetch, no wipe
-    else SB.listJobs().then(resolve).catch((e) => { console.error("jobs_list failed to load", e); this.setState({ recs: [] }); });
+    if (this.state.recs) {
+      resolve(this.state.recs);                               // seeded at mount — instant paint
+      // Background revalidation (deploy-then-flip lag): a seed handed from the landing (or a baked
+      // list) lags the live set by one bake — a tenant deployed AFTER the bake isn't in it. Reconcile
+      // to live jobs_list so newly-deployed jobs appear without a manual refresh. Guarded: only
+      // re-resolve on a NON-EMPTY live result of a DIFFERENT size — no wipe, and no needless
+      // re-render / URL churn on the common no-change load.
+      SB.listJobs().then((recs) => {
+        const cur = this.state.recs ? this.state.recs.length : 0;
+        if (recs && recs.length && recs.length !== cur) resolve(recs);
+      }).catch(() => {});
+    } else {
+      SB.listJobs().then(resolve).catch((e) => { console.error("jobs_list failed to load", e); this.setState({ recs: [] }); });
+    }
     // Job page: kick the entry job's description fetch now so the BAKE populates [data-desc-html]
     // deterministically (WAIT.job gates on it, and jobs_list is withheld during a job-route bake).
     // At runtime BAKED_DESC is set, so ensureDetail skips this — no round trip.
