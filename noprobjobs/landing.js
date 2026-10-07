@@ -122,7 +122,18 @@ class LandingApp extends React.Component {
       // nothing changed (keeps the "no flash" intent for the common no-change load).
       SB.listJobs().then((recs) => {
         const cur = this.state.recs ? this.state.recs.length : 0;
-        if (recs && recs.length && recs.length !== cur) { this.setState({ recs }); this.preflightLogos(recs); }
+        if (recs && recs.length && recs.length !== cur) {
+          // eff_new_date is a BAKED field (freshness.json, keyed by internal_id — see build.mjs);
+          // jobs_list does NOT carry it. Without re-stamping, the swapped-in live rows all lack it
+          // and renderRecent's `&& r.eff_new_date` filter empties the entire "Recent jobs" section.
+          // Re-apply the baked recency onto the live rows by internal_id. Jobs deployed since this
+          // bake have no entry and stay out of Recent until the next bake refreshes freshness.json —
+          // same deploy-then-flip lag the rest of the recency surface already lives with.
+          const eff = Object.create(null);
+          for (const r of (this.state.recs || [])) eff[r.internal_id] = r.eff_new_date;
+          for (const r of recs) if (r.eff_new_date == null) r.eff_new_date = eff[r.internal_id] || null;
+          this.setState({ recs }); this.preflightLogos(recs);
+        }
       }).catch(() => {});
     } else {
       SB.listJobs().then((recs) => {
